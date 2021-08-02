@@ -1,15 +1,17 @@
 package deepsea.auth
 
 import akka.actor.Actor
-import deepsea.auth.AuthManager.{Login, User}
-import deepsea.database.DatabaseManager.{GetConnection, ReleaseConnection}
+import deepsea.auth.AuthManager.{GetUsers, Login, User}
+import deepsea.database.DatabaseManager.GetConnection
 import play.api.libs.json.{Json, OWrites}
 
 import java.sql.Date
 import java.util.UUID
+import scala.collection.mutable.ListBuffer
 
 object AuthManager{
   case class Login(token: Option[String], login: String = "", password: String = "")
+  case class GetUsers()
   case class User(id: Int, login: String, password: String, name: String, surname: String, birthday: Date, email: String, phone: String, tcid: Int, avatar: String, var token: String)
   implicit val writesUser: OWrites[User] = Json.writes[User]
 }
@@ -44,6 +46,7 @@ class AuthManager extends Actor{
             case _ => sender() ! Json.toJson("wrong-password")
           }
       }
+    case GetUsers() => sender() ! Json.toJson(getUsers)
     case _ => None
   }
   def addUserToken(user: String): Option[String] ={
@@ -112,6 +115,32 @@ class AuthManager extends Actor{
         c.close()
         res
       case _ => Option.empty[User]
+    }
+  }
+  def getUsers: ListBuffer[User] ={
+    val res = ListBuffer.empty[User]
+    GetConnection() match {
+      case Some(c) =>
+        val s = c.createStatement()
+        val rs = s.executeQuery(s"select * from users")
+        while (rs.next()){
+          res += User(
+            rs.getInt("id"),
+            rs.getString("login"),
+            rs.getString("password"),
+            rs.getString("name"),
+            rs.getString("surname"),
+            rs.getDate("birthday"),
+            rs.getString("email"),
+            rs.getString("phone"),
+            rs.getInt("tcid"),
+            rs.getString("avatar"),
+            "")
+        }
+        s.close()
+        c.close()
+        res
+      case _ => ListBuffer.empty[User]
     }
   }
 }

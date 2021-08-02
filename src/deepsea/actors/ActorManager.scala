@@ -15,6 +15,8 @@ object ActorManager {
   var httpServer: ActorRef = _
   var dataBase: ActorRef = _
   var auth: ActorRef = _
+  var issue: ActorRef = _
+  var files: ActorRef = _
 
   def init(): Unit ={
     system = ActorSystem()

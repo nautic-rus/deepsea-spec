@@ -4,7 +4,44 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ebc20096-d70b-4412-983f-14fe275410ee" name="Default Changelist" comment="" />
+    <list default="true" id="ebc20096-d70b-4412-983f-14fe275410ee" name="Default Changelist" comment="initial">
+      <change afterPath="$PROJECT_DIR$/src/deepsea/files/FileManager.scala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/deepsea/issues/IssueManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/deepsea/App.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/deepsea/App.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/deepsea/actors/ActorManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/deepsea/actors/ActorManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/deepsea/actors/ActorStartupManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/deepsea/actors/ActorStartupManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/deepsea/auth/AuthManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/deepsea/auth/AuthManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/deepsea/camunda/CamundaManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/deepsea/camunda/CamundaManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/deepsea/http/HTTPManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/deepsea/http/HTTPManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorManager$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorManager$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorManager.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorManager.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$$anonfun$receive$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$$anonfun$receive$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$CamundaManagerStarted$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$CamundaManagerStarted$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$CamundaManagerStarted.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$CamundaManagerStarted.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$DatabaseManagerStarted$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$DatabaseManagerStarted$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$DatabaseManagerStarted.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$DatabaseManagerStarted.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$HTTPManagerStarted$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$HTTPManagerStarted$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$HTTPManagerStarted.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$HTTPManagerStarted.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$Start$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$Start$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$Start.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$Start.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/auth/AuthManager$$anonfun$receive$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/auth/AuthManager$$anonfun$receive$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/auth/AuthManager$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/auth/AuthManager$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/auth/AuthManager$Login$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/auth/AuthManager$Login$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/auth/AuthManager$Login.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/auth/AuthManager$Login.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/auth/AuthManager$User$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/auth/AuthManager$User$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/auth/AuthManager$User.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/auth/AuthManager$User.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/auth/AuthManager.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/auth/AuthManager.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$$anonfun$receive$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$$anonfun$receive$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager$$anonfun$receive$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager$$anonfun$receive$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager$Response$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager$Response$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager$Response.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager$Response.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager.class" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -21,10 +58,14 @@
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="ProjectCodeStyleSettingsMigration">
     <option name="version" value="1" />
   </component>
   <component name="ProjectId" id="1u4n8uM5nu1BLYB3gLF9sXY2Byf" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -32,7 +73,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../workshop/server" />
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.15625" />
     <property name="project.structure.side.proportion" value="0.28312758" />
@@ -71,7 +112,31 @@
       <option name="presentableId" value="Default" />
       <updated>1623933574191</updated>
     </task>
+    <task id="LOCAL-00001" summary="initial">
+      <created>1627300463534</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1627300463534</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="initial" />
+    <option name="LAST_COMMIT_MESSAGE" value="initial" />
   </component>
   <component name="XDebuggerManager">
     <pin-to-top-manager>

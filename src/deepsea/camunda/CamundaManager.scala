@@ -48,9 +48,9 @@ class CamundaManager extends Actor {
   override def receive: Receive = {
     case UploadModel() =>
       repositoryService.createDeployment()
-        .addModelInstance("initial.bpmn", Bpmn.readModelFromFile(new File("C:\\repos\\bpmn\\src\\assets\\diag-1626778804283.bpmn")))
+        .addModelInstance("diag.bpmn", Bpmn.readModelFromFile(new File("C:\\Users\\isaev\\Desktop\\diag.bpmn")))
         .deploy()
-      self ! CreateProcessInstance()
+      //self ! CreateProcessInstance()
     case CreateProcessInstance() =>
       runtimeService.startProcessInstanceByKey("create-task")
       println("imported")

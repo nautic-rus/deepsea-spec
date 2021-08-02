@@ -6,7 +6,9 @@ import akka.actor.{Actor, Props}
 import deepsea.auth.AuthManager
 import deepsea.camunda.CamundaManager
 import deepsea.database.DatabaseManager
+import deepsea.files.FileManager
 import deepsea.http.HTTPManager
+import deepsea.issues.IssueManager
 
 
 object ActorStartupManager{
@@ -25,5 +27,7 @@ class ActorStartupManager extends Actor{
       ActorManager.httpServer = system.actorOf(Props[HTTPManager])
     case HTTPManagerStarted() =>
       ActorManager.auth = system.actorOf(Props[AuthManager])
+      ActorManager.issue = system.actorOf(Props[IssueManager])
+      ActorManager.files = system.actorOf(Props[FileManager])
   }
 }

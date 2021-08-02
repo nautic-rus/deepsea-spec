@@ -70,5 +70,10 @@
             <artifactId>play-json_2.13</artifactId>
             <version>2.9.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.aarboard.nextcloud</groupId>
+            <artifactId>nextcloud-api</artifactId>
+            <version>11.5.0</version>
+        </dependency>
     </dependencies>
 </project>
