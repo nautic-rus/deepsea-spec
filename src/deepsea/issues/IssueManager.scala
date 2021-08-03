@@ -5,9 +5,8 @@ import akka.pattern.ask
 import akka.util.Timeout
 import deepsea.actors.ActorManager
 import deepsea.auth.AuthManager.{GetUser, User}
-import deepsea.camunda.CamundaManager.{GetIssuesForUser, InitIssueInstance, StartIssueInstance}
-import deepsea.database.DatabaseManager.GetConnection
-import deepsea.issues.IssueManager.{GetIssueProjects, GetIssueTypes, GetIssues, IdName, InitIssue, IssueDef, ProcessIssue}
+import deepsea.camunda.CamundaManager.{GetIssuesForUser, InitIssueInstance, ProcessIssueInstance}
+import deepsea.issues.IssueManager.{GetIssues, InitIssue, IssueDef, ProcessIssue}
 import deepsea.issues.classes.Issue
 import play.api.libs.json.{Json, OWrites}
 
@@ -45,7 +44,7 @@ class IssueManager extends Actor{
     case ProcessIssue(issueJson) =>
       Json.parse(issueJson).asOpt[Issue] match {
         case Some(issue) =>
-          ActorManager.camunda ! StartIssueInstance(issue)
+          ActorManager.camunda ! ProcessIssueInstance(issue)
         case _ => None
       }
     case GetIssues(userName) =>
@@ -57,57 +56,6 @@ class IssueManager extends Actor{
           }
         case _ => sender() ! Json.toJson(ListBuffer.empty[Issue])
       }
-    case GetIssueProjects() => sender() ! Json.toJson(getIssueProjects)
-    case GetIssueTypes() => sender() ! Json.toJson(getIssueTypes)
     case _ => None
-  }
-  def getIssueProjects: ListBuffer[IdName] ={
-    val res = ListBuffer.empty[IdName]
-    GetConnection() match {
-      case Some(c) =>
-        val s = c.createStatement()
-        val rs = s.executeQuery(s"select * from issue_projects")
-        while (rs.next()) {
-          res += IdName(
-            rs.getInt("id"),
-            rs.getString("name"))
-        }
-        s.close()
-        c.close()
-        res
-      case _ => ListBuffer.empty[IdName]
-    }
-  }
-  def getIssueTypes: ListBuffer[IdName] ={
-    val res = ListBuffer.empty[IdName]
-    GetConnection() match {
-      case Some(c) =>
-        val s = c.createStatement()
-        val rs = s.executeQuery(s"select * from issue_types")
-        while (rs.next()) {
-          res += IdName(
-            rs.getInt("id"),
-            rs.getString("name"))
-        }
-        s.close()
-        c.close()
-        res
-      case _ => ListBuffer.empty[IdName]
-    }
-  }
-  def addIssue(issue: Issue): Int = {
-    GetConnection() match {
-      case Some(c) =>
-        var res = 0
-        val s = c.createStatement()
-        val rs = s.executeQuery(s"insert into issues (status, started_by, task_model_type, name, details, assigned_to) values ('${issue.status}', '${issue.startedBy}', '${issue.taskModelType}', '${issue.name}', '${issue.details}', '${issue.assignedTo}') returning id")
-        while (rs.next()) {
-          res = rs.getInt("id")
-        }
-        s.close()
-        c.close()
-        res
-      case _ => 0
-    }
   }
 }

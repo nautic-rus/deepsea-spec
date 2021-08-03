@@ -4,7 +4,8 @@ import akka.actor.Actor
 import deepsea.actors.ActorManager
 import deepsea.actors.ActorStartupManager.CamundaManagerStarted
 import deepsea.auth.AuthManager.User
-import deepsea.camunda.CamundaManager.{GetIssuesForUser, InitIssueInstance, StartIssueInstance, UploadModel}
+import deepsea.camunda.CamundaManager.{GetIssuesForUser, InitIssueInstance, ProcessIssueInstance, UploadModel}
+import deepsea.issues.IssueManager.IssueDef
 import deepsea.issues.classes.Issue
 import org.apache.ibatis.logging.slf4j.Slf4jImpl
 import org.camunda.bpm.engine._
@@ -24,7 +25,7 @@ object CamundaManager{
   case class CreateProcessInstance()
   case class ChangeProcessInstance()
   case class GetProcessExecution()
-  case class StartIssueInstance(issue: Issue)
+  case class ProcessIssueInstance(issue: Issue)
   case class GetIssuesForUser(user: User)
   case class InitIssueInstance(user: String)
 }
@@ -64,24 +65,23 @@ class CamundaManager extends Actor {
       val task = taskService.createTaskQuery().processInstanceId(instance.getId).taskName("Specify Task Project and Type").singleResult()
       if (task != null){
         val variables = taskService.getVariables(task.getId)
-        val taskProjects = variables.get("taskProjects").asInstanceOf[util.ArrayList[String]].asScala.toList
-        val taskTypes = variables.get("taskTypes").asInstanceOf[util.ArrayList[String]].asScala.toList
-        sender() ! (instance.getId, taskProjects, taskTypes)
+        val taskProjects = variables.get("_taskProjects").asInstanceOf[util.ArrayList[String]].asScala.toList
+        val taskTypes = variables.get("_taskTypes").asInstanceOf[util.ArrayList[String]].asScala.toList
+        sender() ! IssueDef(instance.getId, taskTypes, taskProjects)
       }
-    case StartIssueInstance(issue) =>
-      val instance = runtimeService.createProcessInstanceByKey("task").setVariable("startedBy", issue.startedBy).execute()
-      var task = taskService.createTaskQuery().processInstanceId(instance.getId).taskName("Specify Task Project and Type").singleResult()
+    case ProcessIssueInstance(issue) =>
+      var task = taskService.createTaskQuery().processInstanceId(issue.id).taskName("Specify Task Project and Type").singleResult()
       if (task != null){
-        taskService.setVariable(task.getId, "_taskId", instance.getId)
-        taskService.setVariable(task.getId, "_taskType", issue.taskModelType)
+        taskService.setVariable(task.getId, "_taskType", issue.taskType)
+        taskService.setVariable(task.getId, "_taskProject", issue.project)
         taskService.complete(task.getId)
       }
-      task = taskService.createTaskQuery().processInstanceId(instance.getId).taskName("Fill Task Info").singleResult()
+      task = taskService.createTaskQuery().processInstanceId(issue.id).taskName("Fill Task Info").singleResult()
       if (task != null){
-        issue.taskModelType match {
+        issue.taskType match {
           case "IT" =>
-            taskService.setVariable(task.getId, "taskDetails", issue.details)
-            taskService.setVariable(task.getId, "taskName", issue.name)
+            taskService.setVariable(task.getId, "_taskDetails", issue.details)
+            taskService.setVariable(task.getId, "_taskName", issue.name)
             taskService.complete(task.getId)
           case _ => None
         }
@@ -98,13 +98,24 @@ class CamundaManager extends Actor {
         })
         proc.foreach(p => {
           val variables = runtimeService.getVariables(p.getId)
-          issues += new Issue(p.getId, variables.get("taskStatus").toString, variables.get("taskDepartment").toString, variables.get("startedBy").toString, variables.get("taskType").toString, variables.get("taskName").toString, variables.get("taskDetails").toString, variables.get("taskAssignedTo").toString)
+          issues += new Issue(p.getId, getVariable(variables,"taskStatus"), getVariable(variables, "taskProject"),
+            getVariable(variables, "taskDepartment"), getVariable(variables, "startedBy"),
+            getVariable(variables, "taskType"), getVariable(variables, "taskName"),
+            getVariable(variables, "taskDetails"), getVariable(variables, "taskAssignedTo"))
         })
-
       }
       else{
 
       }
+      sender() ! issues
     case _ => None
+  }
+  def getVariable(variables: util.Map[String, AnyRef], name: String): String ={
+    if (!variables.isEmpty && variables.get(name) != null){
+      variables.get(name).toString
+    }
+    else {
+      ""
+    }
   }
 }

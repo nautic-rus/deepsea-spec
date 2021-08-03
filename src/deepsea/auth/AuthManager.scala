@@ -51,7 +51,11 @@ class AuthManager extends Actor{
           }
       }
     case GetUsers() => sender() ! Json.toJson(getUsers)
-    case GetUser(login) => sender() ! getUser(login)
+    case GetUser(login) =>
+      getUser(login) match {
+        case Some(user) => sender() ! user
+        case _ => sender() ! Option.empty[User]
+      }
     case _ => None
   }
   def addUserToken(user: String): Option[String] ={
