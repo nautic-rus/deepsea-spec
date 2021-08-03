@@ -6,53 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="ebc20096-d70b-4412-983f-14fe275410ee" name="Default Changelist" comment="initial">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/deepsea/auth/AuthManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/deepsea/auth/AuthManager.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/deepsea/camunda/CamundaManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/deepsea/camunda/CamundaManager.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/deepsea/http/HTTPManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/deepsea/http/HTTPManager.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/deepsea/issues/IssueManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/deepsea/issues/IssueManager.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/deepsea/issues/classes/Issue.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/deepsea/issues/classes/Issue.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/auth/AuthManager$$anonfun$receive$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/auth/AuthManager$$anonfun$receive$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/auth/AuthManager.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/auth/AuthManager.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$$anonfun$receive$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$$anonfun$receive$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$ChangeProcessInstance$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$ChangeProcessInstance$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$ChangeProcessInstance.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$ChangeProcessInstance.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$CreateProcessInstance$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$CreateProcessInstance$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$CreateProcessInstance.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$CreateProcessInstance.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$GetProcessExecution$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$GetProcessExecution$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$GetProcessExecution.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$GetProcessExecution.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$Start$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$Start$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$Start.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$Start.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$StartIssueInstance$.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$StartIssueInstance.class" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$UploadModel$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$UploadModel$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$UploadModel.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager$UploadModel.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/camunda/CamundaManager.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager$$anonfun$receive$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager$$anonfun$receive$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$$anonfun$receive$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$$anonfun$receive$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$GetIssueProjects$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$GetIssueProjects$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$GetIssueProjects.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$GetIssueProjects.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$GetIssueTypes$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$GetIssueTypes$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$GetIssueTypes.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$GetIssueTypes.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$GetIssues$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$GetIssues$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$GetIssues.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$GetIssues.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$IdName$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$IdName$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$IdName.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$IdName.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$InitIssue$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$InitIssue$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$InitIssue.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$InitIssue.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$IssueDef$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$IssueDef$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$IssueDef.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$IssueDef.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$ProcessIssue$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$ProcessIssue$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$ProcessIssue.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$ProcessIssue.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$StartIssue$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$StartIssue$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$StartIssue.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager$StartIssue.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/issues/IssueManager.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/issues/classes/Issue$$anon$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/issues/classes/Issue$$anon$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/issues/classes/Issue$$anon$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/issues/classes/Issue$$anon$2.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/issues/classes/Issue$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/issues/classes/Issue$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/issues/classes/Issue.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/issues/classes/Issue.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -160,7 +115,14 @@
       <option name="project" value="LOCAL" />
       <updated>1627989048387</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="initial">
+      <created>1628002083533</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1628002083533</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
