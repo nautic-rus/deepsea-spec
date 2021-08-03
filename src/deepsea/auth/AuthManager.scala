@@ -1,7 +1,7 @@
 package deepsea.auth
 
 import akka.actor.Actor
-import deepsea.auth.AuthManager.{GetUsers, Login, User}
+import deepsea.auth.AuthManager.{GetUser, GetUsers, Login, User}
 import deepsea.database.DatabaseManager.GetConnection
 import play.api.libs.json.{Json, OWrites}
 
@@ -12,7 +12,11 @@ import scala.collection.mutable.ListBuffer
 object AuthManager{
   case class Login(token: Option[String], login: String = "", password: String = "")
   case class GetUsers()
-  case class User(id: Int, login: String, password: String, name: String, surname: String, birthday: Date, email: String, phone: String, tcid: Int, avatar: String, var token: String)
+  case class GetUser(login: String)
+  case class User(
+                   id: Int, login: String, password: String, name: String, surname: String, birthday: Date, email: String,
+                   phone: String, tcid: Int, avatar: String, var token: String = "", var group: ListBuffer[String] = ListBuffer.empty[String],
+                   var permissions: ListBuffer[String] = ListBuffer.empty[String])
   implicit val writesUser: OWrites[User] = Json.writes[User]
 }
 class AuthManager extends Actor{
@@ -47,6 +51,7 @@ class AuthManager extends Actor{
           }
       }
     case GetUsers() => sender() ! Json.toJson(getUsers)
+    case GetUser(login) => sender() ! getUser(login)
     case _ => None
   }
   def addUserToken(user: String): Option[String] ={
@@ -94,8 +99,8 @@ class AuthManager extends Actor{
   def getUser(login: String): Option[User] ={
     GetConnection() match {
       case Some(c) =>
-        val s = c.createStatement()
-        val rs = s.executeQuery(s"select * from users where login = '$login'")
+        var s = c.createStatement()
+        var rs = s.executeQuery(s"select * from users where login = '$login'")
         var res = Option.empty[User]
         while (rs.next()){
           res = Option(User(
@@ -108,10 +113,23 @@ class AuthManager extends Actor{
             rs.getString("email"),
             rs.getString("phone"),
             rs.getInt("tcid"),
-            rs.getString("avatar"),
-            ""))
+            rs.getString("avatar")))
         }
         s.close()
+        if (res.nonEmpty){
+          s = c.createStatement()
+          rs = s.executeQuery(s"select name from user_groups where id in (select group_id from user_membership where user_id = ${res.get.id})")
+          while (rs.next()){
+            res.get.group += rs.getString("name")
+          }
+          s.close()
+          s = c.createStatement()
+          rs = s.executeQuery(s"select rights from user_rights where user_id = ${res.get.id}")
+          while (rs.next()){
+            res.get.permissions += rs.getString("rights")
+          }
+          s.close()
+        }
         c.close()
         res
       case _ => Option.empty[User]

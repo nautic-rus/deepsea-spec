@@ -18,7 +18,7 @@ import deepsea.actors.ActorStartupManager.HTTPManagerStarted
 import deepsea.auth.AuthManager.{GetUsers, Login}
 import deepsea.camunda.CamundaManager.UploadModel
 import deepsea.files.FileManager.CreateFile
-import deepsea.issues.IssueManager.{GetIssueProjects, GetIssueTypes}
+import deepsea.issues.IssueManager.{GetIssueProjects, GetIssueTypes, GetIssues, InitIssue}
 import org.apache.log4j.{LogManager, Logger}
 import play.api.libs.json.{JsValue, Json}
 
@@ -33,7 +33,7 @@ object HTTPManager{
 class HTTPManager extends Actor{
   implicit val system: ActorSystem[Nothing] = ActorSystem(Behaviors.empty, "http")
   implicit val executionContext: ExecutionContextExecutor = system.executionContext
-  implicit val timeout: Timeout = Timeout(5, TimeUnit.SECONDS)
+  implicit val timeout: Timeout = Timeout(105, TimeUnit.SECONDS)
   val logger: Logger = LogManager.getLogger("HttpManager")
   var server:  Future[Http.ServerBinding] = _
   val routes: Route = {
@@ -81,6 +81,16 @@ class HTTPManager extends Actor{
       (get & path("issueTypes")){
         askFor(ActorManager.issue, GetIssueTypes())
       },
+      (get & path("issueTypes")){
+        askFor(ActorManager.issue, GetIssueTypes())
+      },
+      (get & path("issues") & parameter("user")){ user =>
+        askFor(ActorManager.issue, GetIssues(user))
+      },
+      (get & path("initIssue") & parameter("user")){ user =>
+        askFor(ActorManager.issue, InitIssue(user))
+      },
+      //FILE MANAGER COMMANDS
       (post & path("createFileUrl") & entity(as[Multipart.FormData])){ formData =>
         var fileName = ""
         var fileStream: InputStream = null
@@ -99,14 +109,14 @@ class HTTPManager extends Actor{
         onSuccess(done) { _ =>
           askFor(ActorManager.files, CreateFile(fileName, fileStream), long = true)
         }
-      }
+      },
 
     )
   }
 
   def askFor(actor: ActorRef, command: Any, long: Boolean = false): StandardRoute ={
     try{
-      Await.result(actor ? command, if (long) Timeout(10, TimeUnit.MINUTES).duration else timeout.duration) match {
+      Await.result(actor ? command, timeout.duration) match {
         case response: JsValue => complete(HttpEntity(response.toString()))
         case _ => complete(HttpEntity(Json.toJson("Error: Wrong response from actor.").toString()))
       }
