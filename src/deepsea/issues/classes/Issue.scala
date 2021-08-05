@@ -2,6 +2,8 @@ package deepsea.issues.classes
 
 import play.api.libs.json._
 
+import scala.collection.mutable.ListBuffer
+
 object Issue{
   implicit val writesIssue: Writes[Issue] = new Writes[Issue] {
     override def writes(o: Issue): JsValue = o match {
@@ -11,10 +13,12 @@ object Issue{
         "project" -> x.project,
         "department" -> x.department,
         "startedBy" -> x.startedBy,
+        "startedDate" -> x.startedDate,
         "taskType" -> x.taskType,
         "name" -> x.name,
         "details" -> x.details,
-        "assignedTo" -> x.assignedTo,
+        "messages" -> x.messages,
+        "availableStatuses" -> x.availableStatuses
       )
       case _ => JsNull
     }
@@ -27,16 +31,22 @@ object Issue{
         project = (x \ "project").asOpt[String].getOrElse(""),
         department = (x \ "department").asOpt[String].getOrElse(""),
         startedBy = (x \ "startedBy").asOpt[String].getOrElse(""),
+        startedDate = (x \ "startedDate").asOpt[Long].getOrElse(0),
         taskType = (x \ "taskType").asOpt[String].getOrElse(""),
         name = (x \ "name").asOpt[String].getOrElse(""),
         details = (x \ "details").asOpt[String].getOrElse(""),
         assignedTo = (x \ "assignedTo").asOpt[String].getOrElse(""),
-      ))
+        messages = (x \ "messages").asOpt[ListBuffer[IssueMessage]].getOrElse(ListBuffer.empty[IssueMessage]),
+      ){
+        availableStatuses = (x \ "availableStatuses").asOpt[ListBuffer[String]].getOrElse(ListBuffer.empty[String])
+      })
       case _ => JsSuccess (null)
     }
   }
 }
-class Issue(var id: String, var status: String, var project: String, var department: String, var startedBy: String, var taskType: String, var name: String, var details: String, var assignedTo: String) {
-
+class Issue(var id: String, var status: String, var project: String, var department: String, var startedBy: String,
+            var startedDate: Long, var taskType: String, var name: String, var details: String, var assignedTo: String,
+            var messages: ListBuffer[IssueMessage] = ListBuffer.empty[IssueMessage]) {
+  var availableStatuses: ListBuffer[String] = ListBuffer.empty[String]
 
 }

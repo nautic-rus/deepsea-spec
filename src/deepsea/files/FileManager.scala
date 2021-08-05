@@ -2,23 +2,22 @@ package deepsea.files
 
 import akka.actor.Actor
 import deepsea.App
-import deepsea.files.FileManager.{CreateFile, FileAttachment}
+import deepsea.files.FileManager.CreateFile
+import deepsea.files.classes.FileAttachment
 import org.aarboard.nextcloud.api.NextcloudConnector
 import org.aarboard.nextcloud.api.filesharing.{SharePermissions, ShareType}
-import play.api.libs.json.{Json, OWrites}
+import play.api.libs.json.Json
 
 import java.io.InputStream
 import java.util.UUID
 
 object FileManager{
   case class CreateFile(fileName: String, stream: InputStream)
-  case class FileAttachment(name: String, url: String)
-  implicit val writesAttachment: OWrites[FileAttachment] = Json.writes[FileAttachment]
 }
 class FileManager extends Actor{
   override def receive: Receive = {
     case CreateFile(fileName, stream) =>
-      sender() ! Json.toJson(FileAttachment(fileName, uploadFile(fileName, stream)))
+      sender() ! Json.toJson(new FileAttachment(fileName, uploadFile(fileName, stream)))
     case _ => None
   }
   def uploadFile(fileName: String, stream: InputStream): String ={

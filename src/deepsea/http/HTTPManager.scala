@@ -10,7 +10,7 @@ import akka.http.scaladsl.model.{HttpEntity, Multipart}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Route, StandardRoute}
 import akka.pattern.ask
-import akka.stream.scaladsl.{Sink, StreamConverters}
+import akka.stream.scaladsl.{FileIO, Sink}
 import akka.util.Timeout
 import deepsea.App
 import deepsea.actors.ActorManager
@@ -18,13 +18,12 @@ import deepsea.actors.ActorStartupManager.HTTPManagerStarted
 import deepsea.auth.AuthManager.{GetUsers, Login}
 import deepsea.camunda.CamundaManager.UploadModel
 import deepsea.files.FileManager.CreateFile
-import deepsea.issues.IssueManager.{GetIssueProjects, GetIssueTypes, GetIssues, InitIssue, ProcessIssue}
+import deepsea.issues.IssueManager.{GetIssueDetails, GetIssueProjects, GetIssueTypes, GetIssues, InitIssue, ProcessIssue, RemoveIssue}
 import org.apache.log4j.{LogManager, Logger}
 import play.api.libs.json.{JsValue, Json}
 
-import java.io.InputStream
+import java.io.{File, FileInputStream, InputStream}
 import java.util.concurrent.TimeUnit
-import scala.concurrent.duration.FiniteDuration
 import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 
 object HTTPManager{
@@ -93,20 +92,24 @@ class HTTPManager extends Actor{
       (post & path("processIssue") & entity(as[String])){ issue =>
         askFor(ActorManager.issue, ProcessIssue(issue))
       },
+      (get & path("removeIssue") & parameter("id")){ id =>
+        askFor(ActorManager.issue, RemoveIssue(id))
+      },
+      (get & path("issueDetails") & parameter("id") & parameter("id")){ (id, user) =>
+        askFor(ActorManager.issue, GetIssueDetails(id, user))
+      },
       //FILE MANAGER COMMANDS
       (post & path("createFileUrl") & entity(as[Multipart.FormData])){ formData =>
         var fileName = ""
         var fileStream: InputStream = null
         val done: Future[Done] = formData.parts.mapAsync(1) {
           case b: BodyPart if b.name == "file" =>
-            b.filename match {
-              case Some(name) =>
-                val stream = b.entity.dataBytes.runWith(StreamConverters.asInputStream(FiniteDuration(3, TimeUnit.SECONDS)))
-                fileName = name
-                fileStream = stream
-                Future.successful(Done)
-              case _ => Future.successful(Done)
-            }
+            val file = File.createTempFile("upload", "tmp")
+            b.entity.dataBytes.runWith(FileIO.toPath(file.toPath))
+            fileName = b.filename.get
+            fileStream = new FileInputStream(file)
+            file.delete()
+            Future.successful(Done)
           case _ => Future.successful(Done)
         }.runWith(Sink.ignore)
         onSuccess(done) { _ =>
