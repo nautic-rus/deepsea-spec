@@ -3,6 +3,7 @@ package deepsea.actors
 import deepsea.actors.ActorManager.system
 import deepsea.actors.ActorStartupManager.{CamundaManagerStarted, DatabaseManagerStarted, HTTPManagerStarted, Start}
 import akka.actor.{Actor, Props}
+import akka.routing.RoundRobinPool
 import deepsea.auth.AuthManager
 import deepsea.camunda.CamundaManager
 import deepsea.database.DatabaseManager
@@ -26,8 +27,8 @@ class ActorStartupManager extends Actor{
     case DatabaseManagerStarted() =>
       ActorManager.httpServer = system.actorOf(Props[HTTPManager])
     case HTTPManagerStarted() =>
-      ActorManager.auth = system.actorOf(Props[AuthManager])
-      ActorManager.issue = system.actorOf(Props[IssueManager])
-      ActorManager.files = system.actorOf(Props[FileManager])
+      ActorManager.auth = system.actorOf(RoundRobinPool(5).props(Props[AuthManager]))
+      ActorManager.issue = system.actorOf(RoundRobinPool(5).props(Props[IssueManager]))
+      ActorManager.files = system.actorOf(RoundRobinPool(5).props(Props[FileManager]))
   }
 }

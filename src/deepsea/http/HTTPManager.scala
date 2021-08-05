@@ -18,7 +18,7 @@ import deepsea.actors.ActorStartupManager.HTTPManagerStarted
 import deepsea.auth.AuthManager.{GetUsers, Login}
 import deepsea.camunda.CamundaManager.UploadModel
 import deepsea.files.FileManager.CreateFile
-import deepsea.issues.IssueManager.{GetIssueDetails, GetIssueProjects, GetIssueTypes, GetIssues, InitIssue, ProcessIssue, RemoveIssue}
+import deepsea.issues.IssueManager.{GetIssueDetails, GetIssueProjects, GetIssueTypes, GetIssues, InitIssue, ProcessIssue, RemoveIssue, SetIssueStatus}
 import org.apache.log4j.{LogManager, Logger}
 import play.api.libs.json.{JsValue, Json}
 
@@ -95,8 +95,11 @@ class HTTPManager extends Actor{
       (get & path("removeIssue") & parameter("id")){ id =>
         askFor(ActorManager.issue, RemoveIssue(id))
       },
-      (get & path("issueDetails") & parameter("id") & parameter("id")){ (id, user) =>
+      (get & path("issueDetails") & parameter("id") & parameter("user")){ (id, user) =>
         askFor(ActorManager.issue, GetIssueDetails(id, user))
+      },
+      (get & path("setIssueStatus") & parameter("id") & parameter("user") & parameter("status")){ (id, user, status) =>
+        askFor(ActorManager.issue, SetIssueStatus(id, user, status))
       },
       //FILE MANAGER COMMANDS
       (post & path("createFileUrl") & entity(as[Multipart.FormData])){ formData =>

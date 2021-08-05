@@ -12,9 +12,11 @@ object IssueMessage{
         owner = (x \ "owner").asOpt[String].getOrElse(""),
         author = (x \ "author").asOpt[String].getOrElse(""),
         content = (x \ "content").asOpt[String].getOrElse(""),
-        date = (x \ "date").asOpt[Long].getOrElse(0),
-        fileAttachments = (x \ "fileAttachments").asOpt[ListBuffer[FileAttachment]].getOrElse(ListBuffer.empty[FileAttachment]),
-      ))
+        date = (x \ "date").asOpt[Long].getOrElse(0)
+      ){
+        variables ++= (x \ "variables").asOpt[ListBuffer[VarMap]].getOrElse(ListBuffer.empty[VarMap])
+        fileAttachments ++= (x \ "fileAttachments").asOpt[ListBuffer[FileAttachment]].getOrElse(ListBuffer.empty[FileAttachment])
+      })
       case _ => JsSuccess(null)
     }
   }
@@ -26,11 +28,13 @@ object IssueMessage{
         "content" -> x.content,
         "date" -> x.date,
         "fileAttachments" -> x.fileAttachments,
+        "variables" -> x.variables,
       )
       case _ => JsNull
     }
   }
 }
-class IssueMessage(val owner: String, val author: String, val content: String, val date: Long, val fileAttachments: ListBuffer[FileAttachment] = ListBuffer.empty[FileAttachment]) {
-
+class IssueMessage(val owner: String, val author: String, val content: String, val date: Long) {
+  val variables: ListBuffer[VarMap] = ListBuffer.empty[VarMap]
+  var fileAttachments: ListBuffer[FileAttachment] = ListBuffer.empty[FileAttachment]
 }

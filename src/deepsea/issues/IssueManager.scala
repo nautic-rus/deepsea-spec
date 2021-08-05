@@ -5,9 +5,10 @@ import akka.pattern.ask
 import akka.util.Timeout
 import deepsea.actors.ActorManager
 import deepsea.auth.AuthManager.{GetUser, User}
-import deepsea.camunda.CamundaManager.{GetIssueInstanceDetails, GetIssuesForUser, InitIssueInstance, ProcessIssueInstance, RemoveIssueInstance}
+import deepsea.camunda.CamundaManager._
 import deepsea.database.DatabaseManager.GetConnection
-import deepsea.issues.IssueManager.{GetIssueDetails, GetIssueMessages, GetIssues, InitIssue, IssueDef, ProcessIssue, RemoveIssue}
+import deepsea.files.classes.FileAttachment
+import deepsea.issues.IssueManager.{GetIssueDetails, GetIssues, InitIssue, IssueDef, ProcessIssue, RemoveIssue, SetIssueMessage, SetIssueStatus}
 import deepsea.issues.classes.{Issue, IssueMessage}
 import play.api.libs.json.{Json, OWrites}
 
@@ -26,6 +27,8 @@ object IssueManager{
   case class GetIssueTypes()
   case class GetIssueMessages(id: String)
   case class GetIssueDetails(id: String, user: String)
+  case class SetIssueStatus(id: String, user: String, status: String)
+  case class SetIssueMessage(id: String, message: IssueMessage)
 
   case class IssueDef(id: String, issueTypes: List[String], issueProjects: List[String])
   implicit val writesIssueDef: OWrites[IssueDef] = Json.writes[IssueDef]
@@ -49,7 +52,9 @@ class IssueManager extends Actor{
       Json.parse(issueJson).asOpt[Issue] match {
         case Some(issue) =>
           Await.result(ActorManager.camunda ? ProcessIssueInstance(issue), timeout.duration) match {
-            case result: String => sender() ! Json.toJson(result)
+            case result: String =>
+              issue.fileAttachments.foreach(x =>  setIssueFileAttachments(issue.id, x))
+              sender() ! Json.toJson(result)
             case _ => sender() ! Json.toJson("error")
           }
         case _ => None
@@ -71,17 +76,19 @@ class IssueManager extends Actor{
     case GetIssueDetails(id, userName) =>
       Await.result(ActorManager.auth ? GetUser(userName), timeout.duration) match {
         case user: User =>
-          Await.result(ActorManager.camunda ? GetIssueInstanceDetails(id, user), timeout.duration) match {
-            case result: Option[Issue] =>
-              result match {
-                case Some(issue) => sender() ! Json.toJson(issue)
-                case _ => sender() ! Json.toJson("error")
-              }
+          Await.result(ActorManager.camunda ? GetIssueInstanceDetails(id, user, getIssueMessages(id)), timeout.duration) match {
+            case result: Issue => sender() ! Json.toJson(result)
             case _ => sender() ! Json.toJson("error")
           }
         case _ => sender() ! Json.toJson("error")
       }
-    case GetIssueMessages(id) => sender() ! getIssueMessages(id)
+    case SetIssueStatus(id, user, status) =>
+      Await.result(ActorManager.camunda ? SetIssueInstanceStatus(id, user, status), timeout.duration) match {
+        case result: Issue => sender() ! Json.toJson(result)
+        case _ => sender() ! Json.toJson("error")
+      }
+    case SetIssueMessage(id, message) =>
+      setIssueMessage(id, message)
     case _ => None
   }
 
@@ -96,7 +103,36 @@ class IssueManager extends Actor{
             "human",
             rs.getString("author"),
             rs.getString("content"),
-            rs.getLong("date")
+            rs.getLong("date"),
+          ){
+            fileAttachments = getMessageFileAttachments(id)
+          }
+        }
+        s.close()
+        c.close()
+      case _ =>
+    }
+    res
+  }
+  def setIssueMessage(id: String, message: IssueMessage): Unit ={
+    GetConnection() match {
+      case Some(c) =>
+        val s = c.createStatement()
+        s.execute(s"insert into issue_messages (issue_id, author, content, date, file_attachments) values ('$id', '${message.author}', '${message.content}', '${message.date}', '${Json.toJson(message.fileAttachments).toString()}')")
+        c.close()
+      case _ =>
+    }
+  }
+  def getMessageFileAttachments(id: String): ListBuffer[FileAttachment] ={
+    val res = ListBuffer.empty[FileAttachment]
+    GetConnection() match {
+      case Some(c) =>
+        val s = c.createStatement()
+        val rs = s.executeQuery(s"select * from file_attachments where message_id = $id")
+        while (rs.next()){
+          res += new FileAttachment(
+            rs.getString("name"),
+            rs.getString("url"),
           )
         }
         s.close()
@@ -104,5 +140,41 @@ class IssueManager extends Actor{
       case _ =>
     }
     res
+  }
+  def getIssueFileAttachments(id: String): ListBuffer[FileAttachment] ={
+    val res = ListBuffer.empty[FileAttachment]
+    GetConnection() match {
+      case Some(c) =>
+        val s = c.createStatement()
+        val rs = s.executeQuery(s"select * from file_attachments where issue_id = $id")
+        while (rs.next()){
+          res += new FileAttachment(
+            rs.getString("name"),
+            rs.getString("url"),
+          )
+        }
+        s.close()
+        c.close()
+      case _ =>
+    }
+    res
+  }
+  def setIssueFileAttachments(id: String, file: FileAttachment): Unit ={
+    GetConnection() match {
+      case Some(c) =>
+        val s = c.createStatement()
+        s.execute(s"insert into file_attachments (issue_id, name, url) values ('$id', '${file.name}', '${file.url}')")
+        c.close()
+      case _ =>
+    }
+  }
+  def setMessageFileAttachments(id: String, file: FileAttachment): Unit ={
+    GetConnection() match {
+      case Some(c) =>
+        val s = c.createStatement()
+        s.execute(s"insert into file_attachments (message_id, name, url) values ('$id', '${file.name}', '${file.url}')")
+        c.close()
+      case _ =>
+    }
   }
 }

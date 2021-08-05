@@ -1,5 +1,6 @@
 package deepsea.issues.classes
 
+import deepsea.files.classes.FileAttachment
 import play.api.libs.json._
 
 import scala.collection.mutable.ListBuffer
@@ -18,7 +19,8 @@ object Issue{
         "name" -> x.name,
         "details" -> x.details,
         "messages" -> x.messages,
-        "availableStatuses" -> x.availableStatuses
+        "availableStatuses" -> x.availableStatuses,
+        "fileAttachments" -> x.fileAttachments
       )
       case _ => JsNull
     }
@@ -39,6 +41,7 @@ object Issue{
         messages = (x \ "messages").asOpt[ListBuffer[IssueMessage]].getOrElse(ListBuffer.empty[IssueMessage]),
       ){
         availableStatuses = (x \ "availableStatuses").asOpt[ListBuffer[String]].getOrElse(ListBuffer.empty[String])
+        fileAttachments = (x \ "fileAttachments").asOpt[ListBuffer[FileAttachment]].getOrElse(ListBuffer.empty[FileAttachment])
       })
       case _ => JsSuccess (null)
     }
@@ -48,5 +51,6 @@ class Issue(var id: String, var status: String, var project: String, var departm
             var startedDate: Long, var taskType: String, var name: String, var details: String, var assignedTo: String,
             var messages: ListBuffer[IssueMessage] = ListBuffer.empty[IssueMessage]) {
   var availableStatuses: ListBuffer[String] = ListBuffer.empty[String]
+  var fileAttachments: ListBuffer[FileAttachment] = ListBuffer.empty[FileAttachment]
 
 }
