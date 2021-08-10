@@ -17,6 +17,7 @@ object Issue{
         "startedDate" -> x.startedDate,
         "taskType" -> x.taskType,
         "name" -> x.name,
+        "assignedTo" -> x.assignedTo,
         "details" -> x.details,
         "messages" -> x.messages,
         "availableStatuses" -> x.availableStatuses,

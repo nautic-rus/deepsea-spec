@@ -25,10 +25,10 @@ class ActorStartupManager extends Actor{
     case CamundaManagerStarted() =>
       ActorManager.dataBase = system.actorOf(Props[DatabaseManager])
     case DatabaseManagerStarted() =>
-      ActorManager.httpServer = system.actorOf(Props[HTTPManager])
+      ActorManager.httpServer = system.actorOf(RoundRobinPool(1).props(Props[HTTPManager]))
     case HTTPManagerStarted() =>
-      ActorManager.auth = system.actorOf(RoundRobinPool(5).props(Props[AuthManager]))
-      ActorManager.issue = system.actorOf(RoundRobinPool(5).props(Props[IssueManager]))
-      ActorManager.files = system.actorOf(RoundRobinPool(5).props(Props[FileManager]))
+      ActorManager.auth = system.actorOf(RoundRobinPool(10).props(Props[AuthManager]))
+      ActorManager.issue = system.actorOf(RoundRobinPool(10).props(Props[IssueManager]))
+      ActorManager.files = system.actorOf(RoundRobinPool(10).props(Props[FileManager]))
   }
 }

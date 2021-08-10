@@ -8,10 +8,11 @@ import deepsea.auth.AuthManager.{GetUser, User}
 import deepsea.camunda.CamundaManager._
 import deepsea.database.DatabaseManager.GetConnection
 import deepsea.files.classes.FileAttachment
-import deepsea.issues.IssueManager.{GetIssueDetails, GetIssues, InitIssue, IssueDef, ProcessIssue, RemoveIssue, SetIssueMessage, SetIssueStatus}
+import deepsea.issues.IssueManager.{GetIssueDetails, GetIssueProjects, GetIssueTypes, GetIssues, RemoveIssue, SetIssueMessage, SetIssueStatus, StartIssue}
 import deepsea.issues.classes.{Issue, IssueMessage}
-import play.api.libs.json.{Json, OWrites}
+import play.api.libs.json.{JsValue, Json, OWrites}
 
+import java.util.Date
 import java.util.concurrent.TimeUnit
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Await
@@ -19,16 +20,14 @@ import scala.concurrent.Await
 object IssueManager{
 
   case class GetIssues(user: String)
-  case class InitIssue(user: String)
-  case class StartIssue(user: String)
-  case class ProcessIssue(issue: String)
+  case class StartIssue(user: String, issueJson: String)
   case class RemoveIssue(id: String)
   case class GetIssueProjects()
   case class GetIssueTypes()
   case class GetIssueMessages(id: String)
   case class GetIssueDetails(id: String, user: String)
   case class SetIssueStatus(id: String, user: String, status: String)
-  case class SetIssueMessage(id: String, message: IssueMessage)
+  case class SetIssueMessage(id: String, message: String)
 
   case class IssueDef(id: String, issueTypes: List[String], issueProjects: List[String])
   implicit val writesIssueDef: OWrites[IssueDef] = Json.writes[IssueDef]
@@ -43,17 +42,18 @@ class IssueManager extends Actor{
   implicit val timeout: Timeout = Timeout(30, TimeUnit.SECONDS)
 
   override def receive: Receive = {
-    case InitIssue(user) =>
-      Await.result(ActorManager.camunda ? InitIssueInstance(user), timeout.duration) match {
-        case result: IssueDef => sender() ! Json.toJson(result)
-        case _ => sender() ! Json.toJson(IssueDef("", List.empty[String], List.empty[String]))
+    case GetIssueProjects() => sender() ! Json.toJson(getIssueProjects)
+    case GetIssueTypes() =>
+      Await.result(ActorManager.camunda ? GetUploadedDeployments(), timeout.duration) match {
+        case result: JsValue => sender() ! result
+        case _ => sender() ! Json.toJson(ListBuffer.empty[String])
       }
-    case ProcessIssue(issueJson) =>
+    case StartIssue(user, issueJson) =>
       Json.parse(issueJson).asOpt[Issue] match {
         case Some(issue) =>
-          Await.result(ActorManager.camunda ? ProcessIssueInstance(issue), timeout.duration) match {
+          Await.result(ActorManager.camunda ? StartProcessInstance(user, issue), timeout.duration) match {
             case result: String =>
-              issue.fileAttachments.foreach(x =>  setIssueFileAttachments(issue.id, x))
+              issue.fileAttachments.foreach(x =>  setIssueFileAttachments(result, x))
               sender() ! Json.toJson(result)
             case _ => sender() ! Json.toJson("error")
           }
@@ -76,7 +76,7 @@ class IssueManager extends Actor{
     case GetIssueDetails(id, userName) =>
       Await.result(ActorManager.auth ? GetUser(userName), timeout.duration) match {
         case user: User =>
-          Await.result(ActorManager.camunda ? GetIssueInstanceDetails(id, user, getIssueMessages(id)), timeout.duration) match {
+          Await.result(ActorManager.camunda ? GetIssueInstanceDetails(id, user, getIssueMessages(id), getIssueFileAttachments(id)), timeout.duration) match {
             case result: Issue => sender() ! Json.toJson(result)
             case _ => sender() ! Json.toJson("error")
           }
@@ -88,16 +88,38 @@ class IssueManager extends Actor{
         case _ => sender() ! Json.toJson("error")
       }
     case SetIssueMessage(id, message) =>
-      setIssueMessage(id, message)
+      Json.parse(message).asOpt[IssueMessage] match {
+        case Some(msg) =>
+          setIssueMessage(id, msg)
+          msg.fileAttachments.foreach(x => setMessageFileAttachments(id, x))
+          sender() ! Json.toJson("success")
+        case _ =>
+          sender() ! Json.toJson("error")
+      }
     case _ => None
   }
 
+  def getIssueProjects: ListBuffer[String] ={
+    val res = ListBuffer.empty[String]
+    GetConnection() match {
+      case Some(c) =>
+        val s = c.createStatement()
+        val rs = s.executeQuery(s"select * from issue_projects")
+        while (rs.next()){
+          res += rs.getString("name")
+        }
+        s.close()
+        c.close()
+      case _ =>
+    }
+    res
+  }
   def getIssueMessages(id: String): ListBuffer[IssueMessage] ={
     val res = ListBuffer.empty[IssueMessage]
     GetConnection() match {
       case Some(c) =>
         val s = c.createStatement()
-        val rs = s.executeQuery(s"select * from issue_messages where issue_id = $id and removed = 0")
+        val rs = s.executeQuery(s"select * from issue_messages where issue_id = '$id' and removed = 0")
         while (rs.next()){
           res += new IssueMessage(
             "human",
@@ -118,7 +140,7 @@ class IssueManager extends Actor{
     GetConnection() match {
       case Some(c) =>
         val s = c.createStatement()
-        s.execute(s"insert into issue_messages (issue_id, author, content, date, file_attachments) values ('$id', '${message.author}', '${message.content}', '${message.date}', '${Json.toJson(message.fileAttachments).toString()}')")
+        s.execute(s"insert into issue_messages (issue_id, author, content, date) values ('$id', '${message.author}', '${message.content}', ${new Date().getTime})")
         c.close()
       case _ =>
     }
@@ -146,7 +168,7 @@ class IssueManager extends Actor{
     GetConnection() match {
       case Some(c) =>
         val s = c.createStatement()
-        val rs = s.executeQuery(s"select * from file_attachments where issue_id = $id")
+        val rs = s.executeQuery(s"select * from file_attachments where issue_id = '$id'")
         while (rs.next()){
           res += new FileAttachment(
             rs.getString("name"),

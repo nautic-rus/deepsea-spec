@@ -16,9 +16,9 @@ import deepsea.App
 import deepsea.actors.ActorManager
 import deepsea.actors.ActorStartupManager.HTTPManagerStarted
 import deepsea.auth.AuthManager.{GetUsers, Login}
-import deepsea.camunda.CamundaManager.UploadModel
+import deepsea.camunda.CamundaManager.{DeployProcess, GetDeploymentResource, GetUploadedDeployments}
 import deepsea.files.FileManager.CreateFile
-import deepsea.issues.IssueManager.{GetIssueDetails, GetIssueProjects, GetIssueTypes, GetIssues, InitIssue, ProcessIssue, RemoveIssue, SetIssueStatus}
+import deepsea.issues.IssueManager.{GetIssueDetails, GetIssueProjects, GetIssueTypes, GetIssues, RemoveIssue, SetIssueMessage, SetIssueStatus, StartIssue}
 import org.apache.log4j.{LogManager, Logger}
 import play.api.libs.json.{JsValue, Json}
 
@@ -32,37 +32,11 @@ object HTTPManager{
 class HTTPManager extends Actor{
   implicit val system: ActorSystem[Nothing] = ActorSystem(Behaviors.empty, "http")
   implicit val executionContext: ExecutionContextExecutor = system.executionContext
-  implicit val timeout: Timeout = Timeout(105, TimeUnit.SECONDS)
+  implicit val timeout: Timeout = Timeout(30, TimeUnit.SECONDS)
   val logger: Logger = LogManager.getLogger("HttpManager")
   var server:  Future[Http.ServerBinding] = _
   val routes: Route = {
     concat(
-      (get & path("test")) {
-        println("******************************************************************")
-        complete(HttpEntity("success"))
-      },
-      (post & path("upload")) {
-        ActorManager.camunda ! UploadModel()
-        complete(HttpEntity("success"))
-      },
-      (get & path("get-process-status")) {
-        Await.result(ActorManager.camunda ? "get-process-status", timeout.duration) match {
-          case response: String => complete(HttpEntity(response))
-          case _ => complete(HttpEntity("error"))
-        }
-      },
-      (post & path("set-task-number") & parameter("taskNumber")) { taskNumber =>
-        Await.result(ActorManager.camunda ? ("set-task-number", taskNumber), timeout.duration) match {
-          case response: String => complete(HttpEntity(response))
-          case _ => complete(HttpEntity("error"))
-        }
-      },
-      (post & path("set-task-name") & parameter("taskName")) { taskName =>
-        Await.result(ActorManager.camunda ? ("set-task-name", taskName), timeout.duration) match {
-          case response: String => complete(HttpEntity(response))
-          case _ => complete(HttpEntity("error"))
-        }
-      },
       //AUTHORIZATION COMMANDS
       (get & path("login") & parameter("login", "password")){(login, password) =>
         askFor(ActorManager.auth, Login(Option.empty[String], login, password))
@@ -86,11 +60,8 @@ class HTTPManager extends Actor{
       (get & path("issues") & parameter("user")){ user =>
         askFor(ActorManager.issue, GetIssues(user))
       },
-      (get & path("initIssue") & parameter("user")){ user =>
-        askFor(ActorManager.issue, InitIssue(user))
-      },
-      (post & path("processIssue") & entity(as[String])){ issue =>
-        askFor(ActorManager.issue, ProcessIssue(issue))
+      (post & path("startIssue") & parameter("user") & entity(as[String])){ (user, issue) =>
+        askFor(ActorManager.issue, StartIssue(user, issue))
       },
       (get & path("removeIssue") & parameter("id")){ id =>
         askFor(ActorManager.issue, RemoveIssue(id))
@@ -100,6 +71,31 @@ class HTTPManager extends Actor{
       },
       (get & path("setIssueStatus") & parameter("id") & parameter("user") & parameter("status")){ (id, user, status) =>
         askFor(ActorManager.issue, SetIssueStatus(id, user, status))
+      },
+      (get & path("getUploadedDeployments")){
+        askFor(ActorManager.camunda, GetUploadedDeployments())
+      },
+      (get & path("getDeploymentResource") & parameter("id")){ id =>
+        askFor(ActorManager.camunda, GetDeploymentResource(id))
+      },
+      (post & path("setIssueMessage") & parameter("id") & entity(as[String])){ (id, message) =>
+        askFor(ActorManager.issue, SetIssueMessage(id, message))
+      },
+      (post & path("deployProcess") & entity(as[Multipart.FormData])){ formData =>
+        var fileName = ""
+        var fileStream: InputStream = null
+        val done: Future[Done] = formData.parts.mapAsync(1) {
+          case b: BodyPart if b.name == "file" =>
+            val file = File.createTempFile("upload", "tmp")
+            b.entity.dataBytes.runWith(FileIO.toPath(file.toPath))
+            fileName = b.filename.get
+            fileStream = new FileInputStream(file)
+            Future.successful(Done)
+          case _ => Future.successful(Done)
+        }.runWith(Sink.ignore)
+        onSuccess(done) { _ =>
+          askFor(ActorManager.camunda, DeployProcess(fileName, fileStream))
+        }
       },
       //FILE MANAGER COMMANDS
       (post & path("createFileUrl") & entity(as[Multipart.FormData])){ formData =>
@@ -127,6 +123,8 @@ class HTTPManager extends Actor{
     try{
       Await.result(actor ? command, timeout.duration) match {
         case response: JsValue => complete(HttpEntity(response.toString()))
+        case response: Array[Byte] => complete(HttpEntity(response))
+        case response: String => complete(HttpEntity(Json.toJson(response).toString()))
         case _ => complete(HttpEntity(Json.toJson("Error: Wrong response from actor.").toString()))
       }
     }
