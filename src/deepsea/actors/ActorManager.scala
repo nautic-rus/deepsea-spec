@@ -10,13 +10,9 @@ import scala.concurrent.duration.Duration
 object ActorManager {
 
   var system: ActorSystem = _
-  var camunda: ActorRef = _
   var startup: ActorRef = _
   var httpServer: ActorRef = _
-  var dataBase: ActorRef = _
-  var auth: ActorRef = _
-  var issue: ActorRef = _
-  var files: ActorRef = _
+  var spec: ActorRef = _
 
   def init(): Unit ={
     system = ActorSystem()
