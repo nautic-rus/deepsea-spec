@@ -2,6 +2,7 @@ package local.common
 
 import local.common.DB.MongoDB
 import local.domain.WorkShopMaterial
+import local.hull.BStree.{BsTreeItem, HullPL}
 import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
 import org.bson.codecs.configuration.CodecRegistry
 import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
@@ -12,6 +13,7 @@ import java.sql.{Connection, DriverManager}
 
 object DB {
   case class MongoDB(mongoClient: MongoClient, mongoDatabase: MongoDatabase)
+  case class Room(num:String,name:String)
 }
 
 trait DB {
@@ -30,7 +32,12 @@ trait DB {
   }
 
   def configureMongoDB(): MongoDB = {
-    val codecRegistry: CodecRegistry = fromRegistries(fromProviders(classOf[WorkShopMaterial]), DEFAULT_CODEC_REGISTRY)
+    val codecRegistry: CodecRegistry =
+      fromRegistries(fromProviders(
+        classOf[WorkShopMaterial],
+        classOf[HullPL],
+        classOf[BsTreeItem]
+      ), DEFAULT_CODEC_REGISTRY)
     val mongoClient: MongoClient = MongoClient("mongodb://office.nautic-rus.ru:20120")
     val mongoDatabase: MongoDatabase = mongoClient.getDatabase("3degdatabase").withCodecRegistry(codecRegistry)
     MongoDB(mongoClient, mongoDatabase)
