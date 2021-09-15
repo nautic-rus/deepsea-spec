@@ -18,14 +18,23 @@ object DB {
 
 trait DB {
 
-  def oracleConnection(): Option[Connection] = {
+  def oracleConnection(project:String="N002"): Option[Connection] = {
 
     try {
       val oraConnString: String = s"jdbc:oracle:thin:@office.nautic-rus.ru:1521:ORA2DB"
-      val conn: Connection = DriverManager.getConnection(oraConnString, "CN002", "Whatab0utus")
+
+      val pass:String= project match {
+        case "N002"=>"Whatab0utus"
+        case "P701"=>"ThisIsH0wWeD0"
+        case "P702"=>"ThisIsH0wWeD0"
+        case _=>""
+      }
+
+      val conn: Connection = DriverManager.getConnection(oraConnString,s"C${project}" , pass)
       Option(conn)
     } catch {
-      case _: Throwable => {
+      case x: Throwable => {
+        println(x.toString)
         None
       }
     }

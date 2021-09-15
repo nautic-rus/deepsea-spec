@@ -4,7 +4,7 @@ import com.mongodb.BasicDBObject
 import io.circe.{Decoder, Encoder}
 import local.common.DB
 import local.common.DB.Room
-import local.hull.BStree.{BsTreeItem, HullPL}
+import local.hull.BStree.{Block, BsTreeItem, HullPL}
 import org.bson.types.ObjectId
 
 import java.sql.{ResultSet, Statement}
@@ -34,6 +34,13 @@ object BStree {
 
   implicit val HullPLDecoder: Decoder[HullPL] = deriveDecoder[HullPL]
   implicit val HullPLEncoder: Encoder[HullPL] = deriveEncoder[HullPL]
+
+  case class Block(
+                    OID: Int,
+                    CODE: String,
+                    DESCRIPTION: String
+                  )
+
 
   case class BsTreeItem(
                          PP_OID: Int,
@@ -76,7 +83,7 @@ object BStree {
 
 trait BStree extends DB {
 
-  def genPartList(project: String, block: String, taskId: String, docNum:String, docName:String, user:String): String = {
+  def genPartList(project: String, block: String, taskId: String, docNum: String, docName: String, user: String): String = {
     val mongo = configureMongoDB()
     val collectionMat: MongoCollection[HullPL] = mongo.mongoDatabase.getCollection("partlists")
     val sp: Option[HullPL] = {
@@ -152,12 +159,42 @@ trait BStree extends DB {
           }
           case None => ""
         }
-        val hp = HullPL(new ObjectId(),docNum, docName, project, 0, taskId, user, "", new Date().getTime, items.toList, List[Room]())
+        val hp = HullPL(new ObjectId(), docNum, docName, project, 0, taskId, user, "", new Date().getTime, items.toList, List[Room]())
         Await.result(collectionMat.insertOne(hp).toFuture(), Duration(100, SECONDS))
         hp.asJson.noSpaces
       }
     }
 
+  }
+
+  def genBlocks(project: String): String = {
+    val items = ListBuffer.empty[Block]
+    oracleConnection(project) match {
+      case Some(conn) => {
+        try {
+          val sql = "SELECT OID,CODE,DESCRIPTION FROM BLOCK order by code"
+          val stmt: Statement = conn.createStatement()
+          val rs: ResultSet = stmt.executeQuery(sql)
+          while (rs.next()) {
+            val OID: Int = Option[Int](rs.getInt("OID")).getOrElse(0)
+            val CODE: String = Option[String](rs.getString("CODE")).getOrElse("")
+            val DESCRIPTION: String = Option[String](rs.getString("DESCRIPTION")).getOrElse("")
+            items += Block(OID, CODE, DESCRIPTION)
+          }
+          conn.close()
+          items.toList.asJson.noSpaces
+        }
+        catch {
+          case x: Throwable =>{
+            println(x.toString)
+            items.toList.asJson.noSpaces
+          }
+        }
+      }
+      case None => {
+        items.toList.asJson.noSpaces
+      }
+    }
   }
 }
 
