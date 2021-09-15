@@ -60,5 +60,50 @@
             <artifactId>config</artifactId>
             <version>1.4.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.oracle.database.jdbc</groupId>
+            <artifactId>ojdbc11</artifactId>
+            <version>21.1.0.0</version>
+        </dependency>
+
+       <dependency>
+            <groupId>org.mongodb.scala</groupId>
+            <artifactId>mongo-scala-bson_2.13</artifactId>
+            <version>4.2.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mongodb.scala</groupId>
+            <artifactId>mongo-scala-driver_2.13</artifactId>
+            <version>4.2.3</version>
+        </dependency>
+
+
+
+        <dependency>
+            <groupId>io.circe</groupId>
+            <artifactId>circe-core_2.13</artifactId>
+            <version>0.15.0-M1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.circe</groupId>
+            <artifactId>circe-generic_sjs1_2.13</artifactId>
+            <version>0.15.0-M1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.circe</groupId>
+            <artifactId>circe-parser_sjs1_2.13</artifactId>
+            <version>0.15.0-M1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_2.13</artifactId>
+            <version>3.2.9</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 </project>
