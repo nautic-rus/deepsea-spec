@@ -7,7 +7,7 @@ import scala.io.StdIn.readLine
 object App {
   object HTTPServer{
     val Host = "192.168.1.122"
-    val Port = 1113
+    val Port = 1112
   }
   object Cloud{
     val Host = "cloud.nautic-rus.ru"

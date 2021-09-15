@@ -4,8 +4,14 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ebc20096-d70b-4412-983f-14fe275410ee" name="Default Changelist" comment="kokovin release">
+    <list default="true" id="ebc20096-d70b-4412-983f-14fe275410ee" name="Default Changelist" comment="kokovin release 2">
+      <change afterPath="$PROJECT_DIR$/test/TestCreateSP.scala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test/bb.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_9_15_2021_8_38_AM_[Default_Changelist]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_9_15_2021_8_38_AM__Default_Changelist_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/deepsea/App.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/deepsea/App.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/deepsea/spec/SpecManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/deepsea/spec/SpecManager.scala" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -197,7 +203,14 @@
       <option name="project" value="LOCAL" />
       <updated>1631627331016</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="kokovin release 2">
+      <created>1631689698757</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1631689698757</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -215,7 +228,8 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="initial" />
     <MESSAGE value="kokovin release" />
-    <option name="LAST_COMMIT_MESSAGE" value="kokovin release" />
+    <MESSAGE value="kokovin release 2" />
+    <option name="LAST_COMMIT_MESSAGE" value="kokovin release 2" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
