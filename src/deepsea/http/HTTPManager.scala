@@ -15,13 +15,14 @@ import deepsea.actors.ActorStartupManager.HTTPManagerStarted
 import deepsea.spec.SpecManager.GetHullSpec
 import org.apache.log4j.{LogManager, Logger}
 import play.api.libs.json.{JsValue, Json}
+
 import java.util.concurrent.TimeUnit
 import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 
 object HTTPManager{
   case class Response(value: String)
 }
-class HTTPManager extends Actor{
+class HTTPManager extends Actor {
   implicit val system: ActorSystem[Nothing] = ActorSystem(Behaviors.empty, "http")
   implicit val executionContext: ExecutionContextExecutor = system.executionContext
   implicit val timeout: Timeout = Timeout(30, TimeUnit.SECONDS)
@@ -29,8 +30,8 @@ class HTTPManager extends Actor{
   var server:  Future[Http.ServerBinding] = _
   val routes: Route = {
     concat(
-      (get & path("hullSpec") & parameter("project") & parameter("block")){ (project, block) =>
-        askFor(ActorManager.spec, GetHullSpec(project, block))
+      (get & path("hullSpec") & parameter("project") & parameter("block") & parameter("taskId") & parameter("docNum") & parameter("docName") & parameter("user")){ (project, block, taskId, docNum, docName, user) =>
+        askFor(ActorManager.spec, GetHullSpec(project, block, taskId, docNum, docName, user))
       },
     )
   }
