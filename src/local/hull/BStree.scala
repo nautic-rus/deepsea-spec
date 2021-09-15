@@ -35,6 +35,9 @@ object BStree {
   implicit val HullPLDecoder: Decoder[HullPL] = deriveDecoder[HullPL]
   implicit val HullPLEncoder: Encoder[HullPL] = deriveEncoder[HullPL]
 
+  implicit val BlockDecoder: Decoder[Block] = deriveDecoder[Block]
+  implicit val BlockEncoder: Encoder[Block] = deriveEncoder[Block]
+
   case class Block(
                     OID: Int,
                     CODE: String,

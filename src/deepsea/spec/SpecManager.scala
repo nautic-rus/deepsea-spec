@@ -2,7 +2,7 @@ package deepsea.spec
 
 import akka.actor.Actor
 import akka.util.Timeout
-import deepsea.spec.SpecManager.{GetHullBlocs, GetHullSpec, GetProjectList, PartDef}
+import deepsea.spec.SpecManager.{GetHullBlocks,  GetHullSpec, GetProjectList, PartDef}
 import local.common.Misc
 import local.hull.BStree
 import play.api.libs.json.{Json, OWrites}
@@ -15,7 +15,7 @@ object SpecManager {
 
   case class GetProjectList()
 
-  case class GetHullBlocs(project: String)
+  case class GetHullBlocks(project: String)
 
   case class PartDef(name: String, section: String, description: String)
 
@@ -31,7 +31,7 @@ class SpecManager extends Actor with BStree with Misc {
     //Generate list of projects
     case GetProjectList() => sender() ! genProjectList()
     //Generate list of HULL blocs
-    case GetHullBlocs(project) => sender() ! genBlocks(project)
+    case GetHullBlocks(project) => sender() ! genBlocks(project)
 
     case _ => None
   }

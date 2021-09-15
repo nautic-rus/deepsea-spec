@@ -4,36 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ebc20096-d70b-4412-983f-14fe275410ee" name="Default Changelist" comment="kokovin release 3">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/local/common/Misc.scala" afterDir="false" />
+    <list default="true" id="ebc20096-d70b-4412-983f-14fe275410ee" name="Default Changelist" comment="kokovin release 4">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/deepsea/spec/SpecManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/deepsea/spec/SpecManager.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/local/common/DB.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/local/common/DB.scala" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/local/hull/BStree.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/local/hull/BStree.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/App$HTTPServer$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/App$HTTPServer$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/App.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/App.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorManager.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorManager.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$1$WorkShopMaterialMacroCodec$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$1$WorkShopMaterialMacroCodec$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$1$WorkShopMaterialMacroCodec$2$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$1$WorkShopMaterialMacroCodec$2$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$2$HullPLMacroCodec$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$2$HullPLMacroCodec$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$2$HullPLMacroCodec$2$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$2$HullPLMacroCodec$2$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$2.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$3$BsTreeItemMacroCodec$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$3$BsTreeItemMacroCodec$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$3$BsTreeItemMacroCodec$2$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$3$BsTreeItemMacroCodec$2$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$3.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$3.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/common/DB.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/local/hull/BStree$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/hull/BStree$.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/local/hull/BStree$BsTreeItem$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/hull/BStree$BsTreeItem$.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/local/hull/BStree$BsTreeItem.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/hull/BStree$BsTreeItem.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/local/hull/BStree$HullPL$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/hull/BStree$HullPL$.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/local/hull/BStree$HullPL.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/hull/BStree$HullPL.class" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/target/classes/local/hull/BStree.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/hull/BStree.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/test-classes/TestCreateSP.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/TestCreateSP.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/TestCreateSP.scala" beforeDir="false" afterPath="$PROJECT_DIR$/test/TestCreateSP.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test/bb.json" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -240,7 +222,14 @@
       <option name="project" value="LOCAL" />
       <updated>1631690002338</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="kokovin release 4">
+      <created>1631698555631</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1631698555631</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -260,7 +249,8 @@
     <MESSAGE value="kokovin release" />
     <MESSAGE value="kokovin release 2" />
     <MESSAGE value="kokovin release 3" />
-    <option name="LAST_COMMIT_MESSAGE" value="kokovin release 3" />
+    <MESSAGE value="kokovin release 4" />
+    <option name="LAST_COMMIT_MESSAGE" value="kokovin release 4" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
