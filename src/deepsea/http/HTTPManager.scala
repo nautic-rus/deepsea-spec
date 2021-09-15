@@ -12,7 +12,7 @@ import akka.util.Timeout
 import deepsea.App
 import deepsea.actors.ActorManager
 import deepsea.actors.ActorStartupManager.HTTPManagerStarted
-import local.hull.BStree
+import deepsea.spec.SpecManager.GetHullSpec
 import org.apache.log4j.{LogManager, Logger}
 import play.api.libs.json.{JsValue, Json}
 
@@ -22,7 +22,7 @@ import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 object HTTPManager{
   case class Response(value: String)
 }
-class HTTPManager extends Actor with BStree{
+class HTTPManager extends Actor {
   implicit val system: ActorSystem[Nothing] = ActorSystem(Behaviors.empty, "http")
   implicit val executionContext: ExecutionContextExecutor = system.executionContext
   implicit val timeout: Timeout = Timeout(30, TimeUnit.SECONDS)
@@ -31,7 +31,7 @@ class HTTPManager extends Actor with BStree{
   val routes: Route = {
     concat(
       (get & path("hullSpec") & parameter("project") & parameter("block") & parameter("taskId") & parameter("docNum") & parameter("docName") & parameter("user")){ (project, block, taskId, docNum, docName, user) =>
-        askFor(ActorManager.spec, genPartList(project, block, taskId, docNum, docName, user))
+        askFor(ActorManager.spec, GetHullSpec(project, block, taskId, docNum, docName, user))
       },
     )
   }
