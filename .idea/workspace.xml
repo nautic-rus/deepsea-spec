@@ -4,18 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ebc20096-d70b-4412-983f-14fe275410ee" name="Default Changelist" comment="kokovin release 4">
+    <list default="true" id="ebc20096-d70b-4412-983f-14fe275410ee" name="Default Changelist" comment="kokovin release 3">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/deepsea/spec/SpecManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/deepsea/spec/SpecManager.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/local/hull/BStree.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/local/hull/BStree.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorManager.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorManager.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/local/hull/BStree$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/hull/BStree$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/local/hull/BStree$BsTreeItem$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/hull/BStree$BsTreeItem$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/local/hull/BStree$BsTreeItem.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/hull/BStree$BsTreeItem.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/local/hull/BStree$HullPL$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/hull/BStree$HullPL$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/local/hull/BStree$HullPL.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/hull/BStree$HullPL.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/local/hull/BStree.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/hull/BStree.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/deepsea/http/HTTPManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/deepsea/http/HTTPManager.scala" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -77,12 +68,12 @@
       <recent name="deepsea" />
     </key>
   </component>
-  <component name="RunManager" selected="ScalaTest.TestCreateSP">
+  <component name="RunManager" selected="Application.App">
     <configuration name="App" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="ALTERNATIVE_JRE_PATH" value="11" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="MAIN_CLASS_NAME" value="deepsea.App" />
-      <module name="deepsea" />
+      <module name="deepsea-spec" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -121,9 +112,9 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.App" />
         <item itemvalue="ScalaTest.TestCreateSP" />
         <item itemvalue="Application.M1" />
-        <item itemvalue="Application.App" />
       </list>
     </recent_temporary>
   </component>
@@ -234,7 +225,14 @@
       <option name="project" value="LOCAL" />
       <updated>1631698555631</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="kokovin release 3">
+      <created>1631775174594</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1631775174594</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -253,9 +251,9 @@
     <MESSAGE value="initial" />
     <MESSAGE value="kokovin release" />
     <MESSAGE value="kokovin release 2" />
-    <MESSAGE value="kokovin release 3" />
     <MESSAGE value="kokovin release 4" />
-    <option name="LAST_COMMIT_MESSAGE" value="kokovin release 4" />
+    <MESSAGE value="kokovin release 3" />
+    <option name="LAST_COMMIT_MESSAGE" value="kokovin release 3" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -275,7 +273,7 @@
     </pin-to-top-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/deepsea$App.ic" NAME="App Coverage Results" MODIFIED="1628096465177" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
     <SUITE FILE_PATH="coverage/camunda$App.ic" NAME="App Coverage Results" MODIFIED="1626975965819" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+    <SUITE FILE_PATH="coverage/deepsea$App.ic" NAME="App Coverage Results" MODIFIED="1628096465177" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
   </component>
 </project>

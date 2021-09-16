@@ -12,7 +12,7 @@ import akka.util.Timeout
 import deepsea.App
 import deepsea.actors.ActorManager
 import deepsea.actors.ActorStartupManager.HTTPManagerStarted
-import deepsea.spec.SpecManager.{GetHullBlocs, GetHullSpec}
+import deepsea.spec.SpecManager.{GetHullBlocks, GetHullSpec}
 import org.apache.log4j.{LogManager, Logger}
 import play.api.libs.json.{JsValue, Json}
 
@@ -34,7 +34,7 @@ class HTTPManager extends Actor {
         askFor(ActorManager.spec, GetHullSpec(project, block, taskId, docNum, docName, user))
       },
       (get & path("hullBlocks") & parameter("project")){ (project) =>
-        askFor(ActorManager.spec, GetHullBlocs(project))
+        askFor(ActorManager.spec, GetHullBlocks(project))
       },
     )
   }
