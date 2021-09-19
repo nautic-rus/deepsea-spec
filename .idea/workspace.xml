@@ -4,16 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ebc20096-d70b-4412-983f-14fe275410ee" name="Default Changelist" comment="kokovin release 4">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/deepsea/App.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/deepsea/App.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$$anonfun$receive$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$$anonfun$receive$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$GetHullSpec$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$GetHullSpec$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$GetHullSpec.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$GetHullSpec.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$PartDef$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$PartDef$.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$PartDef.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$PartDef.class" afterDir="false" />
-    </list>
+    <list default="true" id="ebc20096-d70b-4412-983f-14fe275410ee" name="Default Changelist" comment="kokovin release 5 log fixed" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -32,6 +23,7 @@
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="UPDATE_TYPE" value="REBASE" />
   </component>
   <component name="GitSEFilterConfiguration">
     <file-type-list>
@@ -233,7 +225,21 @@
       <option name="project" value="LOCAL" />
       <updated>1631708956847</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="kokovin release 5 log fixed">
+      <created>1632071938321</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1632071938321</updated>
+    </task>
+    <task id="LOCAL-00017" summary="kokovin release 5 log fixed">
+      <created>1632072066228</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1632072066228</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -254,14 +260,15 @@
     <MESSAGE value="kokovin release 2" />
     <MESSAGE value="kokovin release 3" />
     <MESSAGE value="kokovin release 4" />
-    <option name="LAST_COMMIT_MESSAGE" value="kokovin release 4" />
+    <MESSAGE value="kokovin release 5 log fixed" />
+    <option name="LAST_COMMIT_MESSAGE" value="kokovin release 5 log fixed" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="scala-line">
           <url>file://$PROJECT_DIR$/test/TestCreateSP.scala</url>
-          <line>9</line>
+          <line>11</line>
           <option name="timeStamp" value="13" />
         </line-breakpoint>
       </breakpoints>
