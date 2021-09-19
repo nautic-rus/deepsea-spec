@@ -18,7 +18,6 @@ object App {
   }
   def main(args: Array[String]): Unit = {
     org.apache.log4j.BasicConfigurator.configure()
-    Logger.getRootLogger.setLevel(Level.INFO)
     ActorManager.init()
     while (readLine() != "q") {}
     ActorManager.terminate()

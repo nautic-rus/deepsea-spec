@@ -7,6 +7,11 @@
     <list default="true" id="ebc20096-d70b-4412-983f-14fe275410ee" name="Default Changelist" comment="kokovin release 5 log fixed">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/deepsea/App.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/deepsea/App.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/local/common/DB.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/local/common/DB.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/App$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/App$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/App$HTTPServer$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/App$HTTPServer$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/TestCreateSP.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/test-classes/TestCreateSP.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/TestCreateSP.scala" beforeDir="false" afterPath="$PROJECT_DIR$/test/TestCreateSP.scala" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -249,7 +254,14 @@
       <option name="project" value="LOCAL" />
       <updated>1632072453117</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="kokovin release 5 log fixed">
+      <created>1632073502451</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1632073502451</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -278,7 +290,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="scala-line">
           <url>file://$PROJECT_DIR$/test/TestCreateSP.scala</url>
-          <line>11</line>
+          <line>9</line>
           <option name="timeStamp" value="13" />
         </line-breakpoint>
       </breakpoints>
