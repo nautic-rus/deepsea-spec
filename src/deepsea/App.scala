@@ -1,6 +1,7 @@
 package deepsea
 
 import deepsea.actors.ActorManager
+import org.apache.log4j.{Level, Logger}
 
 import scala.io.StdIn.readLine
 
@@ -17,6 +18,7 @@ object App {
   }
   def main(args: Array[String]): Unit = {
     org.apache.log4j.BasicConfigurator.configure()
+    Logger.getRootLogger.setLevel(Level.OFF)
     ActorManager.init()
     while (readLine() != "q") {}
     ActorManager.terminate()
