@@ -1,6 +1,7 @@
 package deepsea
 
 import deepsea.actors.ActorManager
+import org.apache.log4j.{Level, Logger}
 
 import scala.io.StdIn.readLine
 
