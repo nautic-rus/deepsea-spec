@@ -44,7 +44,7 @@ class HTTPManager extends Actor {
       Await.result(actor ? command, timeout.duration) match {
         case response: JsValue => complete(HttpEntity(response.toString()))
         case response: Array[Byte] => complete(HttpEntity(response))
-        case response: String => complete(HttpEntity(Json.toJson(response).toString()))
+        case response: String => complete(HttpEntity(response))
         case _ => complete(HttpEntity(Json.toJson("Error: Wrong response from actor.").toString()))
       }
     }
