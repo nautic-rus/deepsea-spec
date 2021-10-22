@@ -9,5 +9,5 @@ import io.circe.generic.semiauto._
 trait Misc {
 
 
-  def genProjectList():String=List[String]("N002","P701").asJson.noSpaces
+  def genProjectList():String=List[String]("N002","P701","N004").asJson.noSpaces
 }

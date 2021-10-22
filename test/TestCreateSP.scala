@@ -6,7 +6,13 @@ import org.scalatest.funsuite.AnyFunSuite
 class TestCreateSP extends AnyFunSuite with BStree {
   org.apache.log4j.BasicConfigurator.configure()
 
-  val bl = genBlocks("N002")
+  //val bl = genBlocks("N002")
+
+  //val pl: String =genPartList("NR004","U104","","","","")
+
+  val pl: String =initHullPartList("N004", "NR004-150-101", "NR004-150-101", "Block 101", "ZAGU")
+  val pl2: String =getHullPartList("NR004-150-101")
+
   val jj = 0
 
 

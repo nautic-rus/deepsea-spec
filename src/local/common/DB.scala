@@ -25,6 +25,7 @@ trait DB {
       val oraConnString: String = s"jdbc:oracle:thin:@office.nautic-rus.ru:1521:ORA2DB"
 
       val pass:String= project match {
+        case "N004"=>"Whatab0utus"
         case "N002"=>"Whatab0utus"
         case "P701"=>"ThisIsH0wWeD0"
         case "P702"=>"ThisIsH0wWeD0"
