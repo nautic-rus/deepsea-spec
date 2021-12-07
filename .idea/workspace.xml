@@ -5,7 +5,41 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ebc20096-d70b-4412-983f-14fe275410ee" name="Default Changelist" comment="kokovin release 3">
+      <change afterPath="$PROJECT_DIR$/rsc/queries/hullParts.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/deepsea/database/DatabaseManager.scala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/deepsea/hull/HullManager.scala" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/deepsea/actors/ActorManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/deepsea/actors/ActorManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/deepsea/actors/ActorStartupManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/deepsea/actors/ActorStartupManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/App.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/App.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorManager$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorManager$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorManager.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorManager.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$$anonfun$receive$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$$anonfun$receive$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$CamundaManagerStarted$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$CamundaManagerStarted$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$CamundaManagerStarted.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$CamundaManagerStarted.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$DatabaseManagerStarted$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$DatabaseManagerStarted$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$DatabaseManagerStarted.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$DatabaseManagerStarted.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$HTTPManagerStarted$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$HTTPManagerStarted$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$HTTPManagerStarted.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$HTTPManagerStarted.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$Start$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$Start$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$Start.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$Start.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager$$anonfun$receive$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager$$anonfun$receive$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$$anonfun$receive$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$$anonfun$receive$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$GetHullSpec$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$GetHullSpec$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$GetHullSpec.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$GetHullSpec.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$PartDef$.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$PartDef$.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$PartDef.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$PartDef.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$1$WorkShopMaterialMacroCodec$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$1$WorkShopMaterialMacroCodec$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$2$HullPLMacroCodec$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$2$HullPLMacroCodec$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$3$BsTreeItemMacroCodec$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$3$BsTreeItemMacroCodec$1.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/common/DB.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/hull/BStree.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/local/hull/BStree.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,14 +88,24 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="project.structure.last.edited" value="Project" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/deepsea" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15625" />
     <property name="project.structure.side.proportion" value="0.28312758" />
-    <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="editor.preferences.folding" />
   </component>
+  <component name="ReactorSettings">
+    <option name="notificationShown" value="true" />
+  </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\repos\deepsea-spec\src\deepsea" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\repos\deepsea" />
     </key>
@@ -93,13 +137,14 @@
       </method>
     </configuration>
     <configuration name="TestCreateSP" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true" nameIsGenerated="true" show_console_on_std_err="false" show_console_on_std_out="false">
-      <module name="deepsea" />
+      <module name="deepsea-spec" />
       <option name="allowRunningInParallel" value="false" />
       <option name="projectPathOnTarget" />
       <option name="selectedOptions">
         <list />
       </option>
       <option name="testKind" value="Class" />
+      <option name="shortenClasspath" value="NONE" />
       <option name="testClassPath" value="TestCreateSP" />
       <option name="workingDirectory" value="C:\scalaproj\deepsea-spec" />
       <method v="2">
@@ -127,6 +172,9 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1623933574191</updated>
+      <workItem from="1638790794787" duration="30000" />
+      <workItem from="1638791085902" duration="722000" />
+      <workItem from="1638863705894" duration="3304000" />
     </task>
     <task id="LOCAL-00001" summary="initial">
       <created>1627300463534</created>
@@ -247,8 +295,18 @@
       <option name="project" value="LOCAL" />
       <updated>1634812609497</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="kokovin release 3">
+      <created>1634886827700</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1634886827700</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
     <option name="TAB_STATES">
@@ -275,8 +333,13 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="scala-line">
           <url>file://$PROJECT_DIR$/test/TestCreateSP.scala</url>
-          <line>9</line>
+          <line>15</line>
           <option name="timeStamp" value="13" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="scala-line">
+          <url>file://$PROJECT_DIR$/src/deepsea/hull/HullManager.scala</url>
+          <line>43</line>
+          <option name="timeStamp" value="25" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -288,7 +351,8 @@
     </pin-to-top-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/camunda$App.ic" NAME="App Coverage Results" MODIFIED="1626975965819" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
     <SUITE FILE_PATH="coverage/deepsea$App.ic" NAME="App Coverage Results" MODIFIED="1628096465177" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+    <SUITE FILE_PATH="coverage/camunda$App.ic" NAME="App Coverage Results" MODIFIED="1626975965819" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+    <SUITE FILE_PATH="coverage/deepsea_spec$App.ic" NAME="App Coverage Results" MODIFIED="1638865516032" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
   </component>
 </project>
