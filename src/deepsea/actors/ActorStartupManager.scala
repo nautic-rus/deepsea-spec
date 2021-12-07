@@ -7,7 +7,7 @@ import deepsea.actors.ActorStartupManager.{DatabaseManagerStarted, HTTPManagerSt
 import deepsea.database.DatabaseManager
 import deepsea.http.HTTPManager
 import deepsea.hull.HullManager
-import deepsea.hull.HullManager.GetForanParts
+import deepsea.hull.HullManager.{GetForanParts, GetForanPartsExcel}
 import deepsea.spec.SpecManager
 
 
@@ -26,7 +26,5 @@ class ActorStartupManager extends Actor{
     case HTTPManagerStarted() =>
       ActorManager.spec = system.actorOf(RoundRobinPool(10).props(Props[SpecManager]))
       ActorManager.hullManager = system.actorOf(RoundRobinPool(10).props(Props[HullManager]))
-
-      ActorManager.hullManager ! GetForanParts("N004")
   }
 }
