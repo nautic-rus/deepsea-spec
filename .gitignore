@@ -1,3 +1,9 @@
 /.idea/
 /target/
-/.idea/
+/.idea/codeStyles/
+/.idea/shelf/
+/.idea/compiler.xml
+/.idea/jarRepositories.xml
+/.idea/misc.xml
+/.idea/vcs.xml
+/.idea/workspace.xml
