@@ -8,7 +8,7 @@ import scala.io.StdIn.readLine
 
 object App {
 
-  val conf: Config = ConfigFactory.defaultApplication(this.getClass().getClassLoader())
+  val conf: Config = ConfigFactory.defaultApplication(this.getClass.getClassLoader)
 
   object HTTPServer{
     val Host = "192.168.1.122"
