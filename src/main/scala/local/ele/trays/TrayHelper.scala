@@ -135,7 +135,8 @@ trait TrayHelper {
     }
   }
 
-  private def getCoordFromString(in: String): Int = {
+  private def getCoordFromString(inp: String): Int = {
+    val in = inp.replace("-", "")
     if (in.nonEmpty && in.length > 2) {
       if (in.contains(";")) {
         in.split(";").headOption match {

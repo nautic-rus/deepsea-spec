@@ -55,6 +55,7 @@ object TrayManager extends TrayHelper {
     val mountRules: List[TrayMountRules] = retrieveTraysMountRules()
     val clickTray: ForanTray = TrayBySeqId(project, trayIdSeq) //"17683679"
     val clickTrayMontData = retrieveTrayMountDataByTrm(clickTray.STOCK_CODE)
+    ret += "V="+clickTrayMontData.H.toInt.toString
     ret += clickTrayMontData.label
 
     val buffMounts = ListBuffer.empty[TrayMountItem]
