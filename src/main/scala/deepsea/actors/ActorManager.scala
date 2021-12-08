@@ -13,6 +13,8 @@ object ActorManager {
   var startup: ActorRef = _
   var httpServer: ActorRef = _
   var spec: ActorRef = _
+  var hullManager: ActorRef = _
+  var dataBase: ActorRef = _
 
   def init(): Unit ={
     system = ActorSystem()
