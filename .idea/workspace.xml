@@ -5,7 +5,84 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ebc20096-d70b-4412-983f-14fe275410ee" name="Default Changelist" comment="kokovin release 3">
+      <change afterPath="$PROJECT_DIR$/src/main/resources/application.conf" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/log4j.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/scala/local/ele/eq/EleEqHelper.scala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/scala/local/ele/eq/EleEqManager.scala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/scala/local/ele/trays/TrayHelper.scala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/scala/local/ele/trays/TrayManager.scala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/scala/local/sql/ConnectionManager.scala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/test/scala/Trays.scala" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rsc/application.conf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/deepsea/App.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/App.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/deepsea/actors/ActorManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/actors/ActorManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/deepsea/actors/ActorStartupManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/actors/ActorStartupManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/deepsea/http/HTTPManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/http/HTTPManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/deepsea/spec/SpecManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/spec/SpecManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/local/common/DB.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/local/common/DB.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/local/common/Misc.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/local/common/Misc.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/local/domain/WorkShopMaterial.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/local/domain/WorkShopMaterial.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/local/hull/BStree.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/local/hull/BStree.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/application.conf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/App$.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/App$Cloud$.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/App$HTTPServer$.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/App.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorManager$.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorManager.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$$anonfun$receive$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$CamundaManagerStarted$.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$CamundaManagerStarted.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$DatabaseManagerStarted$.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$DatabaseManagerStarted.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$HTTPManagerStarted$.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$HTTPManagerStarted.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$Start$.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager$Start.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/actors/ActorStartupManager.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager$$anonfun$receive$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager$.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager$Response$.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager$Response.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/http/HTTPManager.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$$anonfun$receive$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$GetHullSpec$.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$GetHullSpec.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$PartDef$.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager$PartDef.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/deepsea/spec/SpecManager.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$1$WorkShopMaterialMacroCodec$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$1$WorkShopMaterialMacroCodec$2$.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$2$HullPLMacroCodec$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$2$HullPLMacroCodec$2$.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$2.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$3$BsTreeItemMacroCodec$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$3$BsTreeItemMacroCodec$2$.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$$anon$3.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$MongoDB$.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$MongoDB.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$Room$.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB$Room.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/common/DB.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/domain/WorkShopMaterial.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/hull/BStree$.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/hull/BStree$BsTreeItem$.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/hull/BStree$BsTreeItem.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/hull/BStree$HullPL$.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/hull/BStree$HullPL.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/hull/BStree$anon$lazy$macro$15$1$$anon$2.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/hull/BStree$anon$lazy$macro$15$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/hull/BStree$anon$lazy$macro$7$1$$anon$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/hull/BStree$anon$lazy$macro$7$1.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/local/hull/BStree.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/test-classes/TestCreateSP.class" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test/TestCreateSP.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/TestCreateSP.scala" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -24,7 +101,6 @@
     </option>
   </component>
   <component name="Git.Settings">
-    <option name="PUSH_AUTO_UPDATE" value="true" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitSEFilterConfiguration">
@@ -36,14 +112,16 @@
     </file-type-list>
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/src/deepsea/http/HTTPManager.scala" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/src/main/scala/deepsea/http/HTTPManager.scala" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
   </component>
   <component name="ProjectCodeStyleSettingsMigration">
     <option name="version" value="2" />
   </component>
   <component name="ProjectId" id="1u4n8uM5nu1BLYB3gLF9sXY2Byf" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
-    <OptionsSetting value="false" id="Update" />
     <ConfirmationsSetting value="2" id="Add" />
   </component>
   <component name="ProjectViewState">
@@ -54,22 +132,31 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="project.structure.last.edited" value="Project" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/main/resources" />
+    <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15625" />
     <property name="project.structure.side.proportion" value="0.28312758" />
-    <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="editor.preferences.folding" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\scalaproj\deepsea-spec\src\main\resources" />
+      <recent name="C:\scalaproj\deepsea-spec\src\test" />
+      <recent name="C:\scalaproj\deepsea-spec\test\rsc" />
+      <recent name="C:\scalaproj\deepsea-spec\rsc" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\scalaproj\deepsea-spec\src\main\resources" />
+      <recent name="C:\scalaproj\deepsea-spec\src\main\scala" />
+      <recent name="C:\scalaproj\deepsea-spec\src\test\scala" />
+      <recent name="C:\scalaproj\deepsea-spec\src\main" />
       <recent name="C:\repos\deepsea" />
     </key>
     <key name="MoveClassesOrPackagesDialog.RECENTS_KEY">
       <recent name="deepsea" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.App">
+  <component name="RunManager" selected="ScalaTest.Trays">
     <configuration name="App" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="ALTERNATIVE_JRE_PATH" value="11" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
@@ -93,15 +180,42 @@
       </method>
     </configuration>
     <configuration name="TestCreateSP" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true" nameIsGenerated="true" show_console_on_std_err="false" show_console_on_std_out="false">
-      <module name="deepsea" />
+      <module name="deepsea-spec" />
       <option name="allowRunningInParallel" value="false" />
       <option name="projectPathOnTarget" />
       <option name="selectedOptions">
         <list />
       </option>
       <option name="testKind" value="Class" />
+      <option name="shortenClasspath" value="NONE" />
       <option name="testClassPath" value="TestCreateSP" />
       <option name="workingDirectory" value="C:\scalaproj\deepsea-spec" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Trays" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true" nameIsGenerated="true" show_console_on_std_err="false" show_console_on_std_out="false">
+      <module name="deepsea-spec" />
+      <option name="allowRunningInParallel" value="false" />
+      <option name="projectPathOnTarget" />
+      <option name="selectedOptions">
+        <list />
+      </option>
+      <option name="testKind" value="Class" />
+      <option name="shortenClasspath" value="NONE" />
+      <option name="testClassPath" value="Trays" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="ScalaTestRunConfiguration" factoryName="ScalaTest" show_console_on_std_err="false" show_console_on_std_out="false">
+      <option name="allowRunningInParallel" value="false" />
+      <option name="projectPathOnTarget" />
+      <option name="selectedOptions">
+        <list />
+      </option>
+      <option name="testKind" value="Class" />
+      <option name="shortenClasspath" value="NONE" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -110,11 +224,13 @@
       <item itemvalue="Application.App" />
       <item itemvalue="Application.M1" />
       <item itemvalue="ScalaTest.TestCreateSP" />
+      <item itemvalue="ScalaTest.Trays" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.App" />
+        <item itemvalue="ScalaTest.Trays" />
         <item itemvalue="ScalaTest.TestCreateSP" />
+        <item itemvalue="Application.App" />
         <item itemvalue="Application.M1" />
       </list>
     </recent_temporary>
@@ -241,11 +357,11 @@
       <updated>1631775414411</updated>
     </task>
     <task id="LOCAL-00017" summary="kokovin release 3">
-      <created>1634812609497</created>
+      <created>1634886661721</created>
       <option name="number" value="00017" />
       <option name="presentableId" value="LOCAL-00017" />
       <option name="project" value="LOCAL" />
-      <updated>1634812609497</updated>
+      <updated>1634886661721</updated>
     </task>
     <option name="localTasksCounter" value="18" />
     <servers />
@@ -260,7 +376,6 @@
         </entry>
       </map>
     </option>
-    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="initial" />
@@ -274,9 +389,14 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="scala-line">
-          <url>file://$PROJECT_DIR$/test/TestCreateSP.scala</url>
+          <url>file://$PROJECT_DIR$/src/test/scala/TestCreateSP.scala</url>
+          <line>15</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="scala-line">
+          <url>file://$PROJECT_DIR$/src/test/scala/Trays.scala</url>
           <line>9</line>
-          <option name="timeStamp" value="13" />
+          <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -288,7 +408,7 @@
     </pin-to-top-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/camunda$App.ic" NAME="App Coverage Results" MODIFIED="1626975965819" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
     <SUITE FILE_PATH="coverage/deepsea$App.ic" NAME="App Coverage Results" MODIFIED="1628096465177" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+    <SUITE FILE_PATH="coverage/camunda$App.ic" NAME="App Coverage Results" MODIFIED="1626975965819" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
   </component>
 </project>
