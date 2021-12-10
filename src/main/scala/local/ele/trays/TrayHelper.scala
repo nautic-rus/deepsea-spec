@@ -26,6 +26,26 @@ trait TrayHelper {
     s"select code from cable where seqid in(\n\nselect CABLE from CAB_ROUTE  where (NODE1 in (\n\n    select NODE1 from PLS_ELEM where   IDSQ = ${trayIdsq}\n    union all\n    select NODE2 from PLS_ELEM where   IDSQ = ${trayIdsq}\n\n) AND NODE2 in \n    (\n    select NODE1 from PLS_ELEM where   IDSQ = ${trayIdsq}\n    union all\n    select NODE2 from PLS_ELEM where   IDSQ = ${trayIdsq}\n    )\n) \n) order by Code"
   }
 
+  private def cablesInLineByTwoNodesSql(nodeName1: String, nodeName2: String): String = {
+    s"select code from cable where seqid in(\n\nselect CABLE from CAB_ROUTE  where (NODE1 in (\n\n    select seqid from node where userid in('${nodeName1}', '${nodeName2}')\n    union all\n    select seqid from node where userid in('${nodeName1}', '${nodeName2}')\n) AND NODE2 in \n    (\n    select seqid from node where userid in('${nodeName1}', '${nodeName2}')\n    union all\n    select seqid from node where userid in('${nodeName1}', '${nodeName2}')\n    )\n) \n) order by Code"
+  }
+
+  private def traySqlByZonesAndSystems(zones: String, systems: String): String = {
+    s"select STOCK_CODE, sum(WEIGHT) as WEIGHT, sum(LEN) as LEN\nfrom\n    (\n    select   \n              TR.STOCK_CODE,\n              PE.WEIGHT,\n              SQRT( (N2.X-N1.X)*(N2.X-N1.X) + (N2.Y-N1.Y)*(N2.Y-N1.Y) + (N2.Z-N1.Z)*(N2.Z-N1.Z) )*1000 as LEN\n              from PLS_ELEM PE ,PIPELINE_SEGMENT PS, SEGMENT S, V_CTRAY_PATTERN_LEVEL TR, NODE N1, NODE N2, ZONE Z, SYSTEMS SYS\n              where \n              PE.TYPE=PS.TYPE AND PE.ZONE=PS.ZONE AND PE.SYSTEM=PS.SYSTEM AND PE.LINE=PS.LINE AND PE.PLS=PS.SQID AND\n              ((S.NODE1=PE.NODE1 AND S.NODE2=PE.NODE2) OR (S.NODE1=PE.NODE2 AND S.NODE2=PE.NODE1)) AND\n              S.PATTERN=TR.SEQID AND\n              PE.NODE1=N1.SEQID AND PE.NODE2=N2.SEQID AND\n              Z.SEQID=PE.ZONE AND\n              SYS.SEQID=PE.SYSTEM AND\n              Z.NAME in (${zones}) AND\n              SYS.NAME in(${systems})\n      ) \n  group by STOCK_CODE"
+  }
+
+  private def traySqlByZones(zones: String): String = {
+    s"select STOCK_CODE, sum(WEIGHT) as WEIGHT, sum(LEN) as LEN\nfrom\n    (\n    select   \n              TR.STOCK_CODE,\n              PE.WEIGHT,\n              SQRT( (N2.X-N1.X)*(N2.X-N1.X) + (N2.Y-N1.Y)*(N2.Y-N1.Y) + (N2.Z-N1.Z)*(N2.Z-N1.Z) )*1000 as LEN\n              from PLS_ELEM PE ,PIPELINE_SEGMENT PS, SEGMENT S, V_CTRAY_PATTERN_LEVEL TR, NODE N1, NODE N2, ZONE Z, SYSTEMS SYS\n              where \n              PE.TYPE=PS.TYPE AND PE.ZONE=PS.ZONE AND PE.SYSTEM=PS.SYSTEM AND PE.LINE=PS.LINE AND PE.PLS=PS.SQID AND\n              ((S.NODE1=PE.NODE1 AND S.NODE2=PE.NODE2) OR (S.NODE1=PE.NODE2 AND S.NODE2=PE.NODE1)) AND\n              S.PATTERN=TR.SEQID AND\n              PE.NODE1=N1.SEQID AND PE.NODE2=N2.SEQID AND\n              Z.SEQID=PE.ZONE AND\n              SYS.SEQID=PE.SYSTEM AND\n              Z.NAME in (${zones})       ) \n  group by STOCK_CODE"
+  }
+
+  private def traySqlBySystems(systems: String): String = {
+    s"select STOCK_CODE, sum(WEIGHT) as WEIGHT, sum(LEN) as LEN\nfrom\n    (\n    select   \n              TR.STOCK_CODE,\n              PE.WEIGHT,\n              SQRT( (N2.X-N1.X)*(N2.X-N1.X) + (N2.Y-N1.Y)*(N2.Y-N1.Y) + (N2.Z-N1.Z)*(N2.Z-N1.Z) )*1000 as LEN\n              from PLS_ELEM PE ,PIPELINE_SEGMENT PS, SEGMENT S, V_CTRAY_PATTERN_LEVEL TR, NODE N1, NODE N2, ZONE Z, SYSTEMS SYS\n              where \n              PE.TYPE=PS.TYPE AND PE.ZONE=PS.ZONE AND PE.SYSTEM=PS.SYSTEM AND PE.LINE=PS.LINE AND PE.PLS=PS.SQID AND\n              ((S.NODE1=PE.NODE1 AND S.NODE2=PE.NODE2) OR (S.NODE1=PE.NODE2 AND S.NODE2=PE.NODE1)) AND\n              S.PATTERN=TR.SEQID AND\n              PE.NODE1=N1.SEQID AND PE.NODE2=N2.SEQID AND\n              Z.SEQID=PE.ZONE AND\n              SYS.SEQID=PE.SYSTEM  AND\n              SYS.NAME in(${systems})\n      ) \n  group by STOCK_CODE"
+  }
+
+  private def allTraysSql(): String = {
+    s"select STOCK_CODE, sum(WEIGHT) as WEIGHT, sum(LEN) as LEN\nfrom\n    (\n    select   \n              TR.STOCK_CODE,\n              PE.WEIGHT,\n              SQRT( (N2.X-N1.X)*(N2.X-N1.X) + (N2.Y-N1.Y)*(N2.Y-N1.Y) + (N2.Z-N1.Z)*(N2.Z-N1.Z) )*1000 as LEN\n              from PLS_ELEM PE ,PIPELINE_SEGMENT PS, SEGMENT S, V_CTRAY_PATTERN_LEVEL TR, NODE N1, NODE N2, ZONE Z, SYSTEMS SYS\n              where \n              PE.TYPE=PS.TYPE AND PE.ZONE=PS.ZONE AND PE.SYSTEM=PS.SYSTEM AND PE.LINE=PS.LINE AND PE.PLS=PS.SQID AND\n              ((S.NODE1=PE.NODE1 AND S.NODE2=PE.NODE2) OR (S.NODE1=PE.NODE2 AND S.NODE2=PE.NODE1)) AND\n              S.PATTERN=TR.SEQID AND\n              PE.NODE1=N1.SEQID AND PE.NODE2=N2.SEQID AND\n              Z.SEQID=PE.ZONE AND\n              SYS.SEQID=PE.SYSTEM   ) \n  group by STOCK_CODE"
+  }
+
   private val duration: FiniteDuration = Duration(2, SECONDS)
 
   private val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
@@ -50,13 +70,13 @@ trait TrayHelper {
         try {
           connection.setAutoCommit(false)
           val stmt: Statement = connection.createStatement()
-          val rs: ResultSet = stmt.executeQuery(traySQL(trayIdSeq))
+          val sql=traySQL(trayIdSeq)
+          val rs: ResultSet = stmt.executeQuery(sql)
           val ret = {
             if (rs.next()) {
               val marign: Int = calculateH(Option[Double](rs.getDouble("X_COG")).getOrElse(0),
                 Option[Double](rs.getDouble("Y_COG")).getOrElse(0),
                 Option[Double](rs.getDouble("Z_COG")).getOrElse(0), Option[String](rs.getString("SURFACE")).getOrElse(""))
-
               val materialId = getMaterialFromString(Option[String](rs.getString("SURFACE")).getOrElse(""))
               ForanTray(
                 Option[Int](rs.getInt("IDSQ")).getOrElse(0),
@@ -122,6 +142,27 @@ trait TrayHelper {
     }
   }
 
+  def cablesinLineByTwoNodeNames(project: String, nodeName1: String, nodeName2: String): List[String] = {
+    ConnectionManager.connectionByProject(project) match {
+      case Some(connection) => {
+        try {
+          connection.setAutoCommit(false)
+          val stmt: Statement = connection.createStatement()
+          val rs: ResultSet = stmt.executeQuery(cablesInLineByTwoNodesSql(nodeName1, nodeName2))
+          val buffer = ListBuffer.empty[String]
+          while (rs.next()) {
+            buffer += Option[String](rs.getString("CODE")).getOrElse("NF")
+          }
+          buffer.toList
+        }
+        catch {
+          case _: Throwable => List.empty[String]
+        }
+      }
+      case None => List.empty[String]
+    }
+  }
+
   private def calculateH(X_COG: Double = 0, Y_COG: Double = 0, Z_COG: Double = 0, SURFACE: String = ""): Int = {
     if (SURFACE.nonEmpty) {
       SURFACE.head.toUpper.toString match {
@@ -146,7 +187,8 @@ trait TrayHelper {
       } else {
         in.tail.toIntOption.getOrElse(0)
       }
-    } else 0
+    }
+    else 0
   }
 
   private def getMaterialFromString(in: String): Int = {
@@ -158,6 +200,18 @@ trait TrayHelper {
       }
     } else {
       3
+    }
+  }
+
+  private def listToSqlString(in: List[String]): String = {
+    if (in.nonEmpty) {
+      var ret = ""
+      in.foreach(s => {
+        ret += "'" + s + "',"
+      })
+      ret.dropRight(1)
+    } else {
+      "'0'"
     }
   }
 
@@ -200,6 +254,44 @@ trait TrayHelper {
       case None => TrayMountData()
     }
   }
+
+  def retrieveTraysByZoneNameAndSysName(project: String, zones: List[String], systems: List[String]): Unit = {
+    case class TotalTray(stockCode: String, weight: Double, len: Double)
+
+    val sql: String = (zones.isEmpty, systems.isEmpty) match {
+      case (true, true) => allTraysSql()
+      case (false, true) => traySqlByZones(listToSqlString(zones))
+      case (true, false) => traySqlBySystems(listToSqlString(systems))
+      case _ => traySqlByZonesAndSystems(listToSqlString(zones), listToSqlString(systems))
+    }
+
+    val totalTrays: List[TotalTray] = {
+      ConnectionManager.connectionByProject(project) match {
+        case Some(connection) => {
+          try {
+            connection.setAutoCommit(false)
+            val stmt: Statement = connection.createStatement()
+
+            val rs: ResultSet = stmt.executeQuery(sql)
+            val buffer = ListBuffer.empty[TotalTray]
+            while (rs.next()) {
+              val stock: String = Option[String](rs.getString("STOCK_CODE")).getOrElse("NF")
+              val w: Double = Option[Double](rs.getDouble("WEIGHT")).getOrElse(0)
+              val l: Double = Option[Double](rs.getDouble("LEN")).getOrElse(0)
+              buffer += TotalTray(stock, w, l)
+            }
+            buffer.toList
+          }
+          catch {
+            case _: Throwable => List.empty[TotalTray]
+          }
+        }
+        case None => List.empty[TotalTray]
+      }
+    }
+    val n = 0
+  }
+
 
 }
 

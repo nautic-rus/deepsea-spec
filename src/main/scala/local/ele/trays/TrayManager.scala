@@ -55,10 +55,14 @@ object TrayManager extends TrayHelper {
     val mountRules: List[TrayMountRules] = retrieveTraysMountRules()
     val clickTray: ForanTray = TrayBySeqId(project, trayIdSeq) //"17683679"
     val clickTrayMontData = retrieveTrayMountDataByTrm(clickTray.STOCK_CODE)
-    ret += "V="+clickTrayMontData.H.toInt.toString
+    ret += "V=" + clickTray.marign.toString
     ret += clickTrayMontData.label
 
     val buffMounts = ListBuffer.empty[TrayMountItem]
+
+    //val h=mountRules.filter(p => p.inputTypeIdRange.contains(clickTrayMontData.typeId.toString))
+    //val hh=0
+
     mountRules.filter(p => p.inputTypeIdRange.contains(clickTrayMontData.typeId.toString)).foreach(item => {
       if (item.trmCode.nonEmpty) {
         item.label match {
@@ -73,8 +77,8 @@ object TrayManager extends TrayHelper {
       } else {
 
         item.searchTypeIdRange match {
-          case "54;" =>
-            mountData.find(s => s.typeId == 54 && s.matId == clickTrayMontData.matId) match {
+          case "51;" =>
+            mountData.find(s => s.typeId == 51 && s.matId == clickTrayMontData.matId) match {
               case Some(value) => buffMounts += TrayMountItem(retrieveMaterialByTrm(project, value.trmCode), TrayMountData(value.label, value.trmCode), item.kei, item.count * item.lenghtFactor * clickTray.LEN / 1000, item.isNeedLabel)
               case None => TrayMountItem()
             }
@@ -88,8 +92,8 @@ object TrayManager extends TrayHelper {
               case Some(value) => buffMounts += TrayMountItem(retrieveMaterialByTrm(project, value.trmCode), TrayMountData(value.label, value.trmCode), item.kei, item.count * item.lenghtFactor * clickTray.LEN / 1000, item.isNeedLabel)
               case None => TrayMountItem()
             }
-          case "57;58;" =>
-            val it = mountData.filter(s => (s.typeId == 57 || s.typeId == 58) && s.matId == clickTrayMontData.matId && s.parD1 * 1000 >= clickTray.marign)
+          case "57;" =>
+            val it = mountData.filter(s => (s.typeId == 57) && s.matId == clickTrayMontData.matId && s.parD1 * 1000 >= clickTray.marign)
             if (it.nonEmpty) {
               val part = it.minBy(d => d.parI1)
               buffMounts += TrayMountItem(retrieveMaterialByTrm(project, part.trmCode), TrayMountData(part.label, part.trmCode), item.kei, item.count * item.lenghtFactor * clickTray.LEN / 1000, item.isNeedLabel)
@@ -108,15 +112,18 @@ object TrayManager extends TrayHelper {
         }
       }
     })
-    buffMounts.filter(b => b.isNeedLabel).sortBy(d => d.mountData.label).foreach(s => {
+
+    buffMounts.sortBy(d => d.mountData.label).foreach(s => {
       ret += s.mountData.label
     })
     ret.toList
   }
 
-
   def genCablesByTraySeqId(project: String, trayIdSeq: String): List[String] = cablesByTraySeqId(project, trayIdSeq)
 
+  def genTraysByZoneNameAndSysName(project: String = "P701", zones: List[String] = List.empty[String], systems: List[String] = List.empty[String]): Unit = retrieveTraysByZoneNameAndSysName(project, zones, systems)
+
+  def genCablesInLineByTwoNodes(project: String, nodeName1: String, nodeName2: String): List[String] = cablesinLineByTwoNodeNames(project, nodeName1, nodeName2)
 
 }
 
