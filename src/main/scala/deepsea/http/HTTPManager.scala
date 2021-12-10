@@ -12,6 +12,7 @@ import akka.util.Timeout
 import deepsea.App
 import deepsea.actors.ActorManager
 import deepsea.actors.ActorStartupManager.HTTPManagerStarted
+import deepsea.elec.ElecManager.{GetCablesByTray, GetEqLabels, GetTrayLabels}
 import deepsea.hull.HullManager.{GetForanParts, GetForanPartsExcel}
 import deepsea.spec.SpecManager.{GetHullBlocks, GetHullPartList, GetHullSpec}
 import org.apache.log4j.{LogManager, Logger}
@@ -32,6 +33,7 @@ class HTTPManager extends Actor {
   var server: Future[Http.ServerBinding] = _
   val routes: Route = {
     concat(
+      //HULL
       (get & path("initHullPartList") & parameter("project") & parameter("taskId") & parameter("docNum") & parameter("docName") & parameter("user")) { (project, taskId, docNum, docName, user) =>
         askFor(ActorManager.spec, GetHullSpec(project, taskId, docNum, docName, user))
       },
@@ -41,11 +43,22 @@ class HTTPManager extends Actor {
       (get & path("getHullPartList") & parameter("docNum")) { (docNum) =>
         askFor(ActorManager.spec, GetHullPartList(docNum))
       },
+
+      //FORAN
       (get & path("foranPartsExcel") & parameter("project")) { (project) =>
         askFor(ActorManager.hullManager, GetForanPartsExcel(project))
       },
 
-
+      //ELEC
+      (get & path("trayLabels") & parameter("project") & parameter("seqId")) { (project, seqId) =>
+        askFor(ActorManager.elec, GetTrayLabels(project, seqId))
+      },
+      (get & path("cablesByTray") & parameter("project") & parameter("seqId")) { (project, seqId) =>
+        askFor(ActorManager.elec, GetCablesByTray(project, seqId))
+      },
+      (get & path("eqLabels") & parameter("project") & parameter("seqId")) { (project, seqId) =>
+        askFor(ActorManager.elec, GetEqLabels(project, seqId))
+      },
     )
   }
 

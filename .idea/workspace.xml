@@ -5,17 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ebc20096-d70b-4412-983f-14fe275410ee" name="Default Changelist" comment="kokovin release 3">
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Default_Changelist.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Default_Changelist.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/scala/deepsea/elec/ElecManager.scala" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rsc/queries/hullParts.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/queries/hullParts.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rsc/queries/hullPartsPlateDefs.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/queries/hullPartsPlateDefs.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rsc/queries/hullPartsProfileDefs.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/queries/hullPartsProfileDefs.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/deepsea/database/DatabaseManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/database/DatabaseManager.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/deepsea/hull/HullManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/hull/HullManager.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/application.conf" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.conf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/log4j.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/log4j.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/deepsea/App.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/App.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/deepsea/actors/ActorManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/actors/ActorManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/deepsea/actors/ActorStartupManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/actors/ActorStartupManager.scala" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/scala/deepsea/http/HTTPManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/http/HTTPManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/deepsea/spec/SpecManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/spec/SpecManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/local/ele/trays/TrayManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/local/ele/trays/TrayManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/scala/TestCreateSP.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/TestCreateSP.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/scala/Trays.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/Trays.scala" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -181,8 +180,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="ScalaTest.Trays" />
         <item itemvalue="Application.App" />
+        <item itemvalue="ScalaTest.Trays" />
         <item itemvalue="ScalaTest.TestCreateSP" />
         <item itemvalue="Application.M1" />
       </list>
@@ -196,7 +195,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1623933574191</updated>
-      <workItem from="1638960673599" duration="901000" />
+      <workItem from="1638960673599" duration="12208000" />
     </task>
     <task id="LOCAL-00001" summary="initial">
       <created>1627300463534</created>
@@ -317,7 +316,14 @@
       <option name="project" value="LOCAL" />
       <updated>1634886661721</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="kokovin release 3">
+      <created>1638961597402</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1638961597402</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -348,7 +354,7 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="scala-line">
           <url>file://$PROJECT_DIR$/src/test/scala/TestCreateSP.scala</url>
-          <line>15</line>
+          <line>16</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>
