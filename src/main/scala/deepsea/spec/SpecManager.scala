@@ -13,17 +13,13 @@ import scala.collection.mutable.ListBuffer
 object SpecManager {
 
   case class GetHullSpec(project: String, block: String, taskId: String = "", docNum: String = "", docName: String = "", user: String = "")
-
   case class InitHullPartList(project: String, taskId: String = "", docNum: String = "", docName: String = "", user: String = "")
-
   case class GetProjectList()
-
   case class GetHullBlocks(project: String)
-
   case class GetHullPartList(docNum: String)
 
-  case class PartDef(name: String, section: String, description: String)
 
+  case class PartDef(name: String, section: String, description: String)
   implicit val writesPartDef: OWrites[PartDef] = Json.writes[PartDef]
 }
 

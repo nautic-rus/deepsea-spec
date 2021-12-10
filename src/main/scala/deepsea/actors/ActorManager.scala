@@ -2,6 +2,7 @@ package deepsea.actors
 
 import deepsea.actors.ActorStartupManager.Start
 import akka.actor.{ActorRef, ActorSystem, Props}
+import deepsea.elec.ElecManager
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.Await
@@ -15,6 +16,7 @@ object ActorManager {
   var spec: ActorRef = _
   var hullManager: ActorRef = _
   var dataBase: ActorRef = _
+  var elec: ActorRef = _
 
   def init(): Unit ={
     system = ActorSystem()
