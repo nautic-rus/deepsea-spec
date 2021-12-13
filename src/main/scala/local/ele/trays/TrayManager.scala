@@ -1,6 +1,7 @@
 package local.ele.trays
 
 import local.domain.WorkShopMaterial
+import local.ele.eq.EleEqManager.testCoord
 
 import scala.collection.mutable.ListBuffer
 
@@ -124,6 +125,8 @@ object TrayManager extends TrayHelper {
   def genTraysByZoneNameAndSysName(project: String = "P701", zones: List[String] = List.empty[String], systems: List[String] = List.empty[String]): Unit = retrieveTraysByZoneNameAndSysName(project, zones, systems)
 
   def genCablesInLineByTwoNodes(project: String, nodeName1: String, nodeName2: String): List[String] = cablesinLineByTwoNodeNames(project, nodeName1, nodeName2)
+
+  def genCoord()=testCoord()
 
 }
 
