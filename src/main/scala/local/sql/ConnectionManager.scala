@@ -10,7 +10,7 @@ import java.util.TimeZone
 import scala.collection.mutable.ListBuffer
 
 object ConnectionManager {
-  case class ForanConnection(project: String,connection:Connection )
+  case class ForanConnection(project: String,ds:HikariDataSource)
 
   private var ds: HikariDataSource = _
 
@@ -37,7 +37,7 @@ object ConnectionManager {
       Logger.getLogger("com.zaxxer.hikari.HikariConfig").setLevel(Level.ERROR);
       Logger.getLogger("com.zaxxer.hikari.util.DriverDataSource").setLevel(Level.ERROR);
 
-      buff+=ForanConnection(connName,new HikariDataSource(config).getConnection)
+      buff+=ForanConnection(connName,new HikariDataSource(config))
     })
     buff.toList
   }
@@ -59,7 +59,7 @@ object ConnectionManager {
   def getConnection:Connection = ds.getConnection
 
   def connectionByProject(projectName:String):Option[Connection]= connections.find(s => s.project.equals("C" + projectName.toUpperCase)) match {
-    case Some(value) =>Option[Connection](value.connection)
+    case Some(value) =>Option[Connection](value.ds.getConnection)
     case None => None
   }
 
