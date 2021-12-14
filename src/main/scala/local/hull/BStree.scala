@@ -20,17 +20,15 @@ import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistr
 import org.bson.codecs.configuration.CodecRegistry
 import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
 import org.mongodb.scala.{FindObservable, MongoCollection}
-import org.mongodb.scala.result.InsertOneResult
-import org.mongodb.scala.bson.codecs.Macros._
 
-import scala.concurrent.{Await, Future}
+
+import scala.concurrent.{Await}
 import scala.concurrent.duration.{Duration, SECONDS}
-import scala.concurrent.impl.Promise
-import scala.util.{Failure, Success, Try}
-import scala.concurrent.ExecutionContext.Implicits.global
+
 
 object BStree {
   case class Room(num:String,name:String)
+
   implicit val decodeObjectId: Decoder[ObjectId] = Decoder[String].map(str => new ObjectId(str))
   implicit val encodeObjectId: Encoder[ObjectId] = Encoder[String].contramap(_.toString)
 
