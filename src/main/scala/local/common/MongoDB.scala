@@ -7,7 +7,6 @@ object MongoDB {
 
   private var mc: Option[MongoClient] = None
 
-
   def mongoClient(): MongoClient = {
     mc match {
       case Some(value) => value
@@ -16,8 +15,6 @@ object MongoDB {
         mc.get
       }
     }
-
-
-  } ///MongoClient(s"mongodb://${App.conf.getString("mongo.host")}:${App.conf.getInt("mongo.port").toString}")
+  }
 
 }
