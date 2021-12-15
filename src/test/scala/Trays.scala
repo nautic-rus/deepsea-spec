@@ -13,8 +13,15 @@ class Trays  extends AnyFunSuite with TrayHelper{
  // val cables: List[String] =TrayManager.genCablesByTraySeqId("P701","17157449")
   //val eqLabels: List[String] =genEqLabelsByEqOid("P701","9031306")
 
-  val traysJson: String =tarysByZonesSystemsJson("P701", List("5318"),List("884-6009"))
- // val trays=tarysByZonesSystems("P701", List("5318"),List("884-6009"))
+  //val traysJson: String =tarysByZonesSystemsJson("P701", List("5318"),List("884-6009"))
+
+
+  (0 to 30).foreach(s=>{
+    val trays=tarysByZonesSystems("P701", List("5318"),List("884-6009"))
+    println(s)
+  })
+
+
 
 
   //val b =genCablesInLineByTwoNodes("P701", "0000000000025851","0000000000025884")

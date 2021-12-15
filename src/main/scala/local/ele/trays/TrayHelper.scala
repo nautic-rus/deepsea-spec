@@ -1,6 +1,7 @@
 package local.ele.trays
 
 import deepsea.App
+import local.common.MongoDB
 import local.domain.WorkShopMaterial
 import local.ele.trays.TrayManager.{ForanTray, TrayMountData, TrayMountRules}
 import local.sql.ConnectionManager
@@ -76,9 +77,11 @@ trait TrayHelper {
     classOf[WorkShopMaterial],
   ), DEFAULT_CODEC_REGISTRY)
 
-  private def mongoClient(): MongoClient = MongoClient(s"mongodb://${App.conf.getString("mongo.host")}:${App.conf.getInt("mongo.port").toString}")
 
-  private def mongoDatabase(): MongoDatabase = mongoClient().getDatabase("3degdatabase").withCodecRegistry(codecRegistry)
+
+  //private def mongoClient(): MongoClient = MongoClient(s"mongodb://${App.conf.getString("mongo.host")}:${App.conf.getInt("mongo.port").toString}")
+
+  private def mongoDatabase(): MongoDatabase =MongoDB.mongoClient().getDatabase("3degdatabase").withCodecRegistry(codecRegistry)
 
   private def collectionTrayMountData(): MongoCollection[TrayMountData] = mongoDatabase().getCollection("eleTrayMountData")
 
@@ -133,6 +136,8 @@ trait TrayHelper {
               ForanTray()
             }
           }
+          stmt.close()
+          connection.close()
           ret
         }
         catch {
@@ -193,6 +198,8 @@ trait TrayHelper {
               materialId
             )
           }
+          stmt.close()
+          connection.close()
           buffer.toList
         }
         catch {
@@ -214,6 +221,8 @@ trait TrayHelper {
           while (rs.next()) {
             buffer += Option[String](rs.getString("CODE")).getOrElse("NF")
           }
+          stmt.close()
+          connection.close()
           buffer.toList
         }
         catch {
@@ -235,6 +244,8 @@ trait TrayHelper {
           while (rs.next()) {
             buffer += Option[String](rs.getString("CODE")).getOrElse("NF")
           }
+          stmt.close()
+          connection.close()
           buffer.toList
         }
         catch {
@@ -370,7 +381,6 @@ trait TrayHelper {
           try {
             connection.setAutoCommit(false)
             val stmt: Statement = connection.createStatement()
-
             val rs: ResultSet = stmt.executeQuery(sql)
             val buffer = ListBuffer.empty[TotalTray]
             while (rs.next()) {
@@ -379,6 +389,8 @@ trait TrayHelper {
               val l: Double = Option[Double](rs.getDouble("LEN")).getOrElse(0)
               buffer += TotalTray(stock, w, l)
             }
+            stmt.close()
+            connection.close()
             buffer.toList
           }
           catch {
