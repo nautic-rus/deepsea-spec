@@ -5,7 +5,7 @@ import org.mongodb.scala.MongoClient
 
 object MongoDB {
 
-  private var mc: Option[MongoClient] = None //MongoClient(s"mongodb://${App.conf.getString("mongo.host")}:${App.conf.getInt("mongo.port").toString}")
+  private var mc: Option[MongoClient] = None
 
 
   def mongoClient(): MongoClient = {
