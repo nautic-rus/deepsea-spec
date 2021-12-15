@@ -42,7 +42,7 @@ class DatabaseManager extends Actor{
 
   override def preStart(): Unit = {
 
-    List("N002", "N003", "N004").foreach(project => {
+    List("P701", "P707", "N002", "N003", "N004").foreach(project => {
       configOracle.setDriverClassName("oracle.jdbc.driver.OracleDriver")
       configOracle.setJdbcUrl("jdbc:oracle:thin:@office.nautic-rus.ru:1521:ORA3DB")
       configOracle.setUsername("C" + project)

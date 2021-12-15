@@ -1,6 +1,7 @@
 package local.ele.trays
 
 import deepsea.App
+import deepsea.database.DatabaseManager.GetOracleConnection
 import local.domain.WorkShopMaterial
 import local.ele.trays.TrayManager.{ForanTray, TrayMountData, TrayMountRules}
 import local.sql.ConnectionManager
@@ -151,7 +152,7 @@ trait TrayHelper {
       case (true, false) => traySqlBySystemNames(listToSqlString(systems))
       case _ => traySqlByZonesAndSystems(listToSqlString(zones), listToSqlString(systems))
     }
-    ConnectionManager.connectionByProject(project) match {
+    GetOracleConnection(project) match {
       case Some(connection) => {
         try {
           val buffer = ListBuffer.empty[ForanTray]
@@ -193,6 +194,9 @@ trait TrayHelper {
               materialId
             )
           }
+          rs.close()
+          stmt.close()
+          connection.close()
           buffer.toList
         }
         catch {
