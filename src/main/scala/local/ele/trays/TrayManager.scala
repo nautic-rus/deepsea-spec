@@ -98,6 +98,7 @@ object TrayManager extends TrayHelper {
 
   def tarysByZonesSystemsJson(project: String, zones: List[String], systems: List[String]):String={
     tarysByZonesSystems(project, zones, systems).asJson.noSpaces
+
   }
 
 
