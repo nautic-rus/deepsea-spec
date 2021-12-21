@@ -113,5 +113,5 @@ select
         AND PEP.OID=BDN.MODEL_OID
         AND PEP.PRD_PART_OID=PP.OID
         AND BSN.ATOM_TYPE=3
-        AND (SELECT DESCRIPTION FROM BLOCK WHERE OID = PP.BLOCK_OID) LIKE '%' || :docNumber || '%'
+        AND PP.OID IN (:partOids)
     )

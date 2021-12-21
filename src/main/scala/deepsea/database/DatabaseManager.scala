@@ -47,6 +47,7 @@ class DatabaseManager extends Actor{
       configOracle.setJdbcUrl("jdbc:oracle:thin:@office.nautic-rus.ru:1521:ORA3DB")
       configOracle.setUsername("C" + project)
       configOracle.setPassword("Whatab0utus")
+      configOracle.setMaximumPoolSize(5)
       oracleConnections += OracleConnection(project, new HikariDataSource(configOracle))
     })
 
