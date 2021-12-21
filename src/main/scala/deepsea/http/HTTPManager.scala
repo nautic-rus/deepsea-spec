@@ -13,7 +13,7 @@ import deepsea.App
 import deepsea.actors.ActorManager
 import deepsea.actors.ActorStartupManager.HTTPManagerStarted
 import deepsea.elec.ElecManager.{GetCablesByNodes, GetCablesByTray, GetEqLabels, GetTrayLabels, GetTraysByZonesAndSystems}
-import deepsea.hull.HullManager.{GetForanParts, GetForanPartsExcel}
+import deepsea.hull.HullManager.{GetHullEsp, GetHullParts, GetHullPartsByDocNumber, GetHullPartsExcel, SetHullPartsByDocNumber}
 import deepsea.spec.SpecManager.{GetHullBlocks, GetHullPartListFromBsTree, SetHullPartListFromBsTree}
 import org.apache.log4j.{LogManager, Logger}
 import play.api.libs.json.{JsValue, Json}
@@ -37,16 +37,17 @@ class HTTPManager extends Actor {
       (get & path("hullBlocks") & parameter("project")) { (project) =>
         askFor(ActorManager.spec, GetHullBlocks(project))
       },
-      (get & path("getHullPartList") & parameter("project") & parameter("docNum")) { (project, docNum) =>
-        askFor(ActorManager.spec, GetHullPartListFromBsTree(project, docNum))
+      (get & path("hullPartList") & parameter("project") & parameter("docNumber")) { (project, docNumber) =>
+        askFor(ActorManager.hullManager, GetHullPartsByDocNumber(project, docNumber))
       },
-      (get & path("setHullPartList") & parameter("project") & parameter("docNum") & parameter("user") & parameter("revision")) { (project, docNum, user, revision) =>
-        askFor(ActorManager.spec, SetHullPartListFromBsTree(project, docNum, user, revision))
+      (get & path("setHullPartList") & parameter("project") & parameter("docNumber") & parameter("user") & parameter("revision")) { (project, docNumber, user, revision) =>
+        askFor(ActorManager.hullManager, SetHullPartsByDocNumber(project, docNumber, user, revision))
       },
-
-      //FORAN
       (get & path("foranPartsExcel") & parameter("project")) { (project) =>
-        askFor(ActorManager.hullManager, GetForanPartsExcel(project))
+        askFor(ActorManager.hullManager, GetHullPartsExcel(project))
+      },
+      (get & path("hullEsp") & parameter("docNumber")) { (docNumber) =>
+        askFor(ActorManager.hullManager, GetHullEsp(docNumber))
       },
 
       //ELEC

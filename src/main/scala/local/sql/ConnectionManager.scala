@@ -50,6 +50,7 @@ object ConnectionManager {
     config.setJdbcUrl(s"jdbc:oracle:thin:@${App.conf.getString("oracle.host")}:${App.conf.getString("oracle.port")}/${App.conf.getString("oracle.database")}")
     config.setUsername(App.conf.getString("oracle.login"))
     config.setPassword(App.conf.getString("oracle.password"))
+    config.setMaximumPoolSize(3)
     config.addDataSourceProperty("v$session.osuser", App.conf.getString("app.user"))
     config.addDataSourceProperty("v$session.machine", App.conf.getString("app.machine"))
     config.addDataSourceProperty("v$session.program", App.conf.getString("app.program"))

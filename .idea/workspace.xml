@@ -4,12 +4,21 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ebc20096-d70b-4412-983f-14fe275410ee" name="Default Changelist" comment="kokovin release 9">
-      <change afterPath="$PROJECT_DIR$/src/main/scala/local/common/MongoDB.scala" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/test/scala/a.json" afterDir="false" />
+    <list default="true" id="ebc20096-d70b-4412-983f-14fe275410ee" name="Default Changelist" comment="kokovin release 3">
+      <change afterPath="$PROJECT_DIR$/src/main/resources/queries/hullPartsWithDescription.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/scala/deepsea/hull/classes/HullPart.scala" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/scala/deepsea/spec/classes/PartList.scala" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/local/ele/trays/TrayHelper.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/local/ele/trays/TrayHelper.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/scala/Trays.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/Trays.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/queries/hullParts.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/queries/hullParts.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/queries/hullPartsFromBsTree.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/queries/hullPartsFromBsTree.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/queries/hullPartsPlateDefs.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/queries/hullPartsPlateDefs.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/queries/hullPartsProfileDefs.sql" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/queries/hullPartsProfileDefs.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/deepsea/database/DatabaseManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/database/DatabaseManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/deepsea/http/HTTPManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/http/HTTPManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/deepsea/hull/HullManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/hull/HullManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/deepsea/spec/SpecManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/spec/SpecManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/local/hull/BStree.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/local/hull/BStree.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/local/sql/ConnectionManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/local/sql/ConnectionManager.scala" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,6 +58,7 @@
   </component>
   <component name="ProjectId" id="1u4n8uM5nu1BLYB3gLF9sXY2Byf" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <OptionsSetting value="false" id="Update" />
     <ConfirmationsSetting value="2" id="Add" />
   </component>
   <component name="ProjectViewState">
@@ -56,11 +66,12 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="DatabaseDriversLRU" value="oracle" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/main/resources" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../deepsea" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
@@ -91,15 +102,33 @@
       <recent name="deepsea" />
     </key>
   </component>
-  <component name="RunManager" selected="ScalaTest.Trays">
+  <component name="RunManager" selected="Application.App">
     <configuration name="App" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="ALTERNATIVE_JRE_PATH" value="11" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
       <option name="MAIN_CLASS_NAME" value="deepsea.App" />
-      <module name="deepsea-spec" />
+      <module name="deepsea" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
+    </configuration>
+    <configuration name="M1" type="Application" factoryName="Application" temporary="true">
+      <option name="MAIN_CLASS_NAME" value="local.M1" />
+      <module name="deepsea" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="local.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="hullPartsFromBsTree.sql" type="DatabaseScript" editBeforeRun="true" temporary="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/src/main/resources/queries/hullPartsFromBsTree.sql" />
+      <script-mode>FILE</script-mode>
+      <method v="2" />
     </configuration>
     <configuration default="true" type="JetRunConfigurationType">
       <method v="2">
@@ -112,8 +141,23 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <configuration name="TestCreateSP" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true" nameIsGenerated="true" show_console_on_std_err="false" show_console_on_std_out="false">
+      <module name="deepsea" />
+      <option name="allowRunningInParallel" value="false" />
+      <option name="projectPathOnTarget" />
+      <option name="selectedOptions">
+        <list />
+      </option>
+      <option name="testKind" value="Class" />
+      <option name="shortenClasspath" value="NONE" />
+      <option name="testClassPath" value="TestCreateSP" />
+      <option name="workingDirectory" value="C:\scalaproj\deepsea-spec" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Trays" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true" nameIsGenerated="true" show_console_on_std_err="false" show_console_on_std_out="false">
-      <module name="deepsea-spec" />
+      <module name="deepsea" />
       <option name="allowRunningInParallel" value="false" />
       <option name="projectPathOnTarget" />
       <option name="selectedOptions">
@@ -122,6 +166,7 @@
       <option name="testKind" value="Class" />
       <option name="shortenClasspath" value="NONE" />
       <option name="testClassPath" value="Trays" />
+      <option name="workingDirectory" value="C:\repos\workshop\deepsea-spec" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -140,12 +185,18 @@
     </configuration>
     <list>
       <item itemvalue="Application.App" />
+      <item itemvalue="Application.M1" />
+      <item itemvalue="Database Script.hullPartsFromBsTree.sql" />
+      <item itemvalue="ScalaTest.TestCreateSP" />
       <item itemvalue="ScalaTest.Trays" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="ScalaTest.Trays" />
         <item itemvalue="Application.App" />
+        <item itemvalue="Database Script.hullPartsFromBsTree.sql" />
+        <item itemvalue="ScalaTest.Trays" />
+        <item itemvalue="ScalaTest.TestCreateSP" />
+        <item itemvalue="Application.M1" />
       </list>
     </recent_temporary>
   </component>
@@ -157,7 +208,8 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1623933574191</updated>
-      <workItem from="1638960673599" duration="901000" />
+      <workItem from="1638960673599" duration="45987000" />
+      <workItem from="1639640737258" duration="22537000" />
     </task>
     <task id="LOCAL-00001" summary="initial">
       <created>1627300463534</created>
@@ -278,56 +330,28 @@
       <option name="project" value="LOCAL" />
       <updated>1634886661721</updated>
     </task>
-    <task id="LOCAL-00018" summary="kokovin release 4">
-      <created>1638969214633</created>
+    <task id="LOCAL-00018" summary="kokovin release 3">
+      <created>1638961597402</created>
       <option name="number" value="00018" />
       <option name="presentableId" value="LOCAL-00018" />
       <option name="project" value="LOCAL" />
-      <updated>1638969214633</updated>
+      <updated>1638961597402</updated>
     </task>
-    <task id="LOCAL-00019" summary="kokovin release 4">
-      <created>1638969285191</created>
+    <task id="LOCAL-00019" summary="kokovin release 3">
+      <created>1639135836185</created>
       <option name="number" value="00019" />
       <option name="presentableId" value="LOCAL-00019" />
       <option name="project" value="LOCAL" />
-      <updated>1638969285191</updated>
+      <updated>1639135836185</updated>
     </task>
-    <task id="LOCAL-00020" summary="kokovin release 5">
-      <created>1639135991062</created>
+    <task id="LOCAL-00020" summary="kokovin release 3">
+      <created>1639554544924</created>
       <option name="number" value="00020" />
       <option name="presentableId" value="LOCAL-00020" />
       <option name="project" value="LOCAL" />
-      <updated>1639135991062</updated>
+      <updated>1639554544924</updated>
     </task>
-    <task id="LOCAL-00021" summary="kokovin release 6">
-      <created>1639397415142</created>
-      <option name="number" value="00021" />
-      <option name="presentableId" value="LOCAL-00021" />
-      <option name="project" value="LOCAL" />
-      <updated>1639397415142</updated>
-    </task>
-    <task id="LOCAL-00022" summary="kokovin release 7">
-      <created>1639398446454</created>
-      <option name="number" value="00022" />
-      <option name="presentableId" value="LOCAL-00022" />
-      <option name="project" value="LOCAL" />
-      <updated>1639398446454</updated>
-    </task>
-    <task id="LOCAL-00023" summary="kokovin release 8">
-      <created>1639474663453</created>
-      <option name="number" value="00023" />
-      <option name="presentableId" value="LOCAL-00023" />
-      <option name="project" value="LOCAL" />
-      <updated>1639474663453</updated>
-    </task>
-    <task id="LOCAL-00024" summary="kokovin release 9">
-      <created>1639492253484</created>
-      <option name="number" value="00024" />
-      <option name="presentableId" value="LOCAL-00024" />
-      <option name="project" value="LOCAL" />
-      <updated>1639492253484</updated>
-    </task>
-    <option name="localTasksCounter" value="25" />
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -343,19 +367,15 @@
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="initial" />
     <MESSAGE value="kokovin release" />
     <MESSAGE value="kokovin release 2" />
-    <MESSAGE value="kokovin release 3" />
     <MESSAGE value="kokovin release 4" />
-    <MESSAGE value="kokovin release 5" />
-    <MESSAGE value="kokovin release 6" />
-    <MESSAGE value="kokovin release 7" />
-    <MESSAGE value="kokovin release 8" />
-    <MESSAGE value="kokovin release 9" />
-    <option name="LAST_COMMIT_MESSAGE" value="kokovin release 9" />
+    <MESSAGE value="kokovin release 3" />
+    <option name="LAST_COMMIT_MESSAGE" value="kokovin release 3" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -364,11 +384,6 @@
           <url>file://$PROJECT_DIR$/src/test/scala/TestCreateSP.scala</url>
           <line>16</line>
           <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="scala-line">
-          <url>file://$PROJECT_DIR$/src/test/scala/Trays.scala</url>
-          <line>33</line>
-          <option name="timeStamp" value="6" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -382,6 +397,5 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/deepsea$App.ic" NAME="App Coverage Results" MODIFIED="1628096465177" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
     <SUITE FILE_PATH="coverage/camunda$App.ic" NAME="App Coverage Results" MODIFIED="1626975965819" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
-    <SUITE FILE_PATH="coverage/deepsea_spec$Trays.ic" NAME="Trays Coverage Results" MODIFIED="1639420024497" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
   </component>
 </project>

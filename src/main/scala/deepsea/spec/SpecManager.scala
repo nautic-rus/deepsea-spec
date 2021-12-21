@@ -2,13 +2,12 @@ package deepsea.spec
 
 import akka.actor.Actor
 import akka.util.Timeout
-import deepsea.spec.SpecManager.{GetHullBlocks, GetHullPartListFromBsTree, GetHullSpec, GetProjectList, SetHullPartListFromBsTree}
+import deepsea.spec.SpecManager.{GetHullPartListFromBsTree, SetHullPartListFromBsTree}
+import io.circe.syntax.EncoderOps
 import local.common.Misc
 import local.hull.BStree
 import play.api.libs.json.{Json, OWrites}
-
 import java.util.concurrent.TimeUnit
-import scala.collection.mutable.ListBuffer
 
 object SpecManager {
 
@@ -30,16 +29,14 @@ class SpecManager extends Actor with BStree with Misc {
 
   override def receive: Receive = {
 
-//    //Generate part list from BSTREE
-//    case GetHullSpec(project, block, taskId, docNum, docName, user) => sender() ! genPartList(project, block, taskId, docNum, docName, user)
-//    //Generate list of projects
-//    case GetProjectList() => sender() ! genProjectList()
-//    //Generate list of HULL blocks
-//    case GetHullBlocks(project) => sender() ! genBlocks(project)
 
 
 
-    case GetHullPartListFromBsTree(project, docNum) => sender() ! getHullPartListFromBsTree(project, docNum)
+    case GetHullPartListFromBsTree(project, docNum) =>
+      getHullPartListFromBsTree(project, docNum) match {
+        case Some(value) => sender() ! value.asJson.noSpaces
+        case _ => None
+      }
     case SetHullPartListFromBsTree(project, docNum, user, revision) => sender() ! setHullPartListFromBsTree(project, docNum, user, revision)
 
     case _ => None

@@ -2,8 +2,9 @@ package local.hull
 
 import com.mongodb.BasicDBObject
 import deepsea.App
+import deepsea.actors.ActorManager
 import deepsea.database.DatabaseManager.GetOracleConnection
-import deepsea.hull.HullManager.HullPart
+import deepsea.hull.HullManager.{GetHullParts, HullPart}
 import io.circe.{Decoder, Encoder}
 import local.hull.BStree.{Block, BsTreeItem, HullPL, Room}
 import org.bson.types.ObjectId
@@ -21,7 +22,8 @@ import local.sql.ConnectionManager.{connectionByProject, mongoClient}
 import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
 import org.bson.codecs.configuration.CodecRegistry
 import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
-import org.mongodb.scala.{FindObservable, MongoCollection}
+import org.mongodb.scala.{Document, FindObservable, MongoCollection}
+import play.api.libs.json.Json
 
 import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, SECONDS}
@@ -77,21 +79,28 @@ object BStree {
 
   case class HullPL(
                      var _id: ObjectId,
-                     docNum: String,
                      project: String,
                      content: List[BsTreeItem],
                      rooms: List[Room],
-                     user: String,
-                     docNumber: String,
-                     revision: String,
-                     date: Long
+                     var user: String,
+                     var docNumber: String,
+                     var revision: String,
+                     var date: Long,
+                     var version: Int
                    ) extends PartList
 
   trait PartList{
-    def user: String
-    def docNumber: String
-    def revision: String
-    def date: Long
+    var user: String
+    var docNumber: String
+    var revision: String
+    var version: Int
+    var date: Long
+    def setRevision(user: String, revision: String, version: Int): Unit ={
+      this.user = user
+      this.revision = revision
+      this.version = version
+      date = new Date().getTime
+    }
   }
 
 }
@@ -288,7 +297,7 @@ trait BStree  {
         rs.close()
         s.close()
         c.close()
-        val hp = HullPL(new ObjectId(), docNum, project, items.toList, List.empty[Room], "", docNum, "", new Date().getTime)
+        val hp = HullPL(new ObjectId(), project, items.toList, List.empty[Room], "", docNum, "", new Date().getTime)
         Option(hp)
       case _ =>
         Option.empty[HullPL]
@@ -304,15 +313,12 @@ trait BStree  {
 
         Await.result(partLists.find[HullPL](new BasicDBObject("docNumber", docNum)).first().toFuture(), Duration(10, SECONDS)) match {
           case existSP: HullPL =>
-//            Await.result(partListsHistory.insertOne(existSP).toFuture(), Duration(100, SECONDS))
+            Await.result(partListsHistory.insertOne(Document.apply(existSP.asJson.noSpaces)).toFuture(), Duration(100, SECONDS))
           case _ => None
         }
 
-
-
-//        Await.result(collectionMat.insertOne(hp).toFuture(), Duration(100, SECONDS))
-
-
+        value.setRevision(user, revision)
+        Await.result(partLists.insertOne(Document.apply(value.asJson.noSpaces)).toFuture(), Duration(100, SECONDS))
 
 
         "success"
