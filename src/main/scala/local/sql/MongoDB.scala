@@ -1,7 +1,7 @@
-package local.common
+package local.sql
 
 import deepsea.App
-import org.mongodb.scala.MongoClient
+import org.mongodb.scala.{MongoClient, MongoDatabase}
 
 object MongoDB {
 
@@ -16,5 +16,6 @@ object MongoDB {
       }
     }
   }
+
 
 }

@@ -3,7 +3,6 @@ package deepsea.spec
 import akka.actor.Actor
 import akka.util.Timeout
 import deepsea.spec.SpecManager.{GetHullBlocks, GetHullPartListFromBsTree, GetHullSpec, GetProjectList, SetHullPartListFromBsTree}
-import local.common.Misc
 import local.hull.BStree
 import play.api.libs.json.{Json, OWrites}
 
@@ -25,7 +24,7 @@ object SpecManager {
   implicit val writesPartDef: OWrites[PartDef] = Json.writes[PartDef]
 }
 
-class SpecManager extends Actor with BStree with Misc {
+class SpecManager extends Actor with BStree {
   implicit val timeout: Timeout = Timeout(30, TimeUnit.SECONDS)
 
   override def receive: Receive = {

@@ -1,10 +1,10 @@
 package local.ele.trays
 
 import deepsea.App
-import local.common.MongoDB
+import local.common.DBRequests.calculateH
 import local.domain.WorkShopMaterial
 import local.ele.trays.TrayManager.{ForanTray, TrayMountData, TrayMountRules}
-import local.sql.ConnectionManager
+import local.sql.{ConnectionManager, MongoDB}
 import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
 import org.bson.codecs.configuration.CodecRegistry
 import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
@@ -73,8 +73,7 @@ trait TrayHelper {
 
   private val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
     classOf[TrayMountData],
-    classOf[TrayMountRules],
-    classOf[WorkShopMaterial],
+    classOf[TrayMountRules]
   ), DEFAULT_CODEC_REGISTRY)
 
 
@@ -86,8 +85,6 @@ trait TrayHelper {
   private def collectionTrayMountData(): MongoCollection[TrayMountData] = mongoDatabase().getCollection("eleTrayMountData")
 
   private def collectioneleTrayMountRules(): MongoCollection[TrayMountRules] = mongoDatabase().getCollection("eleTrayMountRules")
-
-  private def collectionWorkShopMaterial(): MongoCollection[WorkShopMaterial] = mongoDatabase().getCollection("materials")
 
   def TrayBySeqId(project: String, trayIdSeq: String): ForanTray = {
     ConnectionManager.connectionByProject(project) match {
@@ -256,34 +253,6 @@ trait TrayHelper {
     }
   }
 
-  private def calculateH(X_COG: Double = 0, Y_COG: Double = 0, Z_COG: Double = 0, SURFACE: String = ""): Int = {
-    if (SURFACE.nonEmpty) {
-      SURFACE.head.toUpper.toString match {
-        case "X" => Math.abs(Math.abs(X_COG.toInt) - Math.abs(getCoordFromString(SURFACE)))
-        case "Y" => Math.abs(Math.abs(Y_COG.toInt) - Math.abs(getCoordFromString(SURFACE)))
-        case "Z" => Math.abs(Math.abs(Z_COG.toInt) - Math.abs(getCoordFromString(SURFACE)))
-        case _ => 0
-      }
-    } else {
-      0
-    }
-  }
-
-  private def getCoordFromString(inp: String): Int = {
-    val in = inp.replace("-", "")
-    if (in.nonEmpty && in.length > 2) {
-      if (in.contains(";")) {
-        in.split(";").headOption match {
-          case Some(value) => value.toIntOption.getOrElse(0)
-          case None => 0
-        }
-      } else {
-        in.tail.toIntOption.getOrElse(0)
-      }
-    }
-    else 0
-  }
-
   private def getMaterialFromString(in: String): Int = {
     if (in.nonEmpty && in.contains(";")) {
       if (in.split(";").length >= 2) {
@@ -320,40 +289,6 @@ trait TrayHelper {
     allelems.value.get.getOrElse(Seq.empty[TrayMountRules]).toList
   }
 
-  def retrieveAllMaterials(): List[WorkShopMaterial] = {
-    val allelems = collectionWorkShopMaterial().find().toFuture()
-    Await.result(allelems, Duration(100, SECONDS))
-    allelems.value.get.getOrElse(Seq.empty[WorkShopMaterial]).toList
-  }
-
-  def retrieveAllMaterialsByProject(project: String): List[WorkShopMaterial] = {
-/*    val allelems = collectionWorkShopMaterial().find(equal("project", project)).toFuture()
-    Await.result(allelems, duration)
-    allelems.value.get.getOrElse(Seq.empty[WorkShopMaterial]).toList*/
-
-    val allelems = collectionWorkShopMaterial().find().toFuture()
-    Await.result(allelems, Duration(100, SECONDS))
-    allelems.value.get.getOrElse(Seq.empty[WorkShopMaterial]).toList
-  }
-
-  def findWorkshopMaterial(trm: String, buff: List[WorkShopMaterial]): WorkShopMaterial = buff.find(s => s.trmCode.equals(trm)).getOrElse(new WorkShopMaterial())
-
-
-  /*
-    def retrieveMaterialByTrm(project: String, trmCode: String): WorkShopMaterial = {
-      val allelems = collectionWorkShopMaterial().find(and(equal("project", project), equal("trmCode", trmCode))).toFuture()
-      Await.result(allelems, duration)
-      allelems.value.get.getOrElse(Seq.empty[WorkShopMaterial]).toList.headOption match {
-        case Some(value) => {
-          value
-        }
-        case None => {
-          new WorkShopMaterial()
-        }
-      }
-    }
-  */
-
   def retrieveTrayMountDataByTrm(trmCode: String): TrayMountData = {
     val allelems: Future[Seq[TrayMountData]] = collectionTrayMountData().find(equal("trmCode", trmCode)).toFuture()
     Await.result(allelems, duration)
@@ -362,7 +297,6 @@ trait TrayHelper {
       case None => TrayMountData()
     }
   }
-
 
   def retrieveTraysByZoneNameAndSysNameOld(project: String, zones: List[String], systems: List[String]): Unit = {
 
