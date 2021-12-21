@@ -33,7 +33,7 @@ object HullManager {
   case class HullPartPlateDef(PART_OID: Int, MATERIAL: String, MATERIAL_OID: Int, THICK: Double, STOCK_CODE: String)
   case class HullPartProfileDef(KSE: Int, SECTION: Int, WEB_HEIGHT: Double, WEB_THICKNESS: Double, FLANGE_HEIGHT: Double, FLANGE_THICKNESS: Double, MATERIAL: String, MATERIAL_OID: Int, STOCK_CODE: String)
 
-  case class HullEsp(project: String, content: ListBuffer[HullPart], var docNumber: String, var user: String = "",  var revision: String = "", var date: Long = 0, var version: Int = 0) extends PartList
+  case class HullEsp(project: String, content: ListBuffer[HullPart], var docNumber: String, var user: String,  var revision: String, var date: Long, var version: Int)
   implicit val writesHullPartList: OWrites[HullEsp] = Json.writes[HullEsp]
 
 }
@@ -206,8 +206,8 @@ class HullManager extends Actor {
         case _ => None
       }
 
-      val hullPartList = HullEsp(project, hullParts, docNumber)
-      hullPartList.setRevision(user, revision, version)
+      val date = new Date().getTime
+      val hullPartList = HullEsp(project, hullParts, docNumber, user, revision, date, version)
       Await.result(partLists.insertOne(Document.apply(Json.toJson(hullPartList).toString())).toFuture(), Duration(100, SECONDS))
 
       sender() ! "success"
@@ -471,7 +471,7 @@ class HullManager extends Actor {
 
     res
   }
-  def profileSectionDecode(kse: Int) = kse match {
+  def profileSectionDecode(kse: Int): String = kse match {
     case 0 =>
       "FS"
     case 1 =>

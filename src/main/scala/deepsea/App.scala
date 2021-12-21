@@ -24,7 +24,7 @@ object App {
   }
   def main(args: Array[String]): Unit = {
     org.apache.log4j.BasicConfigurator.configure()
-    Logger.getLogger( "org.mongodb.driver" ).setLevel(Level.ERROR)
+    //Logger.getLogger( "org.mongodb.driver" ).setLevel(Level.ERROR)
     ActorManager.init()
     while (readLine() != "q") {}
     ActorManager.terminate()

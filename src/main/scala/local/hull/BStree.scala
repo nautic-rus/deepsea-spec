@@ -4,7 +4,7 @@ import com.mongodb.BasicDBObject
 import deepsea.App
 import deepsea.actors.ActorManager
 import deepsea.database.DatabaseManager.GetOracleConnection
-import deepsea.hull.HullManager.{GetHullParts, HullPart}
+import deepsea.hull.HullManager.GetHullParts
 import io.circe.{Decoder, Encoder}
 import local.hull.BStree.{Block, BsTreeItem, HullPL, Room}
 import org.bson.types.ObjectId
@@ -95,12 +95,6 @@ object BStree {
     var revision: String
     var version: Int
     var date: Long
-    def setRevision(user: String, revision: String, version: Int): Unit ={
-      this.user = user
-      this.revision = revision
-      this.version = version
-      date = new Date().getTime
-    }
   }
 
 }
@@ -297,7 +291,7 @@ trait BStree  {
         rs.close()
         s.close()
         c.close()
-        val hp = HullPL(new ObjectId(), project, items.toList, List.empty[Room], "", docNum, "", new Date().getTime)
+        val hp = HullPL(new ObjectId(), project, items.toList, List.empty[Room], "", docNum, "", new Date().getTime, 0)
         Option(hp)
       case _ =>
         Option.empty[HullPL]
@@ -317,7 +311,7 @@ trait BStree  {
           case _ => None
         }
 
-        value.setRevision(user, revision)
+//        value.setRevision(user, revision)
         Await.result(partLists.insertOne(Document.apply(value.asJson.noSpaces)).toFuture(), Duration(100, SECONDS))
 
 
