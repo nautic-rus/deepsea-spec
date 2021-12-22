@@ -7,7 +7,7 @@ import io.circe.syntax._
 import io.circe.generic.semiauto._
 import local.common.DBRequests._
 import local.domain.WorkShopMaterial
-import local.ele.eq.EleEqManager.testCoord
+
 
 import scala.collection.mutable.ListBuffer
 
@@ -167,7 +167,7 @@ object TrayManager extends TrayHelper {
     buff.toList
   }
 
-  def genCoord() = testCoord()
+  //def genCoord() = testCoord()
 
 }
 
