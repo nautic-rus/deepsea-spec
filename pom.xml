@@ -84,19 +84,29 @@
         <dependency>
             <groupId>io.circe</groupId>
             <artifactId>circe-core_2.13</artifactId>
-            <version>0.15.0-M1</version>
+            <version>0.14.1</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/io.circe/circe-generic -->
         <dependency>
             <groupId>io.circe</groupId>
-            <artifactId>circe-generic_sjs1_2.13</artifactId>
-            <version>0.15.0-M1</version>
+            <artifactId>circe-generic_2.13</artifactId>
+            <version>0.14.1</version>
         </dependency>
 
+
+        <!-- https://mvnrepository.com/artifact/io.circe/circe-parser -->
         <dependency>
             <groupId>io.circe</groupId>
-            <artifactId>circe-parser_sjs1_2.13</artifactId>
-            <version>0.15.0-M1</version>
+            <artifactId>circe-parser_2.13</artifactId>
+            <version>0.14.1</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/io.circe/circe-generic-extras -->
+        <dependency>
+            <groupId>io.circe</groupId>
+            <artifactId>circe-generic-extras_2.13</artifactId>
+            <version>0.14.1</version>
+        </dependency>
+
 
         <dependency>
             <groupId>org.scalatest</groupId>

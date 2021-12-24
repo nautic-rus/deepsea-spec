@@ -2,9 +2,7 @@ package local.ele.cb
 
 import local.ele.cb.CableBoxManager.ForanCableBox
 import local.sql.ConnectionManager
-
 import java.sql.{ResultSet, Statement}
-import scala.collection.mutable.ListBuffer
 
 trait CableBoxHelper {
 
@@ -45,9 +43,6 @@ trait CableBoxHelper {
               ForanCableBox()
             }
           }
-
-
-
           stmt.close()
           connection.close()
           ret

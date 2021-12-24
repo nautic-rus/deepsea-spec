@@ -3,10 +3,12 @@ package local.ele.eq
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
+import local.common.Codecs
 import local.common.DBRequests.MountItem
 import local.domain.WorkShopMaterial
+import local.ele.CommonEle.EleComplect
 
-object EleEqManager extends EleEqHelper {
+object EleEqManager extends EleEqHelper with Codecs {
 
   case class EleEq(
                     OID: Int = 0,
@@ -30,16 +32,15 @@ object EleEqManager extends EleEqHelper {
                     MARGIN: Int = 0,
                     SUPPORTS: List[MountItem] = List.empty[MountItem],
                     workShopMaterial: WorkShopMaterial = new WorkShopMaterial()
-                  )
+                  ) {
+    def orderItem(): Double = {
+      LABEL.toDoubleOption match {
+        case Some(value) => value
+        case None => 99999999.0
+      }
+    }
+  }
 
-  implicit val EleEqDecoder: Decoder[EleEq] = deriveDecoder[EleEq]
-  implicit val EleEqEncoder: Encoder[EleEq] = deriveEncoder[EleEq]
-
-  implicit val MountItemDecoder: Decoder[MountItem] = deriveDecoder[MountItem]
-  implicit val MountItemEncoder: Encoder[MountItem] = deriveEncoder[MountItem]
-
-  implicit val WorkShopMaterialDecoder: Decoder[WorkShopMaterial] = deriveDecoder[WorkShopMaterial]
-  implicit val WorkShopMaterialEncoder: Encoder[WorkShopMaterial] = deriveEncoder[WorkShopMaterial]
 
   def genEqLabelsByEqOid(project: String, eqOid: String): List[String] = eqLabelsByEqOid(project, eqOid)
 
@@ -47,8 +48,16 @@ object EleEqManager extends EleEqHelper {
     eqLabelsByEqOid(project, eqOid).asJson.noSpaces
   }
 
-  def genEqByOID(project: String, eqOid: String): EleEq =eqByOID(project, eqOid)
+  def eqToJson(eq: EleEq): String = eq.asJson.noSpaces
 
-  def genEqByOIDJson(project: String, eqOid: String):String=eqByOID(project, eqOid).asJson.noSpaces
+
+  def genEqByOID(project: String, eqOid: String): EleEq = eqByOID(project, eqOid)
+
+  def genEqByOIDJson(project: String, eqOid: String): String = eqByOID(project, eqOid).asJson.noSpaces
+
+  def genEqsByComplect(project: String, complect: EleComplect): List[EleEq] = eqsByComplect(project, complect)
+
+  def genEqsByComplectJson(project: String, complect: EleComplect): String = genEqsByComplect(project, complect).asJson.noSpaces
+
 
 }

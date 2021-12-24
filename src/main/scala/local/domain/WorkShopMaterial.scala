@@ -1,9 +1,5 @@
 package local.domain
-
-import org.bson.Document
-
 import java.util.UUID
-import scala.collection.mutable.ListBuffer
 
 class WorkShopMaterial
 (

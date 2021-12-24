@@ -5,13 +5,14 @@ import io.circe.parser._
 import io.circe.generic.auto._
 import io.circe.syntax._
 import io.circe.generic.semiauto._
+import local.common.Codecs
 import local.common.DBRequests._
 import local.domain.WorkShopMaterial
-
+import local.ele.CommonEle.EleComplect
 
 import scala.collection.mutable.ListBuffer
 
-object TrayManager extends TrayHelper {
+object TrayManager extends TrayHelper with Codecs{
 
 
   case class Tray(foranTray: ForanTray, mountData: TrayMountData, workShopMaterial: WorkShopMaterial, supports: List[MountItem])
@@ -55,22 +56,6 @@ object TrayManager extends TrayHelper {
                         materialId: Int = 0
                       )
 
-
-  implicit val TrayDecoder: Decoder[Tray] = deriveDecoder[Tray]
-  implicit val TrayEncoder: Encoder[Tray] = deriveEncoder[Tray]
-
-  implicit val WorkShopMaterialDecoder: Decoder[WorkShopMaterial] = deriveDecoder[WorkShopMaterial]
-  implicit val WorkShopMaterialEncoder: Encoder[WorkShopMaterial] = deriveEncoder[WorkShopMaterial]
-
-
-
-  implicit val TrayMountDataDecoder: Decoder[TrayMountData] = deriveDecoder[TrayMountData]
-  implicit val TrayMountDataEncoder: Encoder[TrayMountData] = deriveEncoder[TrayMountData]
-
-  implicit val ForanTrayDecoder: Decoder[ForanTray] = deriveDecoder[ForanTray]
-  implicit val ForanTrayEncoder: Encoder[ForanTray] = deriveEncoder[ForanTray]
-
-
   def trayLabels(project: String, trayIdSeq: String): List[String] = {
     val ret = ListBuffer.empty[String]
     val mountData: List[TrayMountData] = retrieveTraysMountDate()
@@ -92,7 +77,11 @@ object TrayManager extends TrayHelper {
     retrieveTraysByZoneNameAndSysName(project, zones, systems).foreach(clickTray => {
       buff += calculateTrayMountDate(project, clickTray, mountData, mountRules, materials)
     })
-    buff.toList//.asJson.noSpaces
+    buff.toList
+  }
+
+  def traysByComplect(project:String,complect:EleComplect): List[Tray] ={
+    tarysByZonesSystems(project,complect.zoneNames,complect.systemNames)
   }
 
   def tarysByZonesSystemsJson(project: String, zones: List[String], systems: List[String]):String={
@@ -167,7 +156,7 @@ object TrayManager extends TrayHelper {
     buff.toList
   }
 
-  //def genCoord() = testCoord()
+
 
 }
 

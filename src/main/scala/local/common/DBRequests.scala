@@ -23,13 +23,9 @@ import io.circe.syntax._
 import io.circe.generic.semiauto._
 
 
-object DBRequests {
+object DBRequests extends Codecs{
 
   case class MountItem(workShopMaterial: WorkShopMaterial = new WorkShopMaterial(), label:String="NF", kei: String = "", qty: Double = 0, isNeedLabel: Boolean = false)
-  implicit val TrayMountItemDecoder: Decoder[MountItem] = deriveDecoder[MountItem]
-  implicit val TrayMountItemEncoder: Encoder[MountItem] = deriveEncoder[MountItem]
-
-  private def mongoDatabase(): MongoDatabase =MongoDB.mongoClient().getDatabase("3degdatabase").withCodecRegistry(codecRegistry)
 
   private def collectionWorkShopMaterial(): MongoCollection[WorkShopMaterial] = mongoDatabase().getCollection("materials")
   private val duration: FiniteDuration = Duration(2, SECONDS)
@@ -114,5 +110,15 @@ object DBRequests {
     else 0
   }
 
-
+  def listToSqlString(in: List[String]): String = {
+    if (in.nonEmpty) {
+      var ret = ""
+      in.foreach(s => {
+        ret += "'" + s + "',"
+      })
+      ret.dropRight(1)
+    } else {
+      "'0'"
+    }
+  }
 }

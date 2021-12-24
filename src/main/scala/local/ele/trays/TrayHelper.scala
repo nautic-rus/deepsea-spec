@@ -1,8 +1,10 @@
 package local.ele.trays
 
 import deepsea.App
-import local.common.DBRequests.calculateH
+import local.common.Codecs
+import local.common.DBRequests.{calculateH, listToSqlString}
 import local.domain.WorkShopMaterial
+import local.ele.CommonEle.EleComplect
 import local.ele.trays.TrayManager.{ForanTray, TrayMountData, TrayMountRules}
 import local.sql.{ConnectionManager, MongoDB}
 import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
@@ -17,7 +19,7 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.{Duration, FiniteDuration, SECONDS}
 import org.mongodb.scala.bson.codecs.Macros._
 
-trait TrayHelper {
+trait TrayHelper extends Codecs{
 
   /*  private def traySQL(trayIdsq: String): String = {
       s"select   \n  PE.IDSQ,\n  PS.OID as FDS_MODEL,\n  Z.NAME  as ZONE,\n  SYS.NAME  as SYSTEM,\n  PE.LINE,\n  PE.PLS,\n  PE.ELEM,\n  PE.WEIGHT,\n  PE.X_COG,\n  PE.Y_COG,\n  PE.Z_COG,\n  PE.CTYPE,\n  PE.TYPE,\n  N1.USERID  as NODE1,\n   N2.USERID  as NODE2,\n  PE.TRAY_LEVEL,\n  TR.STOCK_CODE,\n  N1.X *1000 as N1X,\n  N1.Y *1000 as N1Y,\n  N1.Z *1000 as N1Z,\n  N2.X *1000 as N2X,\n  N2.Y *1000 as N2Y,\n  N2.Z *1000 as N2Z,\n  SQRT( (N2.X-N1.X)*(N2.X-N1.X) + (N2.Y-N1.Y)*(N2.Y-N1.Y) + (N2.Z-N1.Z)*(N2.Z-N1.Z) )*1000 as LEN,\n  --PE.UUID,\n  (select name from bs_node where oid =(\n       select parent_node from bs_node where OID =(\n            select BS_NODE_OID  from BS_ATOM_FIXED_ATTRIBUTE where BS_DS_ATOM_OID=(\n            select oid from BS_DESIGN_ATOM where BS_DESIGN_NODE_OID=(\n                select oid from BS_DESIGN_NODE where model_oid=PS.OID)\n        )\n   )\n)) as surface   \n  from PLS_ELEM PE ,PIPELINE_SEGMENT PS, SEGMENT S, V_CTRAY_PATTERN_LEVEL TR, NODE N1, NODE N2, ZONE Z, SYSTEMS SYS\n  where \n  IDSQ = ${trayIdsq} AND\n  PE.TYPE=PS.TYPE AND PE.ZONE=PS.ZONE AND PE.SYSTEM=PS.SYSTEM AND PE.LINE=PS.LINE AND PE.PLS=PS.SQID AND\n  ((S.NODE1=PE.NODE1 AND S.NODE2=PE.NODE2) OR (S.NODE1=PE.NODE2 AND S.NODE2=PE.NODE1)) AND\n  S.PATTERN=TR.SEQID AND\n  PE.NODE1=N1.SEQID AND PE.NODE2=N2.SEQID AND\n  Z.SEQID=PE.ZONE AND\n  SYS.SEQID=PE.SYSTEM \n  "
@@ -70,17 +72,6 @@ trait TrayHelper {
   }
 
   private val duration: FiniteDuration = Duration(2, SECONDS)
-
-  private val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
-    classOf[TrayMountData],
-    classOf[TrayMountRules]
-  ), DEFAULT_CODEC_REGISTRY)
-
-
-
-  //private def mongoClient(): MongoClient = MongoClient(s"mongodb://${App.conf.getString("mongo.host")}:${App.conf.getInt("mongo.port").toString}")
-
-  private def mongoDatabase(): MongoDatabase =MongoDB.mongoClient().getDatabase("3degdatabase").withCodecRegistry(codecRegistry)
 
   private def collectionTrayMountData(): MongoCollection[TrayMountData] = mongoDatabase().getCollection("eleTrayMountData")
 
@@ -265,18 +256,6 @@ trait TrayHelper {
     }
   }
 
-  private def listToSqlString(in: List[String]): String = {
-    if (in.nonEmpty) {
-      var ret = ""
-      in.foreach(s => {
-        ret += "'" + s + "',"
-      })
-      ret.dropRight(1)
-    } else {
-      "'0'"
-    }
-  }
-
   def retrieveTraysMountDate(): List[TrayMountData] = {
     val allelems = collectionTrayMountData().find().toFuture()
     Await.result(allelems, Duration(100, SECONDS))
@@ -296,47 +275,6 @@ trait TrayHelper {
       case Some(value) => value
       case None => TrayMountData()
     }
-  }
-
-  def retrieveTraysByZoneNameAndSysNameOld(project: String, zones: List[String], systems: List[String]): Unit = {
-
-    case class TotalTray(stockCode: String, weight: Double, len: Double)
-
-    val sql: String = (zones.isEmpty, systems.isEmpty) match {
-      case (true, true) => allTraysSql()
-      case (false, true) => traySqlByZoneNames(listToSqlString(zones))
-      case (true, false) => traySqlBySystemNames(listToSqlString(systems))
-      case _ => traySqlByZonesAndSystems(listToSqlString(zones), listToSqlString(systems))
-    }
-
-    val totalTrays: List[TotalTray] = {
-      ConnectionManager.connectionByProject(project) match {
-        case Some(connection) => {
-          try {
-            connection.setAutoCommit(false)
-            val stmt: Statement = connection.createStatement()
-            val rs: ResultSet = stmt.executeQuery(sql)
-            val buffer = ListBuffer.empty[TotalTray]
-            while (rs.next()) {
-              val stock: String = Option[String](rs.getString("STOCK_CODE")).getOrElse("NF")
-              val w: Double = Option[Double](rs.getDouble("WEIGHT")).getOrElse(0)
-              val l: Double = Option[Double](rs.getDouble("LEN")).getOrElse(0)
-              buffer += TotalTray(stock, w, l)
-            }
-            stmt.close()
-            connection.close()
-            buffer.toList
-          }
-          catch {
-            case _: Throwable => List.empty[TotalTray]
-          }
-        }
-        case None => List.empty[TotalTray]
-      }
-    }
-
-
-    val n = 0
   }
 
 

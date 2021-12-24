@@ -8,7 +8,6 @@ import deepsea.database.DatabaseManager
 import deepsea.elec.ElecManager
 import deepsea.http.HTTPManager
 import deepsea.hull.HullManager
-import deepsea.hull.HullManager.{GetForanParts, GetForanPartsExcel}
 import deepsea.spec.SpecManager
 
 

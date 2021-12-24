@@ -8,12 +8,13 @@ import io.circe.syntax._
 import io.circe.generic.semiauto._
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import local.common.Codecs
 import local.common.DBRequests.{findWorkshopMaterial, findWorkshopMaterialContains, retrieveAllMaterialsByProject}
 import local.domain.WorkShopMaterial
 
 import scala.collection.mutable.ListBuffer
 
-object CableBoxManager extends CableBoxHelper{
+object CableBoxManager extends CableBoxHelper with Codecs{
   case class ForanCableBox(
                             PIDSQ: Int = 0,
                             USERID:String="",
@@ -33,10 +34,7 @@ object CableBoxManager extends CableBoxHelper{
 
   case class CableBox(foranData: ForanCableBox, workshopData: WorkShopMaterial)
 
-  implicit val ForanCableBoxDecoder: Decoder[ForanCableBox] = deriveDecoder[ForanCableBox]
-  implicit val ForanCableBoxEncoder: Encoder[ForanCableBox] = deriveEncoder[ForanCableBox]
-  implicit val WorkShopMaterialDecoder: Decoder[WorkShopMaterial] = deriveDecoder[WorkShopMaterial]
-  implicit val WorkShopMaterialEncoder: Encoder[WorkShopMaterial] = deriveEncoder[WorkShopMaterial]
+
 
   def cableBoxBySeqId(project: String, cbIdSeq: String):CableBox={
     val wsmats=retrieveAllMaterialsByProject(project)
