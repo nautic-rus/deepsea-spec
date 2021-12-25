@@ -21,7 +21,9 @@ object EleEqTrayESKDReport {
   private val pageSize: PageSize = PageSize.A3.rotate()
   private val kM: Float = 1.437F
   private val defaultFontSize: Float = mmToPt(3.5)
+
   private case class DescrTree(pageNum: Int, A1: String, A2: String)
+
   private val descrTreeBuffer = ListBuffer.empty[DescrTree]
 
   private val pointColumnWidths = Array(
@@ -38,8 +40,9 @@ object EleEqTrayESKDReport {
     mmToPt(10 * kM) + 2
   )
 
-  def generatePdfToFile(project: String, complectName: String, path:String): Unit ={
-    val parts: EleComplectParts =retrieveAllPartsByComplectName(project, complectName)
+  def generatePdfToFile(project: String, complectName: String, path: String): List[String] = {
+
+    val parts: EleComplectParts = retrieveAllPartsByComplectName(project, complectName)
     val item11Columns: List[Item11Columns] = {
       val n1 = "Электрооборудование устанавливаемое заводом-строителем"
       val n2 = "Электрооборудование устанавливаемое электромонтажным предприятием"
@@ -58,8 +61,8 @@ object EleEqTrayESKDReport {
               A5 = eq.workShopMaterial.trmCode,
               A6 = eq.workShopMaterial.units,
               A7 = "1",
-              A8 = String.format("%.2f",eq.workShopMaterial.singleWeight),
-              A9 = String.format("%.2f",eq.workShopMaterial.singleWeight),
+              A8 = String.format("%.2f", eq.workShopMaterial.singleWeight),
+              A9 = String.format("%.2f", eq.workShopMaterial.singleWeight),
               A10 = eq.workShopMaterial.category,
               A11 = eq.ZONE_NAME
 
@@ -73,8 +76,8 @@ object EleEqTrayESKDReport {
                 A5 = supp.workShopMaterial.trmCode,
                 A6 = supp.kei,
                 A7 = supp.qty.toString,
-                A8 = String.format("%.2f",supp.workShopMaterial.singleWeight),
-                A9 = String.format("%.2f",(supp.workShopMaterial.singleWeight * supp.qty)),
+                A8 = String.format("%.2f", supp.workShopMaterial.singleWeight),
+                A9 = String.format("%.2f", (supp.workShopMaterial.singleWeight * supp.qty)),
                 A10 = supp.workShopMaterial.category,
                 A11 = eq.ZONE_NAME
               )
@@ -94,8 +97,8 @@ object EleEqTrayESKDReport {
               A4 = eq.workShopMaterial.name, A5 = eq.workShopMaterial.trmCode,
               A6 = eq.workShopMaterial.units,
               A7 = "1",
-              A8 = String.format("%.2f",eq.workShopMaterial.singleWeight),
-              A9 = String.format("%.2f",eq.workShopMaterial.singleWeight),
+              A8 = String.format("%.2f", eq.workShopMaterial.singleWeight),
+              A9 = String.format("%.2f", eq.workShopMaterial.singleWeight),
               A10 = eq.workShopMaterial.category,
               A11 = eq.ZONE_NAME
 
@@ -109,8 +112,8 @@ object EleEqTrayESKDReport {
                 A5 = supp.workShopMaterial.trmCode,
                 A6 = supp.kei,
                 A7 = supp.qty.toString,
-                A8 = String.format("%.2f",supp.workShopMaterial.singleWeight),
-                A9 = String.format("%.2f",(supp.workShopMaterial.singleWeight * supp.qty)),
+                A8 = String.format("%.2f", supp.workShopMaterial.singleWeight),
+                A9 = String.format("%.2f", (supp.workShopMaterial.singleWeight * supp.qty)),
                 A10 = supp.workShopMaterial.category,
                 A11 = eq.ZONE_NAME
               )
@@ -121,7 +124,7 @@ object EleEqTrayESKDReport {
       val supports: List[MountItem] = {
         val suppBuffer = ListBuffer.empty[MountItem]
         parts.trays.foreach(tr => {
-          suppBuffer += MountItem(tr.workShopMaterial, tr.mountData.label, "006", tr.foranTray.LEN/1000)
+          suppBuffer += MountItem(tr.workShopMaterial, tr.mountData.label, "006", tr.foranTray.LEN / 1000)
           suppBuffer ++= tr.supports
         })
         suppBuffer.toList
@@ -142,9 +145,9 @@ object EleEqTrayESKDReport {
               A4 = item.workShopMaterial.name,
               A5 = item.workShopMaterial.trmCode,
               A6 = kei,
-              A7 = String.format("%.2f",qty),
-              A8 = String.format("%.2f",item.workShopMaterial.singleWeight),
-              A9 = String.format("%.2f",(item.workShopMaterial.singleWeight * qty)),
+              A7 = String.format("%.2f", qty),
+              A8 = String.format("%.2f", item.workShopMaterial.singleWeight),
+              A9 = String.format("%.2f", (item.workShopMaterial.singleWeight * qty)),
               A10 = item.workShopMaterial.category,
               A11 = ""
             )
@@ -180,14 +183,18 @@ object EleEqTrayESKDReport {
       }
       buff.toList
     }
-    val docName: DocName = DocName(num = parts.complect.drawingId, name = parts.complect.drawingDescr, lastRev = "2",userDev = "Сидоров")
-    genReport(docName, item11Columns,path)
+    val docName: DocName = DocName(num = parts.complect.drawingId, name = parts.complect.drawingDescr, lastRev = "2", userDev = "Сидоров")
+    val pdfPath = s"${path}/${docName.num}_${docName.name}_rev${docName.lastRev}.pdf"
+    val retPath = List[String](pdfPath)
+    genReport(docName, item11Columns, pdfPath)
+
+    retPath
   }
 
-  def genReport(docName: DocName, items: List[Item11Columns], path:String, isNewRevision: Boolean = false): Unit = {
+  def genReport(docName: DocName, items: List[Item11Columns], path: String, isNewRevision: Boolean = false): Unit = {
     descrTreeBuffer.clear()
     val titul: PdfDocument = genTitulA3Rot(docName)
-    val pdfWriter: PdfWriter = new PdfWriter(s"${path}/${docName.num}_${docName.name}_rev${docName.lastRev}.pdf", new WriterProperties().setFullCompressionMode(true)) {
+    val pdfWriter: PdfWriter = new PdfWriter(path, new WriterProperties().setFullCompressionMode(true)) {
       setSmartMode(true)
     }
     val pdfDoc = new PdfDocument(pdfWriter) {

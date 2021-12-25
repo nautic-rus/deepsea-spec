@@ -45,4 +45,5 @@ object CableBoxManager extends CableBoxHelper with Codecs{
   def cableBoxBySeqIdJson(project: String, cbIdSeq: String):String={
     cableBoxBySeqId(project, cbIdSeq).asJson.noSpaces
   }
+
 }

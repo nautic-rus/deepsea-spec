@@ -161,6 +161,7 @@ class TestElePdf extends AnyFunSuite with Codecs {
   val docName: DocName = DocName(num = parts.complect.drawingId, name = parts.complect.drawingDescr, lastRev = "2",userDev = "Сидоров")
   EleEqTrayESKDReport.genReport(docName, item11Columns,"C:/1")*/
 
-  generatePdfToFile("P701","170701-884-2001","C:/1")
+  val paths: List[String] =generatePdfToFile("P701","170701-884-2001","C:/1")
+  val ret=0
 
 }
