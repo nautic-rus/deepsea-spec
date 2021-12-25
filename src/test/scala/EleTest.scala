@@ -1,4 +1,4 @@
-import local.ele.CommonEle.{retrieveAllParts, retrieveAllPartsJSON}
+import local.ele.CommonEle.{retrieveAllPartsByComplectNameJSON, retrieveEleComplectsJsonString}
 import local.ele.eq.EleEqManager.eqToJson
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -8,7 +8,9 @@ class EleTest extends AnyFunSuite{
   //val b=eqsByComplect("P701","170701-884-6004")
 
 
-   val jjj= retrieveAllPartsJSON("P701","170701-884-2001")
+  val complects: String =retrieveEleComplectsJsonString("P701")
+
+  val jjj: String = retrieveAllPartsByComplectNameJSON("P701","170701-884-2001")
 
 
 //170701-884-2008 1

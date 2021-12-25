@@ -268,10 +268,16 @@ trait TrayHelper extends Codecs{
     allelems.value.get.getOrElse(Seq.empty[TrayMountRules]).toList
   }
 
-  def retrieveTrayMountDataByTrm(trmCode: String): TrayMountData = {
-    val allelems: Future[Seq[TrayMountData]] = collectionTrayMountData().find(equal("trmCode", trmCode)).toFuture()
+  def retrieveAllTrayMountData():List[TrayMountData]={
+    val allelems: Future[Seq[TrayMountData]] = collectionTrayMountData().find().toFuture()
     Await.result(allelems, duration)
-    allelems.value.get.getOrElse(Seq.empty[TrayMountData]).toList.headOption match {
+    allelems.value.get.getOrElse(Seq.empty[TrayMountData]).toList
+  }
+
+  def retrieveTrayMountDataByTrm(trmCode: String, mountData:List[TrayMountData]): TrayMountData = {
+    //val allelems: Future[Seq[TrayMountData]] = collectionTrayMountData().find(equal("trmCode", trmCode)).toFuture()
+    //Await.result(allelems, duration)
+    mountData.find(s=>s.trmCode.equals(trmCode)) match {
       case Some(value) => value
       case None => TrayMountData()
     }

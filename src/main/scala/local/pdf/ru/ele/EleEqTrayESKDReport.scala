@@ -7,6 +7,8 @@ import com.itextpdf.kernel.pdf.{PdfDocument, PdfOutline, PdfReader, PdfWriter, W
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.{Cell, Paragraph, Table, Text}
 import com.itextpdf.layout.properties.{HorizontalAlignment, TextAlignment, VerticalAlignment}
+import local.common.DBRequests.MountItem
+import local.ele.CommonEle.{EleComplectParts, retrieveAllPartsByComplectName}
 import local.pdf.ru.common.ReportCommon
 import local.pdf.ru.common.ReportCommon.{DocName, Item11Columns, borderESKD, genBaseStampBig, genBaseStampSmall, getNnauticLigo, gostFont, mmToPt}
 import org.davidmoten.text.utils.WordWrap
@@ -29,17 +31,163 @@ object EleEqTrayESKDReport {
     mmToPt(119 * kM),
     mmToPt(35 * kM),
     mmToPt(10 * kM),
-    mmToPt(10 * kM),//
     mmToPt(10 * kM),
     mmToPt(10 * kM),
-    mmToPt(15 * kM),//
+    mmToPt(10 * kM),
+    mmToPt(15 * kM),
     mmToPt(10 * kM) + 2
   )
 
-  def genReport(docName: DocName, items: List[Item11Columns], isNewRevision: Boolean = false): Unit = {
+  def generatePdfToFile(project: String, complectName: String, path:String): Unit ={
+    val parts: EleComplectParts =retrieveAllPartsByComplectName(project, complectName)
+    val item11Columns: List[Item11Columns] = {
+      val n1 = "Электрооборудование устанавливаемое заводом-строителем"
+      val n2 = "Электрооборудование устанавливаемое электромонтажным предприятием"
+      val buff = ListBuffer.empty[Item11Columns]
+      val parttitions = parts.eqs.partition(x => x.workShopMaterial.singleWeight > 50)
+      if (parttitions._1.nonEmpty) {
+        buff += Item11Columns(true, n1.toUpperCase())
+        parttitions._1.groupBy(s => s.SYSTEM_DESCR).toList.sortBy(s => s._1).foreach(gr => {
+          buff += Item11Columns(true, gr._1)
+          gr._2.sortBy(s => s.orderItem()).foreach(eq => {
+            buff += Item11Columns(
+              A1 = eq.LABEL,
+              A2 = eq.USERID,
+              A3 = eq.workShopMaterial.description,
+              A4 = eq.workShopMaterial.name,
+              A5 = eq.workShopMaterial.trmCode,
+              A6 = eq.workShopMaterial.units,
+              A7 = "1",
+              A8 = String.format("%.2f",eq.workShopMaterial.singleWeight),
+              A9 = String.format("%.2f",eq.workShopMaterial.singleWeight),
+              A10 = eq.workShopMaterial.category,
+              A11 = eq.ZONE_NAME
+
+            )
+            eq.SUPPORTS.sortBy(d => d.label).foreach(supp => {
+              buff += Item11Columns(
+                A1 = supp.label,
+                A2 = "",
+                A3 = supp.workShopMaterial.description,
+                A4 = supp.workShopMaterial.name,
+                A5 = supp.workShopMaterial.trmCode,
+                A6 = supp.kei,
+                A7 = supp.qty.toString,
+                A8 = String.format("%.2f",supp.workShopMaterial.singleWeight),
+                A9 = String.format("%.2f",(supp.workShopMaterial.singleWeight * supp.qty)),
+                A10 = supp.workShopMaterial.category,
+                A11 = eq.ZONE_NAME
+              )
+            })
+          })
+        })
+      }
+      if (parttitions._2.nonEmpty) {
+        buff += Item11Columns(true, n2.toUpperCase())
+        parttitions._2.groupBy(s => s.SYSTEM_DESCR).toList.sortBy(s => s._1).foreach(gr => {
+          buff += Item11Columns(true, gr._1)
+          gr._2.sortBy(s => s.orderItem()).foreach(eq => {
+            buff += Item11Columns(
+              A1 = eq.LABEL,
+              A2 = eq.USERID,
+              A3 = eq.workShopMaterial.description,
+              A4 = eq.workShopMaterial.name, A5 = eq.workShopMaterial.trmCode,
+              A6 = eq.workShopMaterial.units,
+              A7 = "1",
+              A8 = String.format("%.2f",eq.workShopMaterial.singleWeight),
+              A9 = String.format("%.2f",eq.workShopMaterial.singleWeight),
+              A10 = eq.workShopMaterial.category,
+              A11 = eq.ZONE_NAME
+
+            )
+            eq.SUPPORTS.sortBy(d => d.label).foreach(supp => {
+              buff += Item11Columns(
+                A1 = supp.label,
+                A2 = "",
+                A3 = supp.workShopMaterial.description,
+                A4 = supp.workShopMaterial.name,
+                A5 = supp.workShopMaterial.trmCode,
+                A6 = supp.kei,
+                A7 = supp.qty.toString,
+                A8 = String.format("%.2f",supp.workShopMaterial.singleWeight),
+                A9 = String.format("%.2f",(supp.workShopMaterial.singleWeight * supp.qty)),
+                A10 = supp.workShopMaterial.category,
+                A11 = eq.ZONE_NAME
+              )
+            })
+          })
+        })
+      }
+      val supports: List[MountItem] = {
+        val suppBuffer = ListBuffer.empty[MountItem]
+        parts.trays.foreach(tr => {
+          suppBuffer += MountItem(tr.workShopMaterial, tr.mountData.label, "006", tr.foranTray.LEN/1000)
+          suppBuffer ++= tr.supports
+        })
+        suppBuffer.toList
+      }
+
+      val supportsRows: List[Item11Columns] = {
+        val buffer = ListBuffer.empty[Item11Columns]
+        supports.groupBy(s => s.workShopMaterial.trmCode).toList.foreach(group => {
+          if (group._2.nonEmpty) {
+            val item = group._2.head
+            val label = item.label
+            val kei = item.kei
+            val qty: Double = Math.ceil(group._2.map(_.qty).sum)
+            buffer += Item11Columns(
+              A1 = label,
+              A2 = "",
+              A3 = item.workShopMaterial.description,
+              A4 = item.workShopMaterial.name,
+              A5 = item.workShopMaterial.trmCode,
+              A6 = kei,
+              A7 = String.format("%.2f",qty),
+              A8 = String.format("%.2f",item.workShopMaterial.singleWeight),
+              A9 = String.format("%.2f",(item.workShopMaterial.singleWeight * qty)),
+              A10 = item.workShopMaterial.category,
+              A11 = ""
+            )
+          }
+        })
+        buffer.toList
+      }
+
+      val gr4 = supportsRows.filter(p => p.A1.startsWith("4"))
+      if (gr4.nonEmpty) {
+        buff += Item11Columns(true, "Крепление и заземление кабелей")
+        buff ++= gr4.sortBy(s => s.A1)
+      }
+      val gr5 = supportsRows.filter(p => p.A1.startsWith("5"))
+      if (gr5.nonEmpty) {
+        buff += Item11Columns(true, "Доизоляционные детали крепления")
+        buff ++= gr5.sortBy(s => s.A1)
+      }
+      val gr6 = supportsRows.filter(p => p.A1.startsWith("6"))
+      if (gr6.nonEmpty) {
+        buff += Item11Columns(true, "Послеизоляционные детали крепления")
+        buff ++= gr6.sortBy(s => s.A1)
+      }
+      val gr7 = supportsRows.filter(p => p.A1.startsWith("7"))
+      if (gr7.nonEmpty) {
+        buff += Item11Columns(true, "Трубы защиты кабеля")
+        buff ++= gr7.sortBy(s => s.A1)
+      }
+      val gr8 = supportsRows.filter(p => !p.A1.startsWith("4") && !p.A1.startsWith("5") && !p.A1.startsWith("6") && !p.A1.startsWith("7"))
+      if (gr8.nonEmpty) {
+        buff += Item11Columns(true, "Прочее")
+        buff ++= gr8.sortBy(s => s.A1)
+      }
+      buff.toList
+    }
+    val docName: DocName = DocName(num = parts.complect.drawingId, name = parts.complect.drawingDescr, lastRev = "2",userDev = "Сидоров")
+    genReport(docName, item11Columns,path)
+  }
+
+  def genReport(docName: DocName, items: List[Item11Columns], path:String, isNewRevision: Boolean = false): Unit = {
     descrTreeBuffer.clear()
-    val titul: PdfDocument = genTitul(docName)
-    val pdfWriter: PdfWriter = new PdfWriter(s"C:/1/${docName.num}_${docName.name}_rev${docName.lastRev}.pdf", new WriterProperties().setFullCompressionMode(true)) {
+    val titul: PdfDocument = genTitulA3Rot(docName)
+    val pdfWriter: PdfWriter = new PdfWriter(s"${path}/${docName.num}_${docName.name}_rev${docName.lastRev}.pdf", new WriterProperties().setFullCompressionMode(true)) {
       setSmartMode(true)
     }
     val pdfDoc = new PdfDocument(pdfWriter) {
@@ -59,6 +207,24 @@ object EleEqTrayESKDReport {
       val dest: PdfExplicitDestination = PdfExplicitDestination.createFitH(page, 0f)
       val action = PdfAction.createGoTo(dest)
       outline.addAction(action)
+    })
+
+
+    (1 to pdfDoc.getNumberOfPages).foreach(i => {
+      if (!isNewRevision) {
+        //generateWatermark(pdfDoc.getPage(i))
+      }
+      if (i == 1) {
+        val pa = new Paragraph(pdfDoc.getNumberOfPages.toString)
+        pa.setFontSize(mmToPt(4.5))
+        pa.setFont(gostFont)
+        doc.showTextAligned(pa, mmToPt(411), mmToPt(24), i, TextAlignment.RIGHT, VerticalAlignment.TOP, 0)
+      } else {
+        val pa = new Paragraph(i.toString)
+        pa.setFontSize(mmToPt(4.5))
+        pa.setFont(gostFont)
+        doc.showTextAligned(pa, mmToPt(411), mmToPt(12), i, TextAlignment.RIGHT, VerticalAlignment.TOP, 0)
+      }
     })
 
     doc.close()
@@ -144,6 +310,29 @@ object EleEqTrayESKDReport {
     val logo = getNnauticLigo
       .scaleToFit(82, 30)
       .setFixedPosition(mmToPt(242), mmToPt(6.5))
+    doc.add(logo)
+    doc.close()
+    os.flush()
+    os.close()
+    new PdfDocument(new PdfReader(new ByteArrayInputStream(os.asInstanceOf[ByteArrayOutputStream].toByteArray)))
+  }
+
+  private def genTitulA3Rot(docName: DocName): PdfDocument = {
+    val os: OutputStream = new ByteArrayOutputStream()
+    val pdfWriter = new PdfWriter(os)
+    val pdfDoc = new PdfDocument(pdfWriter)
+    val doc: Document = new Document(pdfDoc, pageSize) {
+      setMargins(0, 0, 0, 0)
+    }
+    val width: Float = doc.getPdfDocument.getDefaultPageSize.getWidth
+    val height: Float = doc.getPdfDocument.getDefaultPageSize.getHeight
+    val bigStamp: Table = genBaseStampBig(docName)
+    bigStamp.setFixedPosition(1, width - bigStamp.getWidth.getValue - mmToPt(5) - 2, mmToPt(5), bigStamp.getWidth.getValue)
+    doc.add(bigStamp)
+    borderESKD(pdfDoc.getPage(1))
+    val logo = getNnauticLigo
+      .scaleToFit(82, 30)
+      .setFixedPosition(mmToPt(380), mmToPt(6.5))
     doc.add(logo)
     doc.close()
     os.flush()

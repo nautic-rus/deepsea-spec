@@ -58,11 +58,12 @@ object TrayManager extends TrayHelper with Codecs{
 
   def trayLabels(project: String, trayIdSeq: String): List[String] = {
     val ret = ListBuffer.empty[String]
+    val traysMountData=retrieveAllTrayMountData()
     val mountData: List[TrayMountData] = retrieveTraysMountDate()
     val mountRules: List[TrayMountRules] = retrieveTraysMountRules()
     val clickTray: ForanTray = TrayBySeqId(project, trayIdSeq)
     val materials = retrieveAllMaterialsByProject(project)
-    val tray = calculateTrayMountDate(project, clickTray, mountData, mountRules, materials)
+    val tray = calculateTrayMountDate(project, clickTray, mountData, mountRules, materials,traysMountData)
     ret += "V=" + clickTray.marign.toString
     ret += tray.mountData.label
     tray.supports.sortBy(d => d.label).foreach(s => ret += s.label)
@@ -74,8 +75,10 @@ object TrayManager extends TrayHelper with Codecs{
     val mountData: List[TrayMountData] = retrieveTraysMountDate()
     val mountRules: List[TrayMountRules] = retrieveTraysMountRules()
     val materials = retrieveAllMaterialsByProject(project)
+    val traysMountData= retrieveAllTrayMountData()
+    val f=0
     retrieveTraysByZoneNameAndSysName(project, zones, systems).foreach(clickTray => {
-      buff += calculateTrayMountDate(project, clickTray, mountData, mountRules, materials)
+      buff += calculateTrayMountDate(project, clickTray, mountData, mountRules, materials,traysMountData)
     })
     buff.toList
   }
@@ -88,8 +91,8 @@ object TrayManager extends TrayHelper with Codecs{
     tarysByZonesSystems(project, zones, systems).asJson.noSpaces
   }
 
-  private def calculateTrayMountDate(project: String, foranTray: ForanTray, mountData: List[TrayMountData], mountRules: List[TrayMountRules], materials: List[WorkShopMaterial]): Tray = {
-    val clickTrayMontData: TrayMountData = retrieveTrayMountDataByTrm(foranTray.STOCK_CODE)
+  private def calculateTrayMountDate(project: String, foranTray: ForanTray, mountData: List[TrayMountData], mountRules: List[TrayMountRules], materials: List[WorkShopMaterial], traysMountData:List[TrayMountData]): Tray = {
+    val clickTrayMontData: TrayMountData = retrieveTrayMountDataByTrm(foranTray.STOCK_CODE,traysMountData)
     val material = findWorkshopMaterial(foranTray.STOCK_CODE, materials)
     val buffMounts = ListBuffer.empty[MountItem]
     mountRules.filter(p => p.inputTypeIdRange.contains(clickTrayMontData.typeId.toString)).foreach(item => {

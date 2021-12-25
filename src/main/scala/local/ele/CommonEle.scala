@@ -49,7 +49,7 @@ object CommonEle extends Codecs{
     retrieveEleComplects(project).asJson.noSpaces
   }
 
-  def retrieveAllParts(project: String, complectName: String): EleComplectParts = {
+  def retrieveAllPartsByComplectName(project: String, complectName: String): EleComplectParts = {
     retrieveEleComplects(project).find(s => s.drawingId.equals(complectName)) match {
       case Some(complect: EleComplect) => {
         val trays: List[Tray] =traysByComplect(project, complect)
@@ -60,7 +60,7 @@ object CommonEle extends Codecs{
     }
   }
 
-  def retrieveAllPartsJSON(project: String, complectName: String):String=retrieveAllParts(project, complectName).asJson.noSpaces
+  def retrieveAllPartsByComplectNameJSON(project: String, complectName: String):String=retrieveAllPartsByComplectName(project, complectName).asJson.noSpaces
 
   def retrieveAllPartsFromJSON(jsonPath:String): EleComplectParts ={
     val src: BufferedSource =Source.fromFile(jsonPath)
