@@ -9,6 +9,7 @@ import local.domain.WorkShopMaterial
 import local.ele.CommonEle.{EleComplectParts, retrieveAllPartsFromJSON}
 import local.pdf.ru.common.ReportCommon.{DocName, Item11Columns}
 import local.pdf.ru.ele.EleEqTrayESKDReport
+import local.pdf.ru.ele.EleEqTrayESKDReport.generatePdfToFile
 
 import scala.collection.mutable.ListBuffer
 import scala.io.{BufferedSource, Source}
@@ -16,7 +17,7 @@ import scala.io.{BufferedSource, Source}
 
 class TestElePdf extends AnyFunSuite with Codecs {
 
-  val parts: EleComplectParts = retrieveAllPartsFromJSON("src/main/resources/test2.Json")
+/*  val parts: EleComplectParts = retrieveAllPartsFromJSON("src/main/resources/test2.Json")
   val item11Columns: List[Item11Columns] = {
     val n1 = "Электрооборудование устанавливаемое заводом-строителем"
     val n2 = "Электрооборудование устанавливаемое электромонтажным предприятием"
@@ -158,7 +159,8 @@ class TestElePdf extends AnyFunSuite with Codecs {
     buff.toList
   }
   val docName: DocName = DocName(num = parts.complect.drawingId, name = parts.complect.drawingDescr, lastRev = "2",userDev = "Сидоров")
+  EleEqTrayESKDReport.genReport(docName, item11Columns,"C:/1")*/
 
-  EleEqTrayESKDReport.genReport(docName, item11Columns,"C:/1")
+  generatePdfToFile("P701","170701-884-2001","C:/1")
 
 }
