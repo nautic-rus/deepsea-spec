@@ -7,10 +7,13 @@ class EleTest extends AnyFunSuite{
 
   //val b=eqsByComplect("P701","170701-884-6004")
 
+  (0 to 100).foreach(x=>{
+    val complects: String =retrieveEleComplectsJsonString("P701")
 
-  val complects: String =retrieveEleComplectsJsonString("P701")
+    val jjj: String = retrieveAllPartsByComplectNameJSON("P701","170701-884-2001")
+    println(x)
+  })
 
-  val jjj: String = retrieveAllPartsByComplectNameJSON("P701","170701-884-2001")
 
 
 //170701-884-2008 1

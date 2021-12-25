@@ -188,6 +188,7 @@ trait TrayHelper extends Codecs{
           }
           stmt.close()
           connection.close()
+          println("close conn")
           buffer.toList
         }
         catch {

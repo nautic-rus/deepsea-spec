@@ -9,7 +9,7 @@ import local.domain.WorkShopMaterial
 import local.ele.CommonEle.{EleComplectParts, retrieveAllPartsFromJSON}
 import local.pdf.ru.common.ReportCommon.{DocName, Item11Columns}
 import local.pdf.ru.ele.EleEqTrayESKDReport
-import local.pdf.ru.ele.EleEqTrayESKDReport.generatePdfToFile
+import local.pdf.ru.ele.EleEqTrayESKDReport.{generatePdfToFileNoRev, generatePdfToFileWithRev}
 
 import scala.collection.mutable.ListBuffer
 import scala.io.{BufferedSource, Source}
@@ -161,7 +161,10 @@ class TestElePdf extends AnyFunSuite with Codecs {
   val docName: DocName = DocName(num = parts.complect.drawingId, name = parts.complect.drawingDescr, lastRev = "2",userDev = "Сидоров")
   EleEqTrayESKDReport.genReport(docName, item11Columns,"C:/1")*/
 
-  val paths: List[String] =generatePdfToFile("P701","170701-884-2001","C:/1")
+  val paths: List[String] =generatePdfToFileWithRev("P701","170701-884-2001","C:/1","2")
+
+  val paths2: List[String] =generatePdfToFileNoRev("P701","170701-884-2001","C:/1")
+
   val ret=0
 
 }

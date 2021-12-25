@@ -50,12 +50,19 @@ object ConnectionManager {
     config.setJdbcUrl(s"jdbc:oracle:thin:@${App.conf.getString("oracle.host")}:${App.conf.getString("oracle.port")}/${App.conf.getString("oracle.database")}")
     config.setUsername(App.conf.getString("oracle.login"))
     config.setPassword(App.conf.getString("oracle.password"))
-    config.setMaximumPoolSize(3)
+    config.setConnectionTestQuery("SELECT 1 FROM DUAL")
+    config.setConnectionTimeout(600000)
+    config.setMaximumPoolSize(500)
+    config.setMaxLifetime(1800000)
+    config.setMinimumIdle(20)
+    config.setValidationTimeout(3000)
+    config.setIdleTimeout(60000)
     config.addDataSourceProperty("v$session.osuser", App.conf.getString("app.user"))
     config.addDataSourceProperty("v$session.machine", App.conf.getString("app.machine"))
     config.addDataSourceProperty("v$session.program", App.conf.getString("app.program"))
     config.addDataSourceProperty("v$session.terminal", App.conf.getString("app.machine"))
     ds = new HikariDataSource(config)
+
   }
   def getConnection:Connection = ds.getConnection
 

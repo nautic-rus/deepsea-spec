@@ -18,7 +18,6 @@ trait CableBoxHelper {
           val stmt: Statement = connection.createStatement()
           val sql = sqlCBBySQID(cbIdSeq)
           val rs: ResultSet = stmt.executeQuery(sql)
-
           val ret={
             if (rs.next()) {
               ForanCableBox(
