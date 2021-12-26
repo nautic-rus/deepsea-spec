@@ -76,7 +76,6 @@ object TrayManager extends TrayHelper with Codecs{
     val mountRules: List[TrayMountRules] = retrieveTraysMountRules()
     val materials = retrieveAllMaterialsByProject(project)
     val traysMountData= retrieveAllTrayMountData()
-    val f=0
     retrieveTraysByZoneNameAndSysName(project, zones, systems).foreach(clickTray => {
       buff += calculateTrayMountDate(project, clickTray, mountData, mountRules, materials,traysMountData)
     })

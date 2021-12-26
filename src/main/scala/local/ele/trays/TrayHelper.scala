@@ -19,7 +19,7 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.{Duration, FiniteDuration, SECONDS}
 import org.mongodb.scala.bson.codecs.Macros._
 
-trait TrayHelper extends Codecs{
+trait TrayHelper extends Codecs {
 
   /*  private def traySQL(trayIdsq: String): String = {
       s"select   \n  PE.IDSQ,\n  PS.OID as FDS_MODEL,\n  Z.NAME  as ZONE,\n  SYS.NAME  as SYSTEM,\n  PE.LINE,\n  PE.PLS,\n  PE.ELEM,\n  PE.WEIGHT,\n  PE.X_COG,\n  PE.Y_COG,\n  PE.Z_COG,\n  PE.CTYPE,\n  PE.TYPE,\n  N1.USERID  as NODE1,\n   N2.USERID  as NODE2,\n  PE.TRAY_LEVEL,\n  TR.STOCK_CODE,\n  N1.X *1000 as N1X,\n  N1.Y *1000 as N1Y,\n  N1.Z *1000 as N1Z,\n  N2.X *1000 as N2X,\n  N2.Y *1000 as N2Y,\n  N2.Z *1000 as N2Z,\n  SQRT( (N2.X-N1.X)*(N2.X-N1.X) + (N2.Y-N1.Y)*(N2.Y-N1.Y) + (N2.Z-N1.Z)*(N2.Z-N1.Z) )*1000 as LEN,\n  --PE.UUID,\n  (select name from bs_node where oid =(\n       select parent_node from bs_node where OID =(\n            select BS_NODE_OID  from BS_ATOM_FIXED_ATTRIBUTE where BS_DS_ATOM_OID=(\n            select oid from BS_DESIGN_ATOM where BS_DESIGN_NODE_OID=(\n                select oid from BS_DESIGN_NODE where model_oid=PS.OID)\n        )\n   )\n)) as surface   \n  from PLS_ELEM PE ,PIPELINE_SEGMENT PS, SEGMENT S, V_CTRAY_PATTERN_LEVEL TR, NODE N1, NODE N2, ZONE Z, SYSTEMS SYS\n  where \n  IDSQ = ${trayIdsq} AND\n  PE.TYPE=PS.TYPE AND PE.ZONE=PS.ZONE AND PE.SYSTEM=PS.SYSTEM AND PE.LINE=PS.LINE AND PE.PLS=PS.SQID AND\n  ((S.NODE1=PE.NODE1 AND S.NODE2=PE.NODE2) OR (S.NODE1=PE.NODE2 AND S.NODE2=PE.NODE1)) AND\n  S.PATTERN=TR.SEQID AND\n  PE.NODE1=N1.SEQID AND PE.NODE2=N2.SEQID AND\n  Z.SEQID=PE.ZONE AND\n  SYS.SEQID=PE.SYSTEM \n  "
@@ -148,14 +148,14 @@ trait TrayHelper extends Codecs{
       case Some(connection) => {
         try {
           val buffer = ListBuffer.empty[ForanTray]
-          connection.setAutoCommit(false)
           val stmt: Statement = connection.createStatement()
           val rs: ResultSet = stmt.executeQuery(sql)
           while (rs.next()) {
             val marign: Int = calculateH(Option[Double](rs.getDouble("X_COG")).getOrElse(0),
               Option[Double](rs.getDouble("Y_COG")).getOrElse(0),
               Option[Double](rs.getDouble("Z_COG")).getOrElse(0), Option[String](rs.getString("SURFACE")).getOrElse(""))
-            val materialId = getMaterialFromString(Option[String](rs.getString("SURFACE")).getOrElse(""))
+            val materialId: Int = getMaterialFromString(Option[String](rs.getString("SURFACE")).getOrElse(""))
+
             buffer += ForanTray(
               Option[Int](rs.getInt("IDSQ")).getOrElse(0),
               Option[Int](rs.getInt("FDS_MODEL")).getOrElse(0),
@@ -186,13 +186,15 @@ trait TrayHelper extends Codecs{
               materialId
             )
           }
+          rs.close()
           stmt.close()
+          connection.commit()
           connection.close()
-          println("close conn")
           buffer.toList
         }
         catch {
-          case _: Throwable => List.empty[ForanTray]
+          case _: Throwable =>
+            List.empty[ForanTray]
         }
       }
       case None => List.empty[ForanTray]
@@ -269,16 +271,16 @@ trait TrayHelper extends Codecs{
     allelems.value.get.getOrElse(Seq.empty[TrayMountRules]).toList
   }
 
-  def retrieveAllTrayMountData():List[TrayMountData]={
+  def retrieveAllTrayMountData(): List[TrayMountData] = {
     val allelems: Future[Seq[TrayMountData]] = collectionTrayMountData().find().toFuture()
     Await.result(allelems, duration)
     allelems.value.get.getOrElse(Seq.empty[TrayMountData]).toList
   }
 
-  def retrieveTrayMountDataByTrm(trmCode: String, mountData:List[TrayMountData]): TrayMountData = {
+  def retrieveTrayMountDataByTrm(trmCode: String, mountData: List[TrayMountData]): TrayMountData = {
     //val allelems: Future[Seq[TrayMountData]] = collectionTrayMountData().find(equal("trmCode", trmCode)).toFuture()
     //Await.result(allelems, duration)
-    mountData.find(s=>s.trmCode.equals(trmCode)) match {
+    mountData.find(s => s.trmCode.equals(trmCode)) match {
       case Some(value) => value
       case None => TrayMountData()
     }

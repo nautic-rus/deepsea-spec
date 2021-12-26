@@ -53,7 +53,7 @@ object CommonEle extends Codecs{
     retrieveEleComplects(project).find(s => s.drawingId.equals(complectName)) match {
       case Some(complect: EleComplect) => {
         val trays: List[Tray] =traysByComplect(project, complect)
-        val eqs: List[EleEq] = genEqsByComplect(project, complect)
+        val eqs: List[EleEq] =genEqsByComplect(project, complect)
         EleComplectParts(complect, eqs, trays)
       }
       case None => EleComplectParts()

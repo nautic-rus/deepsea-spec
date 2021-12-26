@@ -156,6 +156,9 @@ trait EleEqHelper {
             val wmat: WorkShopMaterial = findWorkshopMaterialContains(eq.STOCK_CODE, wmats)
             buff += EleEq(eq.OID, label, eq.TYPE, userId, eq.ZONE_SEQID, eq.ZONE_NAME, eq.ZONE_DESCR, eq.SYSTEM_SEQID, eq.SYSTEM_NAME, eq.SYSTEM_DESCR, eq.ABBREV, eq.XCOG, eq.YCOG, eq.ZCOG, eq.WEIGHT, eq.STOCK_CODE, eq.CLASS_NAME, eq.SURFACE, marigin, supports, wmat)
           }
+          rs.close()
+          stmt.close()
+          connection.close()
           buff.toList
         }
         catch {
