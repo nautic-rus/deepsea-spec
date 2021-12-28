@@ -140,7 +140,7 @@ object TrayManager extends TrayHelper with Codecs{
       buffMounts += MountItem(findWorkshopMaterial(item5.trmCode, materials), TrayMountData(item5.label, item5.trmCode).label, "006", foranTray.LEN / 1000, false)
 
       val item6=mountData.find(s=>s.typeId==43 && s.matId==foranTray.materialId).getOrElse(TrayMountData(label = "NF"))
-      buffMounts += MountItem(findWorkshopMaterial(item6.trmCode, materials), TrayMountData(item6.label, item6.trmCode).label, "796", foranTray.LEN / 1000, false)
+      buffMounts += MountItem(findWorkshopMaterial(item6.trmCode, materials), TrayMountData(item6.label, item6.trmCode).label, "796",2*1.5* foranTray.LEN / 1000, false)
 
     }
 
@@ -178,17 +178,17 @@ object TrayManager extends TrayHelper with Codecs{
         item.searchTypeIdRange match {
           case "51;" =>
             mountData.find(s => s.typeId == 51 && s.matId == clickTrayMontData.matId) match {
-              case Some(value) => buffMounts += MountItem(findWorkshopMaterial(item.trmCode, materials), TrayMountData(value.label, value.trmCode).label, item.kei, item.count * item.lenghtFactor * foranTray.LEN / 1000, item.isNeedLabel)
+              case Some(value) => buffMounts += MountItem(findWorkshopMaterial(value.trmCode, materials), TrayMountData(value.label, value.trmCode).label, item.kei, item.count * item.lenghtFactor * foranTray.LEN / 1000, item.isNeedLabel)
               case None => MountItem()
             }
           case "65;" =>
             mountData.find(s => s.typeId == 65 && s.matId == clickTrayMontData.matId && s.parI1 == clickTrayMontData.parD2.toInt) match {
-              case Some(value) => buffMounts += MountItem(findWorkshopMaterial(item.trmCode, materials), TrayMountData(value.label, value.trmCode).label, item.kei, item.count * item.lenghtFactor * foranTray.LEN / 1000, item.isNeedLabel)
+              case Some(value) => buffMounts += MountItem(findWorkshopMaterial(value.trmCode, materials), TrayMountData(value.label, value.trmCode).label, item.kei, item.count * item.lenghtFactor * foranTray.LEN / 1000, item.isNeedLabel)
               case None => MountItem()
             }
           case "43;" =>
             mountData.find(s => s.typeId == 43 && s.matId == clickTrayMontData.matId) match {
-              case Some(value) => buffMounts += MountItem(findWorkshopMaterial(item.trmCode, materials), TrayMountData(value.label, value.trmCode).label, item.kei, item.count * item.lenghtFactor * foranTray.LEN / 1000, item.isNeedLabel)
+              case Some(value) => buffMounts += MountItem(findWorkshopMaterial(value.trmCode, materials), TrayMountData(value.label, value.trmCode).label, item.kei, item.count * item.lenghtFactor * foranTray.LEN / 1000, item.isNeedLabel)
               case None => MountItem()
             }
           case "57;" =>
