@@ -35,7 +35,7 @@ object ConnectionManager {
       config.addDataSourceProperty("v$session.terminal", App.conf.getString("app.machine"))
       config.setConnectionTestQuery("SELECT 1 FROM DUAL")
       config.setConnectionTimeout(2000)
-      config.setMaximumPoolSize(200)
+      config.setMaximumPoolSize(3)
       config.setMaxLifetime(1800000)
       config.setMinimumIdle(20)
       config.setValidationTimeout(3000)

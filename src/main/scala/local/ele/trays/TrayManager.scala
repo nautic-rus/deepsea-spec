@@ -55,6 +55,21 @@ object TrayManager extends TrayHelper with Codecs{
                         marign: Int = 0,
                         materialId: Int = 0
                       )
+  case class ForanCBX(
+                        IDSQ: Int = 0,
+                        ZONE: String = "",
+                        SYSTEM: String = "",
+                        X_COG: Double = 0,
+                        Y_COG: Double = 0,
+                        Z_COG: Double = 0,
+                        WEIGHT: Double = 0,
+                        NODE1: String = "",
+                        NODE2: String = "",
+                        CODE: String = "",
+                        DESCR: String = "",
+                        STOCK_CODE: String = "",
+                        PENRTRATION: String = ""
+                      )
 
   def trayLabels(project: String, trayIdSeq: String): List[String] = {
     val ret = ListBuffer.empty[String]
@@ -74,11 +89,22 @@ object TrayManager extends TrayHelper with Codecs{
     val buff = ListBuffer.empty[Tray]
     val mountData: List[TrayMountData] = retrieveTraysMountDate()
     val mountRules: List[TrayMountRules] = retrieveTraysMountRules()
-    val materials = retrieveAllMaterialsByProject(project)
-    val traysMountData= retrieveAllTrayMountData()
+    val materials: List[WorkShopMaterial] = retrieveAllMaterialsByProject(project)
+    val traysMountData: List[TrayMountData] = retrieveAllTrayMountData()
     retrieveTraysByZoneNameAndSysName(project, zones, systems).foreach(clickTray => {
       buff += calculateTrayMountDate(project, clickTray, mountData, mountRules, materials,traysMountData)
     })
+    retrieveCBXByZoneNameAndSysName(project, zones, systems).foreach(cbx=>{
+      val tmd: TrayMountData =traysMountData.find(s=>s.trmCode.equals(cbx.STOCK_CODE)).getOrElse(TrayMountData())
+      val ft=ForanTray(IDSQ = cbx.IDSQ,ZONE = cbx.ZONE,SYSTEM = cbx.SYSTEM,
+        X_COG = cbx.X_COG,Y_COG = cbx.Y_COG,Z_COG = cbx.Z_COG, WEIGHT = cbx.WEIGHT,
+        NODE1 = cbx.NODE1,NODE2 = cbx.NODE2,STOCK_CODE = cbx.STOCK_CODE)
+      val ws=materials.find(s=>s.trmCode.equals(cbx.STOCK_CODE)).getOrElse(new WorkShopMaterial())
+      val tray=Tray(ft,tmd,ws,List.empty[MountItem])
+      buff +=tray
+    })
+
+
     buff.toList
   }
 
@@ -148,7 +174,7 @@ object TrayManager extends TrayHelper with Codecs{
 
   def genCablesByTraySeqId(project: String, trayIdSeq: String): List[String] = cablesByTraySeqId(project, trayIdSeq)
 
-  def genTraysByZoneNameAndSysName(project: String = "P701", zones: List[String] = List.empty[String], systems: List[String] = List.empty[String]): Unit = retrieveTraysByZoneNameAndSysName(project, zones, systems)
+  def genTraysByZoneNameAndSysName(project: String = "P701", zones: List[String] = List.empty[String], systems: List[String] = List.empty[String]): List[ForanTray] = retrieveTraysByZoneNameAndSysName(project, zones, systems)
 
   def genCablesInLineByTwoNodes(project: String, nodeName1: String, nodeName2: String): List[String] = cablesinLineByTwoNodeNames(project, nodeName1, nodeName2)
 

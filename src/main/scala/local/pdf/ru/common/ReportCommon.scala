@@ -8,12 +8,14 @@ import com.itextpdf.kernel.pdf.PdfPage
 import com.itextpdf.kernel.pdf.canvas.PdfCanvas
 import com.itextpdf.layout.element.{Cell, Image, Paragraph, Table, Text}
 import com.itextpdf.layout.properties.{HorizontalAlignment, TextAlignment, VerticalAlignment}
+import local.pdf.UtilsPDF
+
 import scala.jdk.CollectionConverters._
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import scala.collection.mutable.ListBuffer
 
-object ReportCommon {
+object ReportCommon extends UtilsPDF{
   case class DocName(code: String = "XXXXX", num: String = "170701-XXX-XXXX", name: String = "XXXXXXXXXXX",
                      lastRev: String = "rev.0", userDev: String = "Голенищев", userTCheck: String = "Воронин",
                      userNCheck: String = "Воронин", userAgree: String = "Стропилов")
@@ -24,13 +26,9 @@ object ReportCommon {
 
   val cuurrentCompany: String = "Наутик-Рус"
 
-  def gostFont: PdfFont = {
-    PdfFontFactory.createFont(FontProgramFactory.createFont("src/main/resources/fonts/GOSTtypeA.ttf"), PdfEncodings.IDENTITY_H, EmbeddingStrategy.PREFER_NOT_EMBEDDED)
-  }
+  def gostFont: PdfFont = PdfFontFactory.createFont(FontProgramFactory.createFont("src/main/resources/fonts/GOSTtypeA.ttf"), PdfEncodings.IDENTITY_H, EmbeddingStrategy.PREFER_NOT_EMBEDDED)
 
-  def dateNow: String = LocalDate.now().format(DateTimeFormatter.ofPattern("dd.MM.yy"))
-
-  def getNnauticLigo: Image = {
+  def  getNnauticLigo: Image = {
     val imageData: ImageData = ImageDataFactory.create("src/main/resources/pict/nrlogo.png")
     new Image(imageData)
   }
@@ -38,7 +36,8 @@ object ReportCommon {
   def genBaseStampBig(data: DocName, debug: Boolean = false): Table = {
     val defaultFontSize = mmToPt(4.1)
     val cellBuff = ListBuffer.empty[Cell]
-    val pointColumnWidths = Array(mmToPt(7), mmToPt(10), mmToPt(23),
+    val pointColumnWidths = Array(
+      mmToPt(7), mmToPt(10), mmToPt(23),
       mmToPt(15), mmToPt(10), mmToPt(70),
       mmToPt(5), mmToPt(5), mmToPt(5), mmToPt(5),
       mmToPt(12), mmToPt(18)
@@ -1161,27 +1160,10 @@ object ReportCommon {
     table
   }
 
-
   def borderESKD(pdfPage: PdfPage): Unit = {
     val canvas = new PdfCanvas(pdfPage)
     canvas.rectangle(mmToPt(20), mmToPt(5), pdfPage.getDocument.getDefaultPageSize.getWidth - mmToPt(25), pdfPage.getDocument.getDefaultPageSize.getHeight - mmToPt(10))
     canvas.stroke()
-  }
-
-  def ptToMM(in: Double): Int = {
-    Math.round((in + 2.0d) / 2.8d).toInt
-  }
-
-  def ptToMM(in: Float): Int = {
-    Math.round((in + 2.0f) / 2.8f)
-  }
-
-  def mmToPt(in: Int): Float = {
-    (in * 2.8346438836889).toFloat - 2
-  }
-
-  def mmToPt(in: Double): Float = {
-    (in * 2.8346438836889).toFloat - 2
   }
 
   private def setStampText(cell: Cell, text: String, italic: Boolean = false, bold: Boolean = false, textAlignment: TextAlignment = TextAlignment.CENTER, fontSize: Float = 4.1f): Cell = {

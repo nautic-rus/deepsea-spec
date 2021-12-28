@@ -5,7 +5,7 @@ import local.common.Codecs
 import local.common.DBRequests.{calculateH, listToSqlString}
 import local.domain.WorkShopMaterial
 import local.ele.CommonEle.EleComplect
-import local.ele.trays.TrayManager.{ForanTray, TrayMountData, TrayMountRules}
+import local.ele.trays.TrayManager.{ForanCBX, ForanTray, TrayMountData, TrayMountRules}
 import local.sql.{ConnectionManager, MongoDB}
 import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
 import org.bson.codecs.configuration.CodecRegistry
@@ -46,6 +46,13 @@ trait TrayHelper extends Codecs {
       s"where \n   PE.TYPE=PS.TYPE AND PE.ZONE=PS.ZONE AND PE.SYSTEM=PS.SYSTEM AND PE.LINE=PS.LINE AND PE.PLS=PS.SQID AND\n  ((S.NODE1=PE.NODE1 AND S.NODE2=PE.NODE2) OR (S.NODE1=PE.NODE2 AND S.NODE2=PE.NODE1)) AND\n  " +
       s"S.PATTERN=TR.SEQID AND\n  PE.NODE1=N1.SEQID AND PE.NODE2=N2.SEQID AND\n  Z.SEQID=PE.ZONE AND\n  SYS.SEQID=PE.SYSTEM \n  AND Z.NAME in (${zoneNames}) and\n  SYS.NAME in (${systemNames})"
   }
+
+  private def cbxAll()=s"select  \nPE.IDSQ, \n(select USERID from ELEMENT where UUID=PE.UUID) as USERID,\nZ.NAME  as ZONE,\nSYS.NAME  as SYSTEM,\nPE.X_COG, \nPE.Y_COG, \nPE.Z_COG,\nPE.WEIGHT, \nPE.NODE1, \nPE.NODE2, \nPL.TYPE, \nPL.SEAL_TYPE, \nPL.CODE, \nPL.DESCR, \nPL.STOCK_CODE, \n(select userid from pntr_list where FITT_OID=PE.IDSQ) as PENRTRATION \nfrom PLS_ELEM PE, V_CABLE_PENETRATION_LIBRARY PL , ZONE Z, SYSTEMS SYS\nwhere  \nPE.TRAY_FITTING=PL.OID AND \nZ.SEQID=PE.ZONE AND\nSYS.SEQID=PE.SYSTEM  AND\n(PL.SEAL_TYPE='S' OR PL.SEAL_TYPE is null) AND  PL.TYPE=1  \nAND CODE not LIKE 'Обделка%'"
+  private def cbxByZones(zoneNames: String)=s"select  \nPE.IDSQ, \n(select USERID from ELEMENT where UUID=PE.UUID) as USERID,\nZ.NAME  as ZONE,\nSYS.NAME  as SYSTEM,\nPE.X_COG, \nPE.Y_COG, \nPE.Z_COG,\nPE.WEIGHT, \nPE.NODE1, \nPE.NODE2, \nPL.TYPE, \nPL.SEAL_TYPE, \nPL.CODE, \nPL.DESCR, \nPL.STOCK_CODE, \n(select userid from pntr_list where FITT_OID=PE.IDSQ) as PENRTRATION \nfrom PLS_ELEM PE, V_CABLE_PENETRATION_LIBRARY PL , ZONE Z, SYSTEMS SYS\nwhere  \nPE.TRAY_FITTING=PL.OID AND \nZ.SEQID=PE.ZONE AND\nSYS.SEQID=PE.SYSTEM  AND\n(PL.SEAL_TYPE='S' OR PL.SEAL_TYPE is null) AND  PL.TYPE=1  \nAND CODE not LIKE 'Обделка%'AND Z.NAME in (${zoneNames})"
+  private def cbxBySystems(systemNames: String)=s"select  \nPE.IDSQ, \n(select USERID from ELEMENT where UUID=PE.UUID) as USERID,\nZ.NAME  as ZONE,\nSYS.NAME  as SYSTEM,\nPE.X_COG, \nPE.Y_COG, \nPE.Z_COG,\nPE.WEIGHT, \nPE.NODE1, \nPE.NODE2, \nPL.TYPE, \nPL.SEAL_TYPE, \nPL.CODE, \nPL.DESCR, \nPL.STOCK_CODE, \n(select userid from pntr_list where FITT_OID=PE.IDSQ) as PENRTRATION \nfrom PLS_ELEM PE, V_CABLE_PENETRATION_LIBRARY PL , ZONE Z, SYSTEMS SYS\nwhere  \nPE.TRAY_FITTING=PL.OID AND \nZ.SEQID=PE.ZONE AND\nSYS.SEQID=PE.SYSTEM  AND\n(PL.SEAL_TYPE='S' OR PL.SEAL_TYPE is null) AND  PL.TYPE=1  \nAND CODE not LIKE 'Обделка%' AND SYS.NAME in (${systemNames})"
+  private def cbxByZonesAndSystems(zoneNames: String, systemNames: String)=s"select  \nPE.IDSQ, \n(select USERID from ELEMENT where UUID=PE.UUID) as USERID,\nZ.NAME  as ZONE,\nSYS.NAME  as SYSTEM,\nPE.X_COG, \nPE.Y_COG, \nPE.Z_COG,\nPE.WEIGHT, \nPE.NODE1, \nPE.NODE2, \nPL.TYPE, \nPL.SEAL_TYPE, \nPL.CODE, \nPL.DESCR, \nPL.STOCK_CODE, \n(select userid from pntr_list where FITT_OID=PE.IDSQ) as PENRTRATION \nfrom PLS_ELEM PE, V_CABLE_PENETRATION_LIBRARY PL , ZONE Z, SYSTEMS SYS\nwhere  \nPE.TRAY_FITTING=PL.OID AND \nZ.SEQID=PE.ZONE AND\nSYS.SEQID=PE.SYSTEM  AND\n(PL.SEAL_TYPE='S' OR PL.SEAL_TYPE is null) AND  PL.TYPE=1  \nAND CODE not LIKE 'Обделка%'AND Z.NAME in (${zoneNames}) AND SYS.NAME in (${systemNames})"
+
+
 
   private def traySqlByZoneNames(zoneNames: String): String = {
     s"select   \n  PE.IDSQ,\n  PS.OID as FDS_MODEL,\n  Z.NAME  as ZONE,\n  SYS.NAME  as SYSTEM,\n  PE.LINE,\n  PE.PLS,\n  PE.ELEM,\n  PE.WEIGHT,\n  PE.X_COG,\n  PE.Y_COG,\n  PE.Z_COG,\n  PE.CTYPE,\n  PE.TYPE,\n  N1.USERID  as NODE1,\n   " +
@@ -200,6 +207,57 @@ trait TrayHelper extends Codecs {
       case None => List.empty[ForanTray]
     }
   }
+
+
+  def retrieveCBXByZoneNameAndSysName(project: String, zones: List[String], systems: List[String]): List[ForanCBX] = {
+
+    val sql: String = (zones.isEmpty, systems.isEmpty) match {
+      case (true, true) => cbxAll()
+      case (false, true) => cbxByZones(listToSqlString(zones))
+      case (true, false) => cbxBySystems(listToSqlString(systems))
+      case _ => cbxByZonesAndSystems(listToSqlString(zones), listToSqlString(systems))
+    }
+    ConnectionManager.connectionByProject(project) match {
+      case Some(connection) => {
+        try {
+          val buffer = ListBuffer.empty[ForanCBX]
+          val stmt: Statement = connection.createStatement()
+          val rs: ResultSet = stmt.executeQuery(sql)
+          while (rs.next()) {
+            buffer += ForanCBX(
+              Option[Int](rs.getInt("IDSQ")).getOrElse(0),
+              Option[String](rs.getString("ZONE")).getOrElse(""),
+              Option[String](rs.getString("SYSTEM")).getOrElse(""),
+              Option[Double](rs.getDouble("X_COG")).getOrElse(0),
+              Option[Double](rs.getDouble("Y_COG")).getOrElse(0),
+              Option[Double](rs.getDouble("Z_COG")).getOrElse(0),
+              Option[Double](rs.getDouble("WEIGHT")).getOrElse(0),
+              Option[String](rs.getString("NODE1")).getOrElse(""),
+              Option[String](rs.getString("NODE2")).getOrElse(""),
+              Option[String](rs.getString("CODE")).getOrElse(""),
+              Option[String](rs.getString("DESCR")).getOrElse(""),
+              Option[String](rs.getString("STOCK_CODE")).getOrElse(""),
+              Option[String](rs.getString("PENRTRATION")).getOrElse("")
+            )
+          }
+          rs.close()
+          stmt.close()
+          connection.commit()
+          connection.close()
+          buffer.toList
+        }
+        catch {
+          case _: Throwable =>
+            List.empty[ForanCBX]
+        }
+      }
+      case None => List.empty[ForanCBX]
+    }
+  }
+
+
+
+
 
   def cablesByTraySeqId(project: String, trayIdSeq: String): List[String] = {
     ConnectionManager.connectionByProject(project) match {

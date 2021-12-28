@@ -1,5 +1,5 @@
 import local.ele.CommonEle
-import local.ele.CommonEle.{retrieveAllParts, retrieveAllPartsJSON, retrieveEleComplects}
+import local.ele.CommonEle.{  retrieveEleComplects}
 import local.ele.eq.EleEqHelper
 import local.ele.eq.EleEqManager.{genEqByOIDJson, genEqLabelsByEqOidJson, genEqsByComplectJson}
 import org.apache.log4j.{Level, Logger}

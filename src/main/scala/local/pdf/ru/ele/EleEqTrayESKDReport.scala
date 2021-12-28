@@ -341,7 +341,10 @@ object EleEqTrayESKDReport {
 
   def genReport(docName: DocName, items: List[Item11Columns], path: String, isNewRevision: Boolean = false): Unit = {
     descrTreeBuffer.clear()
+
     val titul: PdfDocument = genTitulA3Rot(docName)
+
+
     val pdfWriter: PdfWriter = new PdfWriter(path, new WriterProperties().setFullCompressionMode(true)) {
       setSmartMode(true)
     }

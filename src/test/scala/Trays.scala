@@ -13,11 +13,11 @@ class Trays  extends AnyFunSuite with TrayHelper{
   org.apache.log4j.BasicConfigurator.configure()
   Logger.getLogger( "org.mongodb.driver" ).setLevel(Level.ERROR)
 
-  //val elecomplects =CommonEle.retrieveEleComplectsJsonString("P701")
+  val elecomplects: CommonEle.EleComplect =CommonEle.retrieveEleComplects("P701").find(s=>s.drawingId.equals("170701-884-5007")).get
 
   //val trayLabels: List[String] =TrayManager.trayLabels("P701","18613700") //why V0? //18611850  vtulka=18613700
 
-  val cbx=cableBoxBySeqId("P701","18621400")
+  //val cbx=cableBoxBySeqId("P701","18621400")
 
   //val zonesandsystems: List[CommonTypes.ZoneSystem] =DBRequests.retrieveZoneAndSystems("P701")
 
@@ -32,7 +32,7 @@ class Trays  extends AnyFunSuite with TrayHelper{
   })*/
 
 
-
+  val trays: List[Tray] =traysByComplect("P701", elecomplects)
 
   //val b =genCablesInLineByTwoNodes("P701", "0000000000025851","0000000000025884")
 
