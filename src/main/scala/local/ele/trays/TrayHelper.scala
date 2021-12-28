@@ -42,15 +42,10 @@ trait TrayHelper extends Codecs {
       s"N2.USERID  as NODE2,\n  PE.TRAY_LEVEL,\n  TR.STOCK_CODE,\n  N1.X *1000 as N1X,\n  N1.Y *1000 as N1Y,\n  N1.Z *1000 as N1Z,\n  N2.X *1000 as N2X,\n  N2.Y *1000 as N2Y,\n  N2.Z *1000 as N2Z,\n  " +
       s"SQRT( (N2.X-N1.X)*(N2.X-N1.X) + (N2.Y-N1.Y)*(N2.Y-N1.Y) + (N2.Z-N1.Z)*(N2.Z-N1.Z) )*1000 as LEN,\n  (\n         select \n         BN2.name\n         from BS_DESIGN_NODE  BDN, BS_DESIGN_ATOM BDA, " +
       s"BS_ATOM_FIXED_ATTRIBUTE BAF, bs_node BN, bs_node BN2\n         where \n         BDN.model_oid=PS.OID AND \n         BDA.BS_DESIGN_NODE_OID=BDN.OID AND\n         BAF.BS_DS_ATOM_OID=BDA.OID AND\n         " +
-      s"BN.OID=BAF.BS_NODE_OID AND\n         BN2.OID=BN.parent_node\n  ) as surface\n  from PLS_ELEM PE ,PIPELINE_SEGMENT PS, SEGMENT S, V_CTRAY_PATTERN_LEVEL TR, NODE N1, NODE N2, ZONE Z, SYSTEMS SYS\n  " +
+      s"BN.OID=BAF.BS_NODE_OID AND\n         BN2.OID=BN.parent_node\n  ) as surface ,TR.DESCR AS TRAYDESCR\n  from PLS_ELEM PE ,PIPELINE_SEGMENT PS, SEGMENT S, V_CTRAY_PATTERN_LEVEL TR, NODE N1, NODE N2, ZONE Z, SYSTEMS SYS\n  " +
       s"where \n   PE.TYPE=PS.TYPE AND PE.ZONE=PS.ZONE AND PE.SYSTEM=PS.SYSTEM AND PE.LINE=PS.LINE AND PE.PLS=PS.SQID AND\n  ((S.NODE1=PE.NODE1 AND S.NODE2=PE.NODE2) OR (S.NODE1=PE.NODE2 AND S.NODE2=PE.NODE1)) AND\n  " +
       s"S.PATTERN=TR.SEQID AND\n  PE.NODE1=N1.SEQID AND PE.NODE2=N2.SEQID AND\n  Z.SEQID=PE.ZONE AND\n  SYS.SEQID=PE.SYSTEM \n  AND Z.NAME in (${zoneNames}) and\n  SYS.NAME in (${systemNames})"
   }
-
-  private def cbxAll()=s"select  \nPE.IDSQ, \n(select USERID from ELEMENT where UUID=PE.UUID) as USERID,\nZ.NAME  as ZONE,\nSYS.NAME  as SYSTEM,\nPE.X_COG, \nPE.Y_COG, \nPE.Z_COG,\nPE.WEIGHT, \nPE.NODE1, \nPE.NODE2, \nPL.TYPE, \nPL.SEAL_TYPE, \nPL.CODE, \nPL.DESCR, \nPL.STOCK_CODE, \n(select userid from pntr_list where FITT_OID=PE.IDSQ) as PENRTRATION \nfrom PLS_ELEM PE, V_CABLE_PENETRATION_LIBRARY PL , ZONE Z, SYSTEMS SYS\nwhere  \nPE.TRAY_FITTING=PL.OID AND \nZ.SEQID=PE.ZONE AND\nSYS.SEQID=PE.SYSTEM  AND\n(PL.SEAL_TYPE='S' OR PL.SEAL_TYPE is null) AND  PL.TYPE=1  \nAND CODE not LIKE 'Обделка%'"
-  private def cbxByZones(zoneNames: String)=s"select  \nPE.IDSQ, \n(select USERID from ELEMENT where UUID=PE.UUID) as USERID,\nZ.NAME  as ZONE,\nSYS.NAME  as SYSTEM,\nPE.X_COG, \nPE.Y_COG, \nPE.Z_COG,\nPE.WEIGHT, \nPE.NODE1, \nPE.NODE2, \nPL.TYPE, \nPL.SEAL_TYPE, \nPL.CODE, \nPL.DESCR, \nPL.STOCK_CODE, \n(select userid from pntr_list where FITT_OID=PE.IDSQ) as PENRTRATION \nfrom PLS_ELEM PE, V_CABLE_PENETRATION_LIBRARY PL , ZONE Z, SYSTEMS SYS\nwhere  \nPE.TRAY_FITTING=PL.OID AND \nZ.SEQID=PE.ZONE AND\nSYS.SEQID=PE.SYSTEM  AND\n(PL.SEAL_TYPE='S' OR PL.SEAL_TYPE is null) AND  PL.TYPE=1  \nAND CODE not LIKE 'Обделка%'AND Z.NAME in (${zoneNames})"
-  private def cbxBySystems(systemNames: String)=s"select  \nPE.IDSQ, \n(select USERID from ELEMENT where UUID=PE.UUID) as USERID,\nZ.NAME  as ZONE,\nSYS.NAME  as SYSTEM,\nPE.X_COG, \nPE.Y_COG, \nPE.Z_COG,\nPE.WEIGHT, \nPE.NODE1, \nPE.NODE2, \nPL.TYPE, \nPL.SEAL_TYPE, \nPL.CODE, \nPL.DESCR, \nPL.STOCK_CODE, \n(select userid from pntr_list where FITT_OID=PE.IDSQ) as PENRTRATION \nfrom PLS_ELEM PE, V_CABLE_PENETRATION_LIBRARY PL , ZONE Z, SYSTEMS SYS\nwhere  \nPE.TRAY_FITTING=PL.OID AND \nZ.SEQID=PE.ZONE AND\nSYS.SEQID=PE.SYSTEM  AND\n(PL.SEAL_TYPE='S' OR PL.SEAL_TYPE is null) AND  PL.TYPE=1  \nAND CODE not LIKE 'Обделка%' AND SYS.NAME in (${systemNames})"
-  private def cbxByZonesAndSystems(zoneNames: String, systemNames: String)=s"select  \nPE.IDSQ, \n(select USERID from ELEMENT where UUID=PE.UUID) as USERID,\nZ.NAME  as ZONE,\nSYS.NAME  as SYSTEM,\nPE.X_COG, \nPE.Y_COG, \nPE.Z_COG,\nPE.WEIGHT, \nPE.NODE1, \nPE.NODE2, \nPL.TYPE, \nPL.SEAL_TYPE, \nPL.CODE, \nPL.DESCR, \nPL.STOCK_CODE, \n(select userid from pntr_list where FITT_OID=PE.IDSQ) as PENRTRATION \nfrom PLS_ELEM PE, V_CABLE_PENETRATION_LIBRARY PL , ZONE Z, SYSTEMS SYS\nwhere  \nPE.TRAY_FITTING=PL.OID AND \nZ.SEQID=PE.ZONE AND\nSYS.SEQID=PE.SYSTEM  AND\n(PL.SEAL_TYPE='S' OR PL.SEAL_TYPE is null) AND  PL.TYPE=1  \nAND CODE not LIKE 'Обделка%'AND Z.NAME in (${zoneNames}) AND SYS.NAME in (${systemNames})"
 
 
 
@@ -59,7 +54,7 @@ trait TrayHelper extends Codecs {
       s"N2.USERID  as NODE2,\n  PE.TRAY_LEVEL,\n  TR.STOCK_CODE,\n  N1.X *1000 as N1X,\n  N1.Y *1000 as N1Y,\n  N1.Z *1000 as N1Z,\n  N2.X *1000 as N2X,\n  N2.Y *1000 as N2Y,\n  N2.Z *1000 as N2Z,\n  " +
       s"SQRT( (N2.X-N1.X)*(N2.X-N1.X) + (N2.Y-N1.Y)*(N2.Y-N1.Y) + (N2.Z-N1.Z)*(N2.Z-N1.Z) )*1000 as LEN,\n  (\n         select \n         BN2.name\n         from BS_DESIGN_NODE  BDN, BS_DESIGN_ATOM BDA, " +
       s"BS_ATOM_FIXED_ATTRIBUTE BAF, bs_node BN, bs_node BN2\n         where \n         BDN.model_oid=PS.OID AND \n         BDA.BS_DESIGN_NODE_OID=BDN.OID AND\n         BAF.BS_DS_ATOM_OID=BDA.OID AND\n         " +
-      s"BN.OID=BAF.BS_NODE_OID AND\n         BN2.OID=BN.parent_node\n  ) as surface\n  from PLS_ELEM PE ,PIPELINE_SEGMENT PS, SEGMENT S, V_CTRAY_PATTERN_LEVEL TR, NODE N1, NODE N2, ZONE Z, SYSTEMS SYS\n  " +
+      s"BN.OID=BAF.BS_NODE_OID AND\n         BN2.OID=BN.parent_node\n  ) as surface ,TR.DESCR AS TRAYDESCR\n  from PLS_ELEM PE ,PIPELINE_SEGMENT PS, SEGMENT S, V_CTRAY_PATTERN_LEVEL TR, NODE N1, NODE N2, ZONE Z, SYSTEMS SYS\n  " +
       s"where \n   PE.TYPE=PS.TYPE AND PE.ZONE=PS.ZONE AND PE.SYSTEM=PS.SYSTEM AND PE.LINE=PS.LINE AND PE.PLS=PS.SQID AND\n  ((S.NODE1=PE.NODE1 AND S.NODE2=PE.NODE2) OR (S.NODE1=PE.NODE2 AND S.NODE2=PE.NODE1)) AND\n  " +
       s"S.PATTERN=TR.SEQID AND\n  PE.NODE1=N1.SEQID AND PE.NODE2=N2.SEQID AND\n  Z.SEQID=PE.ZONE AND\n  SYS.SEQID=PE.SYSTEM \n  AND Z.NAME in (${zoneNames})"
   }
@@ -69,14 +64,30 @@ trait TrayHelper extends Codecs {
       s"N2.USERID  as NODE2,\n  PE.TRAY_LEVEL,\n  TR.STOCK_CODE,\n  N1.X *1000 as N1X,\n  N1.Y *1000 as N1Y,\n  N1.Z *1000 as N1Z,\n  N2.X *1000 as N2X,\n  N2.Y *1000 as N2Y,\n  N2.Z *1000 as N2Z,\n  " +
       s"SQRT( (N2.X-N1.X)*(N2.X-N1.X) + (N2.Y-N1.Y)*(N2.Y-N1.Y) + (N2.Z-N1.Z)*(N2.Z-N1.Z) )*1000 as LEN,\n  (\n         select \n         BN2.name\n         from BS_DESIGN_NODE  BDN, BS_DESIGN_ATOM BDA, " +
       s"BS_ATOM_FIXED_ATTRIBUTE BAF, bs_node BN, bs_node BN2\n         where \n         BDN.model_oid=PS.OID AND \n         BDA.BS_DESIGN_NODE_OID=BDN.OID AND\n         BAF.BS_DS_ATOM_OID=BDA.OID AND\n         " +
-      s"BN.OID=BAF.BS_NODE_OID AND\n         BN2.OID=BN.parent_node\n  ) as surface\n  from PLS_ELEM PE ,PIPELINE_SEGMENT PS, SEGMENT S, V_CTRAY_PATTERN_LEVEL TR, NODE N1, NODE N2, ZONE Z, SYSTEMS SYS\n  " +
+      s"BN.OID=BAF.BS_NODE_OID AND\n         BN2.OID=BN.parent_node\n  ) as surface ,TR.DESCR AS TRAYDESCR\n  from PLS_ELEM PE ,PIPELINE_SEGMENT PS, SEGMENT S, V_CTRAY_PATTERN_LEVEL TR, NODE N1, NODE N2, ZONE Z, SYSTEMS SYS\n  " +
       s"where \n   PE.TYPE=PS.TYPE AND PE.ZONE=PS.ZONE AND PE.SYSTEM=PS.SYSTEM AND PE.LINE=PS.LINE AND PE.PLS=PS.SQID AND\n  ((S.NODE1=PE.NODE1 AND S.NODE2=PE.NODE2) OR (S.NODE1=PE.NODE2 AND S.NODE2=PE.NODE1)) AND\n  " +
       s"S.PATTERN=TR.SEQID AND\n  PE.NODE1=N1.SEQID AND PE.NODE2=N2.SEQID AND\n  Z.SEQID=PE.ZONE AND\n  SYS.SEQID=PE.SYSTEM \n  and\n  SYS.NAME in (${systemNames})"
   }
 
+/*  private def allTraysSql(): String = {
+    s"select STOCK_CODE, sum(WEIGHT) as WEIGHT, sum(LEN) as LEN\nfrom\n    (\n    select   \n              TR.STOCK_CODE,\n              PE.WEIGHT,\n              " +
+      s"SQRT( (N2.X-N1.X)*(N2.X-N1.X) + (N2.Y-N1.Y)*(N2.Y-N1.Y) + (N2.Z-N1.Z)*(N2.Z-N1.Z) )*1000 as LEN\n              from PLS_ELEM PE ,PIPELINE_SEGMENT PS, SEGMENT S, V_CTRAY_PATTERN_LEVEL TR, NODE N1, NODE N2, ZONE Z, SYSTEMS SYS\n   " +
+      s"where \n              PE.TYPE=PS.TYPE AND PE.ZONE=PS.ZONE AND PE.SYSTEM=PS.SYSTEM AND PE.LINE=PS.LINE AND PE.PLS=PS.SQID AND\n              ((S.NODE1=PE.NODE1 AND S.NODE2=PE.NODE2) OR (S.NODE1=PE.NODE2 AND S.NODE2=PE.NODE1)) AND\n  " +
+      s"S.PATTERN=TR.SEQID AND\n              PE.NODE1=N1.SEQID AND PE.NODE2=N2.SEQID AND\n              Z.SEQID=PE.ZONE AND\n              SYS.SEQID=PE.SYSTEM   ) \n  group by STOCK_CODE"
+  }*/
   private def allTraysSql(): String = {
-    s"select STOCK_CODE, sum(WEIGHT) as WEIGHT, sum(LEN) as LEN\nfrom\n    (\n    select   \n              TR.STOCK_CODE,\n              PE.WEIGHT,\n              SQRT( (N2.X-N1.X)*(N2.X-N1.X) + (N2.Y-N1.Y)*(N2.Y-N1.Y) + (N2.Z-N1.Z)*(N2.Z-N1.Z) )*1000 as LEN\n              from PLS_ELEM PE ,PIPELINE_SEGMENT PS, SEGMENT S, V_CTRAY_PATTERN_LEVEL TR, NODE N1, NODE N2, ZONE Z, SYSTEMS SYS\n              where \n              PE.TYPE=PS.TYPE AND PE.ZONE=PS.ZONE AND PE.SYSTEM=PS.SYSTEM AND PE.LINE=PS.LINE AND PE.PLS=PS.SQID AND\n              ((S.NODE1=PE.NODE1 AND S.NODE2=PE.NODE2) OR (S.NODE1=PE.NODE2 AND S.NODE2=PE.NODE1)) AND\n              S.PATTERN=TR.SEQID AND\n              PE.NODE1=N1.SEQID AND PE.NODE2=N2.SEQID AND\n              Z.SEQID=PE.ZONE AND\n              SYS.SEQID=PE.SYSTEM   ) \n  group by STOCK_CODE"
+    s"select   \n  PE.IDSQ,\n  PS.OID as FDS_MODEL,\n  Z.NAME  as ZONE,\n  SYS.NAME  as SYSTEM,\n  PE.LINE,\n  PE.PLS,\n  PE.ELEM,\n  PE.WEIGHT,\n  PE.X_COG,\n  PE.Y_COG,\n  PE.Z_COG,\n  PE.CTYPE,\n  PE.TYPE,\n  N1.USERID  as NODE1,\n   " +
+      s"N2.USERID  as NODE2,\n  PE.TRAY_LEVEL,\n  TR.STOCK_CODE,\n  N1.X *1000 as N1X,\n  N1.Y *1000 as N1Y,\n  N1.Z *1000 as N1Z,\n  N2.X *1000 as N2X,\n  N2.Y *1000 as N2Y,\n  N2.Z *1000 as N2Z,\n  " +
+      s"SQRT( (N2.X-N1.X)*(N2.X-N1.X) + (N2.Y-N1.Y)*(N2.Y-N1.Y) + (N2.Z-N1.Z)*(N2.Z-N1.Z) )*1000 as LEN,\n  (\n         select \n         BN2.name\n         from BS_DESIGN_NODE  BDN, BS_DESIGN_ATOM BDA, " +
+      s"BS_ATOM_FIXED_ATTRIBUTE BAF, bs_node BN, bs_node BN2\n         where \n         BDN.model_oid=PS.OID AND \n         BDA.BS_DESIGN_NODE_OID=BDN.OID AND\n         BAF.BS_DS_ATOM_OID=BDA.OID AND\n         " +
+      s"BN.OID=BAF.BS_NODE_OID AND\n         BN2.OID=BN.parent_node\n  ) as surface ,TR.DESCR AS TRAYDESCR\n  from PLS_ELEM PE ,PIPELINE_SEGMENT PS, SEGMENT S, V_CTRAY_PATTERN_LEVEL TR, NODE N1, NODE N2, ZONE Z, SYSTEMS SYS\n  " +
+      s"where \n   PE.TYPE=PS.TYPE AND PE.ZONE=PS.ZONE AND PE.SYSTEM=PS.SYSTEM AND PE.LINE=PS.LINE AND PE.PLS=PS.SQID AND\n  ((S.NODE1=PE.NODE1 AND S.NODE2=PE.NODE2) OR (S.NODE1=PE.NODE2 AND S.NODE2=PE.NODE1)) AND\n  " +
+      s"S.PATTERN=TR.SEQID AND\n  PE.NODE1=N1.SEQID AND PE.NODE2=N2.SEQID AND\n  Z.SEQID=PE.ZONE AND\n  SYS.SEQID=PE.SYSTEM"
   }
+  private def cbxAll()=s"select  \nPE.IDSQ, \n(select USERID from ELEMENT where UUID=PE.UUID) as USERID,\nZ.NAME  as ZONE,\nSYS.NAME  as SYSTEM,\nPE.X_COG, \nPE.Y_COG, \nPE.Z_COG,\nPE.WEIGHT, \nPE.NODE1, \nPE.NODE2, \nPL.TYPE, \nPL.SEAL_TYPE, \nPL.CODE, \nPL.DESCR, \nPL.STOCK_CODE, \n(select userid from pntr_list where FITT_OID=PE.IDSQ) as PENRTRATION \nfrom PLS_ELEM PE, V_CABLE_PENETRATION_LIBRARY PL , ZONE Z, SYSTEMS SYS\nwhere  \nPE.TRAY_FITTING=PL.OID AND \nZ.SEQID=PE.ZONE AND\nSYS.SEQID=PE.SYSTEM  AND\n(PL.SEAL_TYPE='S' OR PL.SEAL_TYPE is null) AND  PL.TYPE=1  \nAND CODE not LIKE 'Обделка%'"
+  private def cbxByZones(zoneNames: String)=s"select  \nPE.IDSQ, \n(select USERID from ELEMENT where UUID=PE.UUID) as USERID,\nZ.NAME  as ZONE,\nSYS.NAME  as SYSTEM,\nPE.X_COG, \nPE.Y_COG, \nPE.Z_COG,\nPE.WEIGHT, \nPE.NODE1, \nPE.NODE2, \nPL.TYPE, \nPL.SEAL_TYPE, \nPL.CODE, \nPL.DESCR, \nPL.STOCK_CODE, \n(select userid from pntr_list where FITT_OID=PE.IDSQ) as PENRTRATION \nfrom PLS_ELEM PE, V_CABLE_PENETRATION_LIBRARY PL , ZONE Z, SYSTEMS SYS\nwhere  \nPE.TRAY_FITTING=PL.OID AND \nZ.SEQID=PE.ZONE AND\nSYS.SEQID=PE.SYSTEM  AND\n(PL.SEAL_TYPE='S' OR PL.SEAL_TYPE is null) AND  PL.TYPE=1  \nAND CODE not LIKE 'Обделка%'AND Z.NAME in (${zoneNames})"
+  private def cbxBySystems(systemNames: String)=s"select  \nPE.IDSQ, \n(select USERID from ELEMENT where UUID=PE.UUID) as USERID,\nZ.NAME  as ZONE,\nSYS.NAME  as SYSTEM,\nPE.X_COG, \nPE.Y_COG, \nPE.Z_COG,\nPE.WEIGHT, \nPE.NODE1, \nPE.NODE2, \nPL.TYPE, \nPL.SEAL_TYPE, \nPL.CODE, \nPL.DESCR, \nPL.STOCK_CODE, \n(select userid from pntr_list where FITT_OID=PE.IDSQ) as PENRTRATION \nfrom PLS_ELEM PE, V_CABLE_PENETRATION_LIBRARY PL , ZONE Z, SYSTEMS SYS\nwhere  \nPE.TRAY_FITTING=PL.OID AND \nZ.SEQID=PE.ZONE AND\nSYS.SEQID=PE.SYSTEM  AND\n(PL.SEAL_TYPE='S' OR PL.SEAL_TYPE is null) AND  PL.TYPE=1  \nAND CODE not LIKE 'Обделка%' AND SYS.NAME in (${systemNames})"
+  private def cbxByZonesAndSystems(zoneNames: String, systemNames: String)=s"select  \nPE.IDSQ, \n(select USERID from ELEMENT where UUID=PE.UUID) as USERID,\nZ.NAME  as ZONE,\nSYS.NAME  as SYSTEM,\nPE.X_COG, \nPE.Y_COG, \nPE.Z_COG,\nPE.WEIGHT, \nPE.NODE1, \nPE.NODE2, \nPL.TYPE, \nPL.SEAL_TYPE, \nPL.CODE, \nPL.DESCR, \nPL.STOCK_CODE, \n(select userid from pntr_list where FITT_OID=PE.IDSQ) as PENRTRATION \nfrom PLS_ELEM PE, V_CABLE_PENETRATION_LIBRARY PL , ZONE Z, SYSTEMS SYS\nwhere  \nPE.TRAY_FITTING=PL.OID AND \nZ.SEQID=PE.ZONE AND\nSYS.SEQID=PE.SYSTEM  AND\n(PL.SEAL_TYPE='S' OR PL.SEAL_TYPE is null) AND  PL.TYPE=1  \nAND CODE not LIKE 'Обделка%'AND Z.NAME in (${zoneNames}) AND SYS.NAME in (${systemNames})"
 
   private val duration: FiniteDuration = Duration(2, SECONDS)
 
@@ -124,6 +135,7 @@ trait TrayHelper extends Codecs {
                 Option[Double](rs.getDouble("N2Z")).getOrElse(0),
                 Option[Double](rs.getDouble("LEN")).getOrElse(0),
                 Option[String](rs.getString("SURFACE")).getOrElse(""),
+                Option[String](rs.getString("TRAYDESCR")).getOrElse(""),
                 marign,
                 materialId
               )
@@ -189,6 +201,7 @@ trait TrayHelper extends Codecs {
               Option[Double](rs.getDouble("N2Z")).getOrElse(0),
               Option[Double](rs.getDouble("LEN")).getOrElse(0),
               Option[String](rs.getString("SURFACE")).getOrElse(""),
+              Option[String](rs.getString("TRAYDESCR")).getOrElse(""),
               marign,
               materialId
             )
