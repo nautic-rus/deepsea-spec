@@ -42,11 +42,15 @@ object EleEqTrayESKDReport {
 
   def generatePdfToFileWithRev(project: String, complectName: String, path: String, rev:String="0"): List[String] = {
     val parts: EleComplectParts = retrieveAllPartsByComplectName(project, complectName)
+
     val item11Columns: List[Item11Columns] = {
       val n1 = "Электрооборудование устанавливаемое заводом-строителем"
       val n2 = "Электрооборудование устанавливаемое электромонтажным предприятием"
       val buff = ListBuffer.empty[Item11Columns]
       val parttitions = parts.eqs.partition(x => x.workShopMaterial.singleWeight > 50)
+
+      val eqSupports=ListBuffer.empty[Item11Columns]
+
       if (parttitions._1.nonEmpty) {
         buff += Item11Columns(true, n1.toUpperCase())
         parttitions._1.groupBy(s => s.SYSTEM_DESCR).toList.sortBy(s => s._1).foreach(gr => {
@@ -66,7 +70,7 @@ object EleEqTrayESKDReport {
               A11 = eq.ZONE_NAME
 
             )
-            eq.SUPPORTS.sortBy(d => d.label).foreach(supp => {
+            eq.SUPPORTS.filter(s=>s.label.contains(".")).sortBy(d => d.label).foreach(supp => {
               buff += Item11Columns(
                 A1 = supp.label,
                 A2 = "",
@@ -81,9 +85,25 @@ object EleEqTrayESKDReport {
                 A11 = eq.ZONE_NAME
               )
             })
+            eq.SUPPORTS.filter(s=> !s.label.contains(".")).sortBy(d => d.label).foreach(supp => {
+              eqSupports += Item11Columns(
+                A1 = supp.label,
+                A2 = "",
+                A3 = supp.workShopMaterial.description,
+                A4 = supp.workShopMaterial.name,
+                A5 = supp.workShopMaterial.trmCode,
+                A6 = supp.kei,
+                A7 = supp.qty.toString,
+                A8 = String.format("%.2f", supp.workShopMaterial.singleWeight),
+                A9 = String.format("%.2f", (supp.workShopMaterial.singleWeight * supp.qty)),
+                A10 = supp.workShopMaterial.category,
+                A11 = ""
+              )
+            })
           })
         })
       }
+
       if (parttitions._2.nonEmpty) {
         buff += Item11Columns(true, n2.toUpperCase())
         parttitions._2.groupBy(s => s.SYSTEM_DESCR).toList.sortBy(s => s._1).foreach(gr => {
@@ -102,7 +122,7 @@ object EleEqTrayESKDReport {
               A11 = eq.ZONE_NAME
 
             )
-            eq.SUPPORTS.sortBy(d => d.label).foreach(supp => {
+            eq.SUPPORTS.filter(s=>s.label.contains(".")).sortBy(d => d.label).foreach(supp => {
               buff += Item11Columns(
                 A1 = supp.label,
                 A2 = "",
@@ -117,9 +137,26 @@ object EleEqTrayESKDReport {
                 A11 = eq.ZONE_NAME
               )
             })
+            eq.SUPPORTS.filter(s=> !s.label.contains(".")).sortBy(d => d.label).foreach(supp => {
+              eqSupports += Item11Columns(
+                A1 = supp.label,
+                A2 = "",
+                A3 = supp.workShopMaterial.description,
+                A4 = supp.workShopMaterial.name,
+                A5 = supp.workShopMaterial.trmCode,
+                A6 = supp.kei,
+                A7 = supp.qty.toString,
+                A8 = String.format("%.2f", supp.workShopMaterial.singleWeight),
+                A9 = String.format("%.2f", (supp.workShopMaterial.singleWeight * supp.qty)),
+                A10 = supp.workShopMaterial.category,
+                A11 = ""
+              )
+            })
           })
         })
       }
+
+
       val supports: List[MountItem] = {
         val suppBuffer = ListBuffer.empty[MountItem]
         parts.trays.foreach(tr => {
@@ -131,6 +168,7 @@ object EleEqTrayESKDReport {
 
       val supportsRows: List[Item11Columns] = {
         val buffer = ListBuffer.empty[Item11Columns]
+        buffer++=eqSupports
         supports.groupBy(s => s.workShopMaterial.trmCode).toList.foreach(group => {
           if (group._2.nonEmpty) {
             val item = group._2.head
@@ -182,6 +220,8 @@ object EleEqTrayESKDReport {
       }
       buff.toList
     }
+
+
     val docName: DocName = DocName(num = parts.complect.drawingId, name = parts.complect.drawingDescr, lastRev = rev, userDev = "Сидоров")
     val pdfPath = s"${path}/${docName.num}_${docName.name}_rev${docName.lastRev}.pdf"
     val retPath = List[String](pdfPath)

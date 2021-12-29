@@ -188,8 +188,8 @@ object TrayManager extends TrayHelper with Codecs {
               case Some(value) => buffMounts += MountItem(findWorkshopMaterial(value.trmCode, materials), TrayMountData(value.label, value.trmCode).label, item.kei, item.count * item.lenghtFactor * foranTray.LEN / 1000, item.isNeedLabel)
               case None => MountItem()
             }
-          case "43;" =>
-            mountData.find(s => s.typeId == 43 && s.matId == clickTrayMontData.matId) match {
+          case "66;" =>
+            mountData.find(s => s.typeId == 66 && s.matId == clickTrayMontData.matId) match {
               case Some(value) => buffMounts += MountItem(findWorkshopMaterial(value.trmCode, materials), TrayMountData(value.label, value.trmCode).label, item.kei, item.count * item.lenghtFactor * foranTray.LEN / 1000, item.isNeedLabel)
               case None => MountItem()
             }
