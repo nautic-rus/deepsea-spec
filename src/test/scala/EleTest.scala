@@ -7,9 +7,9 @@ class EleTest extends AnyFunSuite{
   org.apache.log4j.BasicConfigurator.configure()
   //val b=eqsByComplect("P701","170701-884-6004")
 
+  val complects: String =retrieveEleComplectsJsonString("P701")
+  val jjj: EleComplectParts = retrieveAllPartsByComplectName("P701","170701-884-5007")//"170701-884-1001"
 
-   // val complects: String =retrieveEleComplectsJsonString("P701")
-    val jjj: EleComplectParts = retrieveAllPartsByComplectName("P701","170701-884-5007")//"170701-884-1001"
 
 
 

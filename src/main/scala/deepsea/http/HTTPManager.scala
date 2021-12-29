@@ -12,8 +12,8 @@ import akka.util.Timeout
 import deepsea.App
 import deepsea.actors.ActorManager
 import deepsea.actors.ActorStartupManager.HTTPManagerStarted
-import deepsea.elec.ElecManager.{GetCablesByNodes, GetCablesByTray, GetEqLabels, GetTrayLabels, GetTraysByZonesAndSystems}
-import deepsea.hull.HullManager.{GetHullEsp, GetHullParts, GetHullPartsByDocNumber, GetHullPartsExcel, SetHullPartsByDocNumber}
+import deepsea.elec.ElecManager.{GenerateTrayPdf, GetCablesByNodes, GetCablesByTray, GetEqLabels, GetHoleLabel, GetTrayBundles, GetTrayLabels, GetTraysByZonesAndSystems}
+import deepsea.hull.HullManager.{GetHullEsp, GetHullPart, GetHullParts, GetHullPartsByDocNumber, GetHullPartsExcel, SetHullPartsByDocNumber}
 import deepsea.spec.SpecManager.{GetHullBlocks, GetHullPartListFromBsTree, SetHullPartListFromBsTree}
 import org.apache.log4j.{LogManager, Logger}
 import play.api.libs.json.{JsValue, Json}
@@ -28,7 +28,7 @@ object HTTPManager {
 class HTTPManager extends Actor {
   implicit val system: ActorSystem[Nothing] = ActorSystem(Behaviors.empty, "http")
   implicit val executionContext: ExecutionContextExecutor = system.executionContext
-  implicit val timeout: Timeout = Timeout(30, TimeUnit.SECONDS)
+  implicit val timeout: Timeout = Timeout(300, TimeUnit.SECONDS)
   val logger: Logger = LogManager.getLogger("HttpManager")
   var server: Future[Http.ServerBinding] = _
   val routes: Route = {
@@ -40,13 +40,22 @@ class HTTPManager extends Actor {
       (get & path("hullPartList") & parameter("project") & parameter("docNumber")) { (project, docNumber) =>
         askFor(ActorManager.hullManager, GetHullPartsByDocNumber(project, docNumber))
       },
+      (get & path("hullPart") & parameter("project") & parameter("docNumber") & parameter("partCode")) { (project, docNumber, partCode) =>
+        askFor(ActorManager.hullManager, GetHullPart(project, docNumber, partCode))
+      },
       (get & path("setHullPartList") & parameter("project") & parameter("docNumber") & parameter("user") & parameter("revision")) { (project, docNumber, user, revision) =>
         askFor(ActorManager.hullManager, SetHullPartsByDocNumber(project, docNumber, user, revision))
       },
       (get & path("foranPartsExcel") & parameter("project")) { (project) =>
         askFor(ActorManager.hullManager, GetHullPartsExcel(project))
       },
-      (get & path("hullEsp") & parameter("docNumber")) { (docNumber) =>
+      (get & path("hullEsp") & parameter("docNumber") & parameter("revision")) { (docNumber, revision) =>
+        askFor(ActorManager.hullManager, GetHullEsp(docNumber, revision))
+      },
+      (get & path("esp") & parameter("docNumber") & parameter("revision")) { (docNumber, revision) =>
+        askFor(ActorManager.hullManager, GetHullEsp(docNumber, revision))
+      },
+      (get & path("esp") & parameter("docNumber")) { (docNumber) =>
         askFor(ActorManager.hullManager, GetHullEsp(docNumber))
       },
 
@@ -63,8 +72,19 @@ class HTTPManager extends Actor {
       (get & path("eqLabels") & parameter("project") & parameter("seqId")) { (project, seqId) =>
         askFor(ActorManager.elec, GetEqLabels(project, seqId))
       },
-      (get & path("traysByZonesAndSystems") & parameter("project") & parameter("zones") & parameter("systems")) { (project, zones, systems) =>
-        askFor(ActorManager.elec, GetTraysByZonesAndSystems(project, zones, systems))
+      (get & path("elecHoleLabel") & parameter("project") & parameter("seqId")) { (project, seqId) =>
+        askFor(ActorManager.elec, GetHoleLabel(project, seqId))
+      },
+
+      //ELEC TOOLS
+      (get & path("trayBundles") & parameter("project")) { (project) =>
+        askFor(ActorManager.elec, GetTrayBundles(project))
+      },
+      (get & path("traysByZonesAndSystems") & parameter("project") & parameter("docNumber")) { (project, docNumber) =>
+        askFor(ActorManager.elec, GetTraysByZonesAndSystems(project, docNumber))
+      },
+      (get & path("traySpec") & parameter("project") & parameter("docNumber") & parameter("revision")) { (project, docNumber, revision) =>
+        askFor(ActorManager.elec, GenerateTrayPdf(project, docNumber, revision))
       },
     )
   }

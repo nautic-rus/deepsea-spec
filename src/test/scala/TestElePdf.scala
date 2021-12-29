@@ -11,6 +11,7 @@ import local.pdf.ru.common.ReportCommon.{DocName, Item11Columns}
 import local.pdf.ru.ele.EleEqTrayESKDReport
 import local.pdf.ru.ele.EleEqTrayESKDReport.{generatePdfToFileNoRev, generatePdfToFileWithRev}
 
+import java.nio.file.Files
 import scala.collection.mutable.ListBuffer
 import scala.io.{BufferedSource, Source}
 

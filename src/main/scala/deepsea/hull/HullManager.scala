@@ -4,13 +4,29 @@ import akka.actor.Actor
 import com.mongodb.BasicDBObject
 import deepsea.App
 import deepsea.database.DatabaseManager.GetOracleConnection
-import deepsea.hull.HullManager.{GetHullEsp, GetHullParts, GetHullPartsByDocNumber, GetHullPartsExcel, HullEsp, HullPartPlateDef, HullPartProfileDef, SetHullPartsByDocNumber}
+import deepsea.hull.HullManager.{GetHullEsp, GetHullPart, GetHullParts, GetHullPartsByDocNumber, GetHullPartsExcel, HullEsp, HullPartPlateDef, HullPartProfileDef, SetHullPartsByDocNumber}
 import deepsea.hull.classes.HullPart
-import local.hull.BStree.{BsTreeItem, PartList}
-import local.sql.ConnectionManager.mongoClient
+import io.circe.{Decoder, Encoder}
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import local.sql.MongoDB
+import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
+import org.bson.codecs.configuration.CodecRegistry
+import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
+import org.mongodb.scala.{Document, MongoCollection, MongoDatabase}
+import org.mongodb.scala.bson.codecs.Macros._
+import org.mongodb.scala.model.Filters.equal
+
+import scala.concurrent.Await
+import scala.concurrent.duration.{Duration, FiniteDuration, SECONDS}
+import io.circe._
+import io.circe.parser._
+import io.circe.generic.auto._
+import io.circe.syntax._
+import io.circe.generic.semiauto._
+import local.hull.BStree.BsTreeItem
+import local.hull.PartManager.{ForanPartsByDrawingNum, PrdPart, genForanPartLabelByDrawingNumAndPartNameJSON, genForanPartsByDrawingNumJSON}
+import local.sql.MongoDB.mongoClient
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
-import org.mongodb.scala.Document
-import play.api.libs.json.{Json, OWrites}
 
 import java.io.{File, FileOutputStream}
 import java.nio.file.Files
@@ -18,37 +34,55 @@ import java.sql.ResultSet
 import java.util.zip.{ZipEntry, ZipOutputStream}
 import java.util.{Date, UUID}
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.Await
-import scala.concurrent.duration.{Duration, SECONDS}
 import scala.io.Source
 
 
 object HullManager {
   case class GetHullParts(project: String)
   case class GetHullPartsExcel(project: String)
-  case class GetHullEsp(docNumber: String)
+  case class GetHullEsp(docNumber: String, revision: String = "")
   case class GetHullPartsByDocNumber(project: String, docNumber: String)
+  case class GetHullPart(project: String, docNumber: String, partCode: String)
   case class SetHullPartsByDocNumber(project: String, docNumber: String, user: String, revision: String)
 
   case class HullPartPlateDef(PART_OID: Int, MATERIAL: String, MATERIAL_OID: Int, THICK: Double, STOCK_CODE: String)
   case class HullPartProfileDef(KSE: Int, SECTION: Int, WEB_HEIGHT: Double, WEB_THICKNESS: Double, FLANGE_HEIGHT: Double, FLANGE_THICKNESS: Double, MATERIAL: String, MATERIAL_OID: Int, STOCK_CODE: String)
 
-  case class HullEsp(project: String, content: ListBuffer[HullPart], var docNumber: String, var user: String,  var revision: String, var date: Long, var version: Int)
-  implicit val writesHullPartList: OWrites[HullEsp] = Json.writes[HullEsp]
+  case class HullEsp(project: String, department: String, content: List[PrdPart], var docNumber: String, var user: String,  var revision: String, var date: Long, var version: Int)
+  implicit val HullEspDecoder: Decoder[HullEsp] = deriveDecoder[HullEsp]
+  implicit val HullEspEncoder: Encoder[HullEsp] = deriveEncoder[HullEsp]
+
 
 }
 
 class HullManager extends Actor {
+
+  private val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
+    classOf[HullEsp],
+    classOf[PrdPart],
+  ), DEFAULT_CODEC_REGISTRY)
+
   override def receive: Receive = {
     case GetHullParts(project) => sender() ! getHullParts(project)
-    case GetHullEsp(docNumber) =>
+    case GetHullEsp(docNumber, revision) =>
       val mongo = mongoClient()
-      val partLists = mongo.getDatabase(App.conf.getString("mongo.db")).getCollection("partLists")
-      Await.result(partLists.find[HullEsp](new BasicDBObject("docNumber", docNumber)).first().toFuture(), Duration(10, SECONDS)) match {
+      val partLists = mongo.getDatabase(App.conf.getString("mongo.db")).getCollection("partLists").withCodecRegistry(codecRegistry)
+      val partListsHistory = mongo.getDatabase(App.conf.getString("mongo.db")).getCollection("partListsHistory").withCodecRegistry(codecRegistry)
+      val dbObject = new BasicDBObject()
+      dbObject.put("docNumber", docNumber)
+      if (revision != ""){
+        dbObject.put("revision", revision)
+      }
+      Await.result(partLists.find[HullEsp](dbObject).first().toFuture(), Duration(10, SECONDS)) match {
         case existSP: HullEsp =>
-          sender() ! Json.toJson(existSP)
+          sender() ! existSP.asJson.noSpaces
         case _ =>
-          sender() ! "not found"
+          Await.result(partListsHistory.find[HullEsp](dbObject).first().toFuture(), Duration(10, SECONDS)) match {
+            case existSP: HullEsp =>
+              sender() ! existSP.asJson.noSpaces
+            case _ =>
+              sender() ! "not found"
+          }
       }
     case GetHullPartsExcel(project) =>
       val parts = getHullParts(project)
@@ -190,25 +224,27 @@ class HullManager extends Actor {
       val fileUrl = App.Cloud.Url + "/" + pathId + "/" + fileName
 
       sender() ! fileUrl
-    case GetHullPartsByDocNumber(project, docNumber) => sender() ! Json.toJson(getHullPartsByDocNumber(project, docNumber))
+    case GetHullPartsByDocNumber(project, docNumber) => sender() ! genForanPartsByDrawingNumJSON(project,docNumber)
+    case GetHullPart(project, docNumber, partCode) => sender() ! genForanPartLabelByDrawingNumAndPartNameJSON(project, docNumber, partCode)
 
     case SetHullPartsByDocNumber(project, docNumber, user, revision) =>
-      val hullParts = getHullPartsByDocNumber(project, docNumber)
+      val hullParts = ForanPartsByDrawingNum(project, docNumber).sortBy(s=>s.PART_CODE)
       val mongo = mongoClient()
-      val partLists = mongo.getDatabase(App.conf.getString("mongo.db")).getCollection("partLists")
-      val partListsHistory = mongo.getDatabase(App.conf.getString("mongo.db")).getCollection("partListsHistory")
+      val partLists = mongo.getDatabase(App.conf.getString("mongo.db")).getCollection("partLists").withCodecRegistry(codecRegistry)
+      val partListsHistory = mongo.getDatabase(App.conf.getString("mongo.db")).getCollection("partListsHistory").withCodecRegistry(codecRegistry)
 
       var version = 0
       Await.result(partLists.find[HullEsp](new BasicDBObject("docNumber", docNumber)).first().toFuture(), Duration(10, SECONDS)) match {
         case existSP: HullEsp =>
           version = existSP.version + 1
-          Await.result(partListsHistory.insertOne(Document.apply(Json.toJson(existSP).toString())).toFuture(), Duration(100, SECONDS))
+          Await.result(partListsHistory.insertOne(Document.apply(existSP.asJson.noSpaces)).toFuture(), Duration(10, SECONDS))
+          Await.result(partLists.deleteOne(new BasicDBObject("docNumber", docNumber)).toFuture(), Duration(10, SECONDS))
         case _ => None
       }
 
       val date = new Date().getTime
-      val hullPartList = HullEsp(project, hullParts, docNumber, user, revision, date, version)
-      Await.result(partLists.insertOne(Document.apply(Json.toJson(hullPartList).toString())).toFuture(), Duration(100, SECONDS))
+      val hullPartList = HullEsp(project, "hull", hullParts, docNumber, user, revision, date, version)
+      Await.result(partLists.insertOne(Document.apply(hullPartList.asJson.noSpaces)).toFuture(), Duration(10, SECONDS))
 
       sender() ! "success"
   }

@@ -17,6 +17,7 @@ object ActorManager {
   var hullManager: ActorRef = _
   var dataBase: ActorRef = _
   var elec: ActorRef = _
+  var files: ActorRef = _
 
   def init(): Unit ={
     system = ActorSystem()
