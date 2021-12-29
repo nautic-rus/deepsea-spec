@@ -19,7 +19,6 @@ class StressTest extends AnyFunSuite{
     res += cableBoxBySeqId("P701","18621400")
     res += TrayManager.genCablesByTraySeqId("P701","17157449")
     res += genEqLabelsByEqOid("P701","9031306")
-    res += tarysByZonesSystemsJson("P701", List("5318"),List("884-6009"))
     val step = res(x)
   })
 }
