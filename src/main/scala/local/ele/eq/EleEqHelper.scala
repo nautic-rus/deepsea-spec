@@ -90,14 +90,21 @@ trait EleEqHelper {
             val userId:String=if(eq.NODE_USERID.equals(eq.USERID)) eq.USERID else eq.NODE_USERID
             val marigin: Int = calcH(eq)
             val wmat: WorkShopMaterial = findWorkshopMaterialContains(eq.STOCK_CODE, wmats)
+            rs.close()
+            stmt.close()
+            connection.close()
             EleEq(eq.OID, label, eq.TYPE, userId, eq.ZONE_SEQID, eq.ZONE_NAME, eq.ZONE_DESCR, eq.SYSTEM_SEQID, eq.SYSTEM_NAME, eq.SYSTEM_DESCR, eq.ABBREV, eq.XCOG, eq.YCOG, eq.ZCOG, eq.WEIGHT, eq.STOCK_CODE, eq.CLASS_NAME, eq.SURFACE, marigin, supports, wmat)
           } else {
+            rs.close()
+            stmt.close()
+            connection.close()
             EleEq()
           }
         }
         catch {
           case x: Throwable =>
             println(x.toString)
+            connection.close()
             EleEq()
         }
       }
@@ -166,7 +173,9 @@ trait EleEqHelper {
           buff.toList
         }
         catch {
-          case x: Throwable => buff.toList
+          case x: Throwable =>
+            connection.close()
+            buff.toList
         }
       }
       case None => buff.toList

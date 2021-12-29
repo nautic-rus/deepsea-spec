@@ -74,7 +74,9 @@ trait PartHelper {
           ret.toList
         }
         catch {
-          case _: Throwable => List.empty[PrdPart]
+          case _: Throwable =>
+            connection.close()
+            List.empty[PrdPart]
         }
       }
       case None => List.empty[PrdPart]
@@ -140,7 +142,9 @@ trait PartHelper {
           ret.toList
         }
         catch {
-          case _: Throwable => List.empty[PrdPart]
+          case _: Throwable =>
+            connection.close()
+            List.empty[PrdPart]
         }
       }
       case None => List.empty[PrdPart]

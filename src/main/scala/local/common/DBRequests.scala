@@ -59,7 +59,9 @@ object DBRequests extends Codecs{
           buffer.toList
         }
         catch {
-          case _: Throwable => List.empty[ZoneSystem]
+          case _: Throwable =>
+            connection.close()
+            List.empty[ZoneSystem]
         }
       }
       case None => List.empty[ZoneSystem]

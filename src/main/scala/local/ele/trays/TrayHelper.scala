@@ -148,7 +148,9 @@ trait TrayHelper extends Codecs {
           ret
         }
         catch {
-          case _: Throwable => ForanTray()
+          case _: Throwable =>
+            connection.close()
+            ForanTray()
         }
       }
       case None => ForanTray()
@@ -214,6 +216,7 @@ trait TrayHelper extends Codecs {
         }
         catch {
           case _: Throwable =>
+            connection.close()
             List.empty[ForanTray]
         }
       }
@@ -261,6 +264,7 @@ trait TrayHelper extends Codecs {
         }
         catch {
           case _: Throwable =>
+            connection.close()
             List.empty[ForanCBX]
         }
       }
@@ -288,7 +292,9 @@ trait TrayHelper extends Codecs {
           buffer.toList
         }
         catch {
-          case _: Throwable => List.empty[String]
+          case _: Throwable =>
+            connection.close()
+            List.empty[String]
         }
       }
       case None => List.empty[String]
@@ -311,7 +317,9 @@ trait TrayHelper extends Codecs {
           buffer.toList
         }
         catch {
-          case _: Throwable => List.empty[String]
+          case _: Throwable =>
+            connection.close()
+            List.empty[String]
         }
       }
       case None => List.empty[String]

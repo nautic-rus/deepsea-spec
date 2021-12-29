@@ -47,7 +47,9 @@ trait CableBoxHelper {
           ret
         }
         catch {
-          case _: Throwable =>  ForanCableBox()
+          case _: Throwable =>
+            connection.close()
+            ForanCableBox()
         }
       }
       case None =>  ForanCableBox()
