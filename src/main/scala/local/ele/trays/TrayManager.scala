@@ -80,10 +80,10 @@ object TrayManager extends TrayHelper with Codecs {
     val clickTray: ForanTray = TrayBySeqId(project, trayIdSeq)
     val materials = retrieveAllMaterialsByProject(project)
     val tray = calculateTrayMountDate(project, clickTray, mountData, mountRules, materials, traysMountData)
-    ret += "V=" + clickTray.marign.toString
+    if(clickTray.marign!=0) ret += "V=" + clickTray.marign.toString
     ret += tray.mountData.label
     tray.supports.sortBy(d => d.label).foreach(s => ret += s.label)
-    ret.toList
+    ret.distinct.toList
   }
 
   def tarysByZonesSystems(project: String, zones: List[String], systems: List[String]): List[Tray] = {

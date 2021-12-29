@@ -27,40 +27,40 @@ trait PartHelper {
           val ret = ListBuffer.empty[PrdPart]
           while (rs.next()) {
             ret += PrdPart(
-              Option[Int](rs.getInt("PART_OID")).getOrElse(0),
-              Option[Int](rs.getInt("EXPL_OID")).getOrElse(0),
-              Option[String](rs.getString("PART_CODE")).getOrElse(""),
-              Option[String](rs.getString("SYMMETRY")).getOrElse(""),
-              Option[Int](rs.getInt("PART_TYPE")).getOrElse(0),
-              Option[String](rs.getString("BLOCK_CODE")).getOrElse(""),
-              Option[String](rs.getString("DESCRIPTION")).getOrElse(""),
-              Option[Int](rs.getInt("NUM_EQ_PART")).getOrElse(0),
-              Option[String](rs.getString("PART_DESC")).getOrElse(""),
-              Option[String](rs.getString("ELEM_TYPE")).getOrElse(""),
-              Option[String](rs.getString("MATERIAL")).getOrElse(""),
-              Option[Double](rs.getDouble("LENGTH")).getOrElse(0.0),
-              Option[Double](rs.getDouble("WIDTH")).getOrElse(0.0),
-              Option[Double](rs.getDouble("THICKNESS")).getOrElse(0.0),
-              Option[Double](rs.getDouble("WEIGHT_UNIT")).getOrElse(0.0),
-              Option[Double](rs.getDouble("TOTAL_WEIGHT")).getOrElse(0.0),
-              Option[String](rs.getString("NEST_ID")).getOrElse(""),
-              Option[Double](rs.getDouble("NEST_LENGTH")).getOrElse(0.0),
-              Option[Double](rs.getDouble("NEST_WIDTH")).getOrElse(0.0),
-              Option[Int](rs.getInt("NUM_EQ_NEST")).getOrElse(0),
-              Option[Int](rs.getInt("KSE_KPL")).getOrElse(0),
+              Option(rs.getInt("PART_OID")).getOrElse(0),
+              Option(rs.getInt("EXPL_OID")).getOrElse(0),
+              Option(rs.getString("PART_CODE")).getOrElse(""),
+              Option(rs.getString("SYMMETRY")).getOrElse(""),
+              Option(rs.getInt("PART_TYPE")).getOrElse(0),
+              Option(rs.getString("BLOCK_CODE")).getOrElse(""),
+              Option(rs.getString("DESCRIPTION")).getOrElse(""),
+              Option(rs.getInt("NUM_EQ_PART")).getOrElse(0),
+              Option(rs.getString("PART_DESC")).getOrElse(""),
+              Option(rs.getString("ELEM_TYPE")).getOrElse(""),
+              Option(rs.getString("MATERIAL")).getOrElse(""),
+              Option(rs.getDouble("LENGTH")).getOrElse(0.0),
+              Option(rs.getDouble("WIDTH")).getOrElse(0.0),
+              Option(rs.getDouble("THICKNESS")).getOrElse(0.0),
+              Option(rs.getDouble("WEIGHT_UNIT")).getOrElse(0.0),
+              Option(rs.getDouble("TOTAL_WEIGHT")).getOrElse(0.0),
+              Option(rs.getString("NEST_ID")).getOrElse(""),
+              Option(rs.getDouble("NEST_LENGTH")).getOrElse(0.0),
+              Option(rs.getDouble("NEST_WIDTH")).getOrElse(0.0),
+              Option(rs.getInt("NUM_EQ_NEST")).getOrElse(0),
+              Option(rs.getInt("KSE_KPL")).getOrElse(0),
               {
-                Option[String](rs.getString("STOCK1")) match {
+                Option(rs.getString("STOCK1")) match {
                   case Some(value) =>
                     if (value.nonEmpty) {
                       value
                     }
                     else {
-                      Option[String](rs.getString("STOCK2")) match {
+                      Option(rs.getString("STOCK2")) match {
                         case Some(value) => if (value.nonEmpty) value else ""
                         case None => ""
                       }
                     }
-                  case None => Option[String](rs.getString("STOCK2")) match {
+                  case None => Option(rs.getString("STOCK2")) match {
                     case Some(value) => if (value.nonEmpty) value else ""
                     case None => ""
                   }
@@ -95,40 +95,40 @@ trait PartHelper {
           val ret = ListBuffer.empty[PrdPart]
           while (rs.next()) {
             ret += PrdPart(
-              Option[Int](rs.getInt("PART_OID")).getOrElse(0),
-              Option[Int](rs.getInt("EXPL_OID")).getOrElse(0),
-              Option[String](rs.getString("PART_CODE")).getOrElse(""),
-              Option[String](rs.getString("SYMMETRY")).getOrElse(""),
-              Option[Int](rs.getInt("PART_TYPE")).getOrElse(0),
-              Option[String](rs.getString("BLOCK_CODE")).getOrElse(""),
-              Option[String](rs.getString("DESCRIPTION")).getOrElse(""),
-              Option[Int](rs.getInt("NUM_EQ_PART")).getOrElse(0),
-              Option[String](rs.getString("PART_DESC")).getOrElse(""),
-              Option[String](rs.getString("ELEM_TYPE")).getOrElse(""),
-              Option[String](rs.getString("MATERIAL")).getOrElse(""),
-              Option[Double](rs.getDouble("LENGTH")).getOrElse(0.0),
-              Option[Double](rs.getDouble("WIDTH")).getOrElse(0.0),
-              Option[Double](rs.getDouble("THICKNESS")).getOrElse(0.0),
-              Option[Double](rs.getDouble("WEIGHT_UNIT")).getOrElse(0.0),
-              Option[Double](rs.getDouble("TOTAL_WEIGHT")).getOrElse(0.0),
-              Option[String](rs.getString("NEST_ID")).getOrElse(""),
-              Option[Double](rs.getDouble("NEST_LENGTH")).getOrElse(0.0),
-              Option[Double](rs.getDouble("NEST_WIDTH")).getOrElse(0.0),
-              Option[Int](rs.getInt("NUM_EQ_NEST")).getOrElse(0),
-              Option[Int](rs.getInt("KSE_KPL")).getOrElse(0),
+              Option(rs.getInt("PART_OID")).getOrElse(0),
+              Option(rs.getInt("EXPL_OID")).getOrElse(0),
+              Option(rs.getString("PART_CODE")).getOrElse(""),
+              Option(rs.getString("SYMMETRY")).getOrElse(""),
+              Option(rs.getInt("PART_TYPE")).getOrElse(0),
+              Option(rs.getString("BLOCK_CODE")).getOrElse(""),
+              Option(rs.getString("DESCRIPTION")).getOrElse(""),
+              Option(rs.getInt("NUM_EQ_PART")).getOrElse(0),
+              Option(rs.getString("PART_DESC")).getOrElse(""),
+              Option(rs.getString("ELEM_TYPE")).getOrElse(""),
+              Option(rs.getString("MATERIAL")).getOrElse(""),
+              Option(rs.getDouble("LENGTH")).getOrElse(0.0),
+              Option(rs.getDouble("WIDTH")).getOrElse(0.0),
+              Option(rs.getDouble("THICKNESS")).getOrElse(0.0),
+              Option(rs.getDouble("WEIGHT_UNIT")).getOrElse(0.0),
+              Option(rs.getDouble("TOTAL_WEIGHT")).getOrElse(0.0),
+              Option(rs.getString("NEST_ID")).getOrElse(""),
+              Option(rs.getDouble("NEST_LENGTH")).getOrElse(0.0),
+              Option(rs.getDouble("NEST_WIDTH")).getOrElse(0.0),
+              Option(rs.getInt("NUM_EQ_NEST")).getOrElse(0),
+              Option(rs.getInt("KSE_KPL")).getOrElse(0),
               {
-                Option[String](rs.getString("STOCK1")) match {
+                Option(rs.getString("STOCK1")) match {
                   case Some(value) =>
                     if (value.nonEmpty) {
                       value
                     }
                     else {
-                      Option[String](rs.getString("STOCK2")) match {
+                      Option(rs.getString("STOCK2")) match {
                         case Some(value) => if (value.nonEmpty) value else ""
                         case None => ""
                       }
                     }
-                  case None => Option[String](rs.getString("STOCK2")) match {
+                  case None => Option(rs.getString("STOCK2")) match {
                     case Some(value) => if (value.nonEmpty) value else ""
                     case None => ""
                   }

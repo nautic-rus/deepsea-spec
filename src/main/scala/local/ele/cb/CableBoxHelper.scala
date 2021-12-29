@@ -21,22 +21,20 @@ trait CableBoxHelper {
           val ret={
             if (rs.next()) {
               ForanCableBox(
-                Option[Int](rs.getInt("IDSQ")).getOrElse(0),
-                Option[String](rs.getString("USERID")).getOrElse(""),
-                Option[Double](rs.getDouble("X_COG")).getOrElse(0),
-                Option[Double](rs.getDouble("Y_COG")).getOrElse(0),
-                Option[Double](rs.getDouble("Z_COG")).getOrElse(0),
-                Option[Double](rs.getDouble("WEIGHT")).getOrElse(0),
-
-                Option[Int](rs.getInt("NODE1")).getOrElse(0),
-                Option[Int](rs.getInt("NODE2")).getOrElse(0),
-                Option[Int](rs.getInt("TYPE")).getOrElse(0),
-
-                Option[String](rs.getString("SEAL_TYPE")).getOrElse(""),
-                Option[String](rs.getString("CODE")).getOrElse(""),
-                Option[String](rs.getString("DESCR")).getOrElse(""),
-                Option[String](rs.getString("STOCK_CODE")).getOrElse(""),
-                Option[String](rs.getString("PENRTRATION")).getOrElse("")
+                Option(rs.getInt("IDSQ")).getOrElse(0),
+                Option(rs.getString("USERID")).getOrElse(""),
+                Option(rs.getDouble("X_COG")).getOrElse(0),
+                Option(rs.getDouble("Y_COG")).getOrElse(0),
+                Option(rs.getDouble("Z_COG")).getOrElse(0),
+                Option(rs.getDouble("WEIGHT")).getOrElse(0),
+                Option(rs.getInt("NODE1")).getOrElse(0),
+                Option(rs.getInt("NODE2")).getOrElse(0),
+                Option(rs.getInt("TYPE")).getOrElse(0),
+                Option(rs.getString("SEAL_TYPE")).getOrElse(""),
+                Option(rs.getString("CODE")).getOrElse(""),
+                Option(rs.getString("DESCR")).getOrElse(""),
+                Option(rs.getString("STOCK_CODE")).getOrElse(""),
+                Option(rs.getString("PENRTRATION")).getOrElse("")
               )
             }else{
               ForanCableBox()

@@ -26,7 +26,16 @@ trait TrayHelper extends Codecs {
     }*/
 
   private def traySQL(trayIdsq: String): String = {
-    s"select   \n  PE.IDSQ,\n  PS.OID as FDS_MODEL,\n  Z.NAME  as ZONE,\n  SYS.NAME  as SYSTEM,\n  PE.LINE,\n  PE.PLS,\n  PE.ELEM,\n  PE.WEIGHT,\n  PE.X_COG,\n  PE.Y_COG,\n  PE.Z_COG,\n  PE.CTYPE,\n  PE.TYPE,\n  N1.USERID  as NODE1,\n   N2.USERID  as NODE2,\n  PE.TRAY_LEVEL,\n  TR.STOCK_CODE,\n  N1.X *1000 as N1X,\n  N1.Y *1000 as N1Y,\n  N1.Z *1000 as N1Z,\n  N2.X *1000 as N2X,\n  N2.Y *1000 as N2Y,\n  N2.Z *1000 as N2Z,\n  SQRT( (N2.X-N1.X)*(N2.X-N1.X) + (N2.Y-N1.Y)*(N2.Y-N1.Y) + (N2.Z-N1.Z)*(N2.Z-N1.Z) )*1000 as LEN,\n  (\n         select \n         BN2.name\n         from BS_DESIGN_NODE  BDN, BS_DESIGN_ATOM BDA, BS_ATOM_FIXED_ATTRIBUTE BAF, bs_node BN, bs_node BN2\n         where \n         BDN.model_oid=PS.OID AND \n         BDA.BS_DESIGN_NODE_OID=BDN.OID AND\n         BAF.BS_DS_ATOM_OID=BDA.OID AND\n         BN.OID=BAF.BS_NODE_OID AND\n         BN2.OID=BN.parent_node\n  ) as surface\n  from PLS_ELEM PE ,PIPELINE_SEGMENT PS, SEGMENT S, V_CTRAY_PATTERN_LEVEL TR, NODE N1, NODE N2, ZONE Z, SYSTEMS SYS\n  where \n  PE.IDSQ = ${trayIdsq} AND\n  PE.TYPE=PS.TYPE AND PE.ZONE=PS.ZONE AND PE.SYSTEM=PS.SYSTEM AND PE.LINE=PS.LINE AND PE.PLS=PS.SQID AND\n  ((S.NODE1=PE.NODE1 AND S.NODE2=PE.NODE2) OR (S.NODE1=PE.NODE2 AND S.NODE2=PE.NODE1)) AND\n  S.PATTERN=TR.SEQID AND\n  PE.NODE1=N1.SEQID AND PE.NODE2=N2.SEQID AND\n  Z.SEQID=PE.ZONE AND\n  SYS.SEQID=PE.SYSTEM "
+    s"select   \n  PE.IDSQ,\n  PS.OID as FDS_MODEL,\n  Z.NAME  as ZONE,\n  SYS.NAME  as SYSTEM,\n  PE.LINE,\n  PE.PLS,\n  PE.ELEM,\n  PE.WEIGHT,\n  PE.X_COG,\n  PE.Y_COG,\n  PE.Z_COG,\n  " +
+      s"PE.CTYPE,\n  PE.TYPE,\n  N1.USERID  as NODE1,\n   N2.USERID  as NODE2,\n  PE.TRAY_LEVEL,\n  TR.STOCK_CODE,\n  N1.X *1000 as N1X,\n  N1.Y *1000 as N1Y,\n  " +
+      s"N1.Z *1000 as N1Z,\n  N2.X *1000 as N2X,\n  N2.Y *1000 as N2Y,\n  N2.Z *1000 as N2Z,\n  SQRT( (N2.X-N1.X)*(N2.X-N1.X) + (N2.Y-N1.Y)*(N2.Y-N1.Y) + (N2.Z-N1.Z)*(N2.Z-N1.Z) )*1000 as LEN,\n  " +
+      s"(\n         select \n         BN2.name\n         from BS_DESIGN_NODE  BDN, BS_DESIGN_ATOM BDA, BS_ATOM_FIXED_ATTRIBUTE BAF, bs_node BN, bs_node BN2\n         where \n         " +
+      s"BDN.model_oid=PS.OID AND \n         BDA.BS_DESIGN_NODE_OID=BDN.OID AND\n         BAF.BS_DS_ATOM_OID=BDA.OID AND\n         BN.OID=BAF.BS_NODE_OID AND\n         BN2.OID=BN.parent_node\n  ) as SURFACE\n ," +
+      s"TR.DESCR AS TRAYDESCR\n  " +
+      s"from PLS_ELEM PE ,PIPELINE_SEGMENT PS, SEGMENT S, V_CTRAY_PATTERN_LEVEL TR, NODE N1, NODE N2, ZONE Z, SYSTEMS SYS\n  where \n  PE.IDSQ = ${trayIdsq} AND\n  " +
+      s"PE.TYPE=PS.TYPE AND PE.ZONE=PS.ZONE AND PE.SYSTEM=PS.SYSTEM AND PE.LINE=PS.LINE AND PE.PLS=PS.SQID AND\n  " +
+      s"((S.NODE1=PE.NODE1 AND S.NODE2=PE.NODE2) OR (S.NODE1=PE.NODE2 AND S.NODE2=PE.NODE1)) AND\n  S.PATTERN=TR.SEQID AND\n  " +
+      s"PE.NODE1=N1.SEQID AND PE.NODE2=N2.SEQID AND\n  Z.SEQID=PE.ZONE AND\n  SYS.SEQID=PE.SYSTEM "
   }
 
   private def cableInTraySql(trayIdsq: String): String = {
@@ -95,63 +104,60 @@ trait TrayHelper extends Codecs {
 
   private def collectioneleTrayMountRules(): MongoCollection[TrayMountRules] = mongoDatabase().getCollection("eleTrayMountRules")
 
+
+
   def TrayBySeqId(project: String, trayIdSeq: String): ForanTray = {
     ConnectionManager.connectionByProject(project) match {
       case Some(connection) => {
-        try {
-          connection.setAutoCommit(false)
-          val stmt: Statement = connection.createStatement()
-          val sql = traySQL(trayIdSeq)
-          val rs: ResultSet = stmt.executeQuery(sql)
-          val ret = {
-            if (rs.next()) {
-              val marign: Int = calculateH(Option[Double](rs.getDouble("X_COG")).getOrElse(0),
-                Option[Double](rs.getDouble("Y_COG")).getOrElse(0),
-                Option[Double](rs.getDouble("Z_COG")).getOrElse(0), Option[String](rs.getString("SURFACE")).getOrElse(""))
-              val materialId = getMaterialFromString(Option[String](rs.getString("SURFACE")).getOrElse(""))
-              ForanTray(
-                Option[Int](rs.getInt("IDSQ")).getOrElse(0),
-                Option[Int](rs.getInt("FDS_MODEL")).getOrElse(0),
-                Option[String](rs.getString("ZONE")).getOrElse(""),
-                Option[String](rs.getString("SYSTEM")).getOrElse(""),
-                Option[Int](rs.getInt("LINE")).getOrElse(0),
-                Option[Int](rs.getInt("PLS")).getOrElse(0),
-                Option[Int](rs.getInt("ELEM")).getOrElse(0),
-                Option[Double](rs.getDouble("WEIGHT")).getOrElse(0),
-                Option[Double](rs.getDouble("X_COG")).getOrElse(0),
-                Option[Double](rs.getDouble("Y_COG")).getOrElse(0),
-                Option[Double](rs.getDouble("Z_COG")).getOrElse(0),
-                Option[String](rs.getString("CTYPE")).getOrElse(""),
-                Option[Int](rs.getInt("TYPE")).getOrElse(0),
-                Option[String](rs.getString("NODE1")).getOrElse(""),
-                Option[String](rs.getString("NODE2")).getOrElse(""),
-                Option[Int](rs.getInt("TRAY_LEVEL")).getOrElse(0),
-                Option[String](rs.getString("STOCK_CODE")).getOrElse(""),
-                Option[Double](rs.getDouble("N1X")).getOrElse(0),
-                Option[Double](rs.getDouble("N1Y")).getOrElse(0),
-                Option[Double](rs.getDouble("N1Z")).getOrElse(0),
-                Option[Double](rs.getDouble("N2X")).getOrElse(0),
-                Option[Double](rs.getDouble("N2Y")).getOrElse(0),
-                Option[Double](rs.getDouble("N2Z")).getOrElse(0),
-                Option[Double](rs.getDouble("LEN")).getOrElse(0),
-                Option[String](rs.getString("SURFACE")).getOrElse(""),
-                Option[String](rs.getString("TRAYDESCR")).getOrElse(""),
-                marign,
-                materialId
-              )
-            } else {
-              ForanTray()
-            }
-          }
-          stmt.close()
-          connection.close()
-          ret
-        }
-        catch {
-          case _: Throwable =>
-            connection.close()
+        connection.setAutoCommit(false)
+        val stmt: Statement = connection.createStatement()
+        val sql = traySQL(trayIdSeq)
+        val rs: ResultSet = stmt.executeQuery(sql)
+        val ret = {
+          if (rs.next()) {
+            val marign: Int = calculateH(Option(rs.getDouble("X_COG")).getOrElse(0),
+              Option(rs.getDouble("Y_COG")).getOrElse(0.0),
+              Option(rs.getDouble("Z_COG")).getOrElse(0.0),
+              Option(rs.getString("SURFACE")).getOrElse(""))
+            val materialId = getMaterialFromString(Option(rs.getString("SURFACE")).getOrElse(""))
+
+            ForanTray(
+              Option(rs.getInt("IDSQ")).getOrElse(0),
+              Option(rs.getInt("FDS_MODEL")).getOrElse(0),
+              Option(rs.getString("ZONE")).getOrElse(""),
+              Option(rs.getString("SYSTEM")).getOrElse(""),
+              Option(rs.getInt("LINE")).getOrElse(0),
+              Option(rs.getInt("PLS")).getOrElse(0),
+              Option(rs.getInt("ELEM")).getOrElse(0),
+              Option(rs.getDouble("WEIGHT")).getOrElse(0),
+              Option(rs.getDouble("X_COG")).getOrElse(0),
+              Option(rs.getDouble("Y_COG")).getOrElse(0),
+              Option(rs.getDouble("Z_COG")).getOrElse(0),
+              Option(rs.getString("CTYPE")).getOrElse(""),
+              Option(rs.getInt("TYPE")).getOrElse(0),
+              Option(rs.getString("NODE1")).getOrElse(""),
+              Option(rs.getString("NODE2")).getOrElse(""),
+              Option(rs.getInt("TRAY_LEVEL")).getOrElse(0),
+              Option(rs.getString("STOCK_CODE")).getOrElse(""),
+              Option(rs.getDouble("N1X")).getOrElse(0),
+              Option(rs.getDouble("N1Y")).getOrElse(0),
+              Option(rs.getDouble("N1Z")).getOrElse(0),
+              Option(rs.getDouble("N2X")).getOrElse(0),
+              Option(rs.getDouble("N2Y")).getOrElse(0),
+              Option(rs.getDouble("N2Z")).getOrElse(0),
+              Option(rs.getDouble("LEN")).getOrElse(0),
+              Option(rs.getString("SURFACE")).getOrElse(""),
+              Option(rs.getString("TRAYDESCR")).getOrElse(""),
+              marign,
+              materialId
+            )
+          } else {
             ForanTray()
+          }
         }
+        stmt.close()
+        connection.close()
+        ret
       }
       case None => ForanTray()
     }
@@ -172,38 +178,38 @@ trait TrayHelper extends Codecs {
           val stmt: Statement = connection.createStatement()
           val rs: ResultSet = stmt.executeQuery(sql)
           while (rs.next()) {
-            val marign: Int = calculateH(Option[Double](rs.getDouble("X_COG")).getOrElse(0),
-              Option[Double](rs.getDouble("Y_COG")).getOrElse(0),
-              Option[Double](rs.getDouble("Z_COG")).getOrElse(0), Option[String](rs.getString("SURFACE")).getOrElse(""))
-            val materialId: Int = getMaterialFromString(Option[String](rs.getString("SURFACE")).getOrElse(""))
+            val marign: Int = calculateH(Option(rs.getDouble("X_COG")).getOrElse(0),
+              Option(rs.getDouble("Y_COG")).getOrElse(0),
+              Option(rs.getDouble("Z_COG")).getOrElse(0), Option(rs.getString("SURFACE")).getOrElse(""))
+            val materialId: Int = getMaterialFromString(Option(rs.getString("SURFACE")).getOrElse(""))
 
             buffer += ForanTray(
-              Option[Int](rs.getInt("IDSQ")).getOrElse(0),
-              Option[Int](rs.getInt("FDS_MODEL")).getOrElse(0),
-              Option[String](rs.getString("ZONE")).getOrElse(""),
-              Option[String](rs.getString("SYSTEM")).getOrElse(""),
-              Option[Int](rs.getInt("LINE")).getOrElse(0),
-              Option[Int](rs.getInt("PLS")).getOrElse(0),
-              Option[Int](rs.getInt("ELEM")).getOrElse(0),
-              Option[Double](rs.getDouble("WEIGHT")).getOrElse(0),
-              Option[Double](rs.getDouble("X_COG")).getOrElse(0),
-              Option[Double](rs.getDouble("Y_COG")).getOrElse(0),
-              Option[Double](rs.getDouble("Z_COG")).getOrElse(0),
-              Option[String](rs.getString("CTYPE")).getOrElse(""),
-              Option[Int](rs.getInt("TYPE")).getOrElse(0),
-              Option[String](rs.getString("NODE1")).getOrElse(""),
-              Option[String](rs.getString("NODE2")).getOrElse(""),
-              Option[Int](rs.getInt("TRAY_LEVEL")).getOrElse(0),
-              Option[String](rs.getString("STOCK_CODE")).getOrElse(""),
-              Option[Double](rs.getDouble("N1X")).getOrElse(0),
-              Option[Double](rs.getDouble("N1Y")).getOrElse(0),
-              Option[Double](rs.getDouble("N1Z")).getOrElse(0),
-              Option[Double](rs.getDouble("N2X")).getOrElse(0),
-              Option[Double](rs.getDouble("N2Y")).getOrElse(0),
-              Option[Double](rs.getDouble("N2Z")).getOrElse(0),
-              Option[Double](rs.getDouble("LEN")).getOrElse(0),
-              Option[String](rs.getString("SURFACE")).getOrElse(""),
-              Option[String](rs.getString("TRAYDESCR")).getOrElse(""),
+              Option(rs.getInt("IDSQ")).getOrElse(0),
+              Option(rs.getInt("FDS_MODEL")).getOrElse(0),
+              Option(rs.getString("ZONE")).getOrElse(""),
+              Option(rs.getString("SYSTEM")).getOrElse(""),
+              Option(rs.getInt("LINE")).getOrElse(0),
+              Option(rs.getInt("PLS")).getOrElse(0),
+              Option(rs.getInt("ELEM")).getOrElse(0),
+              Option(rs.getDouble("WEIGHT")).getOrElse(0),
+              Option(rs.getDouble("X_COG")).getOrElse(0),
+              Option(rs.getDouble("Y_COG")).getOrElse(0),
+              Option(rs.getDouble("Z_COG")).getOrElse(0),
+              Option(rs.getString("CTYPE")).getOrElse(""),
+              Option(rs.getInt("TYPE")).getOrElse(0),
+              Option(rs.getString("NODE1")).getOrElse(""),
+              Option(rs.getString("NODE2")).getOrElse(""),
+              Option(rs.getInt("TRAY_LEVEL")).getOrElse(0),
+              Option(rs.getString("STOCK_CODE")).getOrElse(""),
+              Option(rs.getDouble("N1X")).getOrElse(0),
+              Option(rs.getDouble("N1Y")).getOrElse(0),
+              Option(rs.getDouble("N1Z")).getOrElse(0),
+              Option(rs.getDouble("N2X")).getOrElse(0),
+              Option(rs.getDouble("N2Y")).getOrElse(0),
+              Option(rs.getDouble("N2Z")).getOrElse(0),
+              Option(rs.getDouble("LEN")).getOrElse(0),
+              Option(rs.getString("SURFACE")).getOrElse(""),
+              Option(rs.getString("TRAYDESCR")).getOrElse(""),
               marign,
               materialId
             )
@@ -241,19 +247,19 @@ trait TrayHelper extends Codecs {
           val rs: ResultSet = stmt.executeQuery(sql)
           while (rs.next()) {
             buffer += ForanCBX(
-              Option[Int](rs.getInt("IDSQ")).getOrElse(0),
-              Option[String](rs.getString("ZONE")).getOrElse(""),
-              Option[String](rs.getString("SYSTEM")).getOrElse(""),
-              Option[Double](rs.getDouble("X_COG")).getOrElse(0),
-              Option[Double](rs.getDouble("Y_COG")).getOrElse(0),
-              Option[Double](rs.getDouble("Z_COG")).getOrElse(0),
-              Option[Double](rs.getDouble("WEIGHT")).getOrElse(0),
-              Option[String](rs.getString("NODE1")).getOrElse(""),
-              Option[String](rs.getString("NODE2")).getOrElse(""),
-              Option[String](rs.getString("CODE")).getOrElse(""),
-              Option[String](rs.getString("DESCR")).getOrElse(""),
-              Option[String](rs.getString("STOCK_CODE")).getOrElse(""),
-              Option[String](rs.getString("PENRTRATION")).getOrElse("")
+              Option(rs.getInt("IDSQ")).getOrElse(0),
+              Option(rs.getString("ZONE")).getOrElse(""),
+              Option(rs.getString("SYSTEM")).getOrElse(""),
+              Option(rs.getDouble("X_COG")).getOrElse(0),
+              Option(rs.getDouble("Y_COG")).getOrElse(0),
+              Option(rs.getDouble("Z_COG")).getOrElse(0),
+              Option(rs.getDouble("WEIGHT")).getOrElse(0),
+              Option(rs.getString("NODE1")).getOrElse(""),
+              Option(rs.getString("NODE2")).getOrElse(""),
+              Option(rs.getString("CODE")).getOrElse(""),
+              Option(rs.getString("DESCR")).getOrElse(""),
+              Option(rs.getString("STOCK_CODE")).getOrElse(""),
+              Option(rs.getString("PENRTRATION")).getOrElse("")
             )
           }
           rs.close()
@@ -285,7 +291,7 @@ trait TrayHelper extends Codecs {
           val rs: ResultSet = stmt.executeQuery(cableInTraySql(trayIdSeq))
           val buffer = ListBuffer.empty[String]
           while (rs.next()) {
-            buffer += Option[String](rs.getString("CODE")).getOrElse("NF")
+            buffer += Option(rs.getString("CODE")).getOrElse("NF")
           }
           stmt.close()
           connection.close()
@@ -310,7 +316,7 @@ trait TrayHelper extends Codecs {
           val rs: ResultSet = stmt.executeQuery(cablesInLineByTwoNodesSql(nodeName1, nodeName2))
           val buffer = ListBuffer.empty[String]
           while (rs.next()) {
-            buffer += Option[String](rs.getString("CODE")).getOrElse("NF")
+            buffer += Option(rs.getString("CODE")).getOrElse("NF")
           }
           stmt.close()
           connection.close()

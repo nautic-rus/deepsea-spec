@@ -45,13 +45,13 @@ object DBRequests extends Codecs{
           val rs: ResultSet = stmt.executeQuery(CommonSql.zonesAndSystemsSql)
           while (rs.next()) {
             buffer += ZoneSystem(
-              Option[String](rs.getString("TYPENAME")).getOrElse("zone"),
-              Option[Int](rs.getInt("OID")).getOrElse(0),
-              Option[Int](rs.getInt("SEQID")).getOrElse(0),
-              Option[String](rs.getString("USERID")).getOrElse(""),
-              Option[String](rs.getString("NAME")).getOrElse(""),
-              Option[String](rs.getString("DESCR_RU")).getOrElse(""),
-              Option[String](rs.getString("DESCR_EN")).getOrElse("")
+              Option(rs.getString("TYPENAME")).getOrElse("zone"),
+              Option(rs.getInt("OID")).getOrElse(0),
+              Option(rs.getInt("SEQID")).getOrElse(0),
+              Option(rs.getString("USERID")).getOrElse(""),
+              Option(rs.getString("NAME")).getOrElse(""),
+              Option(rs.getString("DESCR_RU")).getOrElse(""),
+              Option(rs.getString("DESCR_EN")).getOrElse("")
             )
           }
           stmt.close()
