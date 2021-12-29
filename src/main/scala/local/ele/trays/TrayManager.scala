@@ -123,6 +123,7 @@ object TrayManager extends TrayHelper with Codecs {
     val buffMounts = ListBuffer.empty[MountItem]
 
     if (foranTray.trayDescr.contains("$K")) {
+      val jj=0
 
       val item1 = mountRules.find(s => s.label.equals("4201")).getOrElse(TrayMountRules(label = "4201"))
       buffMounts += MountItem(findWorkshopMaterial(item1.trmCode, materials), TrayMountData(item1.label, item1.trmCode).label, item1.kei, item1.count * item1.lenghtFactor * foranTray.LEN / 1000, item1.isNeedLabel)
@@ -183,7 +184,7 @@ object TrayManager extends TrayHelper with Codecs {
               case Some(value) => buffMounts += MountItem(findWorkshopMaterial(value.trmCode, materials), TrayMountData(value.label, value.trmCode).label, item.kei, item.count * item.lenghtFactor * foranTray.LEN / 1000, item.isNeedLabel)
               case None => MountItem()
             }
-          case "65;" =>
+/*          case "65;" =>
             mountData.find(s => s.typeId == 65 && s.matId == clickTrayMontData.matId && s.parI1 == clickTrayMontData.parD2.toInt) match {
               case Some(value) => buffMounts += MountItem(findWorkshopMaterial(value.trmCode, materials), TrayMountData(value.label, value.trmCode).label, item.kei, item.count * item.lenghtFactor * foranTray.LEN / 1000, item.isNeedLabel)
               case None => MountItem()
@@ -193,6 +194,8 @@ object TrayManager extends TrayHelper with Codecs {
               case Some(value) => buffMounts += MountItem(findWorkshopMaterial(value.trmCode, materials), TrayMountData(value.label, value.trmCode).label, item.kei, item.count * item.lenghtFactor * foranTray.LEN / 1000, item.isNeedLabel)
               case None => MountItem()
             }
+
+ */
           case "57;" =>
             val it = mountData.filter(s => (s.typeId == 57) && s.matId == clickTrayMontData.matId && s.parD1 * 1000 >= foranTray.marign)
             if (it.nonEmpty) {
