@@ -14,8 +14,20 @@ class Trays  extends AnyFunSuite with TrayHelper{
   Logger.getLogger( "org.mongodb.driver" ).setLevel(Level.ERROR)
 
 
-  val labs: List[String] =trayLabels("P701","18651855")// 18613700
+  val labs0 =trayLabels("P701","18658722").mkString(" , ") //лестница без крышки
+  val labs1 =trayLabels("P701","18658723").mkString(" , ") //лестница с крышкой
+  val labs2 =trayLabels("P701","18658724").mkString(" , ") //лоток без крышки
+  val labs3 =trayLabels("P701","18658725").mkString(" , ") //лоток с крышкой
+  val labs4 =trayLabels("P701","18654700").mkString(" , ")  // bez f0
+  val labs5 =trayLabels("P701","18654700").mkString(" , ")  // f0
 
+
+  println(labs0)
+  println(labs1)
+  println(labs2)
+  println(labs3)
+  println(labs4)
+  println(labs5)
   val jj=0
 
 
