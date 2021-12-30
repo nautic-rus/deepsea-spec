@@ -96,7 +96,7 @@ object TrayManager extends TrayHelper with Codecs {
       buff += calculateTrayMountDate(project, clickTray, mountData, mountRules, materials, traysMountData)
     })
     retrieveCBXByZoneNameAndSysName(project, zones, systems).foreach(cbx => {
-      val tmd: TrayMountData = traysMountData.find(s => s.trmCode.equals(cbx.STOCK_CODE)).getOrElse(TrayMountData())
+      val tmd: TrayMountData = traysMountData.find(s => s.trmCode.contains(cbx.STOCK_CODE)).getOrElse(TrayMountData())
       val ft = ForanTray(IDSQ = cbx.IDSQ, ZONE = cbx.ZONE, SYSTEM = cbx.SYSTEM,
         X_COG = cbx.X_COG, Y_COG = cbx.Y_COG, Z_COG = cbx.Z_COG, WEIGHT = cbx.WEIGHT,
         NODE1 = cbx.NODE1, NODE2 = cbx.NODE2, STOCK_CODE = cbx.STOCK_CODE)
