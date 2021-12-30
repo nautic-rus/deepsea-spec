@@ -14,7 +14,7 @@ class Trays  extends AnyFunSuite with TrayHelper{
   Logger.getLogger( "org.mongodb.driver" ).setLevel(Level.ERROR)
 
 
-  val labs: List[String] =trayLabels("P701","18651855")//18651855
+  //val labs: List[String] =trayLabels("P701","18651824")//18651855
 
   val jj=0
 
@@ -24,11 +24,6 @@ class Trays  extends AnyFunSuite with TrayHelper{
 */
 
 
-  (0 to 100).foreach(x=>{
-    println(x)
-    val trayLabels: List[String] =TrayManager.trayLabels("P701","18613700")
-    val trayLabels2: List[String] =TrayManager.trayLabels("P701","7889794")//why V0? //18611850  vtulka=18613700
-  })
 
   //val cbx=cableBoxBySeqId("P701","18621400")
 
@@ -39,10 +34,9 @@ class Trays  extends AnyFunSuite with TrayHelper{
   //val traysJson: String =tarysByZonesSystemsJson("P701", List("5318"),List("884-6009"))
 
 
-/*  (0 to 30).foreach(s=>{
-    val trays=tarysByZonesSystems("P701", List("5318"),List("884-6009"))
-    println(s)
-  })*/
+
+    //val trays=tarysByZonesSystems("P701", List("5318"),List("884-6009"))
+  val trays=tarysByZonesSystems("P701", List("6306"),List("884-7002"))
 
 
 /*
