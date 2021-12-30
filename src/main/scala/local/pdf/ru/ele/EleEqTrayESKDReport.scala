@@ -213,7 +213,7 @@ object EleEqTrayESKDReport {
         buff += Item11Columns(true, "Трубы защиты кабеля")
         buff ++= gr7.sortBy(s => s.A1)
       }
-      val gr8 = supportsRows.filter(p => !p.A1.startsWith("4") && !p.A1.startsWith("5") && !p.A1.startsWith("6") && !p.A1.startsWith("7"))
+      val gr8 = supportsRows.filter(p => !p.A1.startsWith("4") && !p.A1.startsWith("5") && !p.A1.startsWith("6") && !p.A1.startsWith("7")&& !p.A1.startsWith("8"))
       if (gr8.nonEmpty) {
         buff += Item11Columns(true, "Прочее")
         buff ++= gr8.sortBy(s => s.A1)
