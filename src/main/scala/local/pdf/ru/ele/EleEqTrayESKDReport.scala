@@ -40,7 +40,7 @@ object EleEqTrayESKDReport {
     mmToPt(10 * kM) + 2
   )
 
-  def generatePdfToFileWithRev(project: String, complectName: String, path: String, rev:String="0"): List[String] = {
+  def generatePdfToFileWithRev(project: String, complectName: String, path: String, rev: String = "0"): List[String] = {
     val parts: EleComplectParts = retrieveAllPartsByComplectName(project, complectName)
 
     val item11Columns: List[Item11Columns] = {
@@ -49,7 +49,7 @@ object EleEqTrayESKDReport {
       val buff = ListBuffer.empty[Item11Columns]
       val parttitions = parts.eqs.partition(x => x.workShopMaterial.singleWeight > 50)
 
-      val eqSupports=ListBuffer.empty[Item11Columns]
+      val eqSupports = ListBuffer.empty[Item11Columns]
 
       if (parttitions._1.nonEmpty) {
         buff += Item11Columns(true, n1.toUpperCase())
@@ -70,7 +70,7 @@ object EleEqTrayESKDReport {
               A11 = eq.ZONE_NAME
 
             )
-            eq.SUPPORTS.filter(s=>s.label.contains(".")).sortBy(d => d.label).foreach(supp => {
+            eq.SUPPORTS.filter(s => s.label.contains(".")).sortBy(d => d.label).foreach(supp => {
               buff += Item11Columns(
                 A1 = supp.label,
                 A2 = "",
@@ -85,7 +85,7 @@ object EleEqTrayESKDReport {
                 A11 = eq.ZONE_NAME
               )
             })
-            eq.SUPPORTS.filter(s=> !s.label.contains(".")).sortBy(d => d.label).foreach(supp => {
+            eq.SUPPORTS.filter(s => !s.label.contains(".")).sortBy(d => d.label).foreach(supp => {
               eqSupports += Item11Columns(
                 A1 = supp.label,
                 A2 = "",
@@ -122,7 +122,7 @@ object EleEqTrayESKDReport {
               A11 = eq.ZONE_NAME
 
             )
-            eq.SUPPORTS.filter(s=>s.label.contains(".")).sortBy(d => d.label).foreach(supp => {
+            eq.SUPPORTS.filter(s => s.label.contains(".")).sortBy(d => d.label).foreach(supp => {
               buff += Item11Columns(
                 A1 = supp.label,
                 A2 = "",
@@ -137,7 +137,7 @@ object EleEqTrayESKDReport {
                 A11 = eq.ZONE_NAME
               )
             })
-            eq.SUPPORTS.filter(s=> !s.label.contains(".")).sortBy(d => d.label).foreach(supp => {
+            eq.SUPPORTS.filter(s => !s.label.contains(".")).sortBy(d => d.label).foreach(supp => {
               eqSupports += Item11Columns(
                 A1 = supp.label,
                 A2 = "",
@@ -168,7 +168,7 @@ object EleEqTrayESKDReport {
 
       val supportsRows: List[Item11Columns] = {
         val buffer = ListBuffer.empty[Item11Columns]
-        buffer++=eqSupports
+        buffer ++= eqSupports
         supports.groupBy(s => s.workShopMaterial.trmCode).toList.foreach(group => {
           if (group._2.nonEmpty) {
             val item = group._2.head
@@ -198,7 +198,7 @@ object EleEqTrayESKDReport {
         buff += Item11Columns(true, "Крепление и заземление кабелей")
         buff ++= gr4.sortBy(s => s.A1)
       }
-      val gr5 = supportsRows.filter(p => p.A1.startsWith("5"))
+      val gr5 = supportsRows.filter(p => p.A1.startsWith("5") || p.A1.startsWith("8"))
       if (gr5.nonEmpty) {
         buff += Item11Columns(true, "Доизоляционные детали крепления")
         buff ++= gr5.sortBy(s => s.A1)
@@ -230,7 +230,7 @@ object EleEqTrayESKDReport {
   }
 
   def generatePdfToFileNoRev(project: String, complectName: String, path: String): List[String] = {
-    val rev="tmp"
+    val rev = "tmp"
     val parts: EleComplectParts = retrieveAllPartsByComplectName(project, complectName)
     val item11Columns: List[Item11Columns] = {
       val n1 = "Электрооборудование устанавливаемое заводом-строителем"
