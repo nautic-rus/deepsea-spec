@@ -14,7 +14,7 @@ class Trays  extends AnyFunSuite with TrayHelper{
   Logger.getLogger( "org.mongodb.driver" ).setLevel(Level.ERROR)
 
 
-  val labs: List[String] =trayLabels("P701","18613700")//18651855
+  val labs: List[String] =trayLabels("P701","18651855")// 18613700
 
   val jj=0
 
