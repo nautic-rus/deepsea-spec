@@ -229,6 +229,11 @@ object EleEqTrayESKDReport {
     retPath
   }
 
+  def generatePdfToFileNoRev(project: String, complectName: String, path: String)={
+    generatePdfToFileWithRev(project,complectName,path,"tmp")
+  }
+
+/*
   def generatePdfToFileNoRev(project: String, complectName: String, path: String): List[String] = {
     val rev = "tmp"
     val parts: EleComplectParts = retrieveAllPartsByComplectName(project, complectName)
@@ -378,6 +383,9 @@ object EleEqTrayESKDReport {
     genReport(docName, item11Columns, pdfPath)
     retPath
   }
+*/
+
+
 
   def genReport(docName: DocName, items: List[Item11Columns], path: String, isNewRevision: Boolean = false): Unit = {
     descrTreeBuffer.clear()
