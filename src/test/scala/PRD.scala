@@ -11,7 +11,7 @@ class PRD extends AnyFunSuite {
   //val sы=genForanPartLabelByDrawingNumAndPartNameJSON("N004","NR004-101-0103","0001")
   //val b=genForanPartsByDrawingNumJSON("N004","NR004-101-0101")
 
-  val parts: List[PrdPart] = genForanPartsByDrawingNum("N004", "210101-102-0104")
+  val parts: List[PrdPart] = genForanPartsByDrawingNum("N004", "210101-102-0103")
 
   val rows:List[Item11ColumnsEN]={
     val buff: ListBuffer[Item11ColumnsEN] =ListBuffer.empty[Item11ColumnsEN]
@@ -40,8 +40,8 @@ class PRD extends AnyFunSuite {
     buff.sortBy(s=>s.A1).toList
   }
 
-  val dn = DocNameEN(num="210101-101-0104")
-  genTest(dn, "c:\\10\\210101-101-0104.pdf", rows)
+  val dn = DocNameEN(num="210101-101-0103")
+  genTest(dn, "c:\\1\\210101-101-0103.pdf", rows)
   val cs = 0
 
 }

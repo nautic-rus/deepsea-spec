@@ -7,12 +7,13 @@ import akka.pattern.ask
 import akka.util.Timeout
 import deepsea.App
 import deepsea.actors.ActorManager
-import deepsea.elec.ElecManager.{GenerateTrayPdf, GetCablesByNodes, GetCablesByTray, GetEqLabels, GetHoleLabel, GetTrayBundles, GetTrayLabels, GetTraysByZonesAndSystems}
+import deepsea.elec.ElecManager.{FixTrayBundle, GenerateTrayPdf, GetCablesByNodes, GetCablesByTray, GetEqLabels, GetHoleLabel, GetTrayBundles, GetTrayLabels, GetTraysByZonesAndSystems}
 import deepsea.files.FileManager.{CloudFile, CreateFile, GenerateUrl}
 import local.ele.CommonEle.{retrieveAllPartsByComplectNameJSON, retrieveEleComplectsJsonString}
 import local.ele.cb.CableBoxManager.cableBoxBySeqIdJson
 import local.ele.eq.EleEqManager
 import local.ele.trays.TrayManager
+import local.ele.utils.EleUtils.fixFBS
 import local.pdf.ru.ele.EleEqTrayESKDReport.{generatePdfToFileNoRev, generatePdfToFileWithRev}
 import play.api.libs.json.{JsValue, Json}
 
@@ -33,6 +34,7 @@ object ElecManager{
   case class GetTraysByZonesAndSystems(project: String, docNumber: String)
   case class GetTrayBundles(project: String)
   case class GenerateTrayPdf(project: String, docNumber: String, revision: String = "")
+  case class FixTrayBundle(project: String, docNumber: String)
 
 }
 class ElecManager extends Actor{
@@ -48,6 +50,8 @@ class ElecManager extends Actor{
       sender() ! retrieveAllPartsByComplectNameJSON(project,docNumber)
     case GetTrayBundles(project) =>
       sender() ! retrieveEleComplectsJsonString(project)
+    case FixTrayBundle(project, docNumber) =>
+      sender() ! fixFBS(project,docNumber)
 
 
     case GenerateTrayPdf(project, docNumber, revision) =>
@@ -56,8 +60,6 @@ class ElecManager extends Actor{
         case "" => generatePdfToFileNoRev(project, docNumber, tempDirectory)
         case _ => generatePdfToFileWithRev(project, docNumber, tempDirectory, revision)
       }
-
-
       val res = ListBuffer.empty[String]
       files.foreach(file => {
         Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
@@ -66,8 +68,6 @@ class ElecManager extends Actor{
           case _ => None
         }
       })
-
-
       sender() ! Json.toJson(res)
 
 

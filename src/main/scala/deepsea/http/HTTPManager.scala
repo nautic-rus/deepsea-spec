@@ -12,8 +12,8 @@ import akka.util.Timeout
 import deepsea.App
 import deepsea.actors.ActorManager
 import deepsea.actors.ActorStartupManager.HTTPManagerStarted
-import deepsea.elec.ElecManager.{GenerateTrayPdf, GetCablesByNodes, GetCablesByTray, GetEqLabels, GetHoleLabel, GetTrayBundles, GetTrayLabels, GetTraysByZonesAndSystems}
-import deepsea.hull.HullManager.{GetHullEsp, GetHullPart, GetHullParts, GetHullPartsByDocNumber, GetHullPartsExcel, SetHullPartsByDocNumber}
+import deepsea.elec.ElecManager.{FixTrayBundle, GenerateTrayPdf, GetCablesByNodes, GetCablesByTray, GetEqLabels, GetHoleLabel, GetTrayBundles, GetTrayLabels, GetTraysByZonesAndSystems}
+import deepsea.hull.HullManager.{GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, SetHullEsp}
 import deepsea.spec.SpecManager.{GetHullBlocks, GetHullPartListFromBsTree, SetHullPartListFromBsTree}
 import org.apache.log4j.{LogManager, Logger}
 import play.api.libs.json.{JsValue, Json}
@@ -37,26 +37,26 @@ class HTTPManager extends Actor {
       (get & path("hullBlocks") & parameter("project")) { (project) =>
         askFor(ActorManager.spec, GetHullBlocks(project))
       },
-      (get & path("hullPartList") & parameter("project") & parameter("docNumber")) { (project, docNumber) =>
-        askFor(ActorManager.hullManager, GetHullPartsByDocNumber(project, docNumber))
-      },
       (get & path("hullPart") & parameter("project") & parameter("docNumber") & parameter("partCode")) { (project, docNumber, partCode) =>
         askFor(ActorManager.hullManager, GetHullPart(project, docNumber, partCode))
       },
-      (get & path("setHullPartList") & parameter("project") & parameter("docNumber") & parameter("user") & parameter("revision")) { (project, docNumber, user, revision) =>
-        askFor(ActorManager.hullManager, SetHullPartsByDocNumber(project, docNumber, user, revision))
-      },
-      (get & path("foranPartsExcel") & parameter("project")) { (project) =>
-        askFor(ActorManager.hullManager, GetHullPartsExcel(project))
+
+      (get & path("hullPartList") & parameter("project") & parameter("docNumber")) { (project, docNumber) =>
+        askFor(ActorManager.hullManager, GetHullPartsByDocNumber(project, docNumber))
       },
       (get & path("hullEsp") & parameter("docNumber") & parameter("revision")) { (docNumber, revision) =>
         askFor(ActorManager.hullManager, GetHullEsp(docNumber, revision))
       },
-      (get & path("esp") & parameter("docNumber") & parameter("revision")) { (docNumber, revision) =>
-        askFor(ActorManager.hullManager, GetHullEsp(docNumber, revision))
+      (get & path("setHullEsp") & parameter("project") & parameter("docNumber") & parameter("user") & parameter("revision")) { (project, docNumber, user, revision) =>
+        askFor(ActorManager.hullManager, SetHullEsp(project, docNumber, user, revision))
       },
-      (get & path("esp") & parameter("docNumber")) { (docNumber) =>
-        askFor(ActorManager.hullManager, GetHullEsp(docNumber))
+      (get & path("hullEspFiles") & parameter("project") & parameter("docNumber") & parameter("revision")) { (project, docNumber, revision) =>
+        askFor(ActorManager.hullManager, GetHullEspFiles(project, docNumber, revision))
+      },
+
+
+      (get & path("foranPartsExcel") & parameter("project")) { (project) =>
+        askFor(ActorManager.hullManager, GetHullPartsExcel(project))
       },
 
       //ELEC
@@ -75,7 +75,6 @@ class HTTPManager extends Actor {
       (get & path("elecHoleLabel") & parameter("project") & parameter("seqId")) { (project, seqId) =>
         askFor(ActorManager.elec, GetHoleLabel(project, seqId))
       },
-
       //ELEC TOOLS
       (get & path("trayBundles") & parameter("project")) { (project) =>
         askFor(ActorManager.elec, GetTrayBundles(project))
@@ -86,6 +85,10 @@ class HTTPManager extends Actor {
       (get & path("traySpec") & parameter("project") & parameter("docNumber") & parameter("revision")) { (project, docNumber, revision) =>
         askFor(ActorManager.elec, GenerateTrayPdf(project, docNumber, revision))
       },
+      (get & path("fixTrayBundle") & parameter("project") & parameter("docNumber")) { (project, docNumber) =>
+        askFor(ActorManager.elec, FixTrayBundle(project, docNumber))
+      },
+
     )
   }
 
