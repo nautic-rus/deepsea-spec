@@ -4,7 +4,7 @@ import deepsea.App
 import local.common.Codecs
 import local.common.DBRequests.{calculateH, listToSqlString}
 import local.domain.WorkShopMaterial
-import local.ele.CommonEle.EleComplect
+import local.ele.CommonEle.{EleComplect, retrieveEleComplects}
 import local.ele.trays.TrayManager.{ForanCBX, ForanTray, TrayMountData, TrayMountRules}
 import local.sql.{ConnectionManager, MongoDB}
 import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
@@ -39,11 +39,11 @@ trait TrayHelper extends Codecs {
   }
 
   private def cableInTraySql(trayIdsq: String): String = {
-    s"select code from cable where seqid in(\n\nselect CABLE from CAB_ROUTE  where (NODE1 in (\n\n    select NODE1 from PLS_ELEM where   IDSQ = ${trayIdsq}\n    union all\n    select NODE2 from PLS_ELEM where   IDSQ = ${trayIdsq}\n\n) AND NODE2 in \n    (\n    select NODE1 from PLS_ELEM where   IDSQ = ${trayIdsq}\n    union all\n    select NODE2 from PLS_ELEM where   IDSQ = ${trayIdsq}\n    )\n) \n) order by Code"
+    s"select code,(select name from zone where oid=(select zone from ELEMENT where OID=FROM_E)) as ZONEFROM,(select name from zone where oid=(select zone from ELEMENT where OID=TO_E)) as ZONETO from cable where seqid in(\n\nselect CABLE from CAB_ROUTE  where (NODE1 in (\n\n    select NODE1 from PLS_ELEM where   IDSQ = ${trayIdsq}\n    union all\n    select NODE2 from PLS_ELEM where   IDSQ = ${trayIdsq}\n\n) AND NODE2 in \n    (\n    select NODE1 from PLS_ELEM where   IDSQ = ${trayIdsq}\n    union all\n    select NODE2 from PLS_ELEM where   IDSQ = ${trayIdsq}\n    )\n) \n) order by Code"
   }
 
   private def cablesInLineByTwoNodesSql(nodeName1: String, nodeName2: String): String = {
-    s"select code from cable where seqid in(\n\nselect CABLE from CAB_ROUTE  where (NODE1 in (\n\n    select seqid from node where userid in('${nodeName1}', '${nodeName2}')\n    union all\n    select seqid from node where userid in('${nodeName1}', '${nodeName2}')\n) AND NODE2 in \n    (\n    select seqid from node where userid in('${nodeName1}', '${nodeName2}')\n    union all\n    select seqid from node where userid in('${nodeName1}', '${nodeName2}')\n    )\n) \n) order by Code"
+    s"select code,(select name from zone where oid=(select zone from ELEMENT where OID=FROM_E)) as ZONEFROM,(select name from zone where oid=(select zone from ELEMENT where OID=TO_E)) as ZONETO from cable where seqid in(\n\nselect CABLE from CAB_ROUTE  where (NODE1 in (\n\n    select seqid from node where userid in('${nodeName1}', '${nodeName2}')\n    union all\n    select seqid from node where userid in('${nodeName1}', '${nodeName2}')\n) AND NODE2 in \n    (\n    select seqid from node where userid in('${nodeName1}', '${nodeName2}')\n    union all\n    select seqid from node where userid in('${nodeName1}', '${nodeName2}')\n    )\n) \n) order by Code"
   }
 
   private def traySqlByZonesAndSystems(zoneNames: String, systemNames: String): String = {
@@ -353,6 +353,43 @@ trait TrayHelper extends Codecs {
     }
   }
 
+
+  def cablesByTraySeqIdAndComplect(project: String, trayIdSeq: String, complect: String): List[String] = {
+
+    retrieveEleComplects(project).find(s => s.drawingId.equals(complect)) match {
+      case Some(complect) => {
+        val zoneStr = complect.zoneNames.mkString(" ")
+
+        ConnectionManager.connectionByProject(project) match {
+          case Some(connection) => {
+            try {
+              connection.setAutoCommit(false)
+              val stmt: Statement = connection.createStatement()
+              val sql = cableInTraySql(trayIdSeq)
+              val rs: ResultSet = stmt.executeQuery(cableInTraySql(trayIdSeq))
+              val buffer = ListBuffer.empty[String]
+              while (rs.next()) {
+                val z1 = Option(rs.getString("ZONEFROM")).getOrElse("NF")
+                val z2 = Option(rs.getString("ZONETO")).getOrElse("NF")
+                if (zoneStr.contains(z1) || zoneStr.contains(z2)) buffer += Option(rs.getString("CODE")).getOrElse("NF")
+              }
+              stmt.close()
+              connection.close()
+              buffer.toList
+            }
+            catch {
+              case _: Throwable =>
+                connection.close()
+                List.empty[String]
+            }
+          }
+          case None => List.empty[String]
+        }
+      }
+      case None => List.empty[String]
+    }
+  }
+
   def cablesinLineByTwoNodeNames(project: String, nodeName1: String, nodeName2: String): List[String] = {
     ConnectionManager.connectionByProject(project) match {
       case Some(connection) => {
@@ -372,6 +409,39 @@ trait TrayHelper extends Codecs {
           case _: Throwable =>
             connection.close()
             List.empty[String]
+        }
+      }
+      case None => List.empty[String]
+    }
+  }
+
+  def cablesinLineByTwoNodeNamesAndComplect(project: String, nodeName1: String, nodeName2: String, complect: String): List[String] = {
+    retrieveEleComplects(project).find(s => s.drawingId.equals(complect)) match {
+      case Some(complect) => {
+        val zoneStr = complect.zoneNames.mkString(" ")
+        ConnectionManager.connectionByProject(project) match {
+          case Some(connection) => {
+            try {
+              connection.setAutoCommit(false)
+              val stmt: Statement = connection.createStatement()
+              val rs: ResultSet = stmt.executeQuery(cablesInLineByTwoNodesSql(nodeName1, nodeName2))
+              val buffer = ListBuffer.empty[String]
+              while (rs.next()) {
+                val z1 = Option(rs.getString("ZONEFROM")).getOrElse("NF")
+                val z2 = Option(rs.getString("ZONETO")).getOrElse("NF")
+                if (zoneStr.contains(z1) || zoneStr.contains(z2)) buffer += Option(rs.getString("CODE")).getOrElse("NF")
+              }
+              stmt.close()
+              connection.close()
+              buffer.toList
+            }
+            catch {
+              case _: Throwable =>
+                connection.close()
+                List.empty[String]
+            }
+          }
+          case None => List.empty[String]
         }
       }
       case None => List.empty[String]

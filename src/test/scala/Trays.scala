@@ -1,5 +1,6 @@
 import breeze.linalg.{DenseMatrix, DenseVector, Transpose}
 import local.common.DBRequests
+import local.common.DBRequests.retrieveAllMaterialsByProject
 import local.domain.CommonTypes
 import local.ele.CommonEle
 import local.ele.cb.CableBoxManager.cableBoxBySeqId
@@ -14,7 +15,13 @@ class Trays  extends AnyFunSuite with TrayHelper{
   Logger.getLogger( "org.mongodb.driver" ).setLevel(Level.ERROR)
 
 
-  val labs0 =trayLabels("P701","18658722").mkString(" , ") //лестница без крышки
+  //TODO FOR BOGDAN NEEDS CHANGE CABLETRAY LABELING. ADDED COMPLECT PARAMETER
+  val cablesByTrayAndComplect: List[String] =genCablesByTraySeqIdAndComplect("P701","17193439","170701-884-4011")
+  val cablesInLineByTwoNodesAndComplect: List[String] =genCablesInLineByTwoNodesAndComplect("P701","0000000000013605", "4404051111112087","170701-884-4011")
+
+  val bb=0
+
+/*  val labs0 =trayLabels("P701","18658722").mkString(" , ") //лестница без крышки
   val labs1 =trayLabels("P701","18658723").mkString(" , ") //лестница с крышкой
   val labs2 =trayLabels("P701","18658724").mkString(" , ") //лоток без крышки
   val labs3 =trayLabels("P701","18658725").mkString(" , ") //лоток с крышкой
@@ -28,7 +35,7 @@ class Trays  extends AnyFunSuite with TrayHelper{
   println(labs3)
   println(labs4)
   println(labs5)
-  val jj=0
+  val jj=0*/
 
 
 /*

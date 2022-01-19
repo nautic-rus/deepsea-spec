@@ -91,7 +91,7 @@ object TrayManager extends TrayHelper with Codecs {
       }
       case _ => {
         ret += tray.mountData.label
-        tray.supports.filter(d=>d.isNeedLabel).sortBy(d => d.label).foreach(s => ret += s.label)
+        tray.supports.filter(d => d.isNeedLabel).sortBy(d => d.label).foreach(s => ret += s.label)
       }
     }
     ret.distinct.toList
@@ -166,8 +166,8 @@ object TrayManager extends TrayHelper with Codecs {
 
     }
 
-    if (clickTrayMontData.typeId == 63){
-      if (foranTray.SURFACE.contains("F0")){
+    if (clickTrayMontData.typeId == 63) {
+      if (foranTray.SURFACE.contains("F0")) {
 
         val item2 = mountRules.find(s => s.label.equals("4022") && s.inputTypeIdRange.equals("63;")).getOrElse(TrayMountRules(label = "4022"))
         buffMounts += MountItem(findWorkshopMaterial(item2.trmCode, materials), TrayMountData(item2.label, item2.trmCode).label, item2.kei, item2.count * item2.lenghtFactor * foranTray.LEN / 1000, item2.isNeedLabel)
@@ -179,14 +179,13 @@ object TrayManager extends TrayHelper with Codecs {
         buffMounts += MountItem(findWorkshopMaterial(item4.trmCode, materials), TrayMountData(item4.label, item4.trmCode).label, item4.kei, item4.count * item4.lenghtFactor * foranTray.LEN / 1000, item4.isNeedLabel)
 
         val item6 = mountData.find(s => s.typeId == 50 && s.matId == foranTray.materialId).getOrElse(TrayMountData(label = "NF"))
-        buffMounts += MountItem(findWorkshopMaterial(item6.trmCode, materials), TrayMountData(item6.label, item6.trmCode).label, "796", 2  * foranTray.LEN / 1000, true)
+        buffMounts += MountItem(findWorkshopMaterial(item6.trmCode, materials), TrayMountData(item6.label, item6.trmCode).label, "796", 2 * foranTray.LEN / 1000, true)
 
-      }else{
+      } else {
         val item4 = mountRules.find(s => s.label.equals("4211")).getOrElse(TrayMountRules(label = "4211"))
         buffMounts += MountItem(findWorkshopMaterial(item4.trmCode, materials), TrayMountData(item4.label, item4.trmCode).label, item4.kei, item4.count * item4.lenghtFactor * foranTray.LEN / 1000, item4.isNeedLabel)
       }
     }
-
 
 
     mountRules.filter(p => p.inputTypeIdRange.contains(clickTrayMontData.typeId.toString)).foreach(item => {
@@ -243,9 +242,14 @@ object TrayManager extends TrayHelper with Codecs {
 
   def genCablesByTraySeqId(project: String, trayIdSeq: String): List[String] = cablesByTraySeqId(project, trayIdSeq)
 
+  def genCablesByTraySeqIdAndComplect(project: String, trayIdSeq: String, complect: String): List[String] = cablesByTraySeqIdAndComplect(project, trayIdSeq, complect)
+
   def genTraysByZoneNameAndSysName(project: String = "P701", zones: List[String] = List.empty[String], systems: List[String] = List.empty[String]): List[ForanTray] = retrieveTraysByZoneNameAndSysName(project, zones, systems)
 
   def genCablesInLineByTwoNodes(project: String, nodeName1: String, nodeName2: String): List[String] = cablesinLineByTwoNodeNames(project, nodeName1, nodeName2)
+
+  def genCablesInLineByTwoNodesAndComplect(project: String, nodeName1: String, nodeName2: String, complect: String): List[String] = cablesinLineByTwoNodeNamesAndComplect(project, nodeName1, nodeName2, complect)
+
 
   def genTraysListByZoneNameAndSysName(project: String = "P701", zones: List[String] = List.empty[String], systems: List[String] = List.empty[String]): List[Tray] = {
     val buff = ListBuffer.empty[Tray]

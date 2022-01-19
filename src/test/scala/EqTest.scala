@@ -9,7 +9,7 @@ class EqTest extends AnyFunSuite  with EleEqHelper{
   org.apache.log4j.BasicConfigurator.configure()
   Logger.getLogger( "org.mongodb.driver" ).setLevel(Level.ERROR)
 
-  //val eqLabel: String =genEqLabelsByEqOidJson("P701", "7119738")
+  val eqLabel: String =genEqLabelsByEqOidJson("P701", "7119738")
 
 
   //val eqJson: String =genEqByOIDJson("P701", "7119738")
