@@ -424,6 +424,7 @@ trait TrayHelper extends Codecs {
             try {
               connection.setAutoCommit(false)
               val stmt: Statement = connection.createStatement()
+              val sql=cablesInLineByTwoNodesSql(nodeName1, nodeName2)
               val rs: ResultSet = stmt.executeQuery(cablesInLineByTwoNodesSql(nodeName1, nodeName2))
               val buffer = ListBuffer.empty[String]
               while (rs.next()) {

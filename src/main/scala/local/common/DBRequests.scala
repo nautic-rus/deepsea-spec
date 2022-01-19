@@ -90,6 +90,7 @@ object DBRequests extends Codecs{
         case "X" => Math.abs(Math.abs(X_COG.toInt) - Math.abs(getCoordFromBSString(SURFACE)))
         case "Y" => Math.abs(Math.abs(Y_COG.toInt) - Math.abs(getCoordFromBSString(SURFACE)))
         case "Z" => Math.abs(Math.abs(Z_COG.toInt) - Math.abs(getCoordFromBSString(SURFACE)))
+        case "F" => Math.abs(getCoordFromBSString(SURFACE))
         case _ => 0
       }
     } else {
