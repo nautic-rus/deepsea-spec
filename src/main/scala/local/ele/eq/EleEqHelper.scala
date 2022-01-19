@@ -23,18 +23,18 @@ trait EleEqHelper {
 
   //private def eqByComplectsSql(compectStr: String) =s"select \nEL.OID,\nEL.TYPE,\nEL.USERID,\nZ.SEQID as ZONE_SEQID,\nZ.NAME as ZONE_NAME,\nZL.DESCR as ZONE_DESCR,\nS.SEQID as SYSTEM_SEQID,\nS.NAME as SYSTEM_NAME,\nSL.DESCR as SYSTEM_DESCR,\nC.ABBREV,\nC.WEIGHT,\nC.STOCK_CODE,\nOC.NAME as CLASS_NAME,\nRR.CODE as RA_CODE,\nRR.DESCR as RA_DESCR,\nN.USERID as NODE_USERID,\n(select long_descr from ELEMENT_LANG where lang=-1 and elem = EL.OID) as EQELEC,\nELEMPOS.XCOG (EL.OID,EL.TYPE,EL.DECK,EL.COMP) as XCOG,\nELEMPOS.YCOG (EL.OID,EL.TYPE,EL.DECK,EL.COMP) as YCOG,\nELEMPOS.ZCOG (EL.OID,EL.TYPE,EL.DECK,EL.COMP) as ZCOG,\n  POS.A11  ,\n  POS.A12  ,\n  POS.A13  ,\n  POS.A21 ,\n  POS.A22  ,\n  POS.A23  ,\n  POS.A31  ,\n  POS.A32  ,\n  POS.A33  ,\n  POS.A41  ,\n  POS.A42  ,\n  POS.A43,\n  (select X from MDLCONNECTOR where OID_MODEL=M.OID and LABEL='MF')* 1000 as PX,\n  (select Y from MDLCONNECTOR where OID_MODEL=M.OID and LABEL='MF')* 1000 as PY,\n  (select Z from MDLCONNECTOR where OID_MODEL=M.OID and LABEL='MF')* 1000 as PZ,\n(\n         select \n         BN2.name\n         from BS_DESIGN_NODE  BDN, BS_DESIGN_ATOM BDA, BS_ATOM_FIXED_ATTRIBUTE BAF, bs_node BN, bs_node BN2\n         where \n         BDN.model_oid=EL.OID AND \n         BDA.BS_DESIGN_NODE_OID=BDN.OID AND\n         BAF.BS_DS_ATOM_OID=BDA.OID AND\n         BN.OID=BAF.BS_NODE_OID AND\n         BN2.OID=BN.parent_node\n) as SURFACE \nfrom element EL, ZONE Z, ZONE_LANG ZL, SYSTEMS S, SYSTEMS_LANG SL,ROUT_AREA RR ,NODE N,NODE_ELEM NE,\nCOMPONENT C, OBJ_CLASS OC, MODEL M ,ELEM_POS EP,  ELEM_ABS_POS POS\nwhere\nEL.OID=NE.ELEM AND\nRR.SEQID=N.R_AREA AND\nN.SEQID=NE.NODE AND\nEL.OID=EP.ELEM AND\nPOS.OID=EP.OID AND\nEL.ZONE=Z.OID AND\nEL.ZONE=ZL.ZONE AND ZL.LANG=-2 AND\nEL.SYSTEM=S.OID AND\nEL.SYSTEM=SL.SYSTEM AND SL.LANG=-2 AND\nEL.COMP=C.OID AND\nC.ELEM_CLASS=OC.OID AND\nC.MODEL=M.OID_F_LIB_MODEL AND\nRR.code in (${compectStr}) AND EL.USERID not like '#%'  AND N.USERID not like '#%' \norder by EL.USERID"
 
-  private def eqByComplectsSql(compectStr: String) =s"select \nEL.OID,\nEL.TYPE,\nEL.USERID,\nZ.SEQID as ZONE_SEQID,\nZ.NAME as ZONE_NAME,\nZL.DESCR as ZONE_DESCR,\nS.SEQID as SYSTEM_SEQID,\nS.NAME as SYSTEM_NAME,\nSL.DESCR as SYSTEM_DESCR,\nC.ABBREV,\nC.WEIGHT,\nC.STOCK_CODE,\nOC.NAME as CLASS_NAME,\nRR.CODE as RA_CODE,\nRR.DESCR as RA_DESCR,\nN.USERID as NODE_USERID,\n(select long_descr from ELEMENT_LANG where lang=-1 and elem = EL.OID) as EQELEC,\nELEMPOS.XCOG (EL.OID,EL.TYPE,EL.DECK,EL.COMP) as XCOG,\nELEMPOS.YCOG (EL.OID,EL.TYPE,EL.DECK,EL.COMP) as YCOG,\nELEMPOS.ZCOG (EL.OID,EL.TYPE,EL.DECK,EL.COMP) as ZCOG,\n  POS.A11  ,\n  POS.A12  ,\n  POS.A13  ,\n  POS.A21 ,\n  POS.A22  ,\n  POS.A23  ,\n  POS.A31  ,\n  POS.A32  ,\n  POS.A33  ,\n  POS.A41  ,\n  POS.A42  ,\n  POS.A43,\n  (select X from MDLCONNECTOR where OID_MODEL=M.OID and LABEL='MF')* 1000 as PX,\n  (select Y from MDLCONNECTOR where OID_MODEL=M.OID and LABEL='MF')* 1000 as PY,\n  (select Z from MDLCONNECTOR where OID_MODEL=M.OID and LABEL='MF')* 1000 as PZ,\n(\n         select \n         BN2.name\n         from BS_DESIGN_NODE  BDN, BS_DESIGN_ATOM BDA, BS_ATOM_FIXED_ATTRIBUTE BAF, bs_node BN, bs_node BN2\n         where \n         BDN.model_oid=EL.OID AND \n         BDA.BS_DESIGN_NODE_OID=BDN.OID AND\n         BAF.BS_DS_ATOM_OID=BDA.OID AND\n         BN.OID=BAF.BS_NODE_OID AND\n         BN2.OID=BN.parent_node\n) as SURFACE \nfrom element EL, ZONE Z, ZONE_LANG ZL, SYSTEMS S, SYSTEMS_LANG SL,ROUT_AREA RR ,NODE N,NODE_ELEM NE,\nCOMPONENT C, OBJ_CLASS OC, MODEL M ,ELEM_POS EP,  ELEM_ABS_POS POS , COMPONENT_ELEC CE\nwhere\nEL.OID=NE.ELEM AND\nRR.SEQID=N.R_AREA AND\nN.SEQID=NE.NODE AND\nEL.OID=EP.ELEM AND\nPOS.OID=EP.OID AND\nEL.ZONE=Z.OID AND\nEL.ZONE=ZL.ZONE AND ZL.LANG=-2 AND\nEL.SYSTEM=S.OID AND\nEL.SYSTEM=SL.SYSTEM AND SL.LANG=-2 AND\nEL.COMP=C.OID AND\nC.ELEM_CLASS=OC.OID AND\nC.MODEL=M.OID_F_LIB_MODEL AND C.OID=CE.COMP AND CE.MECHANICAL=0 AND \nRR.code in (${compectStr}) AND EL.USERID not like '#%'  AND N.USERID not like '#%' \norder by EL.USERID"
-
+  private def eqByComplectsSql(compectStr: String) = s"select \nEL.OID,\nEL.TYPE,\nEL.USERID,\nZ.SEQID as ZONE_SEQID,\nZ.NAME as ZONE_NAME,\nZL.DESCR as ZONE_DESCR,\nS.SEQID as SYSTEM_SEQID,\nS.NAME as SYSTEM_NAME,\nSL.DESCR as SYSTEM_DESCR,\nC.ABBREV,\nC.WEIGHT,\nC.STOCK_CODE,\nOC.NAME as CLASS_NAME,\nRR.CODE as RA_CODE,\nRR.DESCR as RA_DESCR,\nN.USERID as NODE_USERID,\n(select long_descr from ELEMENT_LANG where lang=-1 and elem = EL.OID) as EQELEC,\nELEMPOS.XCOG (EL.OID,EL.TYPE,EL.DECK,EL.COMP) as XCOG,\nELEMPOS.YCOG (EL.OID,EL.TYPE,EL.DECK,EL.COMP) as YCOG,\nELEMPOS.ZCOG (EL.OID,EL.TYPE,EL.DECK,EL.COMP) as ZCOG,\n  POS.A11  ,\n  POS.A12  ,\n  POS.A13  ,\n  POS.A21 ,\n  POS.A22  ,\n  POS.A23  ,\n  POS.A31  ,\n  POS.A32  ,\n  POS.A33  ,\n  POS.A41  ,\n  POS.A42  ,\n  POS.A43,\n  (select X from MDLCONNECTOR where OID_MODEL=M.OID and LABEL='MF')* 1000 as PX,\n  (select Y from MDLCONNECTOR where OID_MODEL=M.OID and LABEL='MF')* 1000 as PY,\n  (select Z from MDLCONNECTOR where OID_MODEL=M.OID and LABEL='MF')* 1000 as PZ,\n(\n         select \n         BN2.name\n         from BS_DESIGN_NODE  BDN, BS_DESIGN_ATOM BDA, BS_ATOM_FIXED_ATTRIBUTE BAF, bs_node BN, bs_node BN2\n         where \n         BDN.model_oid=EL.OID AND \n         BDA.BS_DESIGN_NODE_OID=BDN.OID AND\n         BAF.BS_DS_ATOM_OID=BDA.OID AND\n         BN.OID=BAF.BS_NODE_OID AND\n         BN2.OID=BN.parent_node\n) as SURFACE \nfrom element EL, ZONE Z, ZONE_LANG ZL, SYSTEMS S, SYSTEMS_LANG SL,ROUT_AREA RR ,NODE N,NODE_ELEM NE,\nCOMPONENT C, OBJ_CLASS OC, MODEL M ,ELEM_POS EP,  ELEM_ABS_POS POS , COMPONENT_ELEC CE\nwhere\nEL.OID=NE.ELEM AND\nRR.SEQID=N.R_AREA AND\nN.SEQID=NE.NODE AND\nEL.OID=EP.ELEM AND\nPOS.OID=EP.OID AND\nEL.ZONE=Z.OID AND\nEL.ZONE=ZL.ZONE AND ZL.LANG=-2 AND\nEL.SYSTEM=S.OID AND\nEL.SYSTEM=SL.SYSTEM AND SL.LANG=-2 AND\nEL.COMP=C.OID AND\nC.ELEM_CLASS=OC.OID AND\nC.MODEL=M.OID_F_LIB_MODEL AND C.OID=CE.COMP AND CE.MECHANICAL=0 AND \nRR.code in (${compectStr}) AND EL.USERID not like '#%'  AND N.USERID not like '#%' \norder by EL.USERID"
 
 
   def eqLabelsByEqOid(project: String, eqOid: String): List[String] = {
     val buff = ListBuffer.empty[String]
     val eq = eqByOID(project, eqOid)
-    buff += "V=" + eq.MARGIN.toString
+    //buff += "V=" + eq.MARGIN.toString
+    buff += eq.USERID
     buff += eq.LABEL
-    eq.SUPPORTS.sortBy(s => s.label).foreach(s => {
-      buff += s.label
-    })
+    /*    eq.SUPPORTS.sortBy(s => s.label).foreach(s => {
+          buff += s.label
+        })*/
     buff.toList
   }
 
@@ -87,7 +87,7 @@ trait EleEqHelper {
             val wmats = retrieveAllMaterialsByProject(project)
             val label: String = calculateDrawingLabel(eq.EQELEC)
             val supports: List[MountItem] = calculateSupports(eq.EQELEC, wmats)
-            val userId:String=if(eq.NODE_USERID.equals(eq.USERID)) eq.USERID else eq.NODE_USERID
+            val userId: String = if (eq.NODE_USERID.equals(eq.USERID)) eq.USERID else eq.NODE_USERID
             val marigin: Int = calcH(eq)
             val wmat: WorkShopMaterial = findWorkshopMaterialContains(eq.STOCK_CODE, wmats)
             rs.close()
@@ -163,7 +163,7 @@ trait EleEqHelper {
             val label: String = calculateDrawingLabel(eq.EQELEC)
             val supports: List[MountItem] = calculateSupports(eq.EQELEC, wmats)
             val marigin: Int = calcH(eq)
-            val userId:String=if(eq.NODE_USERID.equals(eq.USERID)) eq.USERID else eq.NODE_USERID
+            val userId: String = if (eq.NODE_USERID.equals(eq.USERID)) eq.USERID else eq.NODE_USERID
             val wmat: WorkShopMaterial = findWorkshopMaterialContains(eq.STOCK_CODE, wmats)
             buff += EleEq(eq.OID, label, eq.TYPE, userId, eq.ZONE_SEQID, eq.ZONE_NAME, eq.ZONE_DESCR, eq.SYSTEM_SEQID, eq.SYSTEM_NAME, eq.SYSTEM_DESCR, eq.ABBREV, eq.XCOG, eq.YCOG, eq.ZCOG, eq.WEIGHT, eq.STOCK_CODE, eq.CLASS_NAME, eq.SURFACE, marigin, supports, wmat)
           }
