@@ -12,6 +12,8 @@ class PRD extends AnyFunSuite {
   //val b=genForanPartsByDrawingNumJSON("N004","NR004-101-0101")
 
   val parts: List[PrdPart] = genForanPartsByDrawingNum("N004", "210101-102-0103")
+  val tt1=parts.filter(p=>p.PART_CODE.contains("273"))
+  val hh=0
 
   val rows:List[Item11ColumnsEN]={
     val buff: ListBuffer[Item11ColumnsEN] =ListBuffer.empty[Item11ColumnsEN]
