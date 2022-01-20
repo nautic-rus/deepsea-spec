@@ -111,8 +111,9 @@ object TrayManager extends TrayHelper with Codecs {
       val tmd: TrayMountData = traysMountData.find(s => s.trmCode.contains(cbx.STOCK_CODE)).getOrElse(TrayMountData())
       val ft = ForanTray(IDSQ = cbx.IDSQ, ZONE = cbx.ZONE, SYSTEM = cbx.SYSTEM,
         X_COG = cbx.X_COG, Y_COG = cbx.Y_COG, Z_COG = cbx.Z_COG, WEIGHT = cbx.WEIGHT,
-        NODE1 = cbx.NODE1, NODE2 = cbx.NODE2, STOCK_CODE = cbx.STOCK_CODE, LEN = 1.0)
+        NODE1 = cbx.NODE1, NODE2 = cbx.NODE2, STOCK_CODE = cbx.STOCK_CODE, LEN = 1000.0)
       val ws = materials.find(s => s.trmCode.contains(cbx.STOCK_CODE)).getOrElse(new WorkShopMaterial())
+      if(ws.trmCode.equals("NRF0459FB3AF0BD49")) println("NRF0459FB3AF0BD49")
       val tray = Tray(ft, tmd, ws, List.empty[MountItem])
       buff += tray
     })

@@ -13,7 +13,7 @@ import local.pdf.ru.common.ReportCommon
 import local.pdf.ru.common.ReportCommon.{DocName, Item11Columns, borderESKD, genBaseStampBig, genBaseStampSmall, getNnauticLigo, gostFont, mmToPt}
 import org.davidmoten.text.utils.WordWrap
 
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, OutputStream}
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, OutputStream, PrintWriter}
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._
 
@@ -41,6 +41,7 @@ object EleEqTrayESKDReport {
   )
 
   def generatePdfToFileWithRev(project: String, complectName: String, path: String, rev: String = "0"): List[String] = {
+    val retPath = ListBuffer.empty[String]
     val parts: EleComplectParts = retrieveAllPartsByComplectName(project, complectName)
 
     val item11Columns: List[Item11Columns] = {
@@ -64,7 +65,7 @@ object EleEqTrayESKDReport {
               A5 = eq.workShopMaterial.trmCode,
               A6 = eq.workShopMaterial.units,
               A7 = "1",
-              A8 = String.format("%.2f", checkWeight( eq.workShopMaterial.singleWeight)),
+              A8 = String.format("%.2f", checkWeight(eq.workShopMaterial.singleWeight)),
               A9 = String.format("%.2f", checkWeight(eq.workShopMaterial.singleWeight)),
               A10 = eq.workShopMaterial.category,
               A11 = eq.ZONE_NAME
@@ -117,7 +118,7 @@ object EleEqTrayESKDReport {
               A6 = eq.workShopMaterial.units,
               A7 = "1",
               A8 = String.format("%.2f", checkWeight(eq.workShopMaterial.singleWeight)),
-              A9 = String.format("%.2f",checkWeight( eq.workShopMaterial.singleWeight)),
+              A9 = String.format("%.2f", checkWeight(eq.workShopMaterial.singleWeight)),
               A10 = eq.workShopMaterial.category,
               A11 = eq.ZONE_NAME
 
@@ -182,7 +183,7 @@ object EleEqTrayESKDReport {
               A5 = itemTrmCode,
               A6 = item.A6,
               A7 = String.format("%.2f", qty),
-              A8 = String.format("%.2f",checkWeight(item.A8.toDoubleOption.getOrElse(0.0))),
+              A8 = String.format("%.2f", checkWeight(item.A8.toDoubleOption.getOrElse(0.0))),
               A9 = String.format("%.2f", Math.ceil(qty * item.A8.toDoubleOption.getOrElse(0.0))),
               A10 = item.A10,
               A11 = item.A11
@@ -250,13 +251,41 @@ object EleEqTrayESKDReport {
 
     val docName: DocName = DocName(num = parts.complect.drawingId, name = parts.complect.drawingDescr, lastRev = rev, userDev = "Сидоров")
     val pdfPath = s"${path}/${docName.num}_${docName.name}_rev${docName.lastRev}.pdf"
-    val retPath = List[String](pdfPath)
+    val trmPath = s"${path}/${docName.num}_${docName.name}_rev${docName.lastRev}.trm"
+    retPath += pdfPath
     genReport(docName, item11Columns, pdfPath)
-    retPath
+
+    generateTrm(trmPath, docName, item11Columns)
+
+    retPath.toList
   }
 
-  def generatePdfToFileNoRev(project: String, complectName: String, path: String) = {
+  def generatePdfToFileNoRev(project: String, complectName: String, path: String): List[String] = {
     generatePdfToFileWithRev(project, complectName, path, "tmp")
+  }
+
+  private def generateTrm(path: String, docName: DocName, item11Columns: List[Item11Columns]): Unit = {
+    var rowcunter = 2
+    var partCounter = 1
+    var subPartCounter = 1
+    val pw1 = new PrintWriter(path, "Windows-1251")
+    pw1.println(s"#СП|${docName.num}|${docName.name}|${docName.lastRev}")
+
+    item11Columns.foreach(item => {
+
+      if (item.isHeader) {
+        val str = s"${rowcunter}|Ч${partCounter}|${item.A1}"
+        pw1.println(str)
+        rowcunter = rowcunter + 1
+        partCounter = partCounter + 1
+      } else {
+        val str = s"${rowcunter}|${item.A1}|${item.A2}|${item.A4}|${item.A5}|${item.A6}|${item.A7}|${item.A8}|${item.A9}|${item.A11}||${item.A10}||||MESTO|"
+        pw1.println(str)
+        rowcunter = rowcunter + 1
+      }
+    })
+    pw1.println("#")
+    pw1.close()
   }
 
   /*
