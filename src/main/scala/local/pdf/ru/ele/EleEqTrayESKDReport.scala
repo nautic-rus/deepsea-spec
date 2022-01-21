@@ -11,6 +11,7 @@ import local.common.DBRequests.MountItem
 import local.ele.CommonEle.{EleComplectParts, retrieveAllPartsByComplectName}
 import local.pdf.ru.common.ReportCommon
 import local.pdf.ru.common.ReportCommon.{DocName, Item11Columns, borderESKD, genBaseStampBig, genBaseStampSmall, getNnauticLigo, gostFont, mmToPt}
+import local.pdf.ru.ele.EleEqTrayESKDReport.checkWeight
 import org.davidmoten.text.utils.WordWrap
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, OutputStream, PrintWriter}
@@ -39,6 +40,215 @@ object EleEqTrayESKDReport {
     mmToPt(15 * kM),
     mmToPt(10 * kM) + 2
   )
+
+  def generateElecParts(project: String, complectName: String): List[Item11Columns] = {
+    val retPath = ListBuffer.empty[String]
+    val parts: EleComplectParts = retrieveAllPartsByComplectName(project, complectName)
+    val item11Columns: List[Item11Columns] = {
+      val n1 = "Электрооборудование устанавливаемое заводом-строителем"
+      val n2 = "Электрооборудование устанавливаемое электромонтажным предприятием"
+      val buff = ListBuffer.empty[Item11Columns]
+      val parttitions = parts.eqs.partition(x => x.workShopMaterial.singleWeight > 50)
+
+      val eqSupports = ListBuffer.empty[Item11Columns]
+
+      if (parttitions._1.nonEmpty) {
+        buff += Item11Columns(true, n1.toUpperCase())
+        parttitions._1.groupBy(s => s.SYSTEM_DESCR).toList.sortBy(s => s._1).foreach(gr => {
+          buff += Item11Columns(true, gr._1)
+          gr._2.sortBy(s => s.orderItem()).foreach(eq => {
+            buff += Item11Columns(
+              A1 = eq.LABEL,
+              A2 = eq.USERID,
+              A3 = eq.workShopMaterial.description,
+              A4 = eq.workShopMaterial.name,
+              A5 = eq.workShopMaterial.trmCode,
+              A6 = eq.workShopMaterial.units,
+              A7 = "1",
+              A8 = String.format("%.2f", checkWeight(eq.workShopMaterial.singleWeight)),
+              A9 = String.format("%.2f", checkWeight(eq.workShopMaterial.singleWeight)),
+              A10 = eq.workShopMaterial.category,
+              A11 = eq.ZONE_NAME
+
+            )
+            eq.SUPPORTS.filter(s => s.label.contains(".")).sortBy(d => d.label).foreach(supp => {
+              buff += Item11Columns(
+                A1 = supp.label,
+                A2 = "",
+                A3 = supp.workShopMaterial.description,
+                A4 = supp.workShopMaterial.name,
+                A5 = supp.workShopMaterial.trmCode,
+                A6 = supp.kei,
+                A7 = supp.qty.toString,
+                A8 = String.format("%.2f", checkWeight(supp.workShopMaterial.singleWeight)),
+                A9 = String.format("%.2f", checkWeight(supp.workShopMaterial.singleWeight * supp.qty)),
+                A10 = supp.workShopMaterial.category,
+                A11 = eq.ZONE_NAME
+              )
+            })
+            eq.SUPPORTS.filter(s => !s.label.contains(".")).sortBy(d => d.label).foreach(supp => {
+              eqSupports += Item11Columns(
+                A1 = supp.label,
+                A2 = "",
+                A3 = supp.workShopMaterial.description,
+                A4 = supp.workShopMaterial.name,
+                A5 = supp.workShopMaterial.trmCode,
+                A6 = supp.kei,
+                A7 = supp.qty.toString,
+                A8 = String.format("%.2f", checkWeight(supp.workShopMaterial.singleWeight)),
+                A9 = String.format("%.2f", checkWeight(supp.workShopMaterial.singleWeight * supp.qty)),
+                A10 = supp.workShopMaterial.category,
+                A11 = ""
+              )
+            })
+          })
+        })
+      }
+
+      if (parttitions._2.nonEmpty) {
+        buff += Item11Columns(true, n2.toUpperCase())
+        parttitions._2.groupBy(s => s.SYSTEM_DESCR).toList.sortBy(s => s._1).foreach(gr => {
+          buff += Item11Columns(true, gr._1)
+          gr._2.sortBy(s => s.orderItem()).foreach(eq => {
+            buff += Item11Columns(
+              A1 = eq.LABEL,
+              A2 = eq.USERID,
+              A3 = eq.workShopMaterial.description,
+              A4 = eq.workShopMaterial.name, A5 = eq.workShopMaterial.trmCode,
+              A6 = eq.workShopMaterial.units,
+              A7 = "1",
+              A8 = String.format("%.2f", checkWeight(eq.workShopMaterial.singleWeight)),
+              A9 = String.format("%.2f", checkWeight(eq.workShopMaterial.singleWeight)),
+              A10 = eq.workShopMaterial.category,
+              A11 = eq.ZONE_NAME
+
+            )
+            eq.SUPPORTS.filter(s => s.label.contains(".")).sortBy(d => d.label).foreach(supp => {
+              buff += Item11Columns(
+                A1 = supp.label,
+                A2 = "",
+                A3 = supp.workShopMaterial.description,
+                A4 = supp.workShopMaterial.name,
+                A5 = supp.workShopMaterial.trmCode,
+                A6 = supp.kei,
+                A7 = supp.qty.toString,
+                A8 = String.format("%.2f", checkWeight(supp.workShopMaterial.singleWeight)),
+                A9 = String.format("%.2f", checkWeight(supp.workShopMaterial.singleWeight * supp.qty)),
+                A10 = supp.workShopMaterial.category,
+                A11 = eq.ZONE_NAME
+              )
+            })
+            eq.SUPPORTS.filter(s => !s.label.contains(".")).sortBy(d => d.label).foreach(supp => {
+              eqSupports += Item11Columns(
+                A1 = supp.label,
+                A2 = "",
+                A3 = supp.workShopMaterial.description,
+                A4 = supp.workShopMaterial.name,
+                A5 = supp.workShopMaterial.trmCode,
+                A6 = supp.kei,
+                A7 = supp.qty.toString,
+                A8 = String.format("%.2f", checkWeight(supp.workShopMaterial.singleWeight)),
+                A9 = String.format("%.2f", checkWeight(supp.workShopMaterial.singleWeight * supp.qty)),
+                A10 = supp.workShopMaterial.category,
+                A11 = ""
+              )
+            })
+          })
+        })
+      }
+
+
+      val supports: List[MountItem] = {
+        val suppBuffer = ListBuffer.empty[MountItem]
+        parts.trays.foreach(tr => {
+          suppBuffer += MountItem(tr.workShopMaterial, tr.mountData.label, tr.workShopMaterial.units, tr.foranTray.LEN / 1000)
+          suppBuffer ++= tr.supports
+        })
+        suppBuffer.toList
+      }
+
+      val supportsRows: List[Item11Columns] = {
+        val buffer = ListBuffer.empty[Item11Columns]
+        if (eqSupports.nonEmpty) {
+          eqSupports.groupBy(s => (s.A1, s.A5)).toList.foreach(eqGroup => {
+            val itemLabel = eqGroup._1._1
+            val itemTrmCode = eqGroup._1._2
+            val item = eqGroup._2.head
+            val qty: Double = Math.ceil(eqGroup._2.map(_.A7.toDoubleOption.getOrElse(0.0)).sum)
+            buffer += Item11Columns(
+              A1 = itemLabel,
+              A2 = item.A2,
+              A3 = item.A3,
+              A4 = item.A4,
+              A5 = itemTrmCode,
+              A6 = item.A6,
+              A7 = String.format("%.2f", qty),
+              A8 = String.format("%.2f", checkWeight(item.A8.toDoubleOption.getOrElse(0.0))),
+              A9 = String.format("%.2f", Math.ceil(qty * item.A8.toDoubleOption.getOrElse(0.0))),
+              A10 = item.A10,
+              A11 = item.A11
+            )
+          })
+        }
+
+        supports.groupBy(s => s.workShopMaterial.trmCode).toList.foreach(group => {
+          if (group._2.nonEmpty) {
+            val item = group._2.head
+            val label = item.label
+            val kei = item.kei
+            val qty: Double = Math.ceil(group._2.map(_.qty).sum)
+
+            if (label.equals("6002")) {
+              val ss = 0
+            }
+            buffer += Item11Columns(
+              A1 = label,
+              A2 = "",
+              A3 = item.workShopMaterial.description,
+              A4 = item.workShopMaterial.name,
+              A5 = item.workShopMaterial.trmCode,
+              A6 = kei,
+              A7 = String.format("%.2f", qty),
+              A8 = String.format("%.2f", checkWeight(item.workShopMaterial.singleWeight)),
+              A9 = String.format("%.2f", checkWeight(item.workShopMaterial.singleWeight * qty)),
+              A10 = item.workShopMaterial.category,
+              A11 = ""
+            )
+          }
+        })
+        buffer.toList
+      }
+
+      val gr4 = supportsRows.filter(p => p.A1.startsWith("4"))
+      if (gr4.nonEmpty) {
+        buff += Item11Columns(true, "Крепление и заземление кабелей")
+        buff ++= gr4.sortBy(s => s.A1)
+      }
+      val gr5 = supportsRows.filter(p => p.A1.startsWith("5") || p.A1.startsWith("8"))
+      if (gr5.nonEmpty) {
+        buff += Item11Columns(true, "Доизоляционные детали крепления")
+        buff ++= gr5.sortBy(s => s.A1)
+      }
+      val gr6 = supportsRows.filter(p => p.A1.startsWith("6"))
+      if (gr6.nonEmpty) {
+        buff += Item11Columns(true, "Послеизоляционные детали крепления")
+        buff ++= gr6.sortBy(s => s.A1)
+      }
+      val gr7 = supportsRows.filter(p => p.A1.startsWith("7"))
+      if (gr7.nonEmpty) {
+        buff += Item11Columns(true, "Трубы защиты кабеля")
+        buff ++= gr7.sortBy(s => s.A1)
+      }
+      val gr8 = supportsRows.filter(p => !p.A1.startsWith("4") && !p.A1.startsWith("5") && !p.A1.startsWith("6") && !p.A1.startsWith("7") && !p.A1.startsWith("8"))
+      if (gr8.nonEmpty) {
+        buff += Item11Columns(true, "Прочее")
+        buff ++= gr8.sortBy(s => s.A1)
+      }
+
+      buff.toList
+    }
+    item11Columns
+  }
 
   def generatePdfToFileWithRev(project: String, complectName: String, path: String, rev: String = "0"): List[String] = {
     val retPath = ListBuffer.empty[String]

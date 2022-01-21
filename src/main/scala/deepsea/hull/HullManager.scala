@@ -53,7 +53,7 @@ object HullManager {
   case class GetHullPartsByDocNumber(project: String, docNumber: String)
   case class GetHullEsp(docNumber: String, revision: String = "")
   case class SetHullEsp(project: String, docNumber: String, user: String, revision: String)
-  case class GetHullEspFiles(project: String, docNumber: String, revision: String)
+  case class GetHullEspFiles(project: String, docNumber: String, docName: String, revision: String)
 
   case class HullPartPlateDef(PART_OID: Int, MATERIAL: String, MATERIAL_OID: Int, THICK: Double, STOCK_CODE: String)
   case class HullPartProfileDef(KSE: Int, SECTION: Int, WEB_HEIGHT: Double, WEB_THICKNESS: Double, FLANGE_HEIGHT: Double, FLANGE_THICKNESS: Double, MATERIAL: String, MATERIAL_OID: Int, STOCK_CODE: String)
@@ -264,7 +264,8 @@ class HullManager extends Actor {
       Await.result(partLists.insertOne(Document.apply(hullPartList.asJson.noSpaces)).toFuture(), Duration(10, SECONDS))
 
       sender() ! "success"
-    case GetHullEspFiles(project, docNumber, revision) =>
+    case GetHullEspFiles(project, docNumber, docName, revision) =>
+
       val parts: List[PrdPart] = genForanPartsByDrawingNum(project, docNumber)
 
       val rows:List[Item11ColumnsEN]={
@@ -294,10 +295,10 @@ class HullManager extends Actor {
         buff.sortBy(s=>s.A1).toList
       }
       val dn = if (revision != ""){
-        DocNameEN(num = docNumber, lastRev = revision)
+        DocNameEN(num = docNumber, name = docName, lastRev = revision)
       }
       else{
-        DocNameEN(num = docNumber)
+        DocNameEN(num = docNumber, name = docName)
       }
       val file = Files.createTempDirectory("trayPdf").toAbsolutePath.toString + "/" + docNumber + ".pdf"
       genTest(dn,file,rows)

@@ -50,8 +50,8 @@ class HTTPManager extends Actor {
       (get & path("setHullEsp") & parameter("project") & parameter("docNumber") & parameter("user") & parameter("revision")) { (project, docNumber, user, revision) =>
         askFor(ActorManager.hullManager, SetHullEsp(project, docNumber, user, revision))
       },
-      (get & path("hullEspFiles") & parameter("project") & parameter("docNumber") & parameter("revision")) { (project, docNumber, revision) =>
-        askFor(ActorManager.hullManager, GetHullEspFiles(project, docNumber, revision))
+      (get & path("hullEspFiles") & parameter("project") & parameter("docNumber") & parameter("docName") & parameter("revision")) { (project, docNumber, docName, revision) =>
+        askFor(ActorManager.hullManager, GetHullEspFiles(project, docNumber, docName, revision))
       },
 
 
@@ -63,11 +63,11 @@ class HTTPManager extends Actor {
       (get & path("trayLabels") & parameter("project") & parameter("seqId")) { (project, seqId) =>
         askFor(ActorManager.elec, GetTrayLabels(project, seqId))
       },
-      (get & path("cablesByTray") & parameter("project") & parameter("seqId")) { (project, seqId) =>
-        askFor(ActorManager.elec, GetCablesByTray(project, seqId))
+      (get & path("cablesByTray") & parameter("project") & parameter("seqId") & parameter("bundle")) { (project, seqId, bundle) =>
+        askFor(ActorManager.elec, GetCablesByTray(project, seqId, bundle))
       },
-      (get & path("cablesByNodes") & parameter("project") & parameter("node1") & parameter("node2")) { (project, node1, node2) =>
-        askFor(ActorManager.elec, GetCablesByNodes(project, node1, node2))
+      (get & path("cablesByNodes") & parameter("project") & parameter("node1") & parameter("node2") & parameter("bundle")) { (project, node1, node2, bundle) =>
+        askFor(ActorManager.elec, GetCablesByNodes(project, node1, node2, bundle))
       },
       (get & path("eqLabels") & parameter("project") & parameter("seqId")) { (project, seqId) =>
         askFor(ActorManager.elec, GetEqLabels(project, seqId))

@@ -27,10 +27,10 @@ import scala.concurrent.Await
 
 object ElecManager{
   case class GetTrayLabels(project: String, seqId: String)
-  case class GetCablesByTray(project: String, seqId: String)
+  case class GetCablesByTray(project: String, seqId: String, bundle: String)
   case class GetEqLabels(project: String, seqId: String)
   case class GetHoleLabel(project: String, seqId: String)
-  case class GetCablesByNodes(project: String, node1: String, node2: String)
+  case class GetCablesByNodes(project: String, node1: String, node2: String, bundle: String)
   case class GetTraysByZonesAndSystems(project: String, docNumber: String)
   case class GetTrayBundles(project: String)
   case class GenerateTrayPdf(project: String, docNumber: String, revision: String = "")
@@ -42,10 +42,10 @@ class ElecManager extends Actor{
 
   override def receive: Receive = {
     case GetTrayLabels(project, seqId) => sender() ! Json.toJson(TrayManager.trayLabels(project,seqId))
-    case GetCablesByTray(project, seqId) => sender() ! Json.toJson(TrayManager.genCablesByTraySeqId(project,seqId))
+    case GetCablesByTray(project, seqId, bundle) => sender() ! Json.toJson(TrayManager.genCablesByTraySeqIdAndComplect(project,seqId, bundle))
     case GetEqLabels(project, seqId) => sender() ! Json.toJson(EleEqManager.genEqLabelsByEqOid(project,seqId))
     case GetHoleLabel(project, seqId) => sender() ! cableBoxBySeqIdJson(project,seqId)
-    case GetCablesByNodes(project, node1, node2) => sender() ! Json.toJson(TrayManager.genCablesInLineByTwoNodes(project, node1, node2))
+    case GetCablesByNodes(project, node1, node2, bundle) => sender() ! Json.toJson(TrayManager.genCablesInLineByTwoNodesAndComplect(project, node1, node2, bundle))
     case GetTraysByZonesAndSystems(project, docNumber) =>
       sender() ! retrieveAllPartsByComplectNameJSON(project,docNumber)
     case GetTrayBundles(project) =>
