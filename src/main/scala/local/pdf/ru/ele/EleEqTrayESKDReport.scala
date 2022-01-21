@@ -7,6 +7,7 @@ import com.itextpdf.kernel.pdf.{PdfDocument, PdfOutline, PdfReader, PdfWriter, W
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.{Cell, Paragraph, Table, Text}
 import com.itextpdf.layout.properties.{HorizontalAlignment, TextAlignment, VerticalAlignment}
+import local.common.Codecs
 import local.common.DBRequests.MountItem
 import local.ele.CommonEle.{EleComplectParts, retrieveAllPartsByComplectName}
 import local.pdf.ru.common.ReportCommon
@@ -18,7 +19,11 @@ import java.io.{ByteArrayInputStream, ByteArrayOutputStream, OutputStream, Print
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._
 
-object EleEqTrayESKDReport {
+import io.circe.{Decoder, Encoder}
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.syntax.EncoderOps
+
+object EleEqTrayESKDReport extends Codecs{
   private val pageSize: PageSize = PageSize.A3.rotate()
   private val kM: Float = 1.437F
   private val defaultFontSize: Float = mmToPt(3.5)
@@ -42,7 +47,6 @@ object EleEqTrayESKDReport {
   )
 
   def generateElecParts(project: String, complectName: String): List[Item11Columns] = {
-    val retPath = ListBuffer.empty[String]
     val parts: EleComplectParts = retrieveAllPartsByComplectName(project, complectName)
     val item11Columns: List[Item11Columns] = {
       val n1 = "Электрооборудование устанавливаемое заводом-строителем"
@@ -248,6 +252,10 @@ object EleEqTrayESKDReport {
       buff.toList
     }
     item11Columns
+  }
+
+  def generateElecPartsTojson(project: String, complectName: String):String={
+    generateElecParts(project, complectName).asJson.noSpaces
   }
 
   def generatePdfToFileWithRev(project: String, complectName: String, path: String, rev: String = "0"): List[String] = {
@@ -463,6 +471,7 @@ object EleEqTrayESKDReport {
     val pdfPath = s"${path}/${docName.num}_${docName.name}_rev${docName.lastRev}.pdf"
     val trmPath = s"${path}/${docName.num}_${docName.name}_rev${docName.lastRev}.trm"
     retPath += pdfPath
+
     genReport(docName, item11Columns, pdfPath)
 
     generateTrm(trmPath, docName, item11Columns)

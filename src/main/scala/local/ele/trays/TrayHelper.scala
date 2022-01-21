@@ -244,7 +244,6 @@ trait TrayHelper extends Codecs {
       case (true, false) => cbxBySystems(listToSqlString(systems))
       case _ => cbxByZonesAndSystems(listToSqlString(zones), listToSqlString(systems))
     }
-    val b=0
     ConnectionManager.connectionByProject(project) match {
       case Some(connection) => {
         try {

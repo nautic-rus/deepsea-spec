@@ -12,12 +12,13 @@ import io.circe.syntax._
 import io.circe.generic.semiauto._
 import local.common.DBRequests.MountItem
 import local.domain.WorkShopMaterial
-import local.ele.CommonEle.{EleComplect}
+import local.ele.CommonEle.EleComplect
 import local.ele.cb.CableBoxManager.ForanCableBox
 import local.ele.eq.EleEqManager.EleEq
 import local.ele.trays.TrayManager.{ForanTray, Tray, TrayMountData, TrayMountRules}
 import local.hull.BStree.{Block, BsTreeItem, HullPL, Room}
 import local.hull.PartManager.PrdPart
+import local.pdf.ru.common.ReportCommon.Item11Columns
 import local.sql.MongoDB
 import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
 import org.bson.codecs.configuration.CodecRegistry
@@ -70,6 +71,9 @@ trait Codecs {
 
   implicit val BlockDecoder: Decoder[Block] = deriveDecoder[Block]
   implicit val BlockEncoder: Encoder[Block] = deriveEncoder[Block]
+
+  implicit val Item11ColumnsDecoder: Decoder[Item11Columns] = deriveDecoder[Item11Columns]
+  implicit val Item11ColumnsEncoder: Encoder[Item11Columns] = deriveEncoder[Item11Columns]
 
   private val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
     classOf[EleComplect],
