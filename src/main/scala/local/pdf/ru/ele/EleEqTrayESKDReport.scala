@@ -471,7 +471,7 @@ object EleEqTrayESKDReport extends Codecs{
     val pdfPath = s"${path}/${docName.num}_${docName.name}_rev${docName.lastRev}.pdf"
     val trmPath = s"${path}/${docName.num}_${docName.name}_rev${docName.lastRev}.trm"
     retPath += pdfPath
-
+    retPath += trmPath
     genReport(docName, item11Columns, pdfPath)
 
     generateTrm(trmPath, docName, item11Columns)
