@@ -143,6 +143,10 @@ object TrayManager extends TrayHelper with Codecs {
 
       if (clickTrayMontData.typeId == 61) {
 
+        if(foranTray.IDSQ==18736417){
+          val ss=0
+        }
+
         val item1 = mountRules.find(s => s.label.equals("4205") && s.inputTypeIdRange.contains("61K;")).getOrElse(TrayMountRules(label = "4205"))
         buffMounts += MountItem(findWorkshopMaterial(item1.trmCode, materials), TrayMountData(item1.label, item1.trmCode).label, item1.kei, calculateQty(item1.count, item1.lenghtFactor, trayLenght), item1.isNeedLabel)
 
@@ -202,7 +206,9 @@ object TrayManager extends TrayHelper with Codecs {
           case "4002" => buffMounts += MountItem(findWorkshopMaterial(item.trmCode, materials), TrayMountData(item.label, item.trmCode).label, item.kei, (3 * clickTrayMontData.parD2 / 1000)*(trayLenght/item.lenghtFactor), item.isNeedLabel)
 
 
-          case _ => buffMounts += MountItem(findWorkshopMaterial(item.trmCode, materials), TrayMountData(item.label, item.trmCode).label, item.kei, calculateQty(item.count, item.lenghtFactor, trayLenght), item.isNeedLabel)
+          case _ =>None
+
+          //case _ => buffMounts += MountItem(findWorkshopMaterial(item.trmCode, materials), TrayMountData(item.label, item.trmCode).label, item.kei, calculateQty(item.count, item.lenghtFactor, trayLenght), item.isNeedLabel)
         }
 
       } else {
