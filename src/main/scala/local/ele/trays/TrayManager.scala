@@ -197,18 +197,15 @@ object TrayManager extends TrayHelper with Codecs {
     }
 
 
-    mountRules.filter(p => p.inputTypeIdRange.contains(clickTrayMontData.typeId.toString)).foreach(item => {
+    mountRules.filter(p => p.inputTypeIdRange.contains(clickTrayMontData.typeId.toString+";")).foreach(item => {
       if (item.trmCode.nonEmpty) {
         item.label match {
 
           case "4089" => buffMounts += MountItem(findWorkshopMaterial(item.trmCode, materials), TrayMountData(item.label, item.trmCode).label, item.kei, (3 * clickTrayMontData.parD2 / 1000)*(trayLenght/item.lenghtFactor), item.isNeedLabel)
 
           case "4002" => buffMounts += MountItem(findWorkshopMaterial(item.trmCode, materials), TrayMountData(item.label, item.trmCode).label, item.kei, (3 * clickTrayMontData.parD2 / 1000)*(trayLenght/item.lenghtFactor), item.isNeedLabel)
-
-
-          case _ =>None
-
-          //case _ => buffMounts += MountItem(findWorkshopMaterial(item.trmCode, materials), TrayMountData(item.label, item.trmCode).label, item.kei, calculateQty(item.count, item.lenghtFactor, trayLenght), item.isNeedLabel)
+          //case _ => None
+         case _ => buffMounts += MountItem(findWorkshopMaterial(item.trmCode, materials), TrayMountData(item.label, item.trmCode).label, item.kei, calculateQty(item.count, item.lenghtFactor, trayLenght), item.isNeedLabel)
         }
 
       } else {
@@ -249,8 +246,6 @@ object TrayManager extends TrayHelper with Codecs {
         }
       }
     })
-
-
     Tray(foranTray, clickTrayMontData, material, buffMounts.toList)
   }
 
