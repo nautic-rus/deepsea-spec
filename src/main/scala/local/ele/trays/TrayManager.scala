@@ -154,7 +154,7 @@ object TrayManager extends TrayHelper with Codecs {
         buffMounts += MountItem(findWorkshopMaterial(item2.trmCode, materials), TrayMountData(item2.label, item2.trmCode).label, item2.kei, calculateQty(item2.count, item2.lenghtFactor, trayLenght), item2.isNeedLabel)
 
         val item3 = mountRules.find(s => s.label.equals("4089") && s.inputTypeIdRange.contains("61K;")).getOrElse(TrayMountRules(label = "4089"))
-        buffMounts += MountItem(findWorkshopMaterial(item3.trmCode, materials), TrayMountData(item3.label, item3.trmCode).label, item3.kei, calculateQty(item3.count, item3.lenghtFactor, trayLenght), item3.isNeedLabel)
+        buffMounts += MountItem(findWorkshopMaterial(item3.trmCode, materials), TrayMountData(item3.label, item3.trmCode).label, item3.kei, (3 * clickTrayMontData.parD2 / 1000)*(trayLenght/item3.lenghtFactor), item3.isNeedLabel)
 
         val item4 = mountRules.find(s => s.label.equals("4207") && s.inputTypeIdRange.contains("61K;")).getOrElse(TrayMountRules(label = "4207"))
         buffMounts += MountItem(findWorkshopMaterial(item4.trmCode, materials), TrayMountData(item4.label, item4.trmCode).label, item4.kei, calculateQty(item4.count, item4.lenghtFactor, trayLenght), item4.isNeedLabel)
@@ -201,7 +201,7 @@ object TrayManager extends TrayHelper with Codecs {
       if (item.trmCode.nonEmpty) {
         item.label match {
 
-          case "4089" => buffMounts += MountItem(findWorkshopMaterial(item.trmCode, materials), TrayMountData(item.label, item.trmCode).label, item.kei, (3 * clickTrayMontData.parD2 / 1000)*(trayLenght/item.lenghtFactor), item.isNeedLabel)
+          //case "4089" => buffMounts += MountItem(findWorkshopMaterial(item.trmCode, materials), TrayMountData(item.label, item.trmCode).label, item.kei, (3 * clickTrayMontData.parD2 / 1000)*(trayLenght/item.lenghtFactor), item.isNeedLabel)
 
           case "4002" => buffMounts += MountItem(findWorkshopMaterial(item.trmCode, materials), TrayMountData(item.label, item.trmCode).label, item.kei, (3 * clickTrayMontData.parD2 / 1000)*(trayLenght/item.lenghtFactor), item.isNeedLabel)
           //case _ => None
@@ -246,7 +246,7 @@ object TrayManager extends TrayHelper with Codecs {
         }
       }
     })
-    Tray(foranTray, clickTrayMontData, material, buffMounts.toList)
+    Tray(foranTray, clickTrayMontData, material, buffMounts.toList.sortBy(s=>s.label))
   }
 
   def genCablesByTraySeqId(project: String, trayIdSeq: String): List[String] = cablesByTraySeqId(project, trayIdSeq)
