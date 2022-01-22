@@ -30,7 +30,7 @@ import io.circe.generic.semiauto._
 import local.hull.BStree.BsTreeItem
 import local.hull.PartManager.{ForanPartsByDrawingNum, PrdPart, genForanPartLabelByDrawingNumAndPartNameJSON, genForanPartsByDrawingNum, genForanPartsByDrawingNumJSON}
 import local.pdf.en.common.ReportCommonEN.{DocNameEN, Item11ColumnsEN}
-import local.pdf.en.prd.PrdPartsReportEN.genTest
+import local.pdf.en.prd.PrdPartsReportEN.genHullPartListEnPDF
 import local.sql.MongoDB.mongoClient
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
@@ -51,14 +51,19 @@ object HullManager {
   case class GetHullPart(project: String, docNumber: String, partCode: String)
 
   case class GetHullPartsByDocNumber(project: String, docNumber: String)
+
   case class GetHullEsp(docNumber: String, revision: String = "")
+
   case class SetHullEsp(project: String, docNumber: String, user: String, revision: String)
+
   case class GetHullEspFiles(project: String, docNumber: String, docName: String, revision: String)
 
   case class HullPartPlateDef(PART_OID: Int, MATERIAL: String, MATERIAL_OID: Int, THICK: Double, STOCK_CODE: String)
+
   case class HullPartProfileDef(KSE: Int, SECTION: Int, WEB_HEIGHT: Double, WEB_THICKNESS: Double, FLANGE_HEIGHT: Double, FLANGE_THICKNESS: Double, MATERIAL: String, MATERIAL_OID: Int, STOCK_CODE: String)
 
-  case class HullEsp(project: String, department: String, content: List[PrdPart], var docNumber: String, var user: String,  var revision: String, var date: Long, var version: Int)
+  case class HullEsp(project: String, department: String, content: List[PrdPart], var docNumber: String, var user: String, var revision: String, var date: Long, var version: Int)
+
   implicit val HullEspDecoder: Decoder[HullEsp] = deriveDecoder[HullEsp]
   implicit val HullEspEncoder: Encoder[HullEsp] = deriveEncoder[HullEsp]
 
@@ -142,7 +147,6 @@ class HullManager extends Actor {
       })
 
 
-
       wb = new XSSFWorkbook()
       sheet = wb.createSheet("Plates")
       sheet.createRow(sheet.getLastRowNum + 1)
@@ -202,7 +206,7 @@ class HullManager extends Actor {
       val fileName = "bill-of-materials-" + new Date().getTime + ".zip"
       var pathId = UUID.randomUUID().toString.substring(0, 8)
       file = new File(App.Cloud.Directory + "\\" + pathId)
-      while (file.exists()){
+      while (file.exists()) {
         pathId = UUID.randomUUID().toString.substring(0, 8)
         file = new File(App.Cloud.Directory + "\\" + pathId)
       }
@@ -223,14 +227,14 @@ class HullManager extends Actor {
 
     //GET CURRENT TEMPLE PART LIST, GET AND SET ESP
     case GetHullPartsByDocNumber(project, docNumber) =>
-      sender() ! genForanPartsByDrawingNumJSON(project,docNumber)
+      sender() ! genForanPartsByDrawingNumJSON(project, docNumber)
     case GetHullEsp(docNumber, revision) =>
       val mongo = mongoClient()
       val partLists = mongo.getDatabase(App.conf.getString("mongo.db")).getCollection(espCollectionName).withCodecRegistry(codecRegistry)
       val partListsHistory = mongo.getDatabase(App.conf.getString("mongo.db")).getCollection(espCollectionName + "History").withCodecRegistry(codecRegistry)
       val dbObject = new BasicDBObject()
       dbObject.put("docNumber", docNumber)
-      if (revision != ""){
+      if (revision != "") {
         dbObject.put("revision", revision)
       }
       Await.result(partLists.find[HullEsp](dbObject).first().toFuture(), Duration(10, SECONDS)) match {
@@ -245,7 +249,7 @@ class HullManager extends Actor {
           }
       }
     case SetHullEsp(project, docNumber, user, revision) =>
-      val hullParts = ForanPartsByDrawingNum(project, docNumber).sortBy(s=>s.PART_CODE)
+      val hullParts = ForanPartsByDrawingNum(project, docNumber).sortBy(s => s.PART_CODE)
       val mongo = mongoClient()
       val partLists = mongo.getDatabase(App.conf.getString("mongo.db")).getCollection(espCollectionName).withCodecRegistry(codecRegistry)
       val partListsHistory = mongo.getDatabase(App.conf.getString("mongo.db")).getCollection(espCollectionName + "History").withCodecRegistry(codecRegistry)
@@ -265,43 +269,8 @@ class HullManager extends Actor {
 
       sender() ! "success"
     case GetHullEspFiles(project, docNumber, docName, revision) =>
-
-      val parts: List[PrdPart] = genForanPartsByDrawingNum(project, docNumber)
-
-      val rows:List[Item11ColumnsEN]={
-        val buff: ListBuffer[Item11ColumnsEN] =ListBuffer.empty[Item11ColumnsEN]
-        parts.groupBy(s => (s.PART_CODE, s.SYMMETRY)).toList.foreach(gr => {
-          val qty = gr._2.length
-          val nestids: String = {
-            val buff = ListBuffer.empty[String]
-            gr._2.foreach(ent => buff += ent.NEST_ID)
-            buff.toList.distinct.mkString(";")
-          }
-          val id=gr._2.head.PART_CODE
-          val weight = String.format("%.2f", gr._2.head.WEIGHT_UNIT)
-          val totWeight = String.format("%.2f", gr._2.head.WEIGHT_UNIT * qty)
-          val symm = gr._2.head.SYMMETRY
-          val elemType = gr._2.head.ELEM_TYPE
-          val mat = gr._2.head.MATERIAL
-          val kpl_kse = {
-            elemType match {
-              case "PL" =>"S"+ String.format("%.1f", gr._2.head.THICKNESS)
-              case "FS" =>"S"+  String.format("%.1f", gr._2.head.THICKNESS)
-              case _ => String.format("%.1f", gr._2.head.WIDTH) + "x" + String.format("%.1f", gr._2.head.THICKNESS)
-            }
-          }
-          buff+= Item11ColumnsEN(A1=id,A2=symm,A3=elemType,A4=kpl_kse,A5=mat, A6=qty.toString,A7=weight,A8=totWeight,A9=nestids)
-        })
-        buff.sortBy(s=>s.A1).toList
-      }
-      val dn = if (revision != ""){
-        DocNameEN(num = docNumber, name = docName, lastRev = revision)
-      }
-      else{
-        DocNameEN(num = docNumber, name = docName)
-      }
-      val file = Files.createTempDirectory("trayPdf").toAbsolutePath.toString + "/" + docNumber + ".pdf"
-      genTest(dn,file,rows)
+      val file: String = Files.createTempDirectory("trayPdf").toAbsolutePath.toString + "/" + docNumber + ".pdf"
+      genHullPartListEnPDF(project, docNumber, docName, revision, file)
       Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
         case url: String => sender() ! url.asJson.noSpaces
         case _ => sender() ! "error".asJson.noSpaces
@@ -310,7 +279,7 @@ class HullManager extends Actor {
 
   }
 
-  def getHullPartsByDocNumber(project: String, docNumber: String): ListBuffer[HullPart] ={
+  def getHullPartsByDocNumber(project: String, docNumber: String): ListBuffer[HullPart] = {
     val parts = getHullParts(project, docNumber)
     val bsItems = ListBuffer.empty[BsTreeItem]
     parts.map(_.PARTOID).distinct.grouped(900).foreach(list => {
@@ -333,6 +302,7 @@ class HullManager extends Actor {
     })
     parts
   }
+
   def getBsTree(project: String, oids: ListBuffer[Int]): ListBuffer[BsTreeItem] = {
     GetOracleConnection(project) match {
       case Some(c) =>
@@ -396,6 +366,7 @@ class HullManager extends Actor {
       case _ => ListBuffer.empty[BsTreeItem]
     }
   }
+
   def getHullParts(project: String): ListBuffer[HullPart] = {
     val res = ListBuffer.empty[HullPart]
     GetOracleConnection(project) match {
@@ -442,7 +413,7 @@ class HullManager extends Actor {
           case _ => None
         }
       }
-      else{
+      else {
         stdPlates.find(x => x.PART_OID == part.PARTOID) match {
           case Some(value) =>
             part.MATERIAL = value.MATERIAL
@@ -455,6 +426,7 @@ class HullManager extends Actor {
 
     res
   }
+
   def getHullParts(project: String, docNumber: String): ListBuffer[HullPart] = {
     val res = ListBuffer.empty[HullPart]
     GetOracleConnection(project) match {
@@ -500,7 +472,7 @@ class HullManager extends Actor {
           case _ => None
         }
       }
-      else{
+      else {
         stdPlates.find(x => x.PART_OID == part.PARTOID) match {
           case Some(value) =>
             part.MATERIAL = value.MATERIAL
@@ -512,6 +484,7 @@ class HullManager extends Actor {
 
     res
   }
+
   def getStdPlates(project: String, plateOids: ListBuffer[Int]): ListBuffer[HullPartPlateDef] = {
     val res = ListBuffer.empty[HullPartPlateDef]
     plateOids.grouped(900).toList.foreach(oids => {
@@ -538,6 +511,7 @@ class HullManager extends Actor {
 
     res
   }
+
   def getStdProfiles(project: String, kseOids: ListBuffer[Int]): ListBuffer[HullPartProfileDef] = {
     val res = ListBuffer.empty[HullPartProfileDef]
     kseOids.grouped(900).toList.foreach(oids => {
@@ -568,6 +542,7 @@ class HullManager extends Actor {
 
     res
   }
+
   def profileSectionDecode(kse: Int): String = kse match {
     case 0 =>
       "FS"

@@ -5,6 +5,7 @@ import com.itextpdf.kernel.pdf.{PdfDocument, PdfReader, PdfWriter, WriterPropert
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.{Cell, Div, Paragraph, Table, Text}
 import com.itextpdf.layout.properties.{HorizontalAlignment, TextAlignment, VerticalAlignment}
+import local.hull.PartManager.{PrdPart, genForanPartsByDrawingNum}
 import local.pdf.UtilsPDF
 import local.pdf.en.common.ReportCommonEN
 import local.pdf.en.common.ReportCommonEN.{DocNameEN, Item11ColumnsEN, border5mm, defaultFontSize, fillStamp, fontHELVETICA, getNnauticLigoEN, stampEN}
@@ -30,11 +31,52 @@ object PrdPartsReportEN extends UtilsPDF {
     mmToPt(81),
 
 
-    mmToPt(15)+2 //
+    mmToPt(15) + 2 //
   )
 
+  def genHullPartListEnPDF(project: String, docNumber: String, docName: String, revision: String, path:String): Unit = {
+    val parts: List[PrdPart] = genForanPartsByDrawingNum(project, docNumber)
 
-  def genTest(docNameEN: DocNameEN, path: String, items: List[Item11ColumnsEN]): Unit = {
+    val rows: List[Item11ColumnsEN] = {
+      val buff: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
+      parts.groupBy(s => (s.PART_CODE, s.SYMMETRY)).toList.foreach(gr => {
+        val qty = gr._2.length
+        val nestids: String = {
+          val buff = ListBuffer.empty[String]
+          gr._2.foreach(ent => buff += ent.NEST_ID)
+          buff.toList.distinct.mkString(";")
+        }
+        val id = gr._2.head.PART_CODE
+        val weight = String.format("%.2f", gr._2.head.WEIGHT_UNIT)
+        val totWeight = String.format("%.2f", gr._2.head.WEIGHT_UNIT * qty)
+        val symm = gr._2.head.SYMMETRY
+        val elemType = gr._2.head.ELEM_TYPE
+        val mat = gr._2.head.MATERIAL
+        val kpl_kse = {
+          elemType match {
+            case "PL" => "S" + String.format("%.1f", gr._2.head.THICKNESS)
+            case "FS" => "S" + String.format("%.1f", gr._2.head.THICKNESS)
+            case _ => String.format("%.1f", gr._2.head.WIDTH) + "x" + String.format("%.1f", gr._2.head.THICKNESS)
+          }
+        }
+        buff += Item11ColumnsEN(A1 = id, A2 = symm, A3 = elemType, A4 = kpl_kse, A5 = mat, A6 = qty.toString, A7 = weight, A8 = totWeight, A9 = nestids)
+      })
+      buff.sortBy(s => s.A1).toList
+    }
+
+    val dn: DocNameEN ={
+      if (revision != "") {
+        DocNameEN(num = docNumber, name = docName, lastRev = revision)
+      }
+      else {
+        DocNameEN(num = docNumber, name = docName)
+      }
+    }
+
+    processPDF(dn,path,rows)
+  }
+
+  private def processPDF(docNameEN: DocNameEN, path: String, items: List[Item11ColumnsEN]): Unit = {
 
     val pdfWriter: PdfWriter = new PdfWriter(path, new WriterProperties().setFullCompressionMode(true)) {
       setSmartMode(true)
@@ -55,10 +97,10 @@ object PrdPartsReportEN extends UtilsPDF {
 
     (1 to pdfDoc.getNumberOfPages).foreach(i => {
       if (i == 1) {
-        val pa = new Paragraph("1/"+pdfDoc.getNumberOfPages.toString)
+        val pa = new Paragraph("1/" + pdfDoc.getNumberOfPages.toString)
         pa.setFontSize(mmToPt(5))
         pa.setFont(fontHELVETICA)
-        doc.showTextAligned(pa, mmToPt(202f), mmToPt(14), i, TextAlignment.RIGHT, VerticalAlignment.TOP, 0)
+        doc.showTextAligned(pa, mmToPt(204f), mmToPt(14), i, TextAlignment.RIGHT, VerticalAlignment.TOP, 0)
       } else {
         val pa = new Paragraph(i.toString)
         pa.setFontSize(mmToPt(5))
@@ -158,10 +200,10 @@ object PrdPartsReportEN extends UtilsPDF {
       table
     }
 
-    header.setFixedPosition(1, mmToPt(5),height - mmToPt(12), bodyGrid.getWidth)
+    header.setFixedPosition(1, mmToPt(5), height - mmToPt(12), bodyGrid.getWidth)
     doc.add(header)
 
-    bodyGrid.setFixedPosition(1,mmToPt(5),  height - mmToPt(maxRow * 5) - mmToPt(12), bodyGrid.getWidth)
+    bodyGrid.setFixedPosition(1, mmToPt(5), height - mmToPt(maxRow * 5) - mmToPt(12), bodyGrid.getWidth)
 
 
     def proceedOrderListHeader(debug: Boolean = true): Table = {
@@ -310,17 +352,17 @@ object PrdPartsReportEN extends UtilsPDF {
       processStaticText()
 
       def processStaticText(): Unit = {
-        setStampText(cellBuff(0), "ID", italic = true)
-        setStampText(cellBuff(1), "SYMM", italic = true)
-        setStampText(cellBuff(2), "TYPE", italic = true)
-        setStampText(cellBuff(3), "DIM", italic = true)
-        setStampText(cellBuff(4), "MAT", italic = true)
-        setStampText(cellBuff(5), "QTY", italic = true)
+        setStampText(cellBuff(0), "ID", italic = false, bold = true)
+        setStampText(cellBuff(1), "SYMM", italic = false, bold = true)
+        setStampText(cellBuff(2), "TYPE", italic = false, bold = true)
+        setStampText(cellBuff(3), "DIM", italic = false, bold = true)
+        setStampText(cellBuff(4), "MAT", italic = false, bold = true)
+        setStampText(cellBuff(5), "QTY", italic = false, bold = true)
 
-        setStampText(cellBuff(6), "W(kg)", italic = true)
-        setStampText(cellBuff(7), "W Tot(KG)", italic = true)
-        setStampText(cellBuff(8), "NEST IDs", italic = true)
-        setStampText(cellBuff(9), "DR. PLACE", italic = true)
+        setStampText(cellBuff(6), "W(kg)", italic = false, bold = true)
+        setStampText(cellBuff(7), "W Tot(kg)", italic = false, bold = true)
+        setStampText(cellBuff(8), "NOTE", italic = false, bold = true)
+        setStampText(cellBuff(9), "DR. PLACE", italic = false, bold = true)
       }
 
       def setStampText(cell: Cell, text: String,
@@ -498,7 +540,8 @@ object PrdPartsReportEN extends UtilsPDF {
 
         bodyGrid.addCell(generateCell(item.A7))
         bodyGrid.addCell(generateCell(item.A8))
-        bodyGrid.addCell(generateCell(item.A9))
+        //bodyGrid.addCell(generateCell(item.A9))
+        bodyGrid.addCell(generateCell(""))
         bodyGrid.addCell(generateCell(item.A10))
       }
       else {

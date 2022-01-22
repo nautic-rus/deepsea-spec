@@ -1,6 +1,6 @@
 import local.hull.PartManager._
 import local.pdf.en.common.ReportCommonEN.{DocNameEN, Item11ColumnsEN}
-import local.pdf.en.prd.PrdPartsReportEN.genTest
+import local.pdf.en.prd.PrdPartsReportEN.genHullPartListEnPDF
 import org.scalatest.funsuite.AnyFunSuite
 
 import scala.collection.mutable.ListBuffer
@@ -11,10 +11,7 @@ class PRD extends AnyFunSuite {
   //val sы=genForanPartLabelByDrawingNumAndPartNameJSON("N004","NR004-101-0103","0001")
   //val b=genForanPartsByDrawingNumJSON("N004","NR004-101-0101")
 
-  val parts: List[PrdPart] = genForanPartsByDrawingNum("N004", "210101-102-0103")
-  val tt1=parts.filter(p=>p.PART_CODE.contains("273"))
-  val hh=0
-
+/*  val parts: List[PrdPart] = genForanPartsByDrawingNum("N004", "210101-102-0103")
   val rows:List[Item11ColumnsEN]={
     val buff: ListBuffer[Item11ColumnsEN] =ListBuffer.empty[Item11ColumnsEN]
     parts.groupBy(s => (s.PART_CODE, s.SYMMETRY)).toList.foreach(gr => {
@@ -41,9 +38,9 @@ class PRD extends AnyFunSuite {
     })
     buff.sortBy(s=>s.A1).toList
   }
+  val dn = DocNameEN(num="210101-101-0103")*/
 
-  val dn = DocNameEN(num="210101-101-0103")
-  genTest(dn, "c:\\1\\210101-101-0103.pdf", rows)
+  //genHullPartListEnPDF(dn, "c:\\1\\210101-101-0103.pdf", rows)
   val cs = 0
 
 }

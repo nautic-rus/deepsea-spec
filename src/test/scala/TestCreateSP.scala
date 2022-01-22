@@ -1,5 +1,6 @@
 
 import local.hull.BStree
+import local.pdf.en.prd.PrdPartsReportEN.genHullPartListEnPDF
 import org.apache.log4j.{Level, Logger}
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -13,7 +14,7 @@ class TestCreateSP extends AnyFunSuite with BStree {
  //val pl: String =genPartList("NR004","U104","","","","")
 
  //val pl2: String =getHullPartList("NR004-150-101")
-
+  genHullPartListEnPDF("N004","210101-102-0104", "210101-102-0104","0","c:\\14\\NR004-150-101.pdf")
   val jj = 0
 
 
