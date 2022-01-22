@@ -175,7 +175,7 @@ object TrayManager extends TrayHelper with Codecs {
     }
 
     if (clickTrayMontData.typeId == 63) {
-      if (foranTray.SURFACE.contains("F0")) {
+      if (!foranTray.SURFACE.contains("F0")) {
 
 /*
         val item2 = mountRules.find(s => s.label.equals("4022") && s.inputTypeIdRange.equals("63;")).getOrElse(TrayMountRules(label = "4022"))
