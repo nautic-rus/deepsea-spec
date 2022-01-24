@@ -1,5 +1,7 @@
 package local.pdf
 
+import local.domain.CommonTypes.DrawingChess
+
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -22,5 +24,12 @@ trait UtilsPDF {
 
   def mmToPt(in: Double): Float = {
     (in * 2.8346438836889).toFloat - 2
+  }
+
+  def findChessPos(pos:String,drawingChess: DrawingChess):String={
+    drawingChess.labels.find(s => s.label.equals(pos)) match {
+      case Some(value) => value.position
+      case None => ""
+    }
   }
 }

@@ -11,6 +11,7 @@ import io.circe.generic.auto._
 import io.circe.syntax._
 import io.circe.generic.semiauto._
 import local.common.DBRequests.MountItem
+import local.domain.CommonTypes.{DrawingChess, DrawingChessItem}
 import local.domain.WorkShopMaterial
 import local.ele.CommonEle.EleComplect
 import local.ele.cb.CableBoxManager.ForanCableBox
@@ -75,6 +76,13 @@ trait Codecs {
   implicit val Item11ColumnsDecoder: Decoder[Item11Columns] = deriveDecoder[Item11Columns]
   implicit val Item11ColumnsEncoder: Encoder[Item11Columns] = deriveEncoder[Item11Columns]
 
+  implicit val DrawingChessItemDecoder: Decoder[DrawingChessItem] = deriveDecoder[DrawingChessItem]
+  implicit val DrawingChessItemEncoder: Encoder[DrawingChessItem] = deriveEncoder[DrawingChessItem]
+
+  implicit val DrawingChessDecoder: Decoder[DrawingChess] = deriveDecoder[DrawingChess]
+  implicit val DrawingChessEncoder: Encoder[DrawingChess] = deriveEncoder[DrawingChess]
+
+
   private val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
     classOf[EleComplect],
     classOf[TrayMountData],
@@ -83,6 +91,8 @@ trait Codecs {
     classOf[BsTreeItem],
     classOf[Block],
     classOf[WorkShopMaterial],
+    classOf[DrawingChess],
+    classOf[DrawingChessItem],
   ), DEFAULT_CODEC_REGISTRY)
 
   def mongoDatabase(): MongoDatabase = MongoDB.mongoClient().getDatabase("3degdatabase").withCodecRegistry(codecRegistry)

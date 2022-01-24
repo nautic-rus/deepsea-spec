@@ -3,13 +3,14 @@ package local.common
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import local.domain.{CommonSql, WorkShopMaterial}
-import local.domain.CommonTypes.ZoneSystem
+import local.domain.CommonTypes.{DrawingChess, ZoneSystem}
 import local.sql.{ConnectionManager, MongoDB}
 import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
 import org.bson.codecs.configuration.CodecRegistry
 import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
 import org.mongodb.scala.{MongoCollection, MongoDatabase}
 import org.mongodb.scala.model.Filters.equal
+import org.mongodb.scala.model.Filters.and
 import org.mongodb.scala.bson.codecs.Macros._
 
 import java.sql.{ResultSet, Statement}
@@ -23,16 +24,21 @@ import io.circe.syntax._
 import io.circe.generic.semiauto._
 
 
-object DBRequests extends Codecs{
+object DBRequests extends Codecs {
 
-  case class MountItem(workShopMaterial: WorkShopMaterial = new WorkShopMaterial(), label:String="NF", kei: String = "", qty: Double = 0, isNeedLabel: Boolean = false)
+  case class MountItem(workShopMaterial: WorkShopMaterial = new WorkShopMaterial(), label: String = "NF", kei: String = "", qty: Double = 0, isNeedLabel: Boolean = false)
 
   private def collectionWorkShopMaterial(): MongoCollection[WorkShopMaterial] = mongoDatabase().getCollection("materials")
+
+  private def collectionDrawingChess(): MongoCollection[DrawingChess] = mongoDatabase().getCollection("drawingChess")
+
+/*
   private val duration: FiniteDuration = Duration(2, SECONDS)
 
   private val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
     classOf[WorkShopMaterial],
   ), DEFAULT_CODEC_REGISTRY)
+*/
 
 
   def retrieveZoneAndSystems(project: String): List[ZoneSystem] = {
@@ -81,6 +87,21 @@ object DBRequests extends Codecs{
   }
 
   def findWorkshopMaterial(trm: String, buff: List[WorkShopMaterial]): WorkShopMaterial = buff.find(s => s.trmCode.equals(trm)).getOrElse(new WorkShopMaterial())
+
+
+  def findChess(docNum: String, rev:String): List[DrawingChess] = {
+    val allelems = collectionDrawingChess().find(
+      and(
+        equal("docNumber",docNum),
+        equal("revision",rev)
+      )
+    ).toFuture()
+
+    //val allelems = collectionDrawingChess().find().toFuture()
+    Await.result(allelems, Duration(100, SECONDS))
+    allelems.value.get.getOrElse(Seq.empty[DrawingChess]).toList
+  }
+
 
   def findWorkshopMaterialContains(trm: String, buff: List[WorkShopMaterial]): WorkShopMaterial = buff.find(s => s.trmCode.contains(trm)).getOrElse(new WorkShopMaterial())
 

@@ -17,7 +17,7 @@ import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 object ReportCommonEN extends UtilsPDF {
   case class DocNameEN(code: String = "XXXXX", num: String = "210101-101-0103", name: String = "BLOCK 104. PART LIST.", lastRev: String = "0")
-  case class Item11ColumnsEN(isHeader: Boolean = false, A1: String, A2: String = "", A3: String = "", A4: String = "", A5: String = "", A6: String = "", A7: String = "", A8: String = "", A9: String = "", A10: String = "", A11: String = "", project: String = "")
+  case class Item11ColumnsEN(isHeader: Boolean = false, A1: String, A2: String = "", A3: String = "", A4: String = "", A5: String = "", A6: String = "", A7: String = "", A8: String = "", A9: String = "", A10: String = "", A11: String = "", project: String = "", A12: String = "")
 
   val defaultFontSize: Float = mmToPt(3.5)
 

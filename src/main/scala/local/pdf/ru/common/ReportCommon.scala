@@ -15,12 +15,12 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import scala.collection.mutable.ListBuffer
 
-object ReportCommon extends UtilsPDF{
+object ReportCommon extends UtilsPDF {
   case class DocName(code: String = "XXXXX", num: String = "170701-XXX-XXXX", name: String = "XXXXXXXXXXX",
                      lastRev: String = "rev.0", userDev: String = "Голенищев", userTCheck: String = "Воронин",
                      userNCheck: String = "Воронин", userAgree: String = "Стропилов")
 
-  case class Item11Columns(isHeader: Boolean = false, A1: String, A2: String = "", A3: String = "", A4: String = "", A5: String = "", A6: String = "", A7: String = "", A8: String = "", A9: String = "", A10: String = "", A11: String = "", project: String = "")
+  case class Item11Columns(isHeader: Boolean = false, A1: String, A2: String = "", A3: String = "", A4: String = "", A5: String = "", A6: String = "", A7: String = "", A8: String = "", A9: String = "", A10: String = "", A11: String = "", project: String = "", A12: String = "")
 
   case class ChangedItem11Columns(before: Item11Columns, now: Item11Columns)
 
@@ -28,7 +28,7 @@ object ReportCommon extends UtilsPDF{
 
   def gostFont: PdfFont = PdfFontFactory.createFont(FontProgramFactory.createFont("src/main/resources/fonts/GOSTtypeA.ttf"), PdfEncodings.IDENTITY_H, EmbeddingStrategy.PREFER_NOT_EMBEDDED)
 
-  def  getNnauticLigo: Image = {
+  def getNnauticLigo: Image = {
     val imageData: ImageData = ImageDataFactory.create("src/main/resources/pict/nrlogo.png")
     new Image(imageData)
   }

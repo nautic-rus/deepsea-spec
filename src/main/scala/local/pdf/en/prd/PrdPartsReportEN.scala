@@ -5,12 +5,14 @@ import com.itextpdf.kernel.pdf.{PdfDocument, PdfReader, PdfWriter, WriterPropert
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.{Cell, Div, Paragraph, Table, Text}
 import com.itextpdf.layout.properties.{HorizontalAlignment, TextAlignment, VerticalAlignment}
+import local.common.DBRequests.findChess
+import local.domain.CommonTypes
 import local.hull.PartManager.{PrdPart, genForanPartsByDrawingNum}
 import local.pdf.UtilsPDF
 import local.pdf.en.common.ReportCommonEN
 import local.pdf.en.common.ReportCommonEN.{DocNameEN, Item11ColumnsEN, border5mm, defaultFontSize, fillStamp, fontHELVETICA, getNnauticLigoEN, stampEN}
 import local.pdf.ru.common.ReportCommon.mmToPt
-import local.pdf.ru.ele.EleEqTrayESKDReport.pageSize
+import local.pdf.ru.ele.EleEqTrayESKDReport.{findChessPos, pageSize}
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, OutputStream}
 import scala.collection.mutable.ListBuffer
@@ -34,9 +36,17 @@ object PrdPartsReportEN extends UtilsPDF {
     mmToPt(15) + 2 //
   )
 
-  def genHullPartListEnPDF(project: String, docNumber: String, docName: String, revision: String, path:String): Unit = {
+  def genHullPartListEnPDF(project: String, docNumber: String, docName: String, revision: String, path: String): Unit = {
     val parts: List[PrdPart] = genForanPartsByDrawingNum(project, docNumber)
+    val chess: CommonTypes.DrawingChess = {
+      val l = findChess(docNumber, revision)
+      if (l.nonEmpty) {
+        l.head
+      } else {
+        CommonTypes.DrawingChess()
+      }
 
+    }
     val rows: List[Item11ColumnsEN] = {
       val buff: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
       parts.groupBy(s => (s.PART_CODE, s.SYMMETRY)).toList.foreach(gr => {
@@ -59,12 +69,12 @@ object PrdPartsReportEN extends UtilsPDF {
             case _ => String.format("%.1f", gr._2.head.WIDTH) + "x" + String.format("%.1f", gr._2.head.THICKNESS)
           }
         }
-        buff += Item11ColumnsEN(A1 = id, A2 = symm, A3 = elemType, A4 = kpl_kse, A5 = mat, A6 = qty.toString, A7 = weight, A8 = totWeight, A9 = nestids)
+        buff += Item11ColumnsEN(A1 = id, A2 = symm, A3 = elemType, A4 = kpl_kse, A5 = mat, A6 = qty.toString, A7 = weight, A8 = totWeight, A9 = nestids, A12 = findChessPos(id+ "-" + symm, chess) )
       })
       buff.sortBy(s => s.A1).toList
     }
 
-    val dn: DocNameEN ={
+    val dn: DocNameEN = {
       if (revision != "") {
         DocNameEN(num = docNumber, name = docName, lastRev = revision)
       }
@@ -73,7 +83,8 @@ object PrdPartsReportEN extends UtilsPDF {
       }
     }
 
-    processPDF(dn,path,rows)
+
+    processPDF(dn, path, rows)
   }
 
   private def processPDF(docNameEN: DocNameEN, path: String, items: List[Item11ColumnsEN]): Unit = {
@@ -458,7 +469,6 @@ object PrdPartsReportEN extends UtilsPDF {
         .setHeight(mmToPt(5))
     }
 
-
     def generateCell(in: String): Cell = {
       new Cell(2, 0).setVerticalAlignment(VerticalAlignment.MIDDLE)
         .setHorizontalAlignment(HorizontalAlignment.CENTER)
@@ -483,7 +493,6 @@ object PrdPartsReportEN extends UtilsPDF {
         .setPadding(0).setMargin(0)
         .setHeight(mmToPt(5))
     }
-
 
     def hasRoom(rows: Int): Boolean = {
       if (currentRow + rows < maxRow) {
@@ -542,7 +551,7 @@ object PrdPartsReportEN extends UtilsPDF {
         bodyGrid.addCell(generateCell(item.A8))
         //bodyGrid.addCell(generateCell(item.A9))
         bodyGrid.addCell(generateCell(""))
-        bodyGrid.addCell(generateCell(item.A10))
+        bodyGrid.addCell(generateCell(item.A12))
       }
       else {
         bodyGrid.addCell(generateSpannedCellBold(item.A1))

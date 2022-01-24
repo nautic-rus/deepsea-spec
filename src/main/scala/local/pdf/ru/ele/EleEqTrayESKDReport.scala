@@ -8,7 +8,7 @@ import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.{Cell, Paragraph, Table, Text}
 import com.itextpdf.layout.properties.{HorizontalAlignment, TextAlignment, VerticalAlignment}
 import local.common.Codecs
-import local.common.DBRequests.MountItem
+import local.common.DBRequests.{MountItem, findChess}
 import local.ele.CommonEle.{EleComplectParts, retrieveAllPartsByComplectName}
 import local.pdf.ru.common.ReportCommon
 import local.pdf.ru.common.ReportCommon.{DocName, Item11Columns, borderESKD, genBaseStampBig, genBaseStampSmall, getNnauticLigo, gostFont, mmToPt}
@@ -18,12 +18,13 @@ import org.davidmoten.text.utils.WordWrap
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, OutputStream, PrintWriter}
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._
-
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
+import local.domain.CommonTypes
+import local.pdf.UtilsPDF
 
-object EleEqTrayESKDReport extends Codecs{
+object EleEqTrayESKDReport extends Codecs with UtilsPDF {
   private val pageSize: PageSize = PageSize.A3.rotate()
   private val kM: Float = 1.437F
   private val defaultFontSize: Float = mmToPt(3.5)
@@ -36,13 +37,14 @@ object EleEqTrayESKDReport extends Codecs{
     mmToPt(9 * kM),
     mmToPt(12 * kM),
     mmToPt(40 * kM),
-    mmToPt(119 * kM),
+    mmToPt(110 * kM),
     mmToPt(35 * kM),
     mmToPt(10 * kM),
     mmToPt(10 * kM),
     mmToPt(10 * kM),
     mmToPt(10 * kM),
     mmToPt(15 * kM),
+    mmToPt(10 * kM),
     mmToPt(10 * kM) + 2
   )
 
@@ -254,13 +256,23 @@ object EleEqTrayESKDReport extends Codecs{
     item11Columns
   }
 
-  def generateElecPartsTojson(project: String, complectName: String):String={
+  def generateElecPartsTojson(project: String, complectName: String): String = {
     generateElecParts(project, complectName).asJson.noSpaces
   }
 
   def generatePdfToFileWithRev(project: String, complectName: String, path: String, rev: String = "0"): List[String] = {
     val retPath = ListBuffer.empty[String]
     val parts: EleComplectParts = retrieveAllPartsByComplectName(project, complectName)
+
+    val chess: CommonTypes.DrawingChess = {
+      val l = findChess(complectName, rev)
+      if (l.nonEmpty) {
+        l.head
+      } else {
+        CommonTypes.DrawingChess()
+      }
+
+    }
 
     val item11Columns: List[Item11Columns] = {
       val n1 = "Электрооборудование устанавливаемое заводом-строителем"
@@ -286,8 +298,8 @@ object EleEqTrayESKDReport extends Codecs{
               A8 = String.format("%.2f", checkWeight(eq.workShopMaterial.singleWeight)),
               A9 = String.format("%.2f", checkWeight(eq.workShopMaterial.singleWeight)),
               A10 = eq.workShopMaterial.category,
-              A11 = eq.ZONE_NAME
-
+              A11 = eq.ZONE_NAME,
+              A12 = findChessPos(eq.LABEL,chess)
             )
             eq.SUPPORTS.filter(s => s.label.contains(".")).sortBy(d => d.label).foreach(supp => {
               buff += Item11Columns(
@@ -301,7 +313,8 @@ object EleEqTrayESKDReport extends Codecs{
                 A8 = String.format("%.2f", checkWeight(supp.workShopMaterial.singleWeight)),
                 A9 = String.format("%.2f", checkWeight(supp.workShopMaterial.singleWeight * supp.qty)),
                 A10 = supp.workShopMaterial.category,
-                A11 = eq.ZONE_NAME
+                A11 = eq.ZONE_NAME,
+                A12 = findChessPos(eq.LABEL,chess)
               )
             })
             eq.SUPPORTS.filter(s => !s.label.contains(".")).sortBy(d => d.label).foreach(supp => {
@@ -316,7 +329,8 @@ object EleEqTrayESKDReport extends Codecs{
                 A8 = String.format("%.2f", checkWeight(supp.workShopMaterial.singleWeight)),
                 A9 = String.format("%.2f", checkWeight(supp.workShopMaterial.singleWeight * supp.qty)),
                 A10 = supp.workShopMaterial.category,
-                A11 = ""
+                A11 = "",
+                A12 = findChessPos(eq.LABEL,chess)
               )
             })
           })
@@ -338,7 +352,8 @@ object EleEqTrayESKDReport extends Codecs{
               A8 = String.format("%.2f", checkWeight(eq.workShopMaterial.singleWeight)),
               A9 = String.format("%.2f", checkWeight(eq.workShopMaterial.singleWeight)),
               A10 = eq.workShopMaterial.category,
-              A11 = eq.ZONE_NAME
+              A11 = eq.ZONE_NAME,
+              A12 = findChessPos(eq.LABEL,chess)
 
             )
             eq.SUPPORTS.filter(s => s.label.contains(".")).sortBy(d => d.label).foreach(supp => {
@@ -353,7 +368,8 @@ object EleEqTrayESKDReport extends Codecs{
                 A8 = String.format("%.2f", checkWeight(supp.workShopMaterial.singleWeight)),
                 A9 = String.format("%.2f", checkWeight(supp.workShopMaterial.singleWeight * supp.qty)),
                 A10 = supp.workShopMaterial.category,
-                A11 = eq.ZONE_NAME
+                A11 = eq.ZONE_NAME,
+                A12 = findChessPos(eq.LABEL,chess)
               )
             })
             eq.SUPPORTS.filter(s => !s.label.contains(".")).sortBy(d => d.label).foreach(supp => {
@@ -368,7 +384,8 @@ object EleEqTrayESKDReport extends Codecs{
                 A8 = String.format("%.2f", checkWeight(supp.workShopMaterial.singleWeight)),
                 A9 = String.format("%.2f", checkWeight(supp.workShopMaterial.singleWeight * supp.qty)),
                 A10 = supp.workShopMaterial.category,
-                A11 = ""
+                A11 = "",
+                A12 = findChessPos(eq.LABEL,chess)
               )
             })
           })
@@ -404,7 +421,8 @@ object EleEqTrayESKDReport extends Codecs{
               A8 = String.format("%.2f", checkWeight(item.A8.toDoubleOption.getOrElse(0.0))),
               A9 = String.format("%.2f", Math.ceil(qty * item.A8.toDoubleOption.getOrElse(0.0))),
               A10 = item.A10,
-              A11 = item.A11
+              A11 = item.A11,
+              A12 = findChessPos(itemLabel,chess)
             )
           })
         }
@@ -430,7 +448,8 @@ object EleEqTrayESKDReport extends Codecs{
               A8 = String.format("%.2f", checkWeight(item.workShopMaterial.singleWeight)),
               A9 = String.format("%.2f", checkWeight(item.workShopMaterial.singleWeight * qty)),
               A10 = item.workShopMaterial.category,
-              A11 = ""
+              A11 = "",
+              A12 = findChessPos(label,chess)
             )
           }
         })
@@ -462,7 +481,6 @@ object EleEqTrayESKDReport extends Codecs{
         buff += Item11Columns(true, "Прочее")
         buff ++= gr8.sortBy(s => s.A1)
       }
-
       buff.toList
     }
 
@@ -506,159 +524,6 @@ object EleEqTrayESKDReport extends Codecs{
     pw1.println("#")
     pw1.close()
   }
-
-  /*
-    def generatePdfToFileNoRev(project: String, complectName: String, path: String): List[String] = {
-      val rev = "tmp"
-      val parts: EleComplectParts = retrieveAllPartsByComplectName(project, complectName)
-      val item11Columns: List[Item11Columns] = {
-        val n1 = "Электрооборудование устанавливаемое заводом-строителем"
-        val n2 = "Электрооборудование устанавливаемое электромонтажным предприятием"
-        val buff = ListBuffer.empty[Item11Columns]
-        val parttitions = parts.eqs.partition(x => x.workShopMaterial.singleWeight > 50)
-        if (parttitions._1.nonEmpty) {
-          buff += Item11Columns(true, n1.toUpperCase())
-          parttitions._1.groupBy(s => s.SYSTEM_DESCR).toList.sortBy(s => s._1).foreach(gr => {
-            buff += Item11Columns(true, gr._1)
-            gr._2.sortBy(s => s.orderItem()).foreach(eq => {
-              buff += Item11Columns(
-                A1 = eq.LABEL,
-                A2 = eq.USERID,
-                A3 = eq.workShopMaterial.description,
-                A4 = eq.workShopMaterial.name,
-                A5 = eq.workShopMaterial.trmCode,
-                A6 = eq.workShopMaterial.units,
-                A7 = "1",
-                A8 = String.format("%.2f", eq.workShopMaterial.singleWeight),
-                A9 = String.format("%.2f", eq.workShopMaterial.singleWeight),
-                A10 = eq.workShopMaterial.category,
-                A11 = eq.ZONE_NAME
-
-              )
-              eq.SUPPORTS.sortBy(d => d.label).foreach(supp => {
-                buff += Item11Columns(
-                  A1 = supp.label,
-                  A2 = "",
-                  A3 = supp.workShopMaterial.description,
-                  A4 = supp.workShopMaterial.name,
-                  A5 = supp.workShopMaterial.trmCode,
-                  A6 = supp.kei,
-                  A7 = supp.qty.toString,
-                  A8 = String.format("%.2f", supp.workShopMaterial.singleWeight),
-                  A9 = String.format("%.2f", (supp.workShopMaterial.singleWeight * supp.qty)),
-                  A10 = supp.workShopMaterial.category,
-                  A11 = eq.ZONE_NAME
-                )
-              })
-            })
-          })
-        }
-        if (parttitions._2.nonEmpty) {
-          buff += Item11Columns(true, n2.toUpperCase())
-          parttitions._2.groupBy(s => s.SYSTEM_DESCR).toList.sortBy(s => s._1).foreach(gr => {
-            buff += Item11Columns(true, gr._1)
-            gr._2.sortBy(s => s.orderItem()).foreach(eq => {
-              buff += Item11Columns(
-                A1 = eq.LABEL,
-                A2 = eq.USERID,
-                A3 = eq.workShopMaterial.description,
-                A4 = eq.workShopMaterial.name, A5 = eq.workShopMaterial.trmCode,
-                A6 = eq.workShopMaterial.units,
-                A7 = "1",
-                A8 = String.format("%.2f", eq.workShopMaterial.singleWeight),
-                A9 = String.format("%.2f", eq.workShopMaterial.singleWeight),
-                A10 = eq.workShopMaterial.category,
-                A11 = eq.ZONE_NAME
-
-              )
-              eq.SUPPORTS.sortBy(d => d.label).foreach(supp => {
-                buff += Item11Columns(
-                  A1 = supp.label,
-                  A2 = "",
-                  A3 = supp.workShopMaterial.description,
-                  A4 = supp.workShopMaterial.name,
-                  A5 = supp.workShopMaterial.trmCode,
-                  A6 = supp.kei,
-                  A7 = supp.qty.toString,
-                  A8 = String.format("%.2f", supp.workShopMaterial.singleWeight),
-                  A9 = String.format("%.2f", (supp.workShopMaterial.singleWeight * supp.qty)),
-                  A10 = supp.workShopMaterial.category,
-                  A11 = eq.ZONE_NAME
-                )
-              })
-            })
-          })
-        }
-        val supports: List[MountItem] = {
-          val suppBuffer = ListBuffer.empty[MountItem]
-          parts.trays.foreach(tr => {
-            suppBuffer += MountItem(tr.workShopMaterial, tr.mountData.label, "006", tr.foranTray.LEN / 1000)
-            suppBuffer ++= tr.supports
-          })
-          suppBuffer.toList
-        }
-
-        val supportsRows: List[Item11Columns] = {
-          val buffer = ListBuffer.empty[Item11Columns]
-          supports.groupBy(s => s.workShopMaterial.trmCode).toList.foreach(group => {
-            if (group._2.nonEmpty) {
-              val item = group._2.head
-              val label = item.label
-              val kei = item.kei
-              val qty: Double = Math.ceil(group._2.map(_.qty).sum)
-              buffer += Item11Columns(
-                A1 = label,
-                A2 = "",
-                A3 = item.workShopMaterial.description,
-                A4 = item.workShopMaterial.name,
-                A5 = item.workShopMaterial.trmCode,
-                A6 = kei,
-                A7 = String.format("%.2f", qty),
-                A8 = String.format("%.2f", item.workShopMaterial.singleWeight),
-                A9 = String.format("%.2f", (item.workShopMaterial.singleWeight * qty)),
-                A10 = item.workShopMaterial.category,
-                A11 = ""
-              )
-            }
-          })
-          buffer.toList
-        }
-
-        val gr4 = supportsRows.filter(p => p.A1.startsWith("4"))
-        if (gr4.nonEmpty) {
-          buff += Item11Columns(true, "Крепление и заземление кабелей")
-          buff ++= gr4.sortBy(s => s.A1)
-        }
-        val gr5 = supportsRows.filter(p => p.A1.startsWith("5"))
-        if (gr5.nonEmpty) {
-          buff += Item11Columns(true, "Доизоляционные детали крепления")
-          buff ++= gr5.sortBy(s => s.A1)
-        }
-        val gr6 = supportsRows.filter(p => p.A1.startsWith("6"))
-        if (gr6.nonEmpty) {
-          buff += Item11Columns(true, "Послеизоляционные детали крепления")
-          buff ++= gr6.sortBy(s => s.A1)
-        }
-        val gr7 = supportsRows.filter(p => p.A1.startsWith("7"))
-        if (gr7.nonEmpty) {
-          buff += Item11Columns(true, "Трубы защиты кабеля")
-          buff ++= gr7.sortBy(s => s.A1)
-        }
-        val gr8 = supportsRows.filter(p => !p.A1.startsWith("4") && !p.A1.startsWith("5") && !p.A1.startsWith("6") && !p.A1.startsWith("7"))
-        if (gr8.nonEmpty) {
-          buff += Item11Columns(true, "Прочее")
-          buff ++= gr8.sortBy(s => s.A1)
-        }
-        buff.toList
-      }
-      val docName: DocName = DocName(num = parts.complect.drawingId, name = parts.complect.drawingDescr, lastRev = rev, userDev = "Сидоров")
-      val pdfPath = s"${path}/${docName.num}_${docName.name}_rev${docName.lastRev}.pdf"
-      val retPath = List[String](pdfPath)
-      genReport(docName, item11Columns, pdfPath)
-      retPath
-    }
-  */
-
 
   def genReport(docName: DocName, items: List[Item11Columns], path: String, isNewRevision: Boolean = false): Unit = {
     descrTreeBuffer.clear()
@@ -720,7 +585,8 @@ object EleEqTrayESKDReport extends Codecs{
     val A8count = 10
     val A9count = 10
     val A10count = 26
-    val A11count = 26
+    val A11count =26
+    val A12count = 6
     val buff = ListBuffer.empty[Item11Columns]
     if (item.isHeader) {
       buff += item
@@ -736,6 +602,7 @@ object EleEqTrayESKDReport extends Codecs{
       val A9 = WordWrap.from(item.A9).newLine("$").insertHyphens(false).maxWidth(A9count).wrap().split('$')
       val A10 = WordWrap.from(item.A10).newLine("$").insertHyphens(false).maxWidth(A10count).wrap().split('$')
       val A11 = WordWrap.from(item.A11).newLine("$").insertHyphens(false).maxWidth(A11count).wrap().split('$')
+      val A12 = WordWrap.from(item.A12).newLine("$").insertHyphens(false).maxWidth(A12count).wrap().split('$')
 
       val maxRows: Int = {
         var count = 1
@@ -750,6 +617,7 @@ object EleEqTrayESKDReport extends Codecs{
         if (A9.length > count) count = A9.length
         if (A10.length > count) count = A10.length
         if (A11.length > count) count = A11.length
+        if (A12.length > count) count = A12.length
         count
       }
       (0 until maxRows).foreach(i => {
@@ -765,7 +633,9 @@ object EleEqTrayESKDReport extends Codecs{
           A8.lift(i).getOrElse(""),
           A9.lift(i).getOrElse(""),
           A10.lift(i).getOrElse(""),
-          A11.lift(i).getOrElse("")
+          A11.lift(i).getOrElse(""),
+          item.project,
+          A12.lift(i).getOrElse("")
         )
       })
     }
@@ -894,6 +764,7 @@ object EleEqTrayESKDReport extends Codecs{
       table.setVerticalAlignment(VerticalAlignment.MIDDLE)
       table
     }
+
     bodyGrid.setFixedPosition(1, mmToPt(20), height - mmToPt(maxRow * 5) - mmToPt(20), bodyGrid.getWidth)
 
 
@@ -1022,6 +893,30 @@ object EleEqTrayESKDReport extends Codecs{
         }
         cellBuff += {
           new Cell(2, 0)
+            .setVerticalAlignment(VerticalAlignment.MIDDLE)
+            .setHorizontalAlignment(HorizontalAlignment.CENTER)
+            .add(new Paragraph("")
+              .setTextAlignment(TextAlignment.CENTER)
+              .setFontSize(defaultFontSize)
+              .setFont(gostFont)
+            )
+            .setPadding(0).setMargin(0)
+            .setHeight(mmToPt(5))
+        }
+        cellBuff += {
+          new Cell(2, 0)
+            .setVerticalAlignment(VerticalAlignment.MIDDLE)
+            .setHorizontalAlignment(HorizontalAlignment.CENTER)
+            .add(new Paragraph("")
+              .setTextAlignment(TextAlignment.CENTER)
+              .setFontSize(defaultFontSize)
+              .setFont(gostFont)
+            )
+            .setPadding(0).setMargin(0)
+            .setHeight(mmToPt(5))
+        }
+        cellBuff += {
+          new Cell(0, 0)
             .setVerticalAlignment(VerticalAlignment.MIDDLE)
             .setHorizontalAlignment(HorizontalAlignment.CENTER)
             .add(new Paragraph("")
@@ -1210,19 +1105,21 @@ object EleEqTrayESKDReport extends Codecs{
         setStampText(cellBuff(7), "Масса", italic = true)
         setStampText(cellBuff(8), "Вед.", italic = true)
         setStampText(cellBuff(9), "Пом.", italic = true)
-        setStampText(cellBuff(10), "един.", italic = true)
-        setStampText(cellBuff(11), "общая", italic = true)
-        setStampText(cellBuff(12), "1", italic = true)
-        setStampText(cellBuff(13), "2", italic = true)
-        setStampText(cellBuff(14), "3", italic = true)
-        setStampText(cellBuff(15), "4", italic = true)
-        setStampText(cellBuff(16), "5", italic = true)
-        setStampText(cellBuff(17), "6", italic = true)
-        setStampText(cellBuff(18), "7", italic = true)
-        setStampText(cellBuff(19), "8", italic = true)
-        setStampText(cellBuff(20), "9", italic = true)
-        setStampText(cellBuff(21), "10", italic = true)
-        setStampText(cellBuff(22), "11", italic = true)
+        setStampText(cellBuff(10), "Место", italic = true)
+        setStampText(cellBuff(11), "един.", italic = true)
+        setStampText(cellBuff(12), "общая", italic = true)
+        setStampText(cellBuff(13), "1", italic = true)
+        setStampText(cellBuff(14), "2", italic = true)
+        setStampText(cellBuff(15), "3", italic = true)
+        setStampText(cellBuff(16), "4", italic = true)
+        setStampText(cellBuff(17), "5", italic = true)
+        setStampText(cellBuff(18), "6", italic = true)
+        setStampText(cellBuff(19), "7", italic = true)
+        setStampText(cellBuff(20), "8", italic = true)
+        setStampText(cellBuff(21), "9", italic = true)
+        setStampText(cellBuff(22), "10", italic = true)
+        setStampText(cellBuff(23), "11", italic = true)
+        setStampText(cellBuff(24), "12", italic = true)
       }
 
       def setStampText(cell: Cell, text: String, italic: Boolean = false, bold: Boolean = false, textAlignment: TextAlignment = TextAlignment.CENTER, fontSize: Float = 4.1f): Cell = {
@@ -1246,6 +1143,7 @@ object EleEqTrayESKDReport extends Codecs{
     }
 
     def insertDummyRow(): Unit = {
+      bodyGrid.addCell(generateCell(""))
       bodyGrid.addCell(generateCell(""))
       bodyGrid.addCell(generateCell(""))
       bodyGrid.addCell(generateCell(""))
@@ -1316,7 +1214,6 @@ object EleEqTrayESKDReport extends Codecs{
         .setHeight(mmToPt(5))
     }
 
-
     def generateCell(in: String): Cell = {
       new Cell(2, 0).setVerticalAlignment(VerticalAlignment.MIDDLE)
         .setHorizontalAlignment(HorizontalAlignment.CENTER)
@@ -1342,7 +1239,6 @@ object EleEqTrayESKDReport extends Codecs{
         .setHeight(mmToPt(5))
     }
 
-
     def hasRoom(rows: Int): Boolean = {
       if (currentRow + rows < maxRow) {
         true
@@ -1354,7 +1250,7 @@ object EleEqTrayESKDReport extends Codecs{
 
     def setLastPage(): Unit = {
       while (currentRow != maxRow) {
-        (1 to 11).foreach(i => {
+        (1 to 12).foreach(i => {
           bodyGrid.addCell(generateDummyCell())
         })
         currentRow = currentRow + 1
@@ -1363,7 +1259,7 @@ object EleEqTrayESKDReport extends Codecs{
     }
 
     def generateSpannedCellBold(in: String): Cell = {
-      new Cell(2, 11).setVerticalAlignment(VerticalAlignment.MIDDLE)
+      new Cell(2, 12).setVerticalAlignment(VerticalAlignment.MIDDLE)
         .setHorizontalAlignment(HorizontalAlignment.CENTER)
         .add(new Paragraph(in)
           .setTextAlignment(TextAlignment.CENTER)
@@ -1387,29 +1283,6 @@ object EleEqTrayESKDReport extends Codecs{
         .setHeight(mmToPt(5))
     }
 
-    def insertRoOld(wrappedRows: List[Item11Columns]): Unit = {
-      wrappedRows.foreach(item => {
-        if (item.isHeader) {
-          bodyGrid.addCell(generateSpannedCellBold(item.A1))
-        }
-        else {
-          bodyGrid.addCell(generateCellDiffSize(item.A1, 6))
-          bodyGrid.addCell(generateCell(item.A2))
-          bodyGrid.addCell(generateCell(item.A3))
-          bodyGrid.addCell(generateCell(item.A4))
-          bodyGrid.addCell(generateCell(item.A5))
-          bodyGrid.addCell(generateCell(item.A6))
-          bodyGrid.addCell(generateCell(item.A7))
-          bodyGrid.addCell(generateCell(item.A8))
-          bodyGrid.addCell(generateCell(item.A9))
-          bodyGrid.addCell(generateCell(item.A10))
-          bodyGrid.addCell(generateCell(item.A11))
-
-        }
-        currentRow = currentRow + 1
-      })
-    }
-
     def insertRow(wrappedRows: List[Item11Columns]): Unit = {
       wrappedRows.foreach(item => {
         if (!item.isHeader) {
@@ -1424,6 +1297,7 @@ object EleEqTrayESKDReport extends Codecs{
           bodyGrid.addCell(generateCell(item.A9))
           bodyGrid.addCell(generateCell(item.A10))
           bodyGrid.addCell(generateCell(item.A11))
+          bodyGrid.addCell(generateCell(item.A12))
         }
         else {
           bodyGrid.addCell(generateSpannedCellBold(item.A1))
