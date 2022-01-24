@@ -484,7 +484,6 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
       buff.toList
     }
 
-
     val docName: DocName = DocName(num = parts.complect.drawingId, name = parts.complect.drawingDescr, lastRev = rev, userDev = "Сидоров")
     val pdfPath = s"${path}/${docName.num}_${docName.name}_rev${docName.lastRev}.pdf"
     val trmPath = s"${path}/${docName.num}_${docName.name}_rev${docName.lastRev}.trm"
