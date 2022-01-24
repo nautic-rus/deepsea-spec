@@ -37,7 +37,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
     mmToPt(9 * kM),
     mmToPt(12 * kM),
     mmToPt(40 * kM),
-    mmToPt(109 * kM),
+    mmToPt(110 * kM),
     mmToPt(35 * kM),
     mmToPt(10 * kM),
     mmToPt(10 * kM),
@@ -45,7 +45,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
     mmToPt(10 * kM),
     mmToPt(15 * kM),
     mmToPt(10 * kM),
-    mmToPt(10 * kM) + 2
+    mmToPt(10 * kM)
   )
 
   def generateElecParts(project: String, complectName: String): List[Item11Columns] = {
