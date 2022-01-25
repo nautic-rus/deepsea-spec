@@ -396,6 +396,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
       val supports: List[MountItem] = {
         val suppBuffer = ListBuffer.empty[MountItem]
         parts.trays.foreach(tr => {
+
           suppBuffer += MountItem(tr.workShopMaterial, tr.mountData.label, tr.workShopMaterial.units, tr.foranTray.LEN / 1000)
           suppBuffer ++= tr.supports
         })
@@ -403,9 +404,58 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
       }
 
       val supportsRows: List[Item11Columns] = {
+        val totAllSupports={
+          val buffer = ListBuffer.empty[Item11Columns]
+          if (eqSupports.nonEmpty) {
+            eqSupports.groupBy(s => (s.A1, s.A5)).toList.foreach(eqGroup => {
+              val itemLabel = eqGroup._1._1
+              val itemTrmCode = eqGroup._1._2
+              val item = eqGroup._2.head
+              val qty: Double = Math.ceil(eqGroup._2.map(_.A7.toDoubleOption.getOrElse(0.0)).sum)
+              buffer += Item11Columns(
+                A1 = itemLabel,
+                A2 = item.A2,
+                A3 = item.A3,
+                A4 = item.A4,
+                A5 = itemTrmCode,
+                A6 = item.A6,
+                A7 = String.format("%.2f", qty),
+                A8 = String.format("%.2f", checkWeight(item.A8.toDoubleOption.getOrElse(0.0))),
+                A9 = String.format("%.2f", Math.ceil(qty * item.A8.toDoubleOption.getOrElse(0.0))),
+                A10 = item.A10,
+                A11 = item.A11,
+                A12 = findChessPos(itemLabel,chess)
+              )
+            })
+          }
+          supports.groupBy(s => s.workShopMaterial.trmCode).toList.foreach(group => {
+            if (group._2.nonEmpty) {
+              val item = group._2.head
+              val label = item.label
+              val kei = item.kei
+              val qty: Double = Math.ceil(group._2.map(_.qty).sum)
+              buffer += Item11Columns(
+                A1 = label,
+                A2 = "",
+                A3 = item.workShopMaterial.description,
+                A4 = item.workShopMaterial.name,
+                A5 = item.workShopMaterial.trmCode,
+                A6 = kei,
+                A7 = String.format("%.2f", qty),
+                A8 = String.format("%.2f", checkWeight(item.workShopMaterial.singleWeight)),
+                A9 = String.format("%.2f", checkWeight(item.workShopMaterial.singleWeight * qty)),
+                A10 = item.workShopMaterial.category,
+                A11 = "",
+                A12 = findChessPos(label,chess)
+              )
+            }
+          })
+          buffer.toList
+        }
         val buffer = ListBuffer.empty[Item11Columns]
-        if (eqSupports.nonEmpty) {
-          eqSupports.groupBy(s => (s.A1, s.A5)).toList.foreach(eqGroup => {
+
+        if (totAllSupports.nonEmpty) {
+          totAllSupports.groupBy(s => (s.A1, s.A5)).toList.foreach(eqGroup => {
             val itemLabel = eqGroup._1._1
             val itemTrmCode = eqGroup._1._2
             val item = eqGroup._2.head
@@ -426,33 +476,6 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
             )
           })
         }
-
-        supports.groupBy(s => s.workShopMaterial.trmCode).toList.foreach(group => {
-          if (group._2.nonEmpty) {
-            val item = group._2.head
-            val label = item.label
-            val kei = item.kei
-            val qty: Double = Math.ceil(group._2.map(_.qty).sum)
-
-            if (label.equals("6002")) {
-              val ss = 0
-            }
-            buffer += Item11Columns(
-              A1 = label,
-              A2 = "",
-              A3 = item.workShopMaterial.description,
-              A4 = item.workShopMaterial.name,
-              A5 = item.workShopMaterial.trmCode,
-              A6 = kei,
-              A7 = String.format("%.2f", qty),
-              A8 = String.format("%.2f", checkWeight(item.workShopMaterial.singleWeight)),
-              A9 = String.format("%.2f", checkWeight(item.workShopMaterial.singleWeight * qty)),
-              A10 = item.workShopMaterial.category,
-              A11 = "",
-              A12 = findChessPos(label,chess)
-            )
-          }
-        })
         buffer.toList
       }
 
