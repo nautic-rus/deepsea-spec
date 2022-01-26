@@ -278,7 +278,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
       val n1 = "Электрооборудование устанавливаемое заводом-строителем"
       val n2 = "Электрооборудование устанавливаемое электромонтажным предприятием"
       val buff = ListBuffer.empty[Item11Columns]
-      val parttitions = parts.eqs.partition(x => x.workShopMaterial.singleWeight > 50)
+      val parttitions = parts.eqs.partition(x => x.workShopMaterial.singleWeight > 15)
 
       val eqSupports = ListBuffer.empty[Item11Columns]
 
