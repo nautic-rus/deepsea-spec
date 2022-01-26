@@ -119,6 +119,7 @@ trait EleEqHelper {
         try {
           connection.setAutoCommit(false)
           val stmt: Statement = connection.createStatement()
+          val sql=eqByComplectsSql(listToSqlString(complect.zoneNames))
           val rs: ResultSet = stmt.executeQuery(eqByComplectsSql(listToSqlString(complect.zoneNames)))
           val wmats = retrieveAllMaterialsByProject(project)
           while (rs.next()) {
@@ -138,7 +139,7 @@ trait EleEqHelper {
               Option(rs.getString("CLASS_NAME")).getOrElse(""),
               Option(rs.getString("RA_CODE")).getOrElse(""),
               Option(rs.getString("RA_DESCR")).getOrElse(""),
-              Option(rs.getString("NODE_USERID")).getOrElse(""),
+              Option(rs.getString("USERID")).getOrElse(""),
               Option(rs.getString("EQELEC")).getOrElse(""),
               Option(rs.getDouble("XCOG")).getOrElse(0.0),
               Option(rs.getDouble("YCOG")).getOrElse(0.0),
