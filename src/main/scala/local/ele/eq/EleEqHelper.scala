@@ -62,7 +62,7 @@ trait EleEqHelper {
               Option(rs.getString("CLASS_NAME")).getOrElse(""),
               Option(rs.getString("RA_CODE")).getOrElse(""),
               Option(rs.getString("RA_DESCR")).getOrElse(""),
-              Option(rs.getString("NODE_USERID")).getOrElse(""),
+              Option(rs.getString("USERID")).getOrElse(""),
               Option(rs.getString("EQELEC")).getOrElse(""),
               Option(rs.getDouble("XCOG")).getOrElse(0.0),
               Option(rs.getDouble("YCOG")).getOrElse(0.0),
