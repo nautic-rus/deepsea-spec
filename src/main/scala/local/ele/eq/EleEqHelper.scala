@@ -32,9 +32,9 @@ trait EleEqHelper {
     //buff += "V=" + eq.MARGIN.toString
     buff += eq.USERID
     buff += eq.LABEL
-    /*    eq.SUPPORTS.sortBy(s => s.label).foreach(s => {
+    eq.SUPPORTS.filter(f=> !f.label.contains(".")).sortBy(s => s.label).foreach(s => {
           buff += s.label
-        })*/
+        })
     buff.toList
   }
 
@@ -217,6 +217,8 @@ trait EleEqHelper {
       "NF"
     }
   }
+
+
 
   private def calculateSupports(in: String, wmaterials: List[WorkShopMaterial]): List[MountItem] = {
     val buffer = ListBuffer.empty[MountItem]

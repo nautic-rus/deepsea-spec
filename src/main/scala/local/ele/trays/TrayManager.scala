@@ -169,7 +169,7 @@ object TrayManager extends TrayHelper with Codecs {
         buffMounts += MountItem(findWorkshopMaterial(item5.trmCode, materials), TrayMountData(item5.label, item5.trmCode).label, "006", trayLenght, true)
 
         val item6 = mountData.find(s => s.typeId == 66 && s.matId == foranTray.materialId).getOrElse(TrayMountData(label = "NF"))
-        buffMounts += MountItem(findWorkshopMaterial(item6.trmCode, materials), TrayMountData(item6.label, item6.trmCode).label, "796", trayLenght / 1.333333333333333d, true)
+        buffMounts += MountItem(findWorkshopMaterial(item6.trmCode, materials), TrayMountData(item6.label, item6.trmCode).label, "796", trayLenght / 1.333333333333333d, false)
       }
 
     }
@@ -183,7 +183,7 @@ object TrayManager extends TrayHelper with Codecs {
         val item4 = mountRules.find(s => s.label.equals("4210") && s.inputTypeIdRange.contains("63;")).getOrElse(TrayMountRules(label = "4210"))
         buffMounts += MountItem(findWorkshopMaterial(item4.trmCode, materials), TrayMountData(item4.label, item4.trmCode).label, item4.kei, trayLenght/0.5, item4.isNeedLabel)
 
-        //TODO depends frm margin
+
         //val item6 = mountData.find(s => s.typeId == 50 && s.matId == foranTray.materialId).getOrElse(TrayMountData(label = "NF"))
        // buffMounts += MountItem(findWorkshopMaterial(item6.trmCode, materials), TrayMountData(item6.label, item6.trmCode).label, "796", 2 * trayLenght, true)
 
