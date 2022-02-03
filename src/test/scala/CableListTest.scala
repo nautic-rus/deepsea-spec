@@ -1,5 +1,5 @@
 import local.ele.CommonEle
-import local.ele.cl.CableListManager.{cablesByComplect, cablesByComplectJson, cablesByComplectMagistralVariant}
+import local.ele.cl.CableListManager._
 import org.scalatest.funsuite.AnyFunSuite
 
 import scala.util.matching.Regex
@@ -10,7 +10,7 @@ class CableListTest extends AnyFunSuite {
 
 
   val ret=cablesByComplectJson("P701","170701-884-5007")
-
+  val ret2= cablesByComplectMagistralVariantJson("P701","170701-884-5007")
   val hh=0
 
 }
