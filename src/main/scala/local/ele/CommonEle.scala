@@ -11,6 +11,7 @@ import org.mongodb.scala.model.Filters.equal
 
 import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, FiniteDuration, SECONDS}
+
 import io.circe.parser._
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
@@ -30,10 +31,20 @@ import local.ele.trays.TrayManager.{ForanTray, Tray, TrayMountData, traysByCompl
 
 import scala.io.{BufferedSource, Source}
 
-object CommonEle extends Codecs{
+object CommonEle extends Codecs {
   case class EleComplect(drawingId: String = "", drawingDescr: String = "", deck: String = "", project: String = "P701", systemNames: List[String] = List.empty[String], zoneNames: List[String] = List.empty[String])
 
   case class EleComplectParts(complect: EleComplect = EleComplect(), eqs: List[EleEq] = List.empty[EleEq], trays: List[Tray] = List.empty[Tray])
+
+  case class Cable(SEQID: Int = 0, CODE: String = "", SPEC: Int = 0, SECT: Int = 0, SECTION: String = "",
+                   MARK: String = "", SCHEME: String = "", FROM_N: String = "", FROM_N_ROOM: String = "",
+                   FROM_N_X: Double = 0, FROM_N_Y: Double = 0, FROM_N_Z: Double = 0,
+                   FROM_E_USERID: String = "", FROM_E_USERID_ELEC: String = "",
+                   FROM_E_ROOM: String = "", FROM_E_X: Double = 0, FROM_E_Y: Double = 0, FROM_E_Z: Double = 0,
+                   TO_E_USERID: String = "", TO_N: String = "", TO_N_ROOM: String = "",
+                   TO_N_X: Double = 0, TO_N_Y: Double = 0, TO_N_Z: Double = 0, TO_E_USERID_ELEC: String = "",
+                   TO_E_ROOM: String = "", TO_E_X: Double = 0, TO_E_Y: Double = 0, TO_E_Z: Double = 0, LEN: Double = 0, CABLEPATH: String = "",
+                   ADDDATA: String = "", PARTNUMBER: String = "", STOCKCODE: String = "", complectName: String = "", ws: WorkShopMaterial = new WorkShopMaterial())
 
   private val duration: FiniteDuration = Duration(5, SECONDS)
 
@@ -52,23 +63,23 @@ object CommonEle extends Codecs{
   def retrieveAllPartsByComplectName(project: String, complectName: String): EleComplectParts = {
     retrieveEleComplects(project).find(s => s.drawingId.equals(complectName)) match {
       case Some(complect: EleComplect) => {
-        val trays: List[Tray] =traysByComplect(project, complect)
-        val eqs: List[EleEq] =genEqsByComplect(project, complect)
+        val trays: List[Tray] = traysByComplect(project, complect)
+        val eqs: List[EleEq] = genEqsByComplect(project, complect)
         EleComplectParts(complect, eqs, trays)
       }
       case None => EleComplectParts()
     }
   }
 
-  def retrieveAllPartsByComplectNameJSON(project: String, complectName: String):String=retrieveAllPartsByComplectName(project, complectName).asJson.noSpaces
+  def retrieveAllPartsByComplectNameJSON(project: String, complectName: String): String = retrieveAllPartsByComplectName(project, complectName).asJson.noSpaces
 
-  def retrieveAllPartsFromJSON(jsonPath:String): EleComplectParts ={
-    val src: BufferedSource =Source.fromFile(jsonPath)
+  def retrieveAllPartsFromJSON(jsonPath: String): EleComplectParts = {
+    val src: BufferedSource = Source.fromFile(jsonPath)
     val fileContents: String = src.getLines.mkString
     src.close()
     decode[EleComplectParts](fileContents) match {
       case Right(value) => value
-      case Left(value) =>EleComplectParts()
+      case Left(value) => EleComplectParts()
     }
   }
 

@@ -13,7 +13,7 @@ import io.circe.generic.semiauto._
 import local.common.DBRequests.MountItem
 import local.domain.CommonTypes.{DrawingChess, DrawingChessItem}
 import local.domain.WorkShopMaterial
-import local.ele.CommonEle.EleComplect
+import local.ele.CommonEle.{Cable, EleComplect}
 import local.ele.cb.CableBoxManager.ForanCableBox
 import local.ele.eq.EleEqManager.EleEq
 import local.ele.trays.TrayManager.{ForanTray, Tray, TrayMountData, TrayMountRules}
@@ -31,16 +31,11 @@ import org.mongodb.scala.bson.codecs.Macros._
 trait Codecs {
 
 
-
-
   implicit val EleComplectDecoder: Decoder[EleComplect] = deriveDecoder[EleComplect]
   implicit val EleComplectEncoder: Encoder[EleComplect] = deriveEncoder[EleComplect]
 
   implicit val EleEqDecoder: Decoder[EleEq] = deriveDecoder[EleEq]
   implicit val EleEqEncoder: Encoder[EleEq] = deriveEncoder[EleEq]
-
-
-
 
 
   implicit val WorkShopMaterialDecoder: Decoder[WorkShopMaterial] = deriveDecoder[WorkShopMaterial]
@@ -81,6 +76,9 @@ trait Codecs {
 
   implicit val DrawingChessDecoder: Decoder[DrawingChess] = deriveDecoder[DrawingChess]
   implicit val DrawingChessEncoder: Encoder[DrawingChess] = deriveEncoder[DrawingChess]
+
+  implicit val CableDecoder: Decoder[Cable] = deriveDecoder[Cable]
+  implicit val CableEncoder: Encoder[Cable] = deriveEncoder[Cable]
 
 
   private val codecRegistry: CodecRegistry = fromRegistries(fromProviders(

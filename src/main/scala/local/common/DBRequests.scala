@@ -105,6 +105,9 @@ object DBRequests extends Codecs {
 
   def findWorkshopMaterialContains(trm: String, buff: List[WorkShopMaterial]): WorkShopMaterial = buff.find(s => s.trmCode.contains(trm)).getOrElse(new WorkShopMaterial())
 
+  def findWorkshopMaterialEquals(trm: String, buff: List[WorkShopMaterial]): WorkShopMaterial = buff.find(s => s.trmCode.equals(trm)).getOrElse(new WorkShopMaterial())
+
+
   def calculateH(X_COG: Double = 0, Y_COG: Double = 0, Z_COG: Double = 0, SURFACE: String = ""): Int = {
     if (SURFACE.nonEmpty) {
       SURFACE.head.toUpper.toString match {
