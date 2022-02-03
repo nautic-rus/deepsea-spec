@@ -102,7 +102,6 @@ object DBRequests extends Codecs {
     allelems.value.get.getOrElse(Seq.empty[DrawingChess]).toList
   }
 
-
   def findWorkshopMaterialContains(trm: String, buff: List[WorkShopMaterial]): WorkShopMaterial = buff.find(s => s.trmCode.contains(trm)).getOrElse(new WorkShopMaterial())
 
   def findWorkshopMaterialEquals(trm: String, buff: List[WorkShopMaterial]): WorkShopMaterial = buff.find(s => s.trmCode.equals(trm)).getOrElse(new WorkShopMaterial())

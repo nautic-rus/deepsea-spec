@@ -11,7 +11,7 @@ import io.circe.generic.auto._
 import io.circe.syntax._
 import io.circe.generic.semiauto._
 import local.common.DBRequests.MountItem
-import local.domain.CommonTypes.{DrawingChess, DrawingChessItem}
+import local.domain.CommonTypes.{DrawingChess, DrawingChessItem, ZoneSystem}
 import local.domain.WorkShopMaterial
 import local.ele.CommonEle.{Cable, EleComplect}
 import local.ele.cb.CableBoxManager.ForanCableBox
@@ -80,6 +80,8 @@ trait Codecs {
   implicit val CableDecoder: Decoder[Cable] = deriveDecoder[Cable]
   implicit val CableEncoder: Encoder[Cable] = deriveEncoder[Cable]
 
+  implicit val ZoneSystemDecoder: Decoder[ZoneSystem] = deriveDecoder[ZoneSystem]
+  implicit val ZoneSystemEncoder: Encoder[ZoneSystem] = deriveEncoder[ZoneSystem]
 
   private val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
     classOf[EleComplect],
