@@ -299,7 +299,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
               A9 = String.format("%.2f", checkWeight(eq.workShopMaterial.singleWeight)),
               A10 = eq.workShopMaterial.category,
               A11 = eq.ZONE_NAME,
-              A12 = findChessPos(eq.LABEL,chess)
+              A12 = findChessPos(eq.LABEL, chess)
             )
             eq.SUPPORTS.filter(s => s.label.contains(".")).sortBy(d => d.label).foreach(supp => {
               buff += Item11Columns(
@@ -314,7 +314,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
                 A9 = String.format("%.2f", checkWeight(supp.workShopMaterial.singleWeight * supp.qty)),
                 A10 = supp.workShopMaterial.category,
                 A11 = eq.ZONE_NAME,
-                A12 = findChessPos(eq.LABEL,chess)
+                A12 = findChessPos(eq.LABEL, chess)
               )
             })
             eq.SUPPORTS.filter(s => !s.label.contains(".")).sortBy(d => d.label).foreach(supp => {
@@ -330,7 +330,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
                 A9 = String.format("%.2f", checkWeight(supp.workShopMaterial.singleWeight * supp.qty)),
                 A10 = supp.workShopMaterial.category,
                 A11 = "",
-                A12 = findChessPos(eq.LABEL,chess)
+                A12 = findChessPos(eq.LABEL, chess)
               )
             })
           })
@@ -353,7 +353,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
               A9 = String.format("%.2f", checkWeight(eq.workShopMaterial.singleWeight)),
               A10 = eq.workShopMaterial.category,
               A11 = eq.ZONE_NAME,
-              A12 = findChessPos(eq.LABEL,chess)
+              A12 = findChessPos(eq.LABEL, chess)
 
             )
             eq.SUPPORTS.filter(s => s.label.contains(".")).sortBy(d => d.label).foreach(supp => {
@@ -369,7 +369,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
                 A9 = String.format("%.2f", checkWeight(supp.workShopMaterial.singleWeight * supp.qty)),
                 A10 = supp.workShopMaterial.category,
                 A11 = eq.ZONE_NAME,
-                A12 = findChessPos(eq.LABEL,chess)
+                A12 = findChessPos(eq.LABEL, chess)
               )
             })
             eq.SUPPORTS.filter(s => !s.label.contains(".")).sortBy(d => d.label).foreach(supp => {
@@ -385,7 +385,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
                 A9 = String.format("%.2f", checkWeight(supp.workShopMaterial.singleWeight * supp.qty)),
                 A10 = supp.workShopMaterial.category,
                 A11 = "",
-                A12 = findChessPos(eq.LABEL,chess)
+                A12 = findChessPos(eq.LABEL, chess)
               )
             })
           })
@@ -404,14 +404,28 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
       }
 
       val supportsRows: List[Item11Columns] = {
-        val totAllSupports={
+        val totAllSupports = {
           val buffer = ListBuffer.empty[Item11Columns]
           if (eqSupports.nonEmpty) {
             eqSupports.groupBy(s => (s.A1, s.A5)).toList.foreach(eqGroup => {
               val itemLabel = eqGroup._1._1
               val itemTrmCode = eqGroup._1._2
               val item = eqGroup._2.head
-              val qty: Double = Math.ceil(eqGroup._2.map(_.A7.toDoubleOption.getOrElse(0.0)).sum)
+              val qty: Double = {
+                val ret = Math.ceil(eqGroup._2.map(_.A7.toDoubleOption.getOrElse(0.0)).sum)
+                if (itemLabel.length >= 2) {
+                  itemLabel.substring(0, 2) match {
+                    case "57" => if (ret < 4.0) 4.0 else ret
+                    case "66" => if (ret < 4.0) 4.0 else ret
+                    case "72" => if (ret < 2.0) 2.0 else ret
+                    case _ => ret
+                  }
+                } else {
+                  ret
+                }
+              }
+
+
               buffer += Item11Columns(
                 A1 = itemLabel,
                 A2 = item.A2,
@@ -424,7 +438,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
                 A9 = String.format("%.2f", Math.ceil(qty * item.A8.toDoubleOption.getOrElse(0.0))),
                 A10 = item.A10,
                 A11 = item.A11,
-                A12 = findChessPos(itemLabel,chess)
+                A12 = findChessPos(itemLabel, chess)
               )
             })
           }
@@ -433,7 +447,21 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
               val item = group._2.head
               val label = item.label
               val kei = item.kei
-              val qty: Double = Math.ceil(group._2.map(_.qty).sum)
+              //val qty: Double = Math.ceil(group._2.map(_.qty).sum)
+
+              val qty: Double = {
+                val ret: Double = Math.ceil(group._2.map(_.qty).sum)
+                if (label.length >= 2) {
+                  label.substring(0, 2) match {
+                    case "57" => if (ret < 4.0) 4.0 else ret
+                    case "66" => if (ret < 4.0) 4.0 else ret
+                    case "72" => if (ret < 2.0) 2.0 else ret
+                    case _ => ret
+                  }
+                } else {
+                  ret
+                }
+              }
               buffer += Item11Columns(
                 A1 = label,
                 A2 = "",
@@ -446,7 +474,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
                 A9 = String.format("%.2f", checkWeight(item.workShopMaterial.singleWeight * qty)),
                 A10 = item.workShopMaterial.category,
                 A11 = "",
-                A12 = findChessPos(label,chess)
+                A12 = findChessPos(label, chess)
               )
             }
           })
@@ -472,7 +500,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
               A9 = String.format("%.2f", Math.ceil(qty * item.A8.toDoubleOption.getOrElse(0.0))),
               A10 = item.A10,
               A11 = item.A11,
-              A12 = findChessPos(itemLabel,chess)
+              A12 = findChessPos(itemLabel, chess)
             )
           })
         }
@@ -607,7 +635,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
     val A8count = 10
     val A9count = 10
     val A10count = 26
-    val A11count =26
+    val A11count = 26
     val A12count = 6
     val buff = ListBuffer.empty[Item11Columns]
     if (item.isHeader) {

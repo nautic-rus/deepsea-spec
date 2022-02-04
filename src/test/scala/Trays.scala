@@ -18,8 +18,9 @@ class Trays  extends AnyFunSuite with TrayHelper{
   //TODO FOR BOGDAN NEEDS CHANGE CABLETRAY LABELING. ADDED COMPLECT PARAMETER
   //val cablesByTrayAndComplect: List[String] =genCablesByTraySeqIdAndComplect("P701","17193439","170701-884-4011")
   //val cablesInLineByTwoNodesAndComplect: List[String] =genCablesInLineByTwoNodesAndComplect("P701","0000000000013605", "4404051111112087","170701-884-4011")
-  //val cablesInLineByTwoNodesAndComplect: List[String] =genCablesInLineByTwoNodesAndComplect("P701","9Я19-14", "0000000000023175","170701-884-5002")
+  val cablesInLineByTwoNodesAndComplect: List[String] =genCablesInLineByTwoNodesAndComplect("P701","0000000000036151", "ЩП22-8","170701-884-5011")
 
+  val jj=0
 
 /*  val labs0 =trayLabels("P701","18658722").mkString(" , ") //лестница без крышки
   val labs1 =trayLabels("P701","18658723").mkString(" , ") //лестница с крышкой
@@ -52,7 +53,7 @@ class Trays  extends AnyFunSuite with TrayHelper{
  // val eqLabels: List[String] =genEqLabelsByEqOid("P701","9031306")
   //val traysJson: String =tarysByZonesSystemsJson("P701", List("5318"),List("884-6009"))
 
-  val hh=TrayBySeqId("P701","16213583")
+ // val hh=TrayBySeqId("P701","16213583")
 
 
 
