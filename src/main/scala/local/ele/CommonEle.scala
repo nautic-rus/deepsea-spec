@@ -11,7 +11,6 @@ import org.mongodb.scala.model.Filters.equal
 
 import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, FiniteDuration, SECONDS}
-
 import io.circe.parser._
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
@@ -26,8 +25,8 @@ import local.common.Codecs
 import local.common.DBRequests.MountItem
 import local.domain.WorkShopMaterial
 import local.ele.cb.CableBoxManager.CableBox
+import local.ele.trays.TrayManager.{Tray, traysByComplect}
 import local.ele.eq.EleEqManager.{EleEq, genEqsByComplect}
-import local.ele.trays.TrayManager.{ForanTray, Tray, TrayMountData, traysByComplect}
 
 import scala.io.{BufferedSource, Source}
 

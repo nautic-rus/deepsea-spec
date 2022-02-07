@@ -6,7 +6,7 @@ import local.ele.CommonEle
 import local.ele.cb.CableBoxManager.cableBoxBySeqId
 import local.ele.eq.EleEqManager.genEqLabelsByEqOid
 import local.ele.trays.{TrayHelper, TrayManager}
-import local.ele.trays.TrayManager._
+import TrayManager._
 import org.apache.log4j.{Level, Logger}
 import org.scalatest.funsuite.AnyFunSuite
 

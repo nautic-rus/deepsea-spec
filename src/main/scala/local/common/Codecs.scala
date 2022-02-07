@@ -15,8 +15,9 @@ import local.domain.CommonTypes.{DrawingChess, DrawingChessItem, ZoneSystem}
 import local.domain.WorkShopMaterial
 import local.ele.CommonEle.{Cable, EleComplect}
 import local.ele.cb.CableBoxManager.ForanCableBox
-import local.ele.eq.EleEqManager.EleEq
+import local.ele.cbfill.models.{AnkerPlate, CableBoxModule, CompressionBlock, SealModule}
 import local.ele.trays.TrayManager.{ForanTray, Tray, TrayMountData, TrayMountRules}
+import local.ele.eq.EleEqManager.EleEq
 import local.hull.BStree.{Block, BsTreeItem, HullPL, Room}
 import local.hull.PartManager.PrdPart
 import local.pdf.ru.common.ReportCommon.Item11Columns
@@ -93,6 +94,10 @@ trait Codecs {
     classOf[WorkShopMaterial],
     classOf[DrawingChess],
     classOf[DrawingChessItem],
+    classOf[SealModule],
+    classOf[CompressionBlock],
+    classOf[AnkerPlate],
+    classOf[CableBoxModule],
   ), DEFAULT_CODEC_REGISTRY)
 
   def mongoDatabase(): MongoDatabase = MongoDB.mongoClient().getDatabase("3degdatabase").withCodecRegistry(codecRegistry)

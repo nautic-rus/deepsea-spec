@@ -1,16 +1,14 @@
 package local.ele.trays
 
-import io.circe._
-import io.circe.parser._
-import io.circe.generic.auto._
-import io.circe.syntax._
-import io.circe.generic.semiauto._
 import local.common.Codecs
-import local.common.DBRequests._
+import local.common.DBRequests.{MountItem, findWorkshopMaterial, retrieveAllMaterialsByProject}
 import local.domain.WorkShopMaterial
 import local.ele.CommonEle.EleComplect
 
 import scala.collection.mutable.ListBuffer
+import io.circe.{Decoder, Encoder}
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.syntax.EncoderOps
 
 object TrayManager extends TrayHelper with Codecs {
 
@@ -150,7 +148,7 @@ object TrayManager extends TrayHelper with Codecs {
         buffMounts += MountItem(findWorkshopMaterial(item2.trmCode, materials), TrayMountData(item2.label, item2.trmCode).label, item2.kei, calculateQty(item2.count, item2.lenghtFactor, trayLenght), item2.isNeedLabel)
 
         val item3 = mountRules.find(s => s.label.equals("4089") && s.inputTypeIdRange.contains("61K;")).getOrElse(TrayMountRules(label = "4089"))
-        buffMounts += MountItem(findWorkshopMaterial(item3.trmCode, materials), TrayMountData(item3.label, item3.trmCode).label, item3.kei, (3 * clickTrayMontData.parD2 / 1000)*(trayLenght/item3.lenghtFactor), item3.isNeedLabel)
+        buffMounts += MountItem(findWorkshopMaterial(item3.trmCode, materials), TrayMountData(item3.label, item3.trmCode).label, item3.kei, (3 * clickTrayMontData.parD2 / 1000) * (trayLenght / item3.lenghtFactor), item3.isNeedLabel)
 
         val item4 = mountRules.find(s => s.label.equals("4207") && s.inputTypeIdRange.contains("61K;")).getOrElse(TrayMountRules(label = "4207"))
         buffMounts += MountItem(findWorkshopMaterial(item4.trmCode, materials), TrayMountData(item4.label, item4.trmCode).label, item4.kei, calculateQty(item4.count, item4.lenghtFactor, trayLenght), item4.isNeedLabel)
@@ -178,14 +176,14 @@ object TrayManager extends TrayHelper with Codecs {
       if (!foranTray.SURFACE.contains("F0")) {
 
         val item3 = mountRules.find(s => s.label.equals("4209") && s.inputTypeIdRange.contains("63;")).getOrElse(TrayMountRules(label = "4209"))
-        buffMounts += MountItem(findWorkshopMaterial(item3.trmCode, materials), TrayMountData(item3.label, item3.trmCode).label, item3.kei, trayLenght/0.5, item3.isNeedLabel)
+        buffMounts += MountItem(findWorkshopMaterial(item3.trmCode, materials), TrayMountData(item3.label, item3.trmCode).label, item3.kei, trayLenght / 0.5, item3.isNeedLabel)
 
         val item4 = mountRules.find(s => s.label.equals("4210") && s.inputTypeIdRange.contains("63;")).getOrElse(TrayMountRules(label = "4210"))
-        buffMounts += MountItem(findWorkshopMaterial(item4.trmCode, materials), TrayMountData(item4.label, item4.trmCode).label, item4.kei, trayLenght/0.5, item4.isNeedLabel)
+        buffMounts += MountItem(findWorkshopMaterial(item4.trmCode, materials), TrayMountData(item4.label, item4.trmCode).label, item4.kei, trayLenght / 0.5, item4.isNeedLabel)
 
 
         //val item6 = mountData.find(s => s.typeId == 50 && s.matId == foranTray.materialId).getOrElse(TrayMountData(label = "NF"))
-       // buffMounts += MountItem(findWorkshopMaterial(item6.trmCode, materials), TrayMountData(item6.label, item6.trmCode).label, "796", 2 * trayLenght, true)
+        // buffMounts += MountItem(findWorkshopMaterial(item6.trmCode, materials), TrayMountData(item6.label, item6.trmCode).label, "796", 2 * trayLenght, true)
 
         val it = mountData.filter(s => (s.typeId == 50) && s.matId == clickTrayMontData.matId && s.parD1 * 1000 >= foranTray.marign)
         if (it.nonEmpty) {
@@ -196,31 +194,30 @@ object TrayManager extends TrayHelper with Codecs {
         }
 
 
-
         val item7 = mountData.find(s => s.label.equals("4022")).getOrElse(TrayMountData(label = "4022"))
-        buffMounts += MountItem(findWorkshopMaterial(item7.trmCode, materials), TrayMountData(item7.label, item7.trmCode).label, "796", trayLenght/0.5, false)
+        buffMounts += MountItem(findWorkshopMaterial(item7.trmCode, materials), TrayMountData(item7.label, item7.trmCode).label, "796", trayLenght / 0.5, false)
 
         val item8 = mountData.find(s => s.label.equals("4023")).getOrElse(TrayMountData(label = "4023"))
-        buffMounts += MountItem(findWorkshopMaterial(item8.trmCode, materials), TrayMountData(item8.label, item8.trmCode).label, "796", trayLenght/0.5, false)
+        buffMounts += MountItem(findWorkshopMaterial(item8.trmCode, materials), TrayMountData(item8.label, item8.trmCode).label, "796", trayLenght / 0.5, false)
 
 
       } else {
-        val item4=mountData.find(s => s.label.equals("4211")).getOrElse(TrayMountData(label = "4211"))
-        buffMounts += MountItem(findWorkshopMaterial(item4.trmCode, materials), TrayMountData(item4.label, item4.trmCode).label, "796", trayLenght/0.25, false)
+        val item4 = mountData.find(s => s.label.equals("4211")).getOrElse(TrayMountData(label = "4211"))
+        buffMounts += MountItem(findWorkshopMaterial(item4.trmCode, materials), TrayMountData(item4.label, item4.trmCode).label, "796", trayLenght / 0.25, false)
       }
     }
 
 
-    mountRules.filter(p => p.inputTypeIdRange.contains(clickTrayMontData.typeId.toString+";")).foreach(item => {
+    mountRules.filter(p => p.inputTypeIdRange.contains(clickTrayMontData.typeId.toString + ";")).foreach(item => {
 
       if (item.trmCode.nonEmpty) {
         item.label match {
 
           //case "4089" => buffMounts += MountItem(findWorkshopMaterial(item.trmCode, materials), TrayMountData(item.label, item.trmCode).label, item.kei, (3 * clickTrayMontData.parD2 / 1000)*(trayLenght/item.lenghtFactor), item.isNeedLabel)
 
-          case "4002" => buffMounts += MountItem(findWorkshopMaterial(item.trmCode, materials), TrayMountData(item.label, item.trmCode).label, item.kei, (3 * clickTrayMontData.parD2 / 1000)*(trayLenght/item.lenghtFactor), item.isNeedLabel)
+          case "4002" => buffMounts += MountItem(findWorkshopMaterial(item.trmCode, materials), TrayMountData(item.label, item.trmCode).label, item.kei, (3 * clickTrayMontData.parD2 / 1000) * (trayLenght / item.lenghtFactor), item.isNeedLabel)
           //case _ => None
-         case _ => buffMounts += MountItem(findWorkshopMaterial(item.trmCode, materials), TrayMountData(item.label, item.trmCode).label, item.kei, calculateQty(item.count, item.lenghtFactor, trayLenght), item.isNeedLabel)
+          case _ => buffMounts += MountItem(findWorkshopMaterial(item.trmCode, materials), TrayMountData(item.label, item.trmCode).label, item.kei, calculateQty(item.count, item.lenghtFactor, trayLenght), item.isNeedLabel)
         }
 
       } else {
@@ -263,7 +260,7 @@ object TrayManager extends TrayHelper with Codecs {
     })
 
 
-    Tray(foranTray, clickTrayMontData, material, buffMounts.toList.sortBy(s=>s.label))
+    Tray(foranTray, clickTrayMontData, material, buffMounts.toList.sortBy(s => s.label))
   }
 
   def genCablesByTraySeqId(project: String, trayIdSeq: String): List[String] = cablesByTraySeqId(project, trayIdSeq)
@@ -285,4 +282,3 @@ object TrayManager extends TrayHelper with Codecs {
 
 
 }
-

@@ -2,7 +2,6 @@ import local.ele.CommonEle.{EleComplectParts, retrieveAllPartsByComplectName, re
 import local.ele.cb.CableBoxManager.cableBoxBySeqId
 import local.ele.eq.EleEqManager.{genEqByOIDJson, genEqLabelsByEqOid, genEqLabelsByEqOidJson}
 import local.ele.trays.TrayManager
-import local.ele.trays.TrayManager.tarysByZonesSystemsJson
 import org.scalatest.funsuite.AnyFunSuite
 
 import scala.collection.mutable.ListBuffer
