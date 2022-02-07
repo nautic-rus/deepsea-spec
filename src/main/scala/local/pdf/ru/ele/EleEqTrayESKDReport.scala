@@ -635,7 +635,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
       initializeOutlines()
     }
     val doc: Document = new Document(pdfDoc, pageSize)
-    doc.add(new Paragraph("Сколько раз вам говорить не называть так длинно свои ср...е бумажки? Это что так сложно запомнить? Вы ломаете файловые структуры, у вас не лезет это в рамку, но вы все равно так делаете! Убейтесь ап стену!"))
+    doc.add(new Paragraph("Сколько раз вам говорить не называть так длинно свои ср...е бумажки? Это что так сложно запомнить? Вы ломаете файловые структуры, у вас не лезет это в рамку, но вы все равно так делаете! Убейтесь ап стену!").setFontSize(60).setFont(gostFont))
     doc.close()
   }
 
