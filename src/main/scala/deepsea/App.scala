@@ -11,7 +11,7 @@ object App {
   val conf: Config = ConfigFactory.defaultApplication(this.getClass.getClassLoader)
 
   object HTTPServer{
-    val Host = "192.168.1.122"
+    val Host = "192.168.1.28"
     val Port = 1113
     val Url = "https://deep-sea.ru"
     val RestUrl = "https://deep-sea.ru/rest"
