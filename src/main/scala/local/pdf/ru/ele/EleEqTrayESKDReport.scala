@@ -543,7 +543,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
       genReport(docName, item11Columns, pdfPath)
       generateTrm(trmPath, docName, item11Columns)
     }else{
-      val pdfPath = s"${path}/STUPIDO.pdf"
+      val pdfPath = s"${path}/ERROR_FNAME_LEN.pdf"
       retPath += pdfPath
       genErr(pdfPath)
     }
@@ -635,7 +635,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
       initializeOutlines()
     }
     val doc: Document = new Document(pdfDoc, pageSize)
-    doc.add(new Paragraph("Сколько раз вам говорить не называть так длинно свои ср...е бумажки? Это что так сложно запомнить? Вы ломаете файловые структуры, у вас не лезет это в рамку, но вы все равно так делаете! Убейтесь ап стену!").setFontSize(60).setFont(gostFont))
+    doc.add(new Paragraph("TOO MUCH LETTERS IN FILE NAME!").setFontSize(60).setFont(gostFont))
     doc.close()
   }
 
