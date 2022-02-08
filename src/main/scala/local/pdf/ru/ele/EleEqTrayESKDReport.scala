@@ -266,7 +266,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
     val parts: EleComplectParts = retrieveAllPartsByComplectName(project, complectName)
     val docName: DocName = DocName(num = parts.complect.drawingId, name = parts.complect.drawingDescr, lastRev = rev, userDev = "Сидоров")
 
-    if(docName.name.length<50){
+    if(docName.name.length<60){
       val chess: CommonTypes.DrawingChess = {
         val l = findChess(complectName, rev)
         if (l.nonEmpty) {
