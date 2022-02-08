@@ -11,7 +11,7 @@ object App {
   val conf: Config = ConfigFactory.defaultApplication(this.getClass.getClassLoader)
 
   object HTTPServer{
-    val Host = "192.168.1.122"
+    val Host = "192.168.1.28"
     val Port = 1113
     val Url = "https://deep-sea.ru"
     val RestUrl = "https://deep-sea.ru/rest"
@@ -19,7 +19,7 @@ object App {
   object Cloud{
     val Host = "cloud.nautic-rus.ru"
     val Protocol = "https"
-    val Directory = "D:/cloud"
+    val Directory = "/cloud"
     val Url: String = App.HTTPServer.RestUrl + "/files"
   }
   def main(args: Array[String]): Unit = {
