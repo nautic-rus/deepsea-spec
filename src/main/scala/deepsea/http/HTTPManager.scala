@@ -12,7 +12,7 @@ import akka.util.Timeout
 import deepsea.App
 import deepsea.actors.ActorManager
 import deepsea.actors.ActorStartupManager.HTTPManagerStarted
-import deepsea.elec.ElecManager.{FixTrayBundle, GenerateTrayPdf, GetCablesByNodes, GetCablesByTray, GetEqLabels, GetHoleLabel, GetTrayBundles, GetTrayLabels, GetTraysByZonesAndSystems}
+import deepsea.elec.ElecManager._
 import deepsea.hull.HullManager.{GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, SetHullEsp}
 import deepsea.spec.SpecManager.{GetHullBlocks, GetHullPartListFromBsTree, SetHullPartListFromBsTree}
 import org.apache.log4j.{LogManager, Logger}
@@ -88,7 +88,12 @@ class HTTPManager extends Actor {
       (get & path("fixTrayBundle") & parameter("project") & parameter("docNumber")) { (project, docNumber) =>
         askFor(ActorManager.elec, FixTrayBundle(project, docNumber))
       },
-
+      (get & path("elecParts") & parameter("project") & parameter("bundle")) { (project, bundle) =>
+        askFor(ActorManager.elec, GetElecParts(project, bundle))
+      },
+      (get & path("elecCables") & parameter("project") & parameter("bundle") & parameter("magistral")) { (project, bundle, magistral) =>
+        askFor(ActorManager.elec, GetElecCables(project, bundle, magistral))
+      },
     )
   }
 
