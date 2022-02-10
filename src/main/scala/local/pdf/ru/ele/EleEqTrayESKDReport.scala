@@ -275,7 +275,6 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
         } else {
           CommonTypes.DrawingChess()
         }
-
       }
       val item11Columns: List[Item11Columns] = {
         val n1 = "Электрооборудование устанавливаемое заводом-строителем"
@@ -546,11 +545,14 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
       retPath += trmPath
       genReport(docName, item11Columns, pdfPath)
       generateTrm(trmPath, docName, item11Columns)
-    } else {
+    }
+    else {
       val pdfPath = s"${path}/ERROR_FNAME_LEN.pdf"
       retPath += pdfPath
       genErr(pdfPath)
     }
+
+
     retPath.toList
   }
 

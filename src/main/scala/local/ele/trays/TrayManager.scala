@@ -188,7 +188,7 @@ object TrayManager extends TrayHelper with Codecs {
 
         val it = mountData.filter(s => (s.typeId == 50) && s.matId == clickTrayMontData.matId && s.parD1 * 1000 >= foranTray.marign)
         if (it.nonEmpty) {
-          val part = it.minBy(d => d.parI1)
+          val part = it.minBy(d => d.parD1)
           buffMounts += MountItem(findWorkshopMaterial(part.trmCode, materials), TrayMountData(part.label, part.trmCode).label, "796", 2 * trayLenght, true)
         } else {
           MountItem()
@@ -242,7 +242,7 @@ object TrayManager extends TrayHelper with Codecs {
           case "57;" =>
             val it = mountData.filter(s => (s.typeId == 57) && s.matId == clickTrayMontData.matId && s.parD1 * 1000 >= foranTray.marign)
             if (it.nonEmpty) {
-              val part = it.minBy(d => d.parI1)
+              val part = it.minBy(d => d.parD1)
               buffMounts += MountItem(findWorkshopMaterial(part.trmCode, materials), TrayMountData(part.label, part.trmCode).label, item.kei, calculateQty(item.count, item.lenghtFactor, trayLenght), item.isNeedLabel)
             } else {
               MountItem()
@@ -291,7 +291,6 @@ object TrayManager extends TrayHelper with Codecs {
     lb ++= supports
     lb.toList
   }
-
 
   def genCablesByTraySeqId(project: String, trayIdSeq: String): List[String] = cablesByTraySeqId(project, trayIdSeq)
 
