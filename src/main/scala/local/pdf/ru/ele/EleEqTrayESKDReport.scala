@@ -267,7 +267,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
     val parts: EleComplectParts = retrieveAllPartsByComplectName(project, complectName)
     val docName: DocName = DocName(num = parts.complect.drawingId, name = parts.complect.drawingDescr, lastRev = rev, userDev = "Сидоров")
 
-    if(docName.name.length<60){
+    if (docName.name.length < 60) {
       val chess: CommonTypes.DrawingChess = {
         val l = findChess(complectName, rev)
         if (l.nonEmpty) {
@@ -402,7 +402,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
             suppBuffer += MountItem(tr.workShopMaterial, tr.mountData.label, tr.workShopMaterial.units, tr.foranTray.LEN / 1000)
             suppBuffer ++= tr.supports
           })
-          postProcessSupports(suppBuffer.toList,project)
+          postProcessSupports(suppBuffer.toList, project)
         }
 
         val supportsRows: List[Item11Columns] = {
@@ -415,17 +415,17 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
                 val item = eqGroup._2.head
                 val qty: Double = {
                   val ret = Math.ceil(eqGroup._2.map(_.A7.toDoubleOption.getOrElse(0.0)).sum)
-       /*           if (itemLabel.length >= 2) {
-                    itemLabel.substring(0, 2) match {
-                      case "57" => if (ret < 4.0) 4.0 else ret
-                      case "66" => if (ret < 4.0) 4.0 else ret
-                      case "72" => if (ret < 2.0) 2.0 else ret
-                      case _ => ret
-                    }
-                  }
-                  else {
-                    ret
-                  }*/
+                  /*           if (itemLabel.length >= 2) {
+                               itemLabel.substring(0, 2) match {
+                                 case "57" => if (ret < 4.0) 4.0 else ret
+                                 case "66" => if (ret < 4.0) 4.0 else ret
+                                 case "72" => if (ret < 2.0) 2.0 else ret
+                                 case _ => ret
+                               }
+                             }
+                             else {
+                               ret
+                             }*/
                   ret
                 }
 
@@ -455,17 +455,17 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
 
                 val qty: Double = {
                   val ret: Double = Math.ceil(group._2.map(_.qty).sum)
-     /*             if (label.length >= 2) {
-                    label.substring(0, 2) match {
-                      case "57" => if (ret < 4.0) 4.0 else ret
-                      case "66" => if (ret < 4.0) 4.0 else ret
-                      case "72" => if (ret < 2.0) 2.0 else ret
-                      case _ => ret
-                    }
-                  }
-                  else {
-                    ret
-                  }*/
+                  /*             if (label.length >= 2) {
+                                 label.substring(0, 2) match {
+                                   case "57" => if (ret < 4.0) 4.0 else ret
+                                   case "66" => if (ret < 4.0) 4.0 else ret
+                                   case "72" => if (ret < 2.0) 2.0 else ret
+                                   case _ => ret
+                                 }
+                               }
+                               else {
+                                 ret
+                               }*/
                   ret
                 }
                 buffer += Item11Columns(
@@ -546,14 +546,13 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
       retPath += trmPath
       genReport(docName, item11Columns, pdfPath)
       generateTrm(trmPath, docName, item11Columns)
-    }else{
+    } else {
       val pdfPath = s"${path}/ERROR_FNAME_LEN.pdf"
       retPath += pdfPath
       genErr(pdfPath)
     }
     retPath.toList
   }
-
 
 
   def generatePdfToFileNoRev(project: String, complectName: String, path: String): List[String] = {
@@ -631,7 +630,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
     doc.close()
   }
 
-  def genErr(path: String): Unit ={
+  def genErr(path: String): Unit = {
     val pdfWriter: PdfWriter = new PdfWriter(path, new WriterProperties().setFullCompressionMode(true)) {
       setSmartMode(true)
     }
