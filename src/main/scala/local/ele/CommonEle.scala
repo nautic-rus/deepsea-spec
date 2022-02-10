@@ -25,7 +25,7 @@ import local.common.Codecs
 import local.common.DBRequests.MountItem
 import local.domain.WorkShopMaterial
 import local.ele.cb.CableBoxManager.CableBox
-import local.ele.trays.TrayManager.{Tray, traysByComplect}
+import local.ele.trays.TrayManager.{Tray,  traysByComplect}
 import local.ele.eq.EleEqManager.{EleEq, genEqsByComplect}
 
 import scala.io.{BufferedSource, Source}

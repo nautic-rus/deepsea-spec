@@ -22,6 +22,7 @@ import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 import local.domain.CommonTypes
+import local.ele.trays.TrayManager.postProcessSupports
 import local.pdf.UtilsPDF
 
 object EleEqTrayESKDReport extends Codecs with UtilsPDF {
@@ -398,11 +399,10 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
         val supports: List[MountItem] = {
           val suppBuffer = ListBuffer.empty[MountItem]
           parts.trays.foreach(tr => {
-
             suppBuffer += MountItem(tr.workShopMaterial, tr.mountData.label, tr.workShopMaterial.units, tr.foranTray.LEN / 1000)
             suppBuffer ++= tr.supports
           })
-          suppBuffer.toList
+          postProcessSupports(suppBuffer.toList,project)
         }
 
         val supportsRows: List[Item11Columns] = {
@@ -415,16 +415,18 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
                 val item = eqGroup._2.head
                 val qty: Double = {
                   val ret = Math.ceil(eqGroup._2.map(_.A7.toDoubleOption.getOrElse(0.0)).sum)
-                  if (itemLabel.length >= 2) {
+       /*           if (itemLabel.length >= 2) {
                     itemLabel.substring(0, 2) match {
                       case "57" => if (ret < 4.0) 4.0 else ret
                       case "66" => if (ret < 4.0) 4.0 else ret
                       case "72" => if (ret < 2.0) 2.0 else ret
                       case _ => ret
                     }
-                  } else {
-                    ret
                   }
+                  else {
+                    ret
+                  }*/
+                  ret
                 }
 
 
@@ -453,16 +455,18 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
 
                 val qty: Double = {
                   val ret: Double = Math.ceil(group._2.map(_.qty).sum)
-                  if (label.length >= 2) {
+     /*             if (label.length >= 2) {
                     label.substring(0, 2) match {
                       case "57" => if (ret < 4.0) 4.0 else ret
                       case "66" => if (ret < 4.0) 4.0 else ret
                       case "72" => if (ret < 2.0) 2.0 else ret
                       case _ => ret
                     }
-                  } else {
-                    ret
                   }
+                  else {
+                    ret
+                  }*/
+                  ret
                 }
                 buffer += Item11Columns(
                   A1 = label,

@@ -101,6 +101,7 @@ object TrayManager extends TrayHelper with Codecs {
     val mountRules: List[TrayMountRules] = retrieveTraysMountRules()
     val materials: List[WorkShopMaterial] = retrieveAllMaterialsByProject(project)
     val traysMountData: List[TrayMountData] = retrieveAllTrayMountData()
+      //.filter(s=>s.IDSQ==18789202)
     retrieveTraysByZoneNameAndSysName(project, zones, systems).foreach(clickTray => {
       buff += calculateTrayMountDate(project, clickTray, mountData, mountRules, materials, traysMountData)
     })
@@ -262,6 +263,29 @@ object TrayManager extends TrayHelper with Codecs {
 
     Tray(foranTray, clickTrayMontData, material, buffMounts.toList.sortBy(s => s.label))
   }
+
+  def postProcessSupports(supports: List[MountItem],project:String): List[MountItem]={
+    val lb=ListBuffer.empty[MountItem]
+    val mountData: List[TrayMountData] = retrieveTraysMountDate()
+    supports.filter(s=>s.label.startsWith("57")).groupBy(d=>d.label).foreach(item=>{
+      val item57Count =Math.ceil(item._2.map(_.qty).sum).toInt
+
+      val materials = retrieveAllMaterialsByProject(project)
+
+      val item3 = mountData.find(s => s.label.equals("4204")).getOrElse(TrayMountData(label = "4204"))
+      lb += MountItem(findWorkshopMaterial(item3.trmCode, materials), TrayMountData(item3.label, item3.trmCode).label, "796",item57Count, false)
+
+      val item2 = mountData.find(s => s.label.equals("4203")).getOrElse(TrayMountData(label = "4203"))
+      lb += MountItem(findWorkshopMaterial(item2.trmCode, materials), TrayMountData(item2.label, item2.trmCode).label, "796",item57Count, false)
+
+      val item1 = mountData.find(s => s.label.equals("4202")).getOrElse(TrayMountData(label = "4202"))
+      lb += MountItem(findWorkshopMaterial(item1.trmCode, materials), TrayMountData(item1.label, item1.trmCode).label, "796",item57Count, false)
+
+    })
+    lb++=supports
+    lb.toList
+  }
+
 
   def genCablesByTraySeqId(project: String, trayIdSeq: String): List[String] = cablesByTraySeqId(project, trayIdSeq)
 
