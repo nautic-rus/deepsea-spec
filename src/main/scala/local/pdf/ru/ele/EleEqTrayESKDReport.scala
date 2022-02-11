@@ -537,7 +537,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
           buff += Item11Columns(true, "Прочее")
           buff ++= gr8.sortBy(s => s.A1)
         }
-        buff.toList
+        buff.distinct.toList
       }
       val pdfPath = s"${path}/${docName.num}_${docName.name}_rev${docName.lastRev}.pdf"
       val trmPath = s"${path}/${docName.num}_${docName.name}_rev${docName.lastRev}.trm"
