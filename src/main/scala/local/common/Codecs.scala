@@ -20,6 +20,7 @@ import local.ele.trays.TrayManager.{ForanTray, Tray, TrayMountData, TrayMountRul
 import local.ele.eq.EleEqManager.EleEq
 import local.hull.BStree.{Block, BsTreeItem, HullPL, Room}
 import local.hull.PartManager.PrdPart
+import local.hull.nest.CommonNest.Nest
 import local.pdf.ru.common.ReportCommon.Item11Columns
 import local.sql.MongoDB
 import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
@@ -83,6 +84,11 @@ trait Codecs {
 
   implicit val ZoneSystemDecoder: Decoder[ZoneSystem] = deriveDecoder[ZoneSystem]
   implicit val ZoneSystemEncoder: Encoder[ZoneSystem] = deriveEncoder[ZoneSystem]
+
+  implicit val NestDecoder: Decoder[Nest] = deriveDecoder[Nest]
+  implicit val NestEncoder: Encoder[Nest] = deriveEncoder[Nest]
+
+
 
   private val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
     classOf[EleComplect],
