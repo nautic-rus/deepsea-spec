@@ -265,6 +265,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
     val retPath = ListBuffer.empty[String]
 
     val parts: EleComplectParts = retrieveAllPartsByComplectName(project, complectName)
+
     val docName: DocName = DocName(num = parts.complect.drawingId, name = parts.complect.drawingDescr, lastRev = rev, userDev = "Сидоров")
 
     if (docName.name.length < 60) {
@@ -393,7 +394,6 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
             })
           })
         }
-
 
         val supports: List[MountItem] = {
           val suppBuffer = ListBuffer.empty[MountItem]
@@ -537,7 +537,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
           buff += Item11Columns(true, "Прочее")
           buff ++= gr8.sortBy(s => s.A1)
         }
-        buff.distinct.toList
+        localDistinct(buff.toList)
       }
       val pdfPath = s"${path}/${docName.num}_${docName.name}_rev${docName.lastRev}.pdf"
       val trmPath = s"${path}/${docName.num}_${docName.name}_rev${docName.lastRev}.trm"
@@ -556,6 +556,21 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
     retPath.toList
   }
 
+
+  private def localDistinct(in:List[Item11Columns]):List[Item11Columns]={
+    val buff=ListBuffer.empty[Item11Columns]
+
+    in.foreach(p=>{
+      if(p.isHeader){
+        buff+=p
+      }else{
+        if(!buff.exists(s=>s.A1.equals(p.A1))){
+          buff+=p
+        }
+      }
+    })
+    buff.toList
+  }
 
   def generatePdfToFileNoRev(project: String, complectName: String, path: String): List[String] = {
     generatePdfToFileWithRev(project, complectName, path, "tmp")

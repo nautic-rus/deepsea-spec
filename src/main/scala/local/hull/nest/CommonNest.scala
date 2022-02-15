@@ -3,6 +3,7 @@ package local.hull.nest
 object CommonNest {
 
   case class NestIdBlock(nestID: String, block: String)
+
   case class Nest(
                    ID:String="",
                    MATERIAL:String="",
