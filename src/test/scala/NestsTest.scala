@@ -11,7 +11,7 @@ class NestsTest  extends AnyFunSuite with Codecs with NestHelper{
 
   //val d2=genMateriaAlllListJson("N004")
 
-  //val d3=genMaterialNyBlockJson("N004",genBlocks("N004"))
+  val d3=genMaterialNyBlockJson("N004",genBlocks("N004"))
 
   //val d4=plateNestByMaterialsJson("N004",genMateriaAlllList("N004"))
 
