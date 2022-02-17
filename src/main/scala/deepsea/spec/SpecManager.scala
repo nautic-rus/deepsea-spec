@@ -6,9 +6,11 @@ import deepsea.spec.SpecManager._
 import local.hull.BStree
 import local.hull.nest.NestManager._
 import play.api.libs.json.{Json, OWrites}
-
+import io.circe._, io.circe.parser._
+import local.hull.nest.CommonNest.NestMaterial
 import java.util.concurrent.TimeUnit
 import scala.collection.mutable.ListBuffer
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 object SpecManager {
 
@@ -23,7 +25,7 @@ object SpecManager {
   case class GetHullNesting(project: String)
   case class GetHullNestingBlocks(project: String)
   case class GetHullNestingMaterials(project: String, blocks: String)
-  case class GetHullNestingByProjectAndBlocks(project: String, blocks: String)
+  case class GetHullNestingByMaterials(project: String, materials: String)
 
   case class PartDef(name: String, section: String, description: String)
   implicit val writesPartDef: OWrites[PartDef] = Json.writes[PartDef]
@@ -31,6 +33,7 @@ object SpecManager {
 
 class SpecManager extends Actor with BStree {
   implicit val timeout: Timeout = Timeout(30, TimeUnit.SECONDS)
+  implicit val nestMaterialDecoder: Decoder[NestMaterial] = deriveDecoder[NestMaterial]
 
   override def receive: Receive = {
 
@@ -53,8 +56,8 @@ class SpecManager extends Actor with BStree {
       sender() ! genBlocksJson(project)
     case GetHullNestingMaterials(project, blocks) =>
       sender() ! genMaterialNyBlockJson(project, Json.parse(blocks).asOpt[List[String]].getOrElse(List.empty[String]))
-    case GetHullNestingByProjectAndBlocks(project, blocks) =>
-      sender() ! plateNestByBlocksJson(project, Json.parse(blocks).asOpt[List[String]].getOrElse(List.empty[String]))
+    case GetHullNestingByMaterials(project, materials) =>
+      sender() ! plateNestByMaterialsAndDimsJson(project, decode[List[NestMaterial]](materials).getOrElse(List.empty[NestMaterial]))
     case _ => None
   }
 
