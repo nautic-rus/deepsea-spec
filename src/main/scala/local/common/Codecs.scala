@@ -20,7 +20,7 @@ import local.ele.trays.TrayManager.{ForanTray, Tray, TrayMountData, TrayMountRul
 import local.ele.eq.EleEqManager.EleEq
 import local.hull.BStree.{Block, BsTreeItem, HullPL, Room}
 import local.hull.PartManager.PrdPart
-import local.hull.nest.CommonNest.Nest
+import local.hull.nest.CommonNest.{Nest, NestMaterial}
 import local.pdf.ru.common.ReportCommon.Item11Columns
 import local.sql.MongoDB
 import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
@@ -88,7 +88,8 @@ trait Codecs {
   implicit val NestDecoder: Decoder[Nest] = deriveDecoder[Nest]
   implicit val NestEncoder: Encoder[Nest] = deriveEncoder[Nest]
 
-
+  implicit val NestMaterialDecoder: Decoder[NestMaterial] = deriveDecoder[NestMaterial]
+  implicit val NestMaterialEncoder: Encoder[NestMaterial] = deriveEncoder[NestMaterial]
 
   private val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
     classOf[EleComplect],
