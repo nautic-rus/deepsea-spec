@@ -194,14 +194,18 @@ trait NestHelper {
     val par: String = listToSqlString(blocks)
 
     val nestsBlocks: List[NestIdBlock] = getNestBlock(project)
+
     ConnectionManager.connectionByProject(project) match {
       case Some(connection) => {
         try {
           val buffer = ListBuffer.empty[Nest]
           val stmt: Statement = connection.createStatement()
-          val rs: ResultSet = stmt.executeQuery(plateNestByBlocks(par))
+          val sql=plateNestByBlocks(par)
+          val rs: ResultSet = stmt.executeQuery(sql)
           while (rs.next()) {
             val id = Option(rs.getString("ID")).getOrElse("")
+            //val ids=nestsBlocks.filter(s => s.nestID.equals(id)).map(_.block).mkString(";")
+
             buffer += Nest(
               id,
               Option(rs.getString("MATERIAL")).getOrElse(""),
