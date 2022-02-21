@@ -14,7 +14,7 @@ import deepsea.actors.ActorManager
 import deepsea.actors.ActorStartupManager.HTTPManagerStarted
 import deepsea.elec.ElecManager._
 import deepsea.hull.HullManager.{GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, SetHullEsp}
-import deepsea.spec.SpecManager.{GetHullBlocks, GetHullPartListFromBsTree, SetHullPartListFromBsTree}
+import deepsea.spec.SpecManager._
 import org.apache.log4j.{LogManager, Logger}
 import play.api.libs.json.{JsValue, Json}
 
@@ -93,6 +93,19 @@ class HTTPManager extends Actor {
       },
       (get & path("elecCables") & parameter("project") & parameter("bundle") & parameter("magistral")) { (project, bundle, magistral) =>
         askFor(ActorManager.elec, GetElecCables(project, bundle, magistral))
+      },
+
+      (get & path("hullNesting") & parameter("project")) { (project) =>
+        askFor(ActorManager.spec, GetHullNesting(project))
+      },
+      (get & path("hullNestingBlocks") & parameter("project")) { (project) =>
+        askFor(ActorManager.spec, GetHullNestingBlocks(project))
+      },
+      (get & path("hullNestingMaterials") & parameter("project") & parameter("blocks")) { (project, blocks) =>
+        askFor(ActorManager.spec, GetHullNestingMaterials(project, blocks))
+      },
+      (get & path("hullNestingByMaterials") & parameter("project") & parameter("materials")) { (project, materials) =>
+        askFor(ActorManager.spec, GetHullNestingByMaterials(project, materials))
       },
     )
   }
