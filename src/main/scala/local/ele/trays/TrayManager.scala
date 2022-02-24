@@ -255,6 +255,16 @@ object TrayManager extends TrayHelper with Codecs {
             } else {
               MountItem()
             }
+
+          case "76;" =>
+            val it = mountData.filter(s => (s.typeId == 76) && s.parD2 == clickTrayMontData.parD2)
+            if (it.nonEmpty) {
+              val part: TrayMountData = it.head
+              buffMounts += MountItem(findWorkshopMaterial(part.trmCode, materials), TrayMountData(part.label, part.trmCode).label, item.kei, calculateQty(item.count, item.lenghtFactor, trayLenght), item.isNeedLabel)
+            } else {
+              MountItem()
+            }
+
           case _ => None
         }
       }
@@ -288,6 +298,13 @@ object TrayManager extends TrayHelper with Codecs {
       lb += MountItem(findWorkshopMaterial(item1.trmCode, materials), TrayMountData(item1.label, item1.trmCode).label, "796", item57Count + addData, false)
 
     })
+
+    supports.filter(s => s.label.startsWith("76")).groupBy(d => d.label).foreach(item => {
+      val item76Count: Int = Math.ceil(item._2.map(_.qty).sum).toInt
+      val addData = if (item76Count < 4 && item76Count > 0) 2 - item76Count else 0
+      if (addData != 0 && item._2.nonEmpty) lb += MountItem(item._2.head.workShopMaterial, item._2.head.label, item._2.head.kei, addData, item._2.head.isNeedLabel)
+    })
+
     lb ++= supports
     lb.toList
   }
