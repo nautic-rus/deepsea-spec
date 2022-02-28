@@ -25,7 +25,7 @@ object EleUtils {
     s"((select name from zone where seqid=PS.zone)||'-'||PS.line||'-0'||PS.SQID )= DN.name\n  ) \n          AND\n          DN.MODEL_OID <> PS.OID\n        ) where DNOID = oid\n)\nwhere oid in (\nselect \n  DN.OID\n  " +
     s"from  BS_DESIGN_NODE DN ,PIPELINE_SEGMENT PS\n  where\n  PS.zone =(select seqid from zone where userid in('${zoneName}'))  and \n  PS.system=(select seqid from SYSTEMS where name in('${systemName}') ) AND\n    " +
     s"(\n  (PS.line||'-'||PS.line||'-'||PS.SQID) = DN.name OR \n  ((select name from zone where seqid=PS.zone)||'-'||PS.line||'-'||PS.SQID )= DN.name OR\n   (PS.line||'-'||PS.line||'-0'||PS.SQID) = DN.name OR \n  " +
-    s"((select name from zone where seqid=PS.zone)||'-'||PS.line||'-0'||PS.SQID )= DN.name\n  ) \n  AND\n  DN.MODEL_OID <> PS.OID\n)"
+    s"((select name from zone where seqid=PS.zone)||'-'||PS.line||'-0'||PS.SQID )= DN.name\n  ) \n  AND\n  DN.MODEL_OID <> PS.OID AND bs_design_node_adn_from_oid(DN.OID) LIKE '%${systemName}%')"
 
 
   def fixFBS(project: String, complectName: String): Unit = {
@@ -41,7 +41,7 @@ object EleUtils {
                 complect.zoneNames.foreach(zone => {
                   val sql = sqlFixFbs(zone, system)
                   val f: Int =stmt.executeUpdate(sql)
-                  println(zone+" "+system+" "+f.toString)
+                  //println(zone+" "+system+" "+f.toString)
                   connection.commit()
                 })
               })
