@@ -92,6 +92,9 @@ trait CableListHelper {
               }
             }
           }
+          rs.close()
+          stmt.close()
+          connection.close()
           buff.toList
         }
         catch {
@@ -158,6 +161,9 @@ trait CableListHelper {
             )
             buff += cable
           }
+          rs.close()
+          stmt.close()
+          connection.close()
           buff.toList
         }
         catch {
@@ -224,6 +230,9 @@ trait CableListHelper {
             )
             buff += cable
           }
+          rs.close()
+          stmt.close()
+          connection.close()
           buff.toList
         }
         catch {
