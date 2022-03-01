@@ -302,6 +302,19 @@ object TrayManager extends TrayHelper with Codecs {
       if (addData != 0 && item._2.nonEmpty) lb += MountItem(item._2.head.workShopMaterial, item._2.head.label, item._2.head.kei, addData, item._2.head.isNeedLabel)
     })
 
+
+    supports.filter(s => s.label.startsWith("41")).groupBy(d => d.label).foreach(item => {
+      val item41Count: Int = Math.ceil(item._2.map(_.qty).sum).toInt
+      val item3 = mountData.find(s => s.label.equals("4208")).getOrElse(TrayMountData(label = "4208"))
+      lb += MountItem(findWorkshopMaterial(item3.trmCode, materials), TrayMountData(item3.label, item3.trmCode).label, "796", item41Count*2, false)
+      val item2 = mountData.find(s => s.label.equals("4209")).getOrElse(TrayMountData(label = "4209"))
+      lb += MountItem(findWorkshopMaterial(item2.trmCode, materials), TrayMountData(item2.label, item2.trmCode).label, "796", item41Count*4 , false)
+      val item1 = mountData.find(s => s.label.equals("4210")).getOrElse(TrayMountData(label = "4210"))
+      lb += MountItem(findWorkshopMaterial(item1.trmCode, materials), TrayMountData(item1.label, item1.trmCode).label, "796", item41Count*2 , false)
+    })
+
+
+
     lb ++= supports
     lb.toList
   }

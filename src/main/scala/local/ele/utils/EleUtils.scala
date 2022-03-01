@@ -42,7 +42,10 @@ object EleUtils {
                   val sql = sqlFixFbs(zone, system)
                   val f: Int =stmt.executeUpdate(sql)
                   //println(zone+" "+system+" "+f.toString)
+
                   connection.commit()
+                  stmt.close()
+                  connection.close()
                 })
               })
             }
