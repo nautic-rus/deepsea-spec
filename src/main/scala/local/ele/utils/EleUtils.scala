@@ -29,7 +29,11 @@ object EleUtils {
     s"((select name from zone where seqid=PS.zone)||'-'||PS.line||'-0'||PS.SQID )= DN.name\n  ) \n  AND\n  DN.MODEL_OID <> PS.OID AND bs_design_node_adn_from_oid(DN.OID) LIKE '%${systemName}%')"
 
 
-  private def sqlFixFbs2(zoneName: String, systemName: String): String=s"select \n  OID,\n  PSMODEL\nfrom\n(\n\nselect\n  DN.OID,\n  DN.TYPE,\n  DN.MODEL_OID,\n  DN.NAME,\n  DN.DESCRIPTION,\n  DN.PARENT_NODE,\n  bs_design_node_adn_from_oid(DN.OID) as adn,\n  T.OID as PSMODEL\nfrom BS_DESIGN_NODE DN,  \n(select\nPS.TYPE,\nPS.ZONE,\nz.name as ZoneName,\nPS.SYSTEM,\nS.name as SYSTEMName,\nPS.LINE,\nPS.SQID,\nPS.BDAPFIT,\nPS.BDATRI,\nPS.OID,\nPS.UUID,\nPS.LINK_OID,\n(PS.line||'-'||PS.line||'-'||PS.SQID) as A1,\n(Z.name||'-'||PS.line||'-'||PS.SQID ) as A2,\n(PS.line||'-'||PS.line||'-0'||PS.SQID) as A3,\n(z.name||'-'||PS.line||'-0'||PS.SQID ) as A4 \nfrom PIPELINE_SEGMENT  PS, zone Z,SYSTEMS S\nwhere \nPS.zone =Z.seqid AND\nPS.SYSTEM=S.seqid AND\nZ.userid in('${zoneName}') AND\nS.name in('${systemName}') \n) T\nwhere \n(DN.NAME=T.A1 OR DN.NAME=T.A2 OR DN.NAME=T.A3 OR DN.NAME=T.A4)\n)\nwhere \nADN LIKE '%${systemName}%CABLE DUCT LINES%${zoneName}%'\nAND MODEL_OID <> PSMODEL"
+  private def sqlFixFbs2(zoneName: String, systemName: String): String=s"select \n  OID,\n  PSMODEL\nfrom\n(\n\nselect\n  DN.OID,\n  DN.TYPE,\n  DN.MODEL_OID,\n  DN.NAME,\n  DN.DESCRIPTION,\n  " +
+    s"DN.PARENT_NODE,\n  bs_design_node_adn_from_oid(DN.OID) as adn,\n  T.OID as PSMODEL\nfrom BS_DESIGN_NODE DN,  \n(select\nPS.TYPE,\nPS.ZONE,\nz.name as ZoneName,\nPS.SYSTEM,\nS.name as SYSTEMName,\nPS.LINE,\n " +
+    s"PS.SQID,\nPS.BDAPFIT,\nPS.BDATRI,\nPS.OID,\nPS.UUID,\nPS.LINK_OID,\n(PS.line||'-'||PS.line||'-'||PS.SQID) as A1,\n(Z.name||'-'||PS.line||'-'||PS.SQID ) as A2,\n(PS.line||'-'||PS.line||'-0'||PS.SQID) as A3,\n " +
+    s"(z.name||'-'||PS.line||'-0'||PS.SQID ) as A4 \nfrom PIPELINE_SEGMENT  PS, zone Z,SYSTEMS S\nwhere \nPS.zone =Z.seqid AND\nPS.SYSTEM=S.seqid AND\nZ.userid in('${zoneName}') AND\nS.name in('${systemName}') \n) T\nwhere " +
+    s"\n(DN.NAME=T.A1 OR DN.NAME=T.A2 OR DN.NAME=T.A3 OR DN.NAME=T.A4)\n)\nwhere \nADN LIKE '%${systemName}%CABLE DUCT LINES%'\nAND MODEL_OID <> PSMODEL"
 
   private def sqlUpdFixBs(oid:String, newModel:String):String=s"update BS_DESIGN_NODE set MODEL_OID=${newModel} where OID=${oid}"
 
@@ -59,10 +63,10 @@ object EleUtils {
                     stmt.executeUpdate(sqlupdt)
                   })
                   connection.commit()
-                  stmt.close()
-                  connection.close()
                 })
               })
+              stmt.close()
+              connection.close()
             }
             case None => connection.close()
           }
