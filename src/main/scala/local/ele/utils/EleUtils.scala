@@ -3,7 +3,8 @@ package local.ele.utils
 import local.ele.CommonEle.retrieveEleComplects
 import local.sql.ConnectionManager
 
-import java.sql.Statement
+import java.sql.{ResultSet, Statement}
+import scala.collection.mutable.ListBuffer
 
 object EleUtils {
 
@@ -28,8 +29,55 @@ object EleUtils {
     s"((select name from zone where seqid=PS.zone)||'-'||PS.line||'-0'||PS.SQID )= DN.name\n  ) \n  AND\n  DN.MODEL_OID <> PS.OID AND bs_design_node_adn_from_oid(DN.OID) LIKE '%${systemName}%')"
 
 
-  def fixFBS(project: String, complectName: String): Unit = {
+  private def sqlFixFbs2(zoneName: String, systemName: String): String=s"select \n  OID,\n  PSMODEL\nfrom\n(\n\nselect\n  DN.OID,\n  DN.TYPE,\n  DN.MODEL_OID,\n  DN.NAME,\n  DN.DESCRIPTION,\n  DN.PARENT_NODE,\n  bs_design_node_adn_from_oid(DN.OID) as adn,\n  T.OID as PSMODEL\nfrom BS_DESIGN_NODE DN,  \n(select\nPS.TYPE,\nPS.ZONE,\nz.name as ZoneName,\nPS.SYSTEM,\nS.name as SYSTEMName,\nPS.LINE,\nPS.SQID,\nPS.BDAPFIT,\nPS.BDATRI,\nPS.OID,\nPS.UUID,\nPS.LINK_OID,\n(PS.line||'-'||PS.line||'-'||PS.SQID) as A1,\n(Z.name||'-'||PS.line||'-'||PS.SQID ) as A2,\n(PS.line||'-'||PS.line||'-0'||PS.SQID) as A3,\n(z.name||'-'||PS.line||'-0'||PS.SQID ) as A4 \nfrom PIPELINE_SEGMENT  PS, zone Z,SYSTEMS S\nwhere \nPS.zone =Z.seqid AND\nPS.SYSTEM=S.seqid AND\nZ.userid in('${zoneName}') AND\nS.name in('${systemName}') \n) T\nwhere \n(DN.NAME=T.A1 OR DN.NAME=T.A2 OR DN.NAME=T.A3 OR DN.NAME=T.A4)\n)\nwhere \nADN LIKE '%${systemName}%CABLE DUCT LINES%${zoneName}%'\nAND MODEL_OID <> PSMODEL"
 
+  private def sqlUpdFixBs(oid:String, newModel:String):String=s"update BS_DESIGN_NODE set MODEL_OID=${newModel} where OID=${oid}"
+
+  def fixFBS(project: String, complectName: String): Unit = {
+    case class ToUpdt(oid:Int, newModelOid:Int)
+    ConnectionManager.connectionByProject(project) match {
+      case Some(connection) => {
+        try {
+          retrieveEleComplects(project).find(s => s.drawingId.equals(complectName)) match {
+            case Some(complect) => {
+              connection.setAutoCommit(false)
+              val stmt: Statement = connection.createStatement()
+              complect.systemNames.foreach(system => {
+                complect.zoneNames.foreach(zone => {
+                  val sql = sqlFixFbs2(zone, system)
+                  val rs: ResultSet = stmt.executeQuery(sql)
+                  val buffToUpdt=ListBuffer.empty[ToUpdt]
+                  while (rs.next()) {
+                    buffToUpdt += ToUpdt(
+                      Option(rs.getInt("OID")).getOrElse(0),
+                      Option(rs.getInt("PSMODEL")).getOrElse(0),
+                    )
+                  }
+                  rs.close()
+                  buffToUpdt.foreach(u=>{
+                    val sqlupdt=sqlUpdFixBs(u.oid.toString,u.newModelOid.toString)
+                    stmt.executeUpdate(sqlupdt)
+                  })
+                  connection.commit()
+                  stmt.close()
+                  connection.close()
+                })
+              })
+            }
+            case None => connection.close()
+          }
+          connection.close()
+        }
+        catch {
+          case x: Throwable => connection.close()
+        }
+
+      }
+      case None => None
+    }
+  }
+
+  def fixFBSOld(project: String, complectName: String): Unit = {
     ConnectionManager.connectionByProject(project) match {
       case Some(connection) => {
         try {
@@ -64,5 +112,8 @@ object EleUtils {
 
 
   }
+
+
+
 
 }
