@@ -124,7 +124,6 @@ object CNCManager extends ForanFileUtil {
           buff+=(stopCut)
         }
 
-
         case _ => None
       }
 
