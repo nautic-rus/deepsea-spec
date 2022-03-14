@@ -1,11 +1,14 @@
 package local.pdf.ru.ele
 
+import com.itextpdf.io.image.{ImageData, ImageDataFactory}
 import com.itextpdf.kernel.geom.PageSize
 import com.itextpdf.kernel.pdf.action.PdfAction
+import com.itextpdf.kernel.pdf.canvas.PdfCanvas
+import com.itextpdf.kernel.pdf.extgstate.PdfExtGState
 import com.itextpdf.kernel.pdf.navigation.PdfExplicitDestination
 import com.itextpdf.kernel.pdf.{PdfDocument, PdfOutline, PdfReader, PdfWriter, WriterProperties}
 import com.itextpdf.layout.Document
-import com.itextpdf.layout.element.{Cell, Paragraph, Table, Text}
+import com.itextpdf.layout.element.{Cell, Image, Paragraph, Table, Text}
 import com.itextpdf.layout.properties.{HorizontalAlignment, TextAlignment, VerticalAlignment}
 import local.common.Codecs
 import local.common.DBRequests.{MountItem, findChess}
@@ -636,6 +639,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
         pa.setFontSize(mmToPt(4.5))
         pa.setFont(gostFont)
         doc.showTextAligned(pa, mmToPt(411), mmToPt(24), i, TextAlignment.RIGHT, VerticalAlignment.TOP, 0)
+        insertSign(doc)
       } else {
         val pa = new Paragraph(i.toString)
         pa.setFontSize(mmToPt(4.5))
@@ -645,6 +649,25 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
     })
 
     doc.close()
+  }
+
+  def insertSign(doc: Document): Unit ={
+    val imageData1: ImageData = ImageDataFactory.create("src/main/resources/pict/signs/1.png")
+    val imageData2: ImageData = ImageDataFactory.create("src/main/resources/pict/signs/2.png")
+    val imageData3: ImageData = ImageDataFactory.create("src/main/resources/pict/signs/3.png")
+    val imageData4: ImageData = ImageDataFactory.create("src/main/resources/pict/signs/4.png")
+    //val imageData5: ImageData = ImageDataFactory.create("src/main/resources/pict/signs/5.png")
+    val i1=new Image(imageData3).scale(.7f, .35f).setFixedPosition(1,mmToPt(269), mmToPt(31))
+    val i2=new Image(imageData2).scale(.5f, .5f).setFixedPosition(1,mmToPt(269), mmToPt(26))
+    val i3=new Image(imageData2).scale(.5f, .5f).setFixedPosition(1,mmToPt(269), mmToPt(20))
+    val i4=new Image(imageData4).scale(.5f, .5f).setFixedPosition(1,mmToPt(269), mmToPt(10))
+    val i5=new Image(imageData4).scale(.5f, .5f).setFixedPosition(1,mmToPt(269), mmToPt(5))
+    doc.add(i1)
+    doc.add(i2)
+    doc.add(i3)
+    doc.add(i4)
+    doc.add(i5)
+
   }
 
   def genErr(path: String): Unit = {
