@@ -378,7 +378,7 @@ class HullManager extends Actor {
           res += new HullPart(
             rs.getInt("PARTOID"),
             rs.getString("PARTNAME"),
-            rs.getInt("PART_TYPE"),
+            0,
             rs.getString("DESCRIPTION") match {
               case value: String => value
               case _ => ""
@@ -388,7 +388,7 @@ class HullManager extends Actor {
             rs.getDouble("X_COG"),
             rs.getDouble("Y_COG"),
             rs.getDouble("Z_COG"),
-            rs.getString("BLOCK_DESCRIPTION"),
+            "",
             rs.getInt("KSEOID")
           )
         }
