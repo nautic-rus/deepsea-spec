@@ -2,6 +2,7 @@
 import local.common.DBRequests.findChess
 import local.domain.CommonTypes
 import local.hull.BStree
+import local.hull.PartManager.ForanPartsByDrawingNum
 import local.pdf.en.prd.PrdPartsReportEN.genHullPartListEnPDF
 import org.apache.log4j.{Level, Logger}
 import org.scalatest.funsuite.AnyFunSuite
@@ -18,8 +19,8 @@ class TestCreateSP extends AnyFunSuite with BStree {
  //val pl2: String =getHullPartList("NR004-150-101")
 
   //val testChess: List[CommonTypes.DrawingChess] =findChess("docNumber","2")
-
-  genHullPartListEnPDF("N004","210101-102-0104", "210101-102-0104","0","c:\\14\\BB.pdf")
+  ForanPartsByDrawingNum("N002", "200101-222-0105")
+  //genHullPartListEnPDF("N002","210101-102-0104", "210101-102-0104","0","c:\\14\\BB.pdf")
   val jj = 0
 
 
