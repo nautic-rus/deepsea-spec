@@ -454,7 +454,6 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
                 val label = item.label
                 val kei = item.kei
                 //val qty: Double = Math.ceil(group._2.map(_.qty).sum)
-
                 val qty: Double = {
                   val ret: Double = Math.ceil(group._2.map(_.qty).sum)
                   /*             if (label.length >= 2) {
