@@ -166,7 +166,7 @@ class TestElePdf extends AnyFunSuite with Codecs {
 
  // val paths2: List[String] =generatePdfToFileWithRev("P701","170701-884-5008","C:/14","2")
 
-  val paths3: List[String] =generatePdfToFileNoRev("P701","170701-884-5008","C:/14")
+  val paths3: List[String] =generatePdfToFileNoRev("P701","170701-884-3005","C:/14")
 
   //val hh=generateElecPartsTojson("P701","170701-884-6008")
 
