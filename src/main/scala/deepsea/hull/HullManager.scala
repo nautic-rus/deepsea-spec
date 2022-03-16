@@ -8,7 +8,7 @@ import deepsea.App
 import deepsea.actors.ActorManager
 import deepsea.database.DatabaseManager.GetOracleConnection
 import deepsea.files.FileManager.GenerateUrl
-import deepsea.hull.HullManager.{GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, HullEsp, HullPartPlateDef, HullPartProfileDef, SetHullEsp}
+import deepsea.hull.HullManager.{GetHullBillPlates, GetHullBillProfiles, GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, HullEsp, HullPartPlateDef, HullPartProfileDef, SetHullEsp}
 import deepsea.hull.classes.HullPart
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
@@ -29,6 +29,7 @@ import io.circe.syntax._
 import io.circe.generic.semiauto._
 import local.hull.BStree.BsTreeItem
 import local.hull.PartManager.{ForanPartsByDrawingNum, PrdPart, genForanPartLabelByDrawingNumAndPartNameJSON, genForanPartsByDrawingNum, genForanPartsByDrawingNumJSON}
+import local.hull.bill.BillManager.{genAnalyticPlateDataJson, genAnalyticProfileDataJson}
 import local.pdf.en.common.ReportCommonEN.{DocNameEN, Item11ColumnsEN}
 import local.pdf.en.prd.PrdPartsReportEN.genHullPartListEnPDF
 import local.sql.MongoDB.mongoClient
@@ -67,11 +68,12 @@ object HullManager {
   implicit val HullEspDecoder: Decoder[HullEsp] = deriveDecoder[HullEsp]
   implicit val HullEspEncoder: Encoder[HullEsp] = deriveEncoder[HullEsp]
 
-
+  case class GetHullBillPlates(project: String)
+  case class GetHullBillProfiles(project: String)
 }
 
 class HullManager extends Actor {
-  implicit val timeout: Timeout = Timeout(30, TimeUnit.SECONDS)
+  implicit val timeout: Timeout = Timeout(300, TimeUnit.SECONDS)
 
   private val espCollectionName = "hullEsp"
 
@@ -275,8 +277,10 @@ class HullManager extends Actor {
         case url: String => sender() ! url.asJson.noSpaces
         case _ => sender() ! "error".asJson.noSpaces
       }
-
-
+    case GetHullBillPlates(project) =>
+      sender() ! genAnalyticPlateDataJson(project)
+    case GetHullBillProfiles(project) =>
+      sender() ! genAnalyticProfileDataJson(project)
   }
 
   def getHullPartsByDocNumber(project: String, docNumber: String): ListBuffer[HullPart] = {
