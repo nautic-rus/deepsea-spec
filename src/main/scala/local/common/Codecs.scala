@@ -20,6 +20,7 @@ import local.ele.trays.TrayManager.{ForanTray, Tray, TrayMountData, TrayMountRul
 import local.ele.eq.EleEqManager.EleEq
 import local.hull.BStree.{Block, BsTreeItem, HullPL, Room}
 import local.hull.PartManager.PrdPart
+import local.hull.bill.BillManager.{PlateAnalitic, ProfileAnalitic}
 import local.hull.nest.CommonNest.{Nest, NestMaterial}
 import local.pdf.ru.common.ReportCommon.Item11Columns
 import local.sql.MongoDB
@@ -90,6 +91,13 @@ trait Codecs {
 
   implicit val NestMaterialDecoder: Decoder[NestMaterial] = deriveDecoder[NestMaterial]
   implicit val NestMaterialEncoder: Encoder[NestMaterial] = deriveEncoder[NestMaterial]
+
+  implicit val ProfileAnaliticDecoder: Decoder[ProfileAnalitic] = deriveDecoder[ProfileAnalitic]
+  implicit val ProfileAnaliticEncoder: Encoder[ProfileAnalitic] = deriveEncoder[ProfileAnalitic]
+
+  implicit val PlateAnaliticDecoder: Decoder[PlateAnalitic] = deriveDecoder[PlateAnalitic]
+  implicit val PlateAnaliticEncoder: Encoder[PlateAnalitic] = deriveEncoder[PlateAnalitic]
+
 
   private val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
     classOf[EleComplect],
