@@ -127,7 +127,7 @@ object BillManager extends BillHelper with Codecs {
 
         val KPL = nest.head.KPL
         val mat = realPrat.MAT
-        val scantling = genScantling(realPrat.THICKNESS, nest.head.L / 1000, nests.head.W / 1000)
+        val scantling = genScantling(realPrat.THICKNESS, nest.head.L / 1000, nest.head.W / 1000)
         val count = nest.map(_.NGP).sum
         val scrap = nest.head.TOTAL_KPL_SCRAP
         val nestedParts = nest.map(_.NP).sum
