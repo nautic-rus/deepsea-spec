@@ -125,11 +125,11 @@ object BillManager extends BillHelper with Codecs {
       if (nests.exists(p => p.KQ.equals(realPrat.MAT) && p.T == realPrat.THICKNESS)) {
         val nest = nests.filter(p => p.KQ.equals(realPrat.MAT) && p.T == realPrat.THICKNESS)
 
-        val KPL = nests.head.KPL
+        val KPL = nest.head.KPL
         val mat = realPrat.MAT
         val scantling = genScantling(realPrat.THICKNESS, nest.head.L / 1000, nests.head.W / 1000)
-        val count = nests.head.NGP
-        val scrap = nests.head.TOTAL_KPL_SCRAP
+        val count = nest.map(_.NGP).sum
+        val scrap = nest.head.TOTAL_KPL_SCRAP
         val nestedParts = nest.map(_.NP).sum
         val realPartsCount = realPrat.COUNT
         val realWeight = realPrat.WEIGHT
