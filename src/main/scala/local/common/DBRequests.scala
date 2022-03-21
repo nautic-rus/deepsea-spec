@@ -22,6 +22,9 @@ import io.circe.parser._
 import io.circe.generic.auto._
 import io.circe.syntax._
 import io.circe.generic.semiauto._
+import local.hull.nest.CommonNest.NestLock
+
+import java.util.Date
 
 
 object DBRequests extends Codecs {
@@ -32,13 +35,15 @@ object DBRequests extends Codecs {
 
   private def collectionDrawingChess(): MongoCollection[DrawingChess] = mongoDatabase().getCollection("drawingChess")
 
-/*
-  private val duration: FiniteDuration = Duration(2, SECONDS)
+  private def collectionNestsLocks(): MongoCollection[NestLock] = mongoDatabase().getCollection("prdNestLocks")
 
-  private val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
-    classOf[WorkShopMaterial],
-  ), DEFAULT_CODEC_REGISTRY)
-*/
+  /*
+    private val duration: FiniteDuration = Duration(2, SECONDS)
+
+    private val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
+      classOf[WorkShopMaterial],
+    ), DEFAULT_CODEC_REGISTRY)
+  */
 
 
   def retrieveZoneAndSystems(project: String): List[ZoneSystem] = {
@@ -86,14 +91,26 @@ object DBRequests extends Codecs {
     allelems.value.get.getOrElse(Seq.empty[WorkShopMaterial]).toList
   }
 
+  def retrieveNestsLocksByProject(project: String): List[NestLock] = {
+    val allelems = collectionNestsLocks().find(equal("project", project)).toFuture()
+    Await.result(allelems, Duration(100, SECONDS))
+    allelems.value.get.getOrElse(Seq.empty[NestLock]).toList
+  }
+
+  def insertNestsLock(project: String, nestId: String, user: String): Unit = {
+    val allelems = collectionNestsLocks().insertOne(NestLock(project, nestId, new Date().getTime, user)).toFuture()
+    Await.result(allelems, Duration(100, SECONDS))
+  }
+
+
   def findWorkshopMaterial(trm: String, buff: List[WorkShopMaterial]): WorkShopMaterial = buff.find(s => s.trmCode.equals(trm)).getOrElse(new WorkShopMaterial())
 
 
-  def findChess(docNum: String, rev:String): List[DrawingChess] = {
+  def findChess(docNum: String, rev: String): List[DrawingChess] = {
     val allelems = collectionDrawingChess().find(
       and(
-        equal("docNumber",docNum),
-        equal("revision",rev)
+        equal("docNumber", docNum),
+        equal("revision", rev)
       )
     ).toFuture()
 
