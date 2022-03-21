@@ -21,7 +21,7 @@ import local.ele.eq.EleEqManager.EleEq
 import local.hull.BStree.{Block, BsTreeItem, HullPL, Room}
 import local.hull.PartManager.PrdPart
 import local.hull.bill.BillManager.{PlateAnalitic, ProfileAnalitic}
-import local.hull.nest.CommonNest.{Nest, NestMaterial}
+import local.hull.nest.CommonNest.{Nest, NestLock, NestMaterial}
 import local.pdf.ru.common.ReportCommon.Item11Columns
 import local.sql.MongoDB
 import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
@@ -98,6 +98,9 @@ trait Codecs {
   implicit val PlateAnaliticDecoder: Decoder[PlateAnalitic] = deriveDecoder[PlateAnalitic]
   implicit val PlateAnaliticEncoder: Encoder[PlateAnalitic] = deriveEncoder[PlateAnalitic]
 
+  implicit val NestLockDecoder: Decoder[NestLock] = deriveDecoder[NestLock]
+  implicit val NestLockEncoder: Encoder[NestLock] = deriveEncoder[NestLock]
+
 
   private val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
     classOf[EleComplect],
@@ -113,6 +116,7 @@ trait Codecs {
     classOf[CompressionBlock],
     classOf[AnkerPlate],
     classOf[CableBoxModule],
+    classOf[NestLock],
   ), DEFAULT_CODEC_REGISTRY)
 
   def mongoDatabase(): MongoDatabase = MongoDB.mongoClient().getDatabase("3degdatabase").withCodecRegistry(codecRegistry)
