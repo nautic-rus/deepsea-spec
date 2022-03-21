@@ -57,14 +57,19 @@ trait NestHelper {
 
   def allPlateNest(project: String): List[Nest] = {
     val nestsBlocks: List[NestIdBlock] = getNestBlock(project)
+
+    val locks: List[NestLock] = retrieveNestsLocksByProject(project)
+
     ConnectionManager.connectionByProject(project) match {
       case Some(connection) => {
         try {
           val buffer = ListBuffer.empty[Nest]
           val stmt: Statement = connection.createStatement()
           val rs: ResultSet = stmt.executeQuery(allPlateNestSQL())
+
           while (rs.next()) {
             val id = Option(rs.getString("ID")).getOrElse("")
+            val li: (NestLock, Boolean) = calculateLockInfo(id, locks)
             buffer += Nest(
               id,
               Option(rs.getString("MATERIAL")).getOrElse(""),
@@ -75,7 +80,9 @@ trait NestHelper {
               Option(rs.getDouble("PARTS_WEIGHT")).getOrElse(0),
               Option(rs.getDouble("DENSITY")).getOrElse(0),
               Option(rs.getDouble("USAGE")).getOrElse(0),
-              nestsBlocks.filter(s => s.nestID.equals(id)).map(_.block).mkString(";")
+              nestsBlocks.filter(s => s.nestID.equals(id)).map(_.block).mkString(";"),
+              li._2,
+              li._1
             )
           }
           rs.close()
@@ -99,6 +106,8 @@ trait NestHelper {
       materials.foreach(m => b += m.MATERIAL)
       listToSqlString(b.toList)
     }
+    val locks: List[NestLock] = retrieveNestsLocksByProject(project)
+
     val nestsBlocks: List[NestIdBlock] = getNestBlock(project)
     ConnectionManager.connectionByProject(project) match {
       case Some(connection) => {
@@ -108,6 +117,7 @@ trait NestHelper {
           val rs: ResultSet = stmt.executeQuery(plateNestByMaterial(mats))
           while (rs.next()) {
             val id = Option(rs.getString("ID")).getOrElse("")
+            val li: (NestLock, Boolean) = calculateLockInfo(id, locks)
             buffer += Nest(
               id,
               Option(rs.getString("MATERIAL")).getOrElse(""),
@@ -118,7 +128,9 @@ trait NestHelper {
               Option(rs.getDouble("PARTS_WEIGHT")).getOrElse(0),
               Option(rs.getDouble("DENSITY")).getOrElse(0),
               Option(rs.getDouble("USAGE")).getOrElse(0),
-              nestsBlocks.filter(s => s.nestID.equals(id)).map(_.block).mkString(";")
+              nestsBlocks.filter(s => s.nestID.equals(id)).map(_.block).mkString(";"),
+              li._2,
+              li._1
             )
           }
           rs.close()
@@ -153,6 +165,7 @@ trait NestHelper {
       buf.toList
     })
     val nestsBlocks: List[NestIdBlock] = getNestBlock(project)
+    val locks: List[NestLock] = retrieveNestsLocksByProject(project)
     ConnectionManager.connectionByProject(project) match {
       case Some(connection) => {
         try {
@@ -162,6 +175,7 @@ trait NestHelper {
           val rs: ResultSet = stmt.executeQuery(sql)
           while (rs.next()) {
             val id = Option(rs.getString("ID")).getOrElse("")
+            val li: (NestLock, Boolean) = calculateLockInfo(id, locks)
             buffer += Nest(
               id,
               Option(rs.getString("MATERIAL")).getOrElse(""),
@@ -172,7 +186,9 @@ trait NestHelper {
               Option(rs.getDouble("PARTS_WEIGHT")).getOrElse(0),
               Option(rs.getDouble("DENSITY")).getOrElse(0),
               Option(rs.getDouble("USAGE")).getOrElse(0),
-              nestsBlocks.filter(s => s.nestID.equals(id)).map(_.block).mkString(";")
+              nestsBlocks.filter(s => s.nestID.equals(id)).map(_.block).mkString(";"),
+              li._2,
+              li._1
             )
           }
           rs.close()
