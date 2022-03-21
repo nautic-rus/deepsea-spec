@@ -16,13 +16,16 @@ class NestsTest  extends AnyFunSuite with Codecs with NestHelper{
 
   //val d4=plateNestByMaterialsJson("N004",genMateriaAlllList("N004"))
 
-  //val d4=plateNestByMaterialsAndDimsJson("N004",genMateriaAlllList("N004"))
+  val ggs=genMateriaAlllList("N004").filter(s=>s.NEST_LENGTH==2950)
 
-  val blocks: List[String] =genBlocks("N004")
+  val d4=plateNestByMaterialsAndDims("N004",ggs)
+  val jdj=0
 
-  insertLock("N004","MU10305","DEMO")
+ // val blocks: List[String] =genBlocks("N004")
 
-  val jjs=plateNestByBlocksJson("N004",blocks.filter(s=>s.equals("U103")))
+  //insertLock("N004","MU10305","DEMO")
+
+  //val jjs=plateNestByBlocksJson("N004",blocks.filter(s=>s.equals("U103")))
 
   val jj=0
 }
