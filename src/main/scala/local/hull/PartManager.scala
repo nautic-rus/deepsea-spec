@@ -5,13 +5,13 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 import local.common.Codecs
 
-object PartManager extends PartHelper with Codecs{
+object PartManager extends PartHelper with Codecs {
 
   case class PrdPart(
                       PART_OID: Int = 0,
-                      EXPL_OID:Int=0,
+                      EXPL_OID: Int = 0,
                       PART_CODE: String = "",
-                      SYMMETRY:String="",
+                      SYMMETRY: String = "",
                       PART_TYPE: Int = 0,
                       BLOCK_CODE: String = "",
                       DESCRIPTION: String = "",
@@ -28,11 +28,12 @@ object PartManager extends PartHelper with Codecs{
                       NEST_LENGTH: Double = 0.0,
                       NEST_WIDTH: Double = 0.0,
                       NUM_EQ_NEST: Int = 0,
-                      KSE_KPL: Int = 0,
-                      STOCKCODE: String = ""
+                      WH: Double = 0.0,
+                      WT: Double = 0.0,
+                      FH: Double = 0.0,
+                      FT: Double = 0.0,
+                      SCTION:String=""
                     )
-
-
 
 
   def genForanPartLabelByDrawingNumAndPartNameJSON(project: String, drNum: String, partName: String): String = {
@@ -42,6 +43,6 @@ object PartManager extends PartHelper with Codecs{
   def genForanPartsByDrawingNum(project: String, drNum: String): List[PrdPart] = ForanPartsByDrawingNum(project, drNum)
 
   def genForanPartsByDrawingNumJSON(project: String, drNum: String): String = {
-    ForanPartsByDrawingNum(project, drNum).sortBy(s=>s.PART_CODE).asJson.noSpaces
+    ForanPartsByDrawingNum(project, drNum).sortBy(s => s.PART_CODE).asJson.noSpaces
   }
 }

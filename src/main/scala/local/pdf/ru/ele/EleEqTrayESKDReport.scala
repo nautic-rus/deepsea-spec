@@ -230,11 +230,14 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
       }
 
       val gr4 = supportsRows.filter(p => p.A1.startsWith("4"))
+
+
       if (gr4.nonEmpty) {
         buff += Item11Columns(true, "Крепление и заземление кабелей")
         buff ++= gr4.sortBy(s => s.A1)
       }
       val gr5 = supportsRows.filter(p => p.A1.startsWith("5") || p.A1.startsWith("8"))
+      val jj=0
       if (gr5.nonEmpty) {
         buff += Item11Columns(true, "Доизоляционные детали крепления")
         buff ++= gr5.sortBy(s => s.A1)
@@ -407,6 +410,9 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
           postProcessSupports(suppBuffer.toList, project)
         }
 
+        val j=supports.filter(s=>s.label.startsWith("8"))
+        val hh=0
+
         val supportsRows: List[Item11Columns] = {
           val totAllSupports = {
             val buffer = ListBuffer.empty[Item11Columns]
@@ -520,6 +526,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
           buff ++= gr4.sortBy(s => s.A1)
         }
         val gr5 = supportsRows.filter(p => p.A1.startsWith("5") || p.A1.startsWith("8"))
+
         if (gr5.nonEmpty) {
           buff += Item11Columns(true, "Доизоляционные детали крепления")
           buff ++= gr5.sortBy(s => s.A1)
