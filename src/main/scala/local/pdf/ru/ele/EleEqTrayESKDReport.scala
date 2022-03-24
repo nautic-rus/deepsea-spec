@@ -410,9 +410,6 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
           postProcessSupports(suppBuffer.toList, project)
         }
 
-        val j=supports.filter(s=>s.label.startsWith("8"))
-        val hh=0
-
         val supportsRows: List[Item11Columns] = {
           val totAllSupports = {
             val buffer = ListBuffer.empty[Item11Columns]
@@ -423,17 +420,6 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
                 val item = eqGroup._2.head
                 val qty: Double = {
                   val ret = Math.ceil(eqGroup._2.map(_.A7.toDoubleOption.getOrElse(0.0)).sum)
-                  /*           if (itemLabel.length >= 2) {
-                               itemLabel.substring(0, 2) match {
-                                 case "57" => if (ret < 4.0) 4.0 else ret
-                                 case "66" => if (ret < 4.0) 4.0 else ret
-                                 case "72" => if (ret < 2.0) 2.0 else ret
-                                 case _ => ret
-                               }
-                             }
-                             else {
-                               ret
-                             }*/
                   ret
                 }
 
@@ -454,25 +440,14 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
                 )
               })
             }
+
             supports.groupBy(s => s.workShopMaterial.trmCode).toList.foreach(group => {
               if (group._2.nonEmpty) {
-                val item = group._2.head
+                val item = group._2.filter(f=>f.label.nonEmpty).head
                 val label = item.label
                 val kei = item.kei
-                //val qty: Double = Math.ceil(group._2.map(_.qty).sum)
                 val qty: Double = {
                   val ret: Double = Math.ceil(group._2.map(_.qty).sum)
-                  /*             if (label.length >= 2) {
-                                 label.substring(0, 2) match {
-                                   case "57" => if (ret < 4.0) 4.0 else ret
-                                   case "66" => if (ret < 4.0) 4.0 else ret
-                                   case "72" => if (ret < 2.0) 2.0 else ret
-                                   case _ => ret
-                                 }
-                               }
-                               else {
-                                 ret
-                               }*/
                   ret
                 }
                 buffer += Item11Columns(
@@ -491,8 +466,12 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
                 )
               }
             })
+            val hhc=buffer.filter(s=>s.A1.startsWith("8"))
+
             buffer.toList
           }
+
+
           val buffer = ListBuffer.empty[Item11Columns]
 
           if (totAllSupports.nonEmpty) {
@@ -517,6 +496,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
               )
             })
           }
+
           buffer.toList
         }
 

@@ -166,10 +166,10 @@ object TrayManager extends TrayHelper with Codecs {
         buffMounts += MountItem(findWorkshopMaterial(item4.trmCode, materials), TrayMountData(item4.label, item4.trmCode).label, item4.kei, calculateQty(item4.count, item4.lenghtFactor, trayLenght), item4.isNeedLabel)
 
 
-        val item5 = mountData.find(s => s.typeId == 65 && s.matId == foranTray.materialId && s.parI1 == clickTrayMontData.parD2.toInt).getOrElse(TrayMountData(label = "NF"))
+        val item5 = mountData.find(s => s.typeId == 65 && s.matId == clickTrayMontData.matId && s.parI1 == clickTrayMontData.parD2.toInt).getOrElse(TrayMountData(label = "NF"))
         buffMounts += MountItem(findWorkshopMaterial(item5.trmCode, materials), TrayMountData(item5.label, item5.trmCode).label, "006", trayLenght, true)
 
-        val item6 = mountData.find(s => s.typeId == 66 && s.matId == foranTray.materialId).getOrElse(TrayMountData(label = "NF"))
+        val item6 = mountData.find(s => s.typeId == 66 && s.matId == clickTrayMontData.matId).getOrElse(TrayMountData(label = "NF"))
         buffMounts += MountItem(findWorkshopMaterial(item6.trmCode, materials), TrayMountData(item6.label, item6.trmCode).label, "796", trayLenght / 1.333333333333333d, false)
       }
 
@@ -314,6 +314,11 @@ object TrayManager extends TrayHelper with Codecs {
       lb += MountItem(findWorkshopMaterial(item1.trmCode, materials), TrayMountData(item1.label, item1.trmCode).label, "796", item41Count*2 , false)
     })
 
+    supports.filter(s=>s.label.startsWith("72")).groupBy(d => d.label).foreach(item=>{
+      val item72Count: Int = Math.ceil(item._2.map(_.qty).sum).toInt
+      val addData = if (item72Count < 2 && item72Count > 0) 2 - item72Count else 0
+      if (addData != 0 && item._2.nonEmpty) lb += MountItem(item._2.head.workShopMaterial, item._2.head.label, item._2.head.kei, addData, item._2.head.isNeedLabel)
+    })
     lb ++= supports
     lb.toList
   }
