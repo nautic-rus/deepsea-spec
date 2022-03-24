@@ -8,7 +8,7 @@ import deepsea.App
 import deepsea.actors.ActorManager
 import deepsea.database.DatabaseManager.GetOracleConnection
 import deepsea.files.FileManager.GenerateUrl
-import deepsea.hull.HullManager.{GetHullBillPlates, GetHullBillProfiles, GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, HullEsp, HullPartPlateDef, HullPartProfileDef, SetHullEsp}
+import deepsea.hull.HullManager.{GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, HullEsp, HullPartPlateDef, HullPartProfileDef, SetHullEsp}
 import deepsea.hull.classes.HullPart
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
@@ -67,9 +67,6 @@ object HullManager {
 
   implicit val HullEspDecoder: Decoder[HullEsp] = deriveDecoder[HullEsp]
   implicit val HullEspEncoder: Encoder[HullEsp] = deriveEncoder[HullEsp]
-
-  case class GetHullBillPlates(project: String)
-  case class GetHullBillProfiles(project: String)
 }
 
 class HullManager extends Actor {
@@ -277,10 +274,6 @@ class HullManager extends Actor {
         case url: String => sender() ! url.asJson.noSpaces
         case _ => sender() ! "error".asJson.noSpaces
       }
-    case GetHullBillPlates(project) =>
-      sender() ! genAnalyticPlateDataJson(project)
-    case GetHullBillProfiles(project) =>
-      sender() ! genAnalyticProfileDataJson(project)
   }
 
   def getHullPartsByDocNumber(project: String, docNumber: String): ListBuffer[HullPart] = {

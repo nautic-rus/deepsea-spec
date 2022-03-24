@@ -18,6 +18,7 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import local.hull.cnc.hyprethermGcode.CNCManager.{doCNC, doCNCStrings}
 import local.pdf.ru.ele.EleEqTrayESKDReport.{generatePdfToFileNoRev, generatePdfToFileWithRev}
 import akka.pattern.ask
+import local.hull.bill.BillManager.{genAnalyticPlateDataJson, genAnalyticProfileDataJson}
 
 import java.nio.file.Files
 import scala.concurrent.Await
@@ -28,6 +29,8 @@ object SpecManager {
   case class InitHullPartList(project: String, taskId: String = "", docNum: String = "", docName: String = "", user: String = "")
   case class GetProjectList()
   case class GetHullBlocks(project: String)
+  case class GetHullBillPlates(project: String)
+  case class GetHullBillProfiles(project: String)
 
   case class GetHullPartListFromBsTree(project: String, docNum: String)
   case class SetHullPartListFromBsTree(project: String, docNum: String, user: String, revision: String)
@@ -38,6 +41,7 @@ object SpecManager {
   case class GetHullNestingByMaterials(project: String, materials: String)
 
   case class CreateCNC(lines: String, user: String)
+  case class InsertNestLock(project: String, nestId: String, user: String)
 
   case class PartDef(name: String, section: String, description: String)
   implicit val writesPartDef: OWrites[PartDef] = Json.writes[PartDef]
@@ -51,10 +55,10 @@ class SpecManager extends Actor with BStree {
 
 //    //Generate part list from BSTREE
 //    case GetHullSpec(project, block, taskId, docNum, docName, user) => sender() ! genPartList(project, block, taskId, docNum, docName, user)
-//    //Generate list of projects
+    //Generate list of projects
 //    case GetProjectList() => sender() ! genProjectList()
-//    //Generate list of HULL blocks
-//    case GetHullBlocks(project) => sender() ! genBlocks(project)
+    //Generate list of HULL blocks
+    case GetHullBlocks(project) => sender() ! genBlocks(project)
 
 
 
@@ -70,12 +74,17 @@ class SpecManager extends Actor with BStree {
       sender() ! genMaterialNyBlockJson(project, Json.parse(blocks).asOpt[List[String]].getOrElse(List.empty[String]))
     case GetHullNestingByMaterials(project, materials) =>
       sender() ! plateNestByMaterialsAndDimsJson(project, decode[List[NestMaterial]](materials).getOrElse(List.empty[NestMaterial]))
-
+    case GetHullBillPlates(project) =>
+      sender() ! genAnalyticPlateDataJson(project)
+    case GetHullBillProfiles(project) =>
+      sender() ! genAnalyticProfileDataJson(project)
 
     case CreateCNC(lines, user) =>
-
       val res = doCNCStrings(Json.parse(lines).asOpt[List[String]].getOrElse(List.empty[String]), user)
       sender() ! Json.toJson(res)
+    case InsertNestLock(project, nestId, user) =>
+      insertLock(project, nestId, user)
+      sender() ! Json.toJson("success")
 
     case _ => None
   }
