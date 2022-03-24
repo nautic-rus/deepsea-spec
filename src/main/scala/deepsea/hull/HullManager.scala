@@ -29,6 +29,7 @@ import io.circe.syntax._
 import io.circe.generic.semiauto._
 import local.hull.BStree.BsTreeItem
 import local.hull.PartManager.{ForanPartsByDrawingNum, PrdPart, genForanPartLabelByDrawingNumAndPartNameJSON, genForanPartsByDrawingNum, genForanPartsByDrawingNumJSON}
+import local.hull.bill.BillManager.{genAnalyticPlateDataJson, genAnalyticProfileDataJson}
 import local.pdf.en.common.ReportCommonEN.{DocNameEN, Item11ColumnsEN}
 import local.pdf.en.prd.PrdPartsReportEN.genHullPartListEnPDF
 import local.sql.MongoDB.mongoClient
@@ -66,12 +67,10 @@ object HullManager {
 
   implicit val HullEspDecoder: Decoder[HullEsp] = deriveDecoder[HullEsp]
   implicit val HullEspEncoder: Encoder[HullEsp] = deriveEncoder[HullEsp]
-
-
 }
 
 class HullManager extends Actor {
-  implicit val timeout: Timeout = Timeout(30, TimeUnit.SECONDS)
+  implicit val timeout: Timeout = Timeout(300, TimeUnit.SECONDS)
 
   private val espCollectionName = "hullEsp"
 
@@ -275,8 +274,6 @@ class HullManager extends Actor {
         case url: String => sender() ! url.asJson.noSpaces
         case _ => sender() ! "error".asJson.noSpaces
       }
-
-
   }
 
   def getHullPartsByDocNumber(project: String, docNumber: String): ListBuffer[HullPart] = {
@@ -378,7 +375,7 @@ class HullManager extends Actor {
           res += new HullPart(
             rs.getInt("PARTOID"),
             rs.getString("PARTNAME"),
-            rs.getInt("PART_TYPE"),
+            0,
             rs.getString("DESCRIPTION") match {
               case value: String => value
               case _ => ""
@@ -388,7 +385,7 @@ class HullManager extends Actor {
             rs.getDouble("X_COG"),
             rs.getDouble("Y_COG"),
             rs.getDouble("Z_COG"),
-            rs.getString("BLOCK_DESCRIPTION"),
+            "",
             rs.getInt("KSEOID")
           )
         }

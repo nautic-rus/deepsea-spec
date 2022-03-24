@@ -5,10 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ebc20096-d70b-4412-983f-14fe275410ee" name="Default Changelist" comment="kokovin release 13.11.58">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/local/hull/cnc/hyprethermGcode/CNCManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/local/hull/cnc/hyprethermGcode/CNCManager.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/local/hull/cnc/hyprethermGcode/Cases.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/local/hull/cnc/hyprethermGcode/Cases.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/scala/a.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/deepsea/http/HTTPManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/http/HTTPManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/deepsea/hull/HullManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/hull/HullManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/deepsea/spec/SpecManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/spec/SpecManager.scala" afterDir="false" />
+    </list>
+    <list id="47bff93a-d6a1-475e-8d81-ca2260470515" name="Changes by isaev" comment="">
+      <change afterPath="$PROJECT_DIR$/build/deepsea.jar" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,6 +48,31 @@
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/src/main/scala/deepsea/http/HTTPManager.scala" root0="FORCE_HIGHLIGHTING" />
   </component>
+  <component name="LineStatusTrackerManager">
+    <file path="$PROJECT_DIR$/.idea/workspace.xml">
+      <ranges>
+        <range start1="7" end1="7" start2="7" end2="16" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
+        <range start1="8" end1="11" start2="17" end2="17" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
+        <range start1="43" end1="43" start2="49" end2="74" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
+        <range start1="52" end1="52" start2="83" end2="84" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
+        <range start1="68" end1="69" start2="100" end2="101" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
+        <range start1="101" end1="102" start2="133" end2="147" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
+        <range start1="151" end1="165" start2="196" end2="196" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
+        <range start1="196" end1="197" start2="227" end2="227" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
+        <range start1="201" end1="201" start2="231" end2="232" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
+        <range start1="204" end1="204" start2="235" end2="236" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
+        <range start1="208" end1="209" start2="240" end2="240" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
+        <range start1="221" end1="235" start2="252" end2="253" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
+        <range start1="565" end1="566" start2="583" end2="598" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
+        <range start1="650" end1="651" start2="682" end2="683" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
+        <range start1="660" end1="661" start2="692" end2="693" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
+        <range start1="672" end1="672" start2="704" end2="708" changelist="47bff93a-d6a1-475e-8d81-ca2260470515" />
+        <range start1="674" end1="675" start2="710" end2="711" changelist="47bff93a-d6a1-475e-8d81-ca2260470515" />
+        <range start1="676" end1="677" start2="712" end2="713" changelist="47bff93a-d6a1-475e-8d81-ca2260470515" />
+        <range start1="678" end1="679" start2="714" end2="715" changelist="47bff93a-d6a1-475e-8d81-ca2260470515" />
+      </ranges>
+    </file>
+  </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
@@ -50,6 +81,7 @@
   </component>
   <component name="ProjectId" id="1u4n8uM5nu1BLYB3gLF9sXY2Byf" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <OptionsSetting value="false" id="Update" />
     <ConfirmationsSetting value="2" id="Add" />
   </component>
   <component name="ProjectViewState">
@@ -66,7 +98,7 @@
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="project.structure.last.edited" value="Modules" />
+    <property name="project.structure.last.edited" value="Problems" />
     <property name="project.structure.proportion" value="0.15625" />
     <property name="project.structure.side.proportion" value="0.28312758" />
     <property name="settings.editor.selected.configurable" value="editor.preferences.folding" />
@@ -99,7 +131,20 @@
       <recent name="local.ele.cbfill.models" />
     </key>
   </component>
-  <component name="RunManager" selected="ScalaTest.CNCTest">
+  <component name="RunManager">
+    <configuration name="App" type="Application" factoryName="Application" temporary="true">
+      <option name="MAIN_CLASS_NAME" value="deepsea.App" />
+      <module name="deepsea-spec" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="deepsea.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration default="true" type="JetRunConfigurationType">
       <method v="2">
         <option name="Make" enabled="true" />
@@ -153,20 +198,6 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="TestElePdf" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true" nameIsGenerated="true" show_console_on_std_err="false" show_console_on_std_out="false">
-      <module name="deepsea-spec" />
-      <option name="allowRunningInParallel" value="false" />
-      <option name="projectPathOnTarget" />
-      <option name="selectedOptions">
-        <list />
-      </option>
-      <option name="testKind" value="Class" />
-      <option name="shortenClasspath" value="NONE" />
-      <option name="testClassPath" value="TestElePdf" />
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="TestUtils" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true" nameIsGenerated="true" show_console_on_std_err="false" show_console_on_std_out="false">
       <module name="deepsea-spec" />
       <option name="allowRunningInParallel" value="false" />
@@ -194,19 +225,19 @@
       </method>
     </configuration>
     <list>
-      <item itemvalue="ScalaTest.TestElePdf" />
       <item itemvalue="ScalaTest.CNCTest" />
       <item itemvalue="ScalaTest.CableListTest" />
       <item itemvalue="ScalaTest.TestUtils" />
       <item itemvalue="ScalaTest.TestCreateSP" />
+      <item itemvalue="Application.App" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Application.App" />
         <item itemvalue="ScalaTest.CNCTest" />
         <item itemvalue="ScalaTest.TestCreateSP" />
         <item itemvalue="ScalaTest.TestUtils" />
         <item itemvalue="ScalaTest.CableListTest" />
-        <item itemvalue="ScalaTest.TestElePdf" />
       </list>
     </recent_temporary>
   </component>
@@ -219,20 +250,7 @@
       <option name="presentableId" value="Default" />
       <updated>1623933574191</updated>
       <workItem from="1638960673599" duration="901000" />
-    </task>
-    <task id="LOCAL-00061" summary="kokovin release 13.11.18">
-      <created>1642688670415</created>
-      <option name="number" value="00061" />
-      <option name="presentableId" value="LOCAL-00061" />
-      <option name="project" value="LOCAL" />
-      <updated>1642688670415</updated>
-    </task>
-    <task id="LOCAL-00062" summary="kokovin release 13.11.18">
-      <created>1642764846592</created>
-      <option name="number" value="00062" />
-      <option name="presentableId" value="LOCAL-00062" />
-      <option name="project" value="LOCAL" />
-      <updated>1642764846592</updated>
+      <workItem from="1646835846507" duration="7413000" />
     </task>
     <task id="LOCAL-00063" summary="kokovin release 13.11.19">
       <created>1642768147223</created>
@@ -563,7 +581,21 @@
       <option name="project" value="LOCAL" />
       <updated>1646829404387</updated>
     </task>
-    <option name="localTasksCounter" value="110" />
+    <task id="LOCAL-00110" summary="kokovin release 13.11.58">
+      <created>1647253455315</created>
+      <option name="number" value="00110" />
+      <option name="presentableId" value="LOCAL-00110" />
+      <option name="project" value="LOCAL" />
+      <updated>1647253455316</updated>
+    </task>
+    <task id="LOCAL-00111" summary="kokovin release 13.11.58">
+      <created>1647432872520</created>
+      <option name="number" value="00111" />
+      <option name="presentableId" value="LOCAL-00111" />
+      <option name="project" value="LOCAL" />
+      <updated>1647432872520</updated>
+    </task>
+    <option name="localTasksCounter" value="112" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -648,7 +680,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="scala-line">
           <url>file://$PROJECT_DIR$/src/test/scala/NestsTest.scala</url>
-          <line>24</line>
+          <line>29</line>
           <option name="timeStamp" value="205" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="scala-line">
@@ -658,7 +690,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="scala-line">
           <url>file://$PROJECT_DIR$/src/test/scala/TestCreateSP.scala</url>
-          <line>22</line>
+          <line>23</line>
           <option name="timeStamp" value="208" />
         </line-breakpoint>
       </breakpoints>

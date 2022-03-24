@@ -17,7 +17,7 @@ import deepsea.hull.HullManager.{GetHullEsp, GetHullEspFiles, GetHullPart, GetHu
 import deepsea.spec.SpecManager._
 import org.apache.log4j.{LogManager, Logger}
 import play.api.libs.json.{JsValue, Json}
-
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
 import java.util.concurrent.TimeUnit
 import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 
@@ -31,7 +31,7 @@ class HTTPManager extends Actor {
   implicit val timeout: Timeout = Timeout(300, TimeUnit.SECONDS)
   val logger: Logger = LogManager.getLogger("HttpManager")
   var server: Future[Http.ServerBinding] = _
-  val routes: Route = {
+  val routes: Route = cors() {
     concat(
       //HULL
       (get & path("hullBlocks") & parameter("project")) { (project) =>
@@ -106,6 +106,19 @@ class HTTPManager extends Actor {
       },
       (get & path("hullNestingByMaterials") & parameter("project") & parameter("materials")) { (project, materials) =>
         askFor(ActorManager.spec, GetHullNestingByMaterials(project, materials))
+      },
+      (get & path("hullBillPlates") & parameter("project")) { (project) =>
+        askFor(ActorManager.spec, GetHullBillPlates(project))
+      },
+      (get & path("hullBillProfiles") & parameter("project")) { (project) =>
+        askFor(ActorManager.spec, GetHullBillProfiles(project))
+      },
+      (get & path("insertNestLock") & parameter("project") & parameter("nestId") & parameter("user")) { (project, nestId, user) =>
+        askFor(ActorManager.spec, InsertNestLock(project, nestId, user))
+      },
+
+      (post & path("createCNC") & entity(as[String]) & parameter("user")) { (lines, user) =>
+        askFor(ActorManager.spec, CreateCNC(lines, user))
       },
     )
   }
