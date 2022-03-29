@@ -32,7 +32,7 @@ object PartManager extends PartHelper with Codecs {
                       WT: Double = 0.0,
                       FH: Double = 0.0,
                       FT: Double = 0.0,
-                      SCTION:String=""
+                      STRGROUP:String=""
                     )
 
 

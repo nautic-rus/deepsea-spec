@@ -4,17 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ebc20096-d70b-4412-983f-14fe275410ee" name="Default Changelist" comment="kokovin release 13.11.58">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="ebc20096-d70b-4412-983f-14fe275410ee" name="Default Changelist" comment="kokovin release 13.11.70">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/deepsea/http/HTTPManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/http/HTTPManager.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/deepsea/hull/HullManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/hull/HullManager.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/deepsea/spec/SpecManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/spec/SpecManager.scala" afterDir="false" />
-    </list>
-    <list id="47bff93a-d6a1-475e-8d81-ca2260470515" name="Changes by isaev" comment="">
-      <change afterPath="$PROJECT_DIR$/build/deepsea.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/local/hull/PartHelper.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/local/hull/PartHelper.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/local/hull/PartManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/local/hull/PartManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/scala/PRD.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/PRD.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/scala/a.json" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,31 +43,6 @@
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/src/main/scala/deepsea/http/HTTPManager.scala" root0="FORCE_HIGHLIGHTING" />
   </component>
-  <component name="LineStatusTrackerManager">
-    <file path="$PROJECT_DIR$/.idea/workspace.xml">
-      <ranges>
-        <range start1="7" end1="7" start2="7" end2="16" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
-        <range start1="8" end1="11" start2="17" end2="17" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
-        <range start1="43" end1="43" start2="49" end2="74" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
-        <range start1="52" end1="52" start2="83" end2="84" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
-        <range start1="68" end1="69" start2="100" end2="101" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
-        <range start1="101" end1="102" start2="133" end2="147" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
-        <range start1="151" end1="165" start2="196" end2="196" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
-        <range start1="196" end1="197" start2="227" end2="227" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
-        <range start1="201" end1="201" start2="231" end2="232" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
-        <range start1="204" end1="204" start2="235" end2="236" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
-        <range start1="208" end1="209" start2="240" end2="240" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
-        <range start1="221" end1="235" start2="252" end2="253" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
-        <range start1="565" end1="566" start2="583" end2="598" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
-        <range start1="650" end1="651" start2="682" end2="683" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
-        <range start1="660" end1="661" start2="692" end2="693" changelist="ebc20096-d70b-4412-983f-14fe275410ee" />
-        <range start1="672" end1="672" start2="704" end2="708" changelist="47bff93a-d6a1-475e-8d81-ca2260470515" />
-        <range start1="674" end1="675" start2="710" end2="711" changelist="47bff93a-d6a1-475e-8d81-ca2260470515" />
-        <range start1="676" end1="677" start2="712" end2="713" changelist="47bff93a-d6a1-475e-8d81-ca2260470515" />
-        <range start1="678" end1="679" start2="714" end2="715" changelist="47bff93a-d6a1-475e-8d81-ca2260470515" />
-      </ranges>
-    </file>
-  </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
@@ -81,7 +51,6 @@
   </component>
   <component name="ProjectId" id="1u4n8uM5nu1BLYB3gLF9sXY2Byf" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true">
-    <OptionsSetting value="false" id="Update" />
     <ConfirmationsSetting value="2" id="Add" />
   </component>
   <component name="ProjectViewState">
@@ -93,12 +62,12 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/main/scala/local/ele/cbfill/models" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/main/resources/pict/signs" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="project.structure.last.edited" value="Problems" />
+    <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15625" />
     <property name="project.structure.side.proportion" value="0.28312758" />
     <property name="settings.editor.selected.configurable" value="editor.preferences.folding" />
@@ -108,11 +77,11 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\scalaproj\deepsea-spec\src\main\resources\pict\signs" />
       <recent name="C:\scalaproj\deepsea-spec\src\main\scala\local\ele\cbfill\models" />
       <recent name="C:\scalaproj\deepsea-spec\src\main\resources" />
       <recent name="C:\scalaproj\deepsea-spec\src\main\resources\pict" />
       <recent name="C:\scalaproj\deepsea-spec\src\main\resources\fonts" />
-      <recent name="C:\scalaproj\deepsea-spec\src\test" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\repos\workshop\deepsea-spec\src\main\scala\deepsea" />
@@ -131,20 +100,7 @@
       <recent name="local.ele.cbfill.models" />
     </key>
   </component>
-  <component name="RunManager">
-    <configuration name="App" type="Application" factoryName="Application" temporary="true">
-      <option name="MAIN_CLASS_NAME" value="deepsea.App" />
-      <module name="deepsea-spec" />
-      <extension name="coverage">
-        <pattern>
-          <option name="PATTERN" value="deepsea.*" />
-          <option name="ENABLED" value="true" />
-        </pattern>
-      </extension>
-      <method v="2">
-        <option name="Make" enabled="true" />
-      </method>
-    </configuration>
+  <component name="RunManager" selected="ScalaTest.PRD">
     <configuration default="true" type="JetRunConfigurationType">
       <method v="2">
         <option name="Make" enabled="true" />
@@ -170,7 +126,7 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="CableListTest" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true" nameIsGenerated="true" show_console_on_std_err="false" show_console_on_std_out="false">
+    <configuration name="HullBill" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true" nameIsGenerated="true" show_console_on_std_err="false" show_console_on_std_out="false">
       <module name="deepsea-spec" />
       <option name="allowRunningInParallel" value="false" />
       <option name="projectPathOnTarget" />
@@ -179,12 +135,12 @@
       </option>
       <option name="testKind" value="Class" />
       <option name="shortenClasspath" value="NONE" />
-      <option name="testClassPath" value="CableListTest" />
+      <option name="testClassPath" value="HullBill" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="TestCreateSP" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true" nameIsGenerated="true" show_console_on_std_err="false" show_console_on_std_out="false">
+    <configuration name="NestsTest" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true" nameIsGenerated="true" show_console_on_std_err="false" show_console_on_std_out="false">
       <module name="deepsea-spec" />
       <option name="allowRunningInParallel" value="false" />
       <option name="projectPathOnTarget" />
@@ -193,12 +149,12 @@
       </option>
       <option name="testKind" value="Class" />
       <option name="shortenClasspath" value="NONE" />
-      <option name="testClassPath" value="TestCreateSP" />
+      <option name="testClassPath" value="NestsTest" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
     </configuration>
-    <configuration name="TestUtils" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true" nameIsGenerated="true" show_console_on_std_err="false" show_console_on_std_out="false">
+    <configuration name="PRD" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true" nameIsGenerated="true" show_console_on_std_err="false" show_console_on_std_out="false">
       <module name="deepsea-spec" />
       <option name="allowRunningInParallel" value="false" />
       <option name="projectPathOnTarget" />
@@ -207,7 +163,21 @@
       </option>
       <option name="testKind" value="Class" />
       <option name="shortenClasspath" value="NONE" />
-      <option name="testClassPath" value="TestUtils" />
+      <option name="testClassPath" value="PRD" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TestElePdf" type="ScalaTestRunConfiguration" factoryName="ScalaTest" temporary="true" nameIsGenerated="true" show_console_on_std_err="false" show_console_on_std_out="false">
+      <module name="deepsea-spec" />
+      <option name="allowRunningInParallel" value="false" />
+      <option name="projectPathOnTarget" />
+      <option name="selectedOptions">
+        <list />
+      </option>
+      <option name="testKind" value="Class" />
+      <option name="shortenClasspath" value="NONE" />
+      <option name="testClassPath" value="TestElePdf" />
       <method v="2">
         <option name="Make" enabled="true" />
       </method>
@@ -225,19 +195,19 @@
       </method>
     </configuration>
     <list>
+      <item itemvalue="ScalaTest.TestElePdf" />
+      <item itemvalue="ScalaTest.HullBill" />
+      <item itemvalue="ScalaTest.PRD" />
+      <item itemvalue="ScalaTest.NestsTest" />
       <item itemvalue="ScalaTest.CNCTest" />
-      <item itemvalue="ScalaTest.CableListTest" />
-      <item itemvalue="ScalaTest.TestUtils" />
-      <item itemvalue="ScalaTest.TestCreateSP" />
-      <item itemvalue="Application.App" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.App" />
+        <item itemvalue="ScalaTest.PRD" />
+        <item itemvalue="ScalaTest.TestElePdf" />
         <item itemvalue="ScalaTest.CNCTest" />
-        <item itemvalue="ScalaTest.TestCreateSP" />
-        <item itemvalue="ScalaTest.TestUtils" />
-        <item itemvalue="ScalaTest.CableListTest" />
+        <item itemvalue="ScalaTest.NestsTest" />
+        <item itemvalue="ScalaTest.HullBill" />
       </list>
     </recent_temporary>
   </component>
@@ -250,105 +220,6 @@
       <option name="presentableId" value="Default" />
       <updated>1623933574191</updated>
       <workItem from="1638960673599" duration="901000" />
-      <workItem from="1646835846507" duration="7413000" />
-    </task>
-    <task id="LOCAL-00063" summary="kokovin release 13.11.19">
-      <created>1642768147223</created>
-      <option name="number" value="00063" />
-      <option name="presentableId" value="LOCAL-00063" />
-      <option name="project" value="LOCAL" />
-      <updated>1642768147223</updated>
-    </task>
-    <task id="LOCAL-00064" summary="kokovin release 13.11.20">
-      <created>1642772170614</created>
-      <option name="number" value="00064" />
-      <option name="presentableId" value="LOCAL-00064" />
-      <option name="project" value="LOCAL" />
-      <updated>1642772170614</updated>
-    </task>
-    <task id="LOCAL-00065" summary="kokovin release 13.11.21">
-      <created>1642777127936</created>
-      <option name="number" value="00065" />
-      <option name="presentableId" value="LOCAL-00065" />
-      <option name="project" value="LOCAL" />
-      <updated>1642777127936</updated>
-    </task>
-    <task id="LOCAL-00066" summary="kokovin release 13.11.22">
-      <created>1642785508813</created>
-      <option name="number" value="00066" />
-      <option name="presentableId" value="LOCAL-00066" />
-      <option name="project" value="LOCAL" />
-      <updated>1642785508813</updated>
-    </task>
-    <task id="LOCAL-00067" summary="kokovin release 13.11.23">
-      <created>1642786405917</created>
-      <option name="number" value="00067" />
-      <option name="presentableId" value="LOCAL-00067" />
-      <option name="project" value="LOCAL" />
-      <updated>1642786405917</updated>
-    </task>
-    <task id="LOCAL-00068" summary="kokovin release 13.11.24">
-      <created>1642844030890</created>
-      <option name="number" value="00068" />
-      <option name="presentableId" value="LOCAL-00068" />
-      <option name="project" value="LOCAL" />
-      <updated>1642844030890</updated>
-    </task>
-    <task id="LOCAL-00069" summary="kokovin release 13.11.25">
-      <created>1642850015295</created>
-      <option name="number" value="00069" />
-      <option name="presentableId" value="LOCAL-00069" />
-      <option name="project" value="LOCAL" />
-      <updated>1642850015295</updated>
-    </task>
-    <task id="LOCAL-00070" summary="kokovin release 13.11.26">
-      <created>1642857261278</created>
-      <option name="number" value="00070" />
-      <option name="presentableId" value="LOCAL-00070" />
-      <option name="project" value="LOCAL" />
-      <updated>1642857261278</updated>
-    </task>
-    <task id="LOCAL-00071" summary="kokovin release 13.11.27">
-      <created>1642858510070</created>
-      <option name="number" value="00071" />
-      <option name="presentableId" value="LOCAL-00071" />
-      <option name="project" value="LOCAL" />
-      <updated>1642858510071</updated>
-    </task>
-    <task id="LOCAL-00072" summary="kokovin release 13.11.28">
-      <created>1642859698644</created>
-      <option name="number" value="00072" />
-      <option name="presentableId" value="LOCAL-00072" />
-      <option name="project" value="LOCAL" />
-      <updated>1642859698644</updated>
-    </task>
-    <task id="LOCAL-00073" summary="kokovin release 13.11.28">
-      <created>1642860416086</created>
-      <option name="number" value="00073" />
-      <option name="presentableId" value="LOCAL-00073" />
-      <option name="project" value="LOCAL" />
-      <updated>1642860416086</updated>
-    </task>
-    <task id="LOCAL-00074" summary="kokovin release 13.11.29">
-      <created>1642862221406</created>
-      <option name="number" value="00074" />
-      <option name="presentableId" value="LOCAL-00074" />
-      <option name="project" value="LOCAL" />
-      <updated>1642862221406</updated>
-    </task>
-    <task id="LOCAL-00075" summary="kokovin release 13.11.30">
-      <created>1642868864364</created>
-      <option name="number" value="00075" />
-      <option name="presentableId" value="LOCAL-00075" />
-      <option name="project" value="LOCAL" />
-      <updated>1642868864364</updated>
-    </task>
-    <task id="LOCAL-00076" summary="kokovin release 13.11.31">
-      <created>1642871974585</created>
-      <option name="number" value="00076" />
-      <option name="presentableId" value="LOCAL-00076" />
-      <option name="project" value="LOCAL" />
-      <updated>1642871974586</updated>
     </task>
     <task id="LOCAL-00077" summary="kokovin release 13.11.32">
       <created>1643038173530</created>
@@ -581,21 +452,119 @@
       <option name="project" value="LOCAL" />
       <updated>1646829404387</updated>
     </task>
-    <task id="LOCAL-00110" summary="kokovin release 13.11.58">
-      <created>1647253455315</created>
+    <task id="LOCAL-00110" summary="kokovin release 13.11.59">
+      <created>1646834358531</created>
       <option name="number" value="00110" />
       <option name="presentableId" value="LOCAL-00110" />
       <option name="project" value="LOCAL" />
-      <updated>1647253455316</updated>
+      <updated>1646834358531</updated>
     </task>
-    <task id="LOCAL-00111" summary="kokovin release 13.11.58">
-      <created>1647432872520</created>
+    <task id="LOCAL-00111" summary="kokovin release 13.11.60">
+      <created>1647250776297</created>
       <option name="number" value="00111" />
       <option name="presentableId" value="LOCAL-00111" />
       <option name="project" value="LOCAL" />
-      <updated>1647432872520</updated>
+      <updated>1647250776298</updated>
     </task>
-    <option name="localTasksCounter" value="112" />
+    <task id="LOCAL-00112" summary="kokovin release 13.11.61">
+      <created>1647266147913</created>
+      <option name="number" value="00112" />
+      <option name="presentableId" value="LOCAL-00112" />
+      <option name="project" value="LOCAL" />
+      <updated>1647266147913</updated>
+    </task>
+    <task id="LOCAL-00113" summary="kokovin release 13.11.62">
+      <created>1647266773409</created>
+      <option name="number" value="00113" />
+      <option name="presentableId" value="LOCAL-00113" />
+      <option name="project" value="LOCAL" />
+      <updated>1647266773409</updated>
+    </task>
+    <task id="LOCAL-00114" summary="kokovin release 13.11.63">
+      <created>1647338437341</created>
+      <option name="number" value="00114" />
+      <option name="presentableId" value="LOCAL-00114" />
+      <option name="project" value="LOCAL" />
+      <updated>1647338437341</updated>
+    </task>
+    <task id="LOCAL-00115" summary="kokovin release 13.11.64">
+      <created>1647432073062</created>
+      <option name="number" value="00115" />
+      <option name="presentableId" value="LOCAL-00115" />
+      <option name="project" value="LOCAL" />
+      <updated>1647432073062</updated>
+    </task>
+    <task id="LOCAL-00116" summary="kokovin release 13.11.65">
+      <created>1647441914556</created>
+      <option name="number" value="00116" />
+      <option name="presentableId" value="LOCAL-00116" />
+      <option name="project" value="LOCAL" />
+      <updated>1647441914556</updated>
+    </task>
+    <task id="LOCAL-00117" summary="kokovin release 13.11.66">
+      <created>1647506386048</created>
+      <option name="number" value="00117" />
+      <option name="presentableId" value="LOCAL-00117" />
+      <option name="project" value="LOCAL" />
+      <updated>1647506386048</updated>
+    </task>
+    <task id="LOCAL-00118" summary="kokovin release 13.11.66">
+      <created>1647509055845</created>
+      <option name="number" value="00118" />
+      <option name="presentableId" value="LOCAL-00118" />
+      <option name="project" value="LOCAL" />
+      <updated>1647509055845</updated>
+    </task>
+    <task id="LOCAL-00119" summary="kokovin release 13.11.67">
+      <created>1647520291765</created>
+      <option name="number" value="00119" />
+      <option name="presentableId" value="LOCAL-00119" />
+      <option name="project" value="LOCAL" />
+      <updated>1647520291765</updated>
+    </task>
+    <task id="LOCAL-00120" summary="kokovin release 13.11.68">
+      <created>1647849605904</created>
+      <option name="number" value="00120" />
+      <option name="presentableId" value="LOCAL-00120" />
+      <option name="project" value="LOCAL" />
+      <updated>1647849605904</updated>
+    </task>
+    <task id="LOCAL-00121" summary="kokovin release 13.11.68">
+      <created>1647855592047</created>
+      <option name="number" value="00121" />
+      <option name="presentableId" value="LOCAL-00121" />
+      <option name="project" value="LOCAL" />
+      <updated>1647855592047</updated>
+    </task>
+    <task id="LOCAL-00122" summary="kokovin release 13.11.68">
+      <created>1647870302879</created>
+      <option name="number" value="00122" />
+      <option name="presentableId" value="LOCAL-00122" />
+      <option name="project" value="LOCAL" />
+      <updated>1647870302879</updated>
+    </task>
+    <task id="LOCAL-00123" summary="kokovin release 13.11.69">
+      <created>1648136790081</created>
+      <option name="number" value="00123" />
+      <option name="presentableId" value="LOCAL-00123" />
+      <option name="project" value="LOCAL" />
+      <updated>1648136790082</updated>
+    </task>
+    <task id="LOCAL-00124" summary="kokovin release 13.11.70">
+      <created>1648140138631</created>
+      <option name="number" value="00124" />
+      <option name="presentableId" value="LOCAL-00124" />
+      <option name="project" value="LOCAL" />
+      <updated>1648140138631</updated>
+    </task>
+    <task id="LOCAL-00125" summary="kokovin release 13.11.70">
+      <created>1648144746959</created>
+      <option name="number" value="00125" />
+      <option name="presentableId" value="LOCAL-00125" />
+      <option name="project" value="LOCAL" />
+      <updated>1648144746959</updated>
+    </task>
+    <option name="localTasksCounter" value="126" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -613,18 +582,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="kokovin release 13.11.34" />
-    <MESSAGE value="kokovin release 13.11.35" />
-    <MESSAGE value="kokovin release 13.11.36" />
-    <MESSAGE value="kokovin release 13.11.37" />
-    <MESSAGE value="kokovin release 13.11.38" />
-    <MESSAGE value="kokovin release 13.11.39" />
-    <MESSAGE value="kokovin release 13.11.40" />
-    <MESSAGE value="kokovin release 13.11.41" />
-    <MESSAGE value="kokovin release 13.11.42" />
-    <MESSAGE value="kokovin release 13.11.43" />
-    <MESSAGE value="kokovin release 13.11.44" />
-    <MESSAGE value="kokovin release 13.11.45" />
     <MESSAGE value="kokovin release 13.11.46" />
     <MESSAGE value="kokovin release 13.11.47" />
     <MESSAGE value="kokovin release 13.11.48" />
@@ -638,7 +595,19 @@
     <MESSAGE value="kokovin release 13.11.56" />
     <MESSAGE value="kokovin release 13.11.57" />
     <MESSAGE value="kokovin release 13.11.58" />
-    <option name="LAST_COMMIT_MESSAGE" value="kokovin release 13.11.58" />
+    <MESSAGE value="kokovin release 13.11.59" />
+    <MESSAGE value="kokovin release 13.11.60" />
+    <MESSAGE value="kokovin release 13.11.61" />
+    <MESSAGE value="kokovin release 13.11.62" />
+    <MESSAGE value="kokovin release 13.11.63" />
+    <MESSAGE value="kokovin release 13.11.64" />
+    <MESSAGE value="kokovin release 13.11.65" />
+    <MESSAGE value="kokovin release 13.11.66" />
+    <MESSAGE value="kokovin release 13.11.67" />
+    <MESSAGE value="kokovin release 13.11.68" />
+    <MESSAGE value="kokovin release 13.11.69" />
+    <MESSAGE value="kokovin release 13.11.70" />
+    <option name="LAST_COMMIT_MESSAGE" value="kokovin release 13.11.70" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -679,35 +648,66 @@
           <option name="timeStamp" value="202" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="scala-line">
-          <url>file://$PROJECT_DIR$/src/test/scala/NestsTest.scala</url>
-          <line>29</line>
-          <option name="timeStamp" value="205" />
+          <url>file://$PROJECT_DIR$/src/test/scala/HullBill.scala</url>
+          <line>15</line>
+          <option name="timeStamp" value="246" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="scala-line">
+          <url>file://$PROJECT_DIR$/src/test/scala/PRD.scala</url>
+          <line>12</line>
+          <option name="timeStamp" value="247" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="scala-line">
           <url>file://$PROJECT_DIR$/src/test/scala/CNCTest.scala</url>
           <line>14</line>
-          <option name="timeStamp" value="207" />
+          <option name="timeStamp" value="249" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="scala-line">
-          <url>file://$PROJECT_DIR$/src/test/scala/TestCreateSP.scala</url>
-          <line>23</line>
-          <option name="timeStamp" value="208" />
+          <url>file://$PROJECT_DIR$/src/main/scala/local/pdf/ru/ele/EleEqTrayESKDReport.scala</url>
+          <line>239</line>
+          <option name="timeStamp" value="250" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="scala-line">
+          <url>file://$PROJECT_DIR$/src/main/scala/local/pdf/ru/ele/EleEqTrayESKDReport.scala</url>
+          <line>470</line>
+          <option name="timeStamp" value="255" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="scala-line">
+          <url>file://$PROJECT_DIR$/src/main/scala/local/hull/PartHelper.scala</url>
+          <line>63</line>
+          <option name="timeStamp" value="259" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="scala-line">
+          <url>file://$PROJECT_DIR$/src/main/scala/local/hull/PartHelper.scala</url>
+          <line>30</line>
+          <option name="timeStamp" value="260" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="scala-line">
+          <url>file://$PROJECT_DIR$/src/main/scala/local/hull/PartHelper.scala</url>
+          <line>83</line>
+          <option name="timeStamp" value="261" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
     <pin-to-top-manager>
       <pinned-members>
         <PinnedItemInfo parentTag="org.camunda.bpm.engine.impl.persistence.entity.ExecutionEntity" memberName="executionObservers" />
+        <PinnedItemInfo parentTag="local.hull.bill.BillManager$ProfileNestBill" memberName="NGB" />
         <PinnedItemInfo parentTag="org.camunda.bpm.engine.impl.persistence.entity.ActivityInstanceImpl" memberName="executionIds" />
         <PinnedItemInfo parentTag="local.ele.trays.TrayManager$Tray" memberName="supports" />
       </pinned-members>
     </pin-to-top-manager>
+    <watches-manager>
+      <configuration name="ScalaTestRunConfiguration">
+        <watch expression="ghp" />
+      </configuration>
+    </watches-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/deepsea$App.ic" NAME="App Coverage Results" MODIFIED="1628096465177" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
     <SUITE FILE_PATH="coverage/deepsea_spec$TestElePdf.ic" NAME="TestElePdf Coverage Results" MODIFIED="1642860258410" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
     <SUITE FILE_PATH="coverage/camunda$App.ic" NAME="App Coverage Results" MODIFIED="1626975965819" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
-    <SUITE FILE_PATH="coverage/deepsea_spec$NestsTest.ic" NAME="NestsTest Coverage Results" MODIFIED="1645351987954" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
+    <SUITE FILE_PATH="coverage/deepsea_spec$NestsTest.ic" NAME="NestsTest Coverage Results" MODIFIED="1647849154116" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
     <SUITE FILE_PATH="coverage/deepsea_spec$Trays.ic" NAME="Trays Coverage Results" MODIFIED="1639420024497" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
   </component>
 </project>
