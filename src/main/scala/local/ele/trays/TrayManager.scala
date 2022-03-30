@@ -170,7 +170,7 @@ object TrayManager extends TrayHelper with Codecs {
         buffMounts += MountItem(findWorkshopMaterial(item5.trmCode, materials), TrayMountData(item5.label, item5.trmCode).label, "006", trayLenght, true)
 
         val item6 = mountData.find(s => s.typeId == 66 && s.matId == clickTrayMontData.matId).getOrElse(TrayMountData(label = "NF"))
-        buffMounts += MountItem(findWorkshopMaterial(item6.trmCode, materials), TrayMountData(item6.label, item6.trmCode).label, "796", trayLenght / 1.333333333333333d, false)
+        buffMounts += MountItem(findWorkshopMaterial(item6.trmCode, materials), TrayMountData(item6.label, item6.trmCode).label, "796", trayLenght / 0.75d, false)
       }
 
     }
@@ -178,11 +178,11 @@ object TrayManager extends TrayHelper with Codecs {
     if (clickTrayMontData.typeId == 63) {
       if (!foranTray.SURFACE.contains("F0")) {
 
-/*      val item3 = mountRules.find(s => s.label.equals("4209") && s.inputTypeIdRange.contains("63;")).getOrElse(TrayMountRules(label = "4209"))
-        buffMounts += MountItem(findWorkshopMaterial(item3.trmCode, materials), TrayMountData(item3.label, item3.trmCode).label, item3.kei, trayLenght / 0.5, item3.isNeedLabel)
+        /*      val item3 = mountRules.find(s => s.label.equals("4209") && s.inputTypeIdRange.contains("63;")).getOrElse(TrayMountRules(label = "4209"))
+                buffMounts += MountItem(findWorkshopMaterial(item3.trmCode, materials), TrayMountData(item3.label, item3.trmCode).label, item3.kei, trayLenght / 0.5, item3.isNeedLabel)
 
-        val item4 = mountRules.find(s => s.label.equals("4210") && s.inputTypeIdRange.contains("63;")).getOrElse(TrayMountRules(label = "4210"))
-        buffMounts += MountItem(findWorkshopMaterial(item4.trmCode, materials), TrayMountData(item4.label, item4.trmCode).label, item4.kei, trayLenght / 0.5, item4.isNeedLabel)*/
+                val item4 = mountRules.find(s => s.label.equals("4210") && s.inputTypeIdRange.contains("63;")).getOrElse(TrayMountRules(label = "4210"))
+                buffMounts += MountItem(findWorkshopMaterial(item4.trmCode, materials), TrayMountData(item4.label, item4.trmCode).label, item4.kei, trayLenght / 0.5, item4.isNeedLabel)*/
 
 
         //val item6 = mountData.find(s => s.typeId == 50 && s.matId == foranTray.materialId).getOrElse(TrayMountData(label = "NF"))
@@ -307,18 +307,29 @@ object TrayManager extends TrayHelper with Codecs {
     supports.filter(s => s.label.startsWith("41")).groupBy(d => d.label).foreach(item => {
       val item41Count: Int = Math.ceil(item._2.map(_.qty).sum).toInt
       val item3 = mountData.find(s => s.label.equals("4208")).getOrElse(TrayMountData(label = "4208"))
-      lb += MountItem(findWorkshopMaterial(item3.trmCode, materials), TrayMountData(item3.label, item3.trmCode).label, "796", item41Count*2, false)
+      lb += MountItem(findWorkshopMaterial(item3.trmCode, materials), TrayMountData(item3.label, item3.trmCode).label, "796", item41Count * 2, false)
       val item2 = mountData.find(s => s.label.equals("4209")).getOrElse(TrayMountData(label = "4209"))
-      lb += MountItem(findWorkshopMaterial(item2.trmCode, materials), TrayMountData(item2.label, item2.trmCode).label, "796", item41Count*4 , false)
+      lb += MountItem(findWorkshopMaterial(item2.trmCode, materials), TrayMountData(item2.label, item2.trmCode).label, "796", item41Count * 4, false)
       val item1 = mountData.find(s => s.label.equals("4210")).getOrElse(TrayMountData(label = "4210"))
-      lb += MountItem(findWorkshopMaterial(item1.trmCode, materials), TrayMountData(item1.label, item1.trmCode).label, "796", item41Count*2 , false)
+      lb += MountItem(findWorkshopMaterial(item1.trmCode, materials), TrayMountData(item1.label, item1.trmCode).label, "796", item41Count * 2, false)
     })
 
-    supports.filter(s=>s.label.startsWith("72")).groupBy(d => d.label).foreach(item=>{
+    supports.filter(s => s.label.startsWith("72")).groupBy(d => d.label).foreach(item => {
       val item72Count: Int = Math.ceil(item._2.map(_.qty).sum).toInt
       val addData = if (item72Count < 2 && item72Count > 0) 2 - item72Count else 0
       if (addData != 0 && item._2.nonEmpty) lb += MountItem(item._2.head.workShopMaterial, item._2.head.label, item._2.head.kei, addData, item._2.head.isNeedLabel)
     })
+
+    supports.filter(s => s.label.startsWith("66")).groupBy(d => d.label).foreach(item => {
+      val item66Count: Int = Math.ceil(item._2.map(_.qty).sum).toInt
+      val addData: Int = {
+        if (item66Count < 4 && item66Count > 0) 4 - item66Count
+        else if (item66Count % 2 != 0) 1 else 0
+      }
+      if (addData != 0 && item._2.nonEmpty) lb += MountItem(item._2.head.workShopMaterial, item._2.head.label, item._2.head.kei, addData, item._2.head.isNeedLabel)
+    })
+
+
     lb ++= supports
     lb.toList
   }
