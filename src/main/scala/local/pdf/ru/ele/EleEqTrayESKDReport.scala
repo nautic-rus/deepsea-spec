@@ -575,12 +575,12 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
     item11Columns.foreach(item => {
 
       if (item.isHeader) {
-        val str = s"${rowcunter}|Ч${partCounter}|${item.A1}"
+        val str = s"${rowcunter}|Ч${partCounter}||${item.A1}"
         pw1.println(str)
         rowcunter = rowcunter + 1
         partCounter = partCounter + 1
       } else {
-        val str = s"${rowcunter}|${item.A1}|${item.A2}|${item.A4}|${item.A5}|${item.A6}|${item.A7}|${item.A8}|${item.A9}|${item.A11}||${item.A10}||||MESTO|"
+        val str = s"${rowcunter}|${item.A1}|${item.A3}|${item.A4}|${item.A5}|${item.A6}|${item.A7}|${item.A8}|${item.A9}|${item.A11}||${item.A10}||||MESTO|"
         pw1.println(str)
         rowcunter = rowcunter + 1
       }
