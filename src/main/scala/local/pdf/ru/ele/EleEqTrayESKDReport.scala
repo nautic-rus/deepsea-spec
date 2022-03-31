@@ -63,7 +63,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
       val eqSupports = ListBuffer.empty[Item11Columns]
 
       if (parttitions._1.nonEmpty) {
-        buff += Item11Columns(true, n1.toUpperCase())
+        buff += Item11Columns(true, A1 = n1.toUpperCase(), A10 = ".")
         parttitions._1.groupBy(s => s.SYSTEM_DESCR).toList.sortBy(s => s._1).foreach(gr => {
           buff += Item11Columns(true, gr._1)
           gr._2.sortBy(s => s.orderItem()).foreach(eq => {
@@ -116,7 +116,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
       }
 
       if (parttitions._2.nonEmpty) {
-        buff += Item11Columns(true, n2.toUpperCase())
+        buff += Item11Columns(true, A1 = n2.toUpperCase(), A10 = ".")
         parttitions._2.groupBy(s => s.SYSTEM_DESCR).toList.sortBy(s => s._1).foreach(gr => {
           buff += Item11Columns(true, gr._1)
           gr._2.sortBy(s => s.orderItem()).foreach(eq => {
@@ -237,7 +237,6 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
         buff ++= gr4.sortBy(s => s.A1)
       }
       val gr5 = supportsRows.filter(p => p.A1.startsWith("5") || p.A1.startsWith("8"))
-      val jj=0
       if (gr5.nonEmpty) {
         buff += Item11Columns(true, "Доизоляционные детали крепления")
         buff ++= gr5.sortBy(s => s.A1)
@@ -292,7 +291,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
         val eqSupports = ListBuffer.empty[Item11Columns]
 
         if (parttitions._1.nonEmpty) {
-          buff += Item11Columns(true, n1.toUpperCase())
+          buff += Item11Columns(true, A1 = n1.toUpperCase(), A10 = ".")
           parttitions._1.groupBy(s => s.SYSTEM_DESCR).toList.sortBy(s => s._1).foreach(gr => {
             buff += Item11Columns(true, gr._1)
             gr._2.sortBy(s => s.orderItem()).foreach(eq => {
@@ -347,7 +346,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
         }
 
         if (parttitions._2.nonEmpty) {
-          buff += Item11Columns(true, n2.toUpperCase())
+          buff += Item11Columns(true, A1 = n2.toUpperCase(), A10 = ".")
           parttitions._2.groupBy(s => s.SYSTEM_DESCR).toList.sortBy(s => s._1).foreach(gr => {
             buff += Item11Columns(true, gr._1)
             gr._2.sortBy(s => s.orderItem()).foreach(eq => {
@@ -443,7 +442,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
 
             supports.groupBy(s => s.workShopMaterial.trmCode).toList.foreach(group => {
               if (group._2.nonEmpty) {
-                val item = group._2.filter(f=>f.label.nonEmpty).head
+                val item = group._2.filter(f => f.label.nonEmpty).head
                 val label = item.label
                 val kei = item.kei
                 val qty: Double = {
@@ -466,7 +465,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
                 )
               }
             })
-            val hhc=buffer.filter(s=>s.A1.startsWith("8"))
+            val hhc = buffer.filter(s => s.A1.startsWith("8"))
 
             buffer.toList
           }
@@ -546,15 +545,15 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
   }
 
 
-  private def localDistinct(in:List[Item11Columns]):List[Item11Columns]={
-    val buff=ListBuffer.empty[Item11Columns]
+  private def localDistinct(in: List[Item11Columns]): List[Item11Columns] = {
+    val buff = ListBuffer.empty[Item11Columns]
 
-    in.foreach(p=>{
-      if(p.isHeader){
-        buff+=p
-      }else{
-        if(!buff.exists(s=>s.A1.equals(p.A1))){
-          buff+=p
+    in.foreach(p => {
+      if (p.isHeader) {
+        buff += p
+      } else {
+        if (!buff.exists(s => s.A1.equals(p.A1))) {
+          buff += p
         }
       }
     })
@@ -567,23 +566,44 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
 
   private def generateTrm(path: String, docName: DocName, item11Columns: List[Item11Columns]): Unit = {
     var rowcunter = 2
-    var partCounter = 1
+    var partCounter = 0
     var subPartCounter = 1
     val pw1 = new PrintWriter(path, "Windows-1251")
     pw1.println(s"#СП|${docName.num}|${docName.name}|${docName.lastRev}")
-
     item11Columns.foreach(item => {
 
       if (item.isHeader) {
-        val str = s"${rowcunter}|Ч${partCounter}||${item.A1}"
-        pw1.println(str)
-        rowcunter = rowcunter + 1
-        partCounter = partCounter + 1
+        item.A10 match {
+          case "." => {
+            partCounter = partCounter + 1
+            val str = s"${rowcunter}|Ч${partCounter}||${item.A1}"
+            pw1.println(str)
+            rowcunter = rowcunter + 1
+            subPartCounter = 1
+          }
+          case _ => {
+            val str = s"${rowcunter}|${partCounter}-${subPartCounter}||${item.A1}"
+            pw1.println(str)
+            rowcunter = rowcunter + 1
+            subPartCounter = subPartCounter + 1
+          }
+        }
       } else {
         val str = s"${rowcunter}|${item.A1}|${item.A3}|${item.A4}|${item.A5}|${item.A6}|${item.A7}|${item.A8}|${item.A9}|${item.A11}||${item.A10}||||MESTO|"
         pw1.println(str)
         rowcunter = rowcunter + 1
       }
+
+      /*      if (item.isHeader) {
+              val str = s"${rowcunter}|Ч${partCounter}||${item.A1}"
+              pw1.println(str)
+              rowcunter = rowcunter + 1
+              partCounter = partCounter + 1
+            } else {
+              val str = s"${rowcunter}|${item.A1}|${item.A3}|${item.A4}|${item.A5}|${item.A6}|${item.A7}|${item.A8}|${item.A9}|${item.A11}||${item.A10}||||MESTO|"
+              pw1.println(str)
+              rowcunter = rowcunter + 1
+            }*/
     })
     pw1.println("#")
     pw1.close()
@@ -637,17 +657,17 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
     doc.close()
   }
 
-  def insertSign(doc: Document): Unit ={
+  def insertSign(doc: Document): Unit = {
     val imageData1: ImageData = ImageDataFactory.create("src/main/resources/pict/signs/1.png")
     val imageData2: ImageData = ImageDataFactory.create("src/main/resources/pict/signs/2.png")
     val imageData3: ImageData = ImageDataFactory.create("src/main/resources/pict/signs/3.png")
     val imageData4: ImageData = ImageDataFactory.create("src/main/resources/pict/signs/4.png")
     //val imageData5: ImageData = ImageDataFactory.create("src/main/resources/pict/signs/5.png")
-    val i1=new Image(imageData3).scale(.7f, .35f).setFixedPosition(1,mmToPt(269), mmToPt(31))
-    val i2=new Image(imageData2).scale(.5f, .5f).setFixedPosition(1,mmToPt(269), mmToPt(26))
-    val i3=new Image(imageData2).scale(.5f, .5f).setFixedPosition(1,mmToPt(269), mmToPt(20))
-    val i4=new Image(imageData4).scale(.5f, .5f).setFixedPosition(1,mmToPt(269), mmToPt(10))
-    val i5=new Image(imageData4).scale(.5f, .5f).setFixedPosition(1,mmToPt(269), mmToPt(5))
+    val i1 = new Image(imageData3).scale(.7f, .35f).setFixedPosition(1, mmToPt(269), mmToPt(31))
+    val i2 = new Image(imageData2).scale(.5f, .5f).setFixedPosition(1, mmToPt(269), mmToPt(26))
+    val i3 = new Image(imageData2).scale(.5f, .5f).setFixedPosition(1, mmToPt(269), mmToPt(20))
+    val i4 = new Image(imageData4).scale(.5f, .5f).setFixedPosition(1, mmToPt(269), mmToPt(10))
+    val i5 = new Image(imageData4).scale(.5f, .5f).setFixedPosition(1, mmToPt(269), mmToPt(5))
     doc.add(i1)
     doc.add(i2)
     doc.add(i3)
