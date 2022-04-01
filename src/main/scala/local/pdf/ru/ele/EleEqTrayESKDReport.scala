@@ -233,27 +233,27 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
 
 
       if (gr4.nonEmpty) {
-        buff += Item11Columns(true, "Крепление и заземление кабелей")
+        buff += Item11Columns(true,A1= "Крепление и заземление кабелей", A10=".")
         buff ++= gr4.sortBy(s => s.A1)
       }
       val gr5 = supportsRows.filter(p => p.A1.startsWith("5") || p.A1.startsWith("8"))
       if (gr5.nonEmpty) {
-        buff += Item11Columns(true, "Доизоляционные детали крепления")
+        buff += Item11Columns(true, A1="Доизоляционные детали крепления", A10=".")
         buff ++= gr5.sortBy(s => s.A1)
       }
       val gr6 = supportsRows.filter(p => p.A1.startsWith("6"))
       if (gr6.nonEmpty) {
-        buff += Item11Columns(true, "Послеизоляционные детали крепления")
+        buff += Item11Columns(true, A1="Послеизоляционные детали крепления", A10=".")
         buff ++= gr6.sortBy(s => s.A1)
       }
       val gr7 = supportsRows.filter(p => p.A1.startsWith("7"))
       if (gr7.nonEmpty) {
-        buff += Item11Columns(true, "Трубы защиты кабеля")
+        buff += Item11Columns(true, A1="Трубы защиты кабеля", A10=".")
         buff ++= gr7.sortBy(s => s.A1)
       }
       val gr8 = supportsRows.filter(p => !p.A1.startsWith("4") && !p.A1.startsWith("5") && !p.A1.startsWith("6") && !p.A1.startsWith("7") && !p.A1.startsWith("8"))
       if (gr8.nonEmpty) {
-        buff += Item11Columns(true, "Прочее")
+        buff += Item11Columns(true, A1="Прочее", A10=".")
         buff ++= gr8.sortBy(s => s.A1)
       }
 
@@ -501,28 +501,28 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
 
         val gr4 = supportsRows.filter(p => p.A1.startsWith("4"))
         if (gr4.nonEmpty) {
-          buff += Item11Columns(true, "Крепление и заземление кабелей")
+          buff += Item11Columns(true, A1="Крепление и заземление кабелей", A10=".")
           buff ++= gr4.sortBy(s => s.A1)
         }
         val gr5 = supportsRows.filter(p => p.A1.startsWith("5") || p.A1.startsWith("8"))
 
         if (gr5.nonEmpty) {
-          buff += Item11Columns(true, "Доизоляционные детали крепления")
+          buff += Item11Columns(true, A1="Доизоляционные детали крепления", A10=".")
           buff ++= gr5.sortBy(s => s.A1)
         }
         val gr6 = supportsRows.filter(p => p.A1.startsWith("6"))
         if (gr6.nonEmpty) {
-          buff += Item11Columns(true, "Послеизоляционные детали крепления")
+          buff += Item11Columns(true, A1="Послеизоляционные детали крепления", A10=".")
           buff ++= gr6.sortBy(s => s.A1)
         }
         val gr7 = supportsRows.filter(p => p.A1.startsWith("7"))
         if (gr7.nonEmpty) {
-          buff += Item11Columns(true, "Трубы защиты кабеля")
+          buff += Item11Columns(true, A1="Трубы защиты кабеля", A10=".")
           buff ++= gr7.sortBy(s => s.A1)
         }
         val gr8 = supportsRows.filter(p => !p.A1.startsWith("4") && !p.A1.startsWith("5") && !p.A1.startsWith("6") && !p.A1.startsWith("7") && !p.A1.startsWith("8"))
         if (gr8.nonEmpty) {
-          buff += Item11Columns(true, "Прочее")
+          buff += Item11Columns(true, A1="Прочее", A10=".")
           buff ++= gr8.sortBy(s => s.A1)
         }
         localDistinct(buff.toList)
