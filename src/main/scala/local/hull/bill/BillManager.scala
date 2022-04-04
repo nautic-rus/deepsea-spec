@@ -18,7 +18,8 @@ object BillManager extends BillHelper with Codecs {
                               scrap: Double = 0.0,
                               realPartsCount: Int = 0,
                               realLenght: Double = 0,
-                              profileForecast: Int = 0
+                              profileForecast: Int = 0,
+                              partsweight: Double = 0.0
                             )
 
   case class PlateAnalitic(
@@ -79,7 +80,7 @@ object BillManager extends BillHelper with Codecs {
 
   case class PlateMaterial(COUNT: Int, WEIGHT: Double, THICKNESS: Double, MAT: String)
 
-  case class ProfileMaterial(KSE: Int = 0, PRF_SECTION: String = "", MATERIAL: String = "", WEB_H: Double = 0.0, WEB_T: Double = 0.0, FLANGE_H: Double = 0.0, FLANGE_T: Double = 0.0, PARTS: Int = 0, LENGHT: Double = 0.0)
+  case class ProfileMaterial(KSE: Int = 0, PRF_SECTION: String = "", MATERIAL: String = "", WEB_H: Double = 0.0, WEB_T: Double = 0.0, FLANGE_H: Double = 0.0, FLANGE_T: Double = 0.0, PARTS: Int = 0, LENGHT: Double = 0.0, PARTSWEIGHT: Double = 0.0)
 
   def genAnalyticProfileData(project: String): List[ProfileAnalitic] = {
     val buff = ListBuffer.empty[ProfileAnalitic]
@@ -98,7 +99,7 @@ object BillManager extends BillHelper with Codecs {
         val count = nests.map(_.NGB).sum
         val scrap = nests.head.TOTAL_KSE_SCRAP
         val profileForecast: Int = Math.ceil((realLenght + (realLenght / 100) * scrap) / grossLenght).toInt
-        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght, count, scrap, realPartsCpunt, realLenght, profileForecast)
+        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght, count, scrap, realPartsCpunt, realLenght, profileForecast, realPart.PARTSWEIGHT)
       } else {
         val kse = realPart.KSE
         val mat = realPart.MATERIAL
@@ -108,7 +109,7 @@ object BillManager extends BillHelper with Codecs {
         val count = 0
         val scrap = 0
         val profileForecast: Int = 0
-        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght, count, scrap, realPartsCpunt, realLenght, profileForecast)
+        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght, count, scrap, realPartsCpunt, realLenght, profileForecast, realPart.PARTSWEIGHT)
       }
     })
     buff.sortBy(s => (s.mat, s.section, s.scantling)).toList
