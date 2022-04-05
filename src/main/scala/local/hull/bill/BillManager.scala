@@ -88,7 +88,7 @@ object BillManager extends BillHelper with Codecs {
     val real: List[ProfileMaterial] = genTotProfiles(project).sortBy(s => s.KSE)
     real.foreach(realPart => {
       val realPartsCpunt: Int = realPart.PARTS
-      val realLenght: Double = realPart.LENGHT * 1000
+      val realLenghtMM: Double = realPart.LENGHT * 1000
       if (nest.exists(s => s.KSE.equals(realPart.KSE))) {
         val nests = nest.filter(p => p.KSE.equals(realPart.KSE) && p.KQ.equals(realPart.MATERIAL))
         val kse = nests.head.KSE
@@ -98,8 +98,8 @@ object BillManager extends BillHelper with Codecs {
         val grossLenght = nests.head.GROLEN
         val count = nests.map(_.NGB).sum
         val scrap = nests.head.TOTAL_KSE_SCRAP
-        val profileForecast: Int = Math.ceil((realLenght + (realLenght / 100) * scrap) / grossLenght).toInt
-        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght, count, scrap, realPartsCpunt, realLenght, profileForecast, realPart.PARTSWEIGHT)
+        val profileForecast: Int = Math.ceil((realLenghtMM + (realLenghtMM / 100) * scrap) / grossLenght).toInt
+        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT)
       } else {
         val kse = realPart.KSE
         val mat = realPart.MATERIAL
