@@ -109,7 +109,7 @@ object BillManager extends BillHelper with Codecs {
         val count = 0
         val scrap = 0
         val profileForecast: Int = 0
-        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght, count, scrap, realPartsCpunt, realLenght, profileForecast, realPart.PARTSWEIGHT)
+        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT)
       }
     })
     buff.sortBy(s => (s.mat, s.section, s.scantling)).toList
