@@ -31,7 +31,8 @@ object BillManager extends BillHelper with Codecs {
                             nestedParts: Int = 0,
                             realPartsCount: Int = 0,
                             realWeight: Double = 0,
-                            plateForecast: Int = 0
+                            plateForecast: Int = 0,
+                            stock:Int=0
                           )
 
   case class ProfileNestBill(
@@ -75,7 +76,8 @@ object BillManager extends BillHelper with Codecs {
                             TOTAL_BL_SCRAP: Double = 0.0,
                             TOTAL_KPL_SCRAP: Double = 0.0,
                             ENCLOS_TYPE: Int = 0,
-                            ASPECT_RATIO: Int = 0
+                            ASPECT_RATIO: Int = 0,
+                            STOCK:Int=0
                           )
 
   case class PlateMaterial(COUNT: Int, WEIGHT: Double, THICKNESS: Double, MAT: String)
@@ -125,8 +127,8 @@ object BillManager extends BillHelper with Codecs {
 
       if (nests.exists(p => p.KQ.equals(realPrat.MAT) && p.T == realPrat.THICKNESS)) {
         val nest = nests.filter(p => p.KQ.equals(realPrat.MAT) && p.T == realPrat.THICKNESS)
-
         val KPL = nest.head.KPL
+        val stock=nest.head.STOCK
         val mat = realPrat.MAT
         val scantling = genScantling(realPrat.THICKNESS, nest.head.L / 1000, nest.head.W / 1000)
         val count = nest.map(_.NGP).sum
@@ -135,9 +137,7 @@ object BillManager extends BillHelper with Codecs {
         val realPartsCount = realPrat.COUNT
         val realWeight = realPrat.WEIGHT
         val plateForecas = Math.ceil((realWeight + (realWeight / 100) * scrap) / nest.head.TONETWGT).toInt
-        buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedParts, realPartsCount, realWeight, plateForecas)
-
-
+        buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedParts, realPartsCount, realWeight, plateForecas,stock)
       } else {
         val KPL = 0
         val mat = realPrat.MAT
