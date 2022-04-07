@@ -90,9 +90,9 @@ object BillManager extends BillHelper with Codecs {
                             DENSITY: Double = 0.0
                           )
 
-  case class StdPlate(OID: Int = 0, KPL: Int = 0, MATERIAL_OID: Int = 0, LENGTH: Double = 0.0, WIDTH: Double = 0.0, THICKNESS: Double = 0.0, STORAGE_CODE: String = "", STOCK: Int = 0) {
-    def area(): Double = WIDTH * LENGTH
-  }
+  case class StdPlate(OID: Int = 0, KPL: Int = 0, MATERIAL_OID: Int = 0, LENGTH: Double = 0.0, WIDTH: Double = 0.0, THICKNESS: Double = 0.0, STORAGE_CODE: String = "", STOCK: Int = 0, area:Double=0.0)
+
+
 
   case class PlateMaterial(COUNT: Int, WEIGHT: Double, THICKNESS: Double, MAT: String)
 
@@ -145,18 +145,19 @@ object BillManager extends BillHelper with Codecs {
     realPrats.foreach(realPrat => {
       if (nests.exists(p => p.KQ.equals(realPrat.MAT) && p.T == realPrat.THICKNESS)) {
         val nest = nests.filter(p => p.KQ.equals(realPrat.MAT) && p.T == realPrat.THICKNESS)
-        val KPL = nest.head.KPL
-        val stock = nest.head.STOCK
+        val globNest: PlateNestBill =nest.maxBy(s=>s.W*s.L)
+        val KPL = globNest.KPL
+        val stock = globNest.STOCK
         val mat = realPrat.MAT
         val density: Double = mats.find(s => s.CODE.equals(mat)) match {
           case Some(value) => value.DENSITY
           case None => 0.0d
         }
-        val oneSheetWeight = Math.ceil(nest.head.W / 1000 * nest.head.L / 1000 * (nest.head.T / 1000) * density * 1000).toInt
+        val oneSheetWeight = Math.ceil(globNest.W / 1000 * globNest.L / 1000 * (globNest.T / 1000) * density * 1000).toInt
         val isDisabled = isMatDisabled(mat, mats)
-        val scantling = genScantling(realPrat.THICKNESS, nest.head.L / 1000, nest.head.W / 1000)
+        val scantling = genScantling(realPrat.THICKNESS, globNest.L / 1000, globNest.W / 1000)
         val count = nest.map(_.NGP).sum
-        val scrap = nest.head.TOTAL_KPL_SCRAP
+        val scrap = globNest.TOTAL_KPL_SCRAP
         val nestedParts = nest.map(_.NP).sum
         val realPartsCount = realPrat.COUNT
         val realWeight = realPrat.WEIGHT
@@ -211,7 +212,7 @@ object BillManager extends BillHelper with Codecs {
     mats.find(s => s.CODE.equals(matCode)) match {
       case Some(mat) => {
         val stdPlatesMat = stdPlates.filter(s => s.MATERIAL_OID == mat.OID && s.THICKNESS==thin)
-        if (stdPlatesMat.nonEmpty) stdPlatesMat.maxBy(s => s.area()) else StdPlate()
+        if (stdPlatesMat.nonEmpty) stdPlatesMat.maxBy(s => s.area) else StdPlate()
       }
       case None => StdPlate()
     }

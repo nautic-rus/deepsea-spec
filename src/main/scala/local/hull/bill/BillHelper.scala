@@ -196,7 +196,6 @@ trait BillHelper {
   }
 
   def doubTo2Str(in: Double): (String) = {
-    println(in)
     val arr = in.toString.split("\\.")
     val intVal = arr.head
     val doubleValue = arr(1).head.toString
@@ -258,6 +257,7 @@ trait BillHelper {
               Option(rs.getDouble("THICKNESS")).getOrElse(0.0),
               Option(rs.getString("STORAGE_CODE")).getOrElse(""),
               Option(rs.getInt("STOCK")).getOrElse(0),
+              Option(rs.getDouble("LENGTH")).getOrElse(0.0) * Option(rs.getDouble("WIDTH")).getOrElse(0.0)
             )
           }
           rs.close()
