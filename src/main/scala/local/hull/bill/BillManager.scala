@@ -210,7 +210,7 @@ object BillManager extends BillHelper with Codecs {
   private def finfSuitableStdPlate(matCode: String, thin: Double, stdPlates: List[StdPlate], mats: List[ForanMaterial]): StdPlate = {
     mats.find(s => s.CODE.equals(matCode)) match {
       case Some(mat) => {
-        val stdPlatesMat = stdPlates.filter(s => s.MATERIAL_OID == mat.OID)
+        val stdPlatesMat = stdPlates.filter(s => s.MATERIAL_OID == mat.OID && s.THICKNESS==thin)
         if (stdPlatesMat.nonEmpty) stdPlatesMat.maxBy(s => s.area()) else StdPlate()
       }
       case None => StdPlate()
