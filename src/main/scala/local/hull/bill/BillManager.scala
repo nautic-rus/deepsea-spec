@@ -34,7 +34,8 @@ object BillManager extends BillHelper with Codecs {
                             realWeight: Double = 0,
                             plateForecast: Int = 0,
                             stock: Int = 0,
-                            isDisabled: Boolean = true
+                            isDisabled: Boolean = true,
+                            oneSheetWeight: Double = 0.0
                           )
 
   case class ProfileNestBill(
@@ -142,6 +143,11 @@ object BillManager extends BillHelper with Codecs {
         val KPL = nest.head.KPL
         val stock = nest.head.STOCK
         val mat = realPrat.MAT
+        val density: Double = mats.find(s => s.CODE.equals(mat)) match {
+          case Some(value) => value.DENSITY
+          case None => 0.0d
+        }
+        val oneSheetWeight: Double = nest.head.W / 1000 * nest.head.L / 1000 * (nest.head.T / 1000) * density * 1000
         val isDisabled = isMatDisabled(mat, mats)
         val scantling = genScantling(realPrat.THICKNESS, nest.head.L / 1000, nest.head.W / 1000)
         val count = nest.map(_.NGP).sum
@@ -150,20 +156,24 @@ object BillManager extends BillHelper with Codecs {
         val realPartsCount = realPrat.COUNT
         val realWeight = realPrat.WEIGHT
         //val plateForecas = Math.ceil((realWeight + (realWeight / 100) * scrap) / nest.head.TONETWGT).toInt
-        val plateForecas = Math.ceil((realWeight + (realWeight * 0.13 )) / nest.head.TONETWGT).toInt
-        buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedParts, realPartsCount, realWeight, plateForecas, stock, isDisabled)
+        //val plateForecas = Math.ceil((realWeight + (realWeight * 0.13 )) / nest.head.TONETWGT).toInt
+
+        val plateForecas = Math.ceil(realWeight / oneSheetWeight + (realWeight / oneSheetWeight) * 0.13d).toInt
+
+        buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedParts, realPartsCount, realWeight, plateForecas, stock, isDisabled, oneSheetWeight)
       } else {
         val KPL = 0
         val mat = realPrat.MAT
         val isDisabled = isMatDisabled(mat, mats)
         val scantling = genScantling(realPrat.THICKNESS)
+
         val count = 0
         val scrap = 0.0
         val realPartsCount = realPrat.COUNT
         val realWeight = realPrat.WEIGHT
         val plateForecas = 0
         val nestedPatrs = 0
-        buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedPatrs, realPartsCount, realWeight, plateForecas, 0, isDisabled)
+        buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedPatrs, realPartsCount, realWeight, plateForecas, 0, isDisabled, 0.0d)
       }
 
     })
