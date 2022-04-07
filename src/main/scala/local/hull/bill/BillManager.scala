@@ -90,6 +90,10 @@ object BillManager extends BillHelper with Codecs {
                             DENSITY: Double = 0.0
                           )
 
+  case class StdPlate(OID: Int = 0, KPL: Int = 0, MATERIAL_OID: Int = 0, LENGTH: Double = 0.0, WIDTH: Double = 0.0, THICKNESS: Double = 0.0, STORAGE_CODE: String = "", STOCK: Int = 0) {
+    def area(): Double = WIDTH * LENGTH
+  }
+
   case class PlateMaterial(COUNT: Int, WEIGHT: Double, THICKNESS: Double, MAT: String)
 
   case class ProfileMaterial(KSE: Int = 0, PRF_SECTION: String = "", MATERIAL: String = "", WEB_H: Double = 0.0, WEB_T: Double = 0.0, FLANGE_H: Double = 0.0, FLANGE_T: Double = 0.0, PARTS: Int = 0, LENGHT: Double = 0.0, PARTSWEIGHT: Double = 0.0)
@@ -135,6 +139,7 @@ object BillManager extends BillHelper with Codecs {
     val realPrats = genTotPlates(project)
     val nests = genPlateNestBill(project)
     val mats: List[ForanMaterial] = genForanMaterials(project)
+    val stdPlates: List[StdPlate] = genForanStdPlates(project)
 
     val buff = ListBuffer.empty[PlateAnalitic]
     realPrats.foreach(realPrat => {
@@ -147,7 +152,7 @@ object BillManager extends BillHelper with Codecs {
           case Some(value) => value.DENSITY
           case None => 0.0d
         }
-        val oneSheetWeight =Math.ceil( nest.head.W / 1000 * nest.head.L / 1000 * (nest.head.T / 1000) * density * 1000).toInt
+        val oneSheetWeight = Math.ceil(nest.head.W / 1000 * nest.head.L / 1000 * (nest.head.T / 1000) * density * 1000).toInt
         val isDisabled = isMatDisabled(mat, mats)
         val scantling = genScantling(realPrat.THICKNESS, nest.head.L / 1000, nest.head.W / 1000)
         val count = nest.map(_.NGP).sum
@@ -162,18 +167,24 @@ object BillManager extends BillHelper with Codecs {
 
         buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedParts, realPartsCount, realWeight, plateForecas, stock, isDisabled, oneSheetWeight)
       } else {
-        val KPL = 0
         val mat = realPrat.MAT
+        val density: Double = mats.find(s => s.CODE.equals(mat)) match {
+          case Some(value) => value.DENSITY
+          case None => 0.0d
+        }
+        val stdPlate = finfSuitableStdPlate(mat, realPrat.THICKNESS, stdPlates, mats)
+        val oneSheetWeight = Math.ceil(stdPlate.WIDTH / 1000 * stdPlate.LENGTH / 1000 * (stdPlate.THICKNESS / 1000) * density * 1000).toInt
+        val KPL = stdPlate.KPL
         val isDisabled = isMatDisabled(mat, mats)
-        val scantling = genScantling(realPrat.THICKNESS)
-
+        val scantling = genScantling(realPrat.THICKNESS, stdPlate.LENGTH / 1000, stdPlate.WIDTH / 1000)
         val count = 0
         val scrap = 0.0
         val realPartsCount = realPrat.COUNT
         val realWeight = realPrat.WEIGHT
-        val plateForecas = 0
+        val plateForecas = Math.ceil(realWeight / oneSheetWeight + (realWeight / oneSheetWeight) * 0.13d).toInt
         val nestedPatrs = 0
-        buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedPatrs, realPartsCount, realWeight, plateForecas, 0, isDisabled, 0)
+        val stock =stdPlate.STOCK
+        buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedPatrs, realPartsCount, realWeight, plateForecas, stock, isDisabled, oneSheetWeight)
       }
 
     })
@@ -193,6 +204,16 @@ object BillManager extends BillHelper with Codecs {
     mats.find(s => s.CODE.equals(matCode)) match {
       case Some(mat) => mat.DESCRIPTION.toUpperCase().contains("DISABLED")
       case None => true
+    }
+  }
+
+  private def finfSuitableStdPlate(matCode: String, thin: Double, stdPlates: List[StdPlate], mats: List[ForanMaterial]): StdPlate = {
+    mats.find(s => s.CODE.equals(matCode)) match {
+      case Some(mat) => {
+        val stdPlatesMat = stdPlates.filter(s => s.MATERIAL_OID == mat.OID)
+        if (stdPlatesMat.nonEmpty) stdPlatesMat.maxBy(s => s.area()) else StdPlate()
+      }
+      case None => StdPlate()
     }
   }
 

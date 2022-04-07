@@ -1,6 +1,6 @@
 package local.hull.bill
 
-import local.hull.bill.BillManager.{ForanMaterial, PlateAnalitic, PlateMaterial, PlateNestBill, ProfileAnalitic, ProfileMaterial, ProfileNestBill}
+import local.hull.bill.BillManager.{ForanMaterial, PlateAnalitic, PlateMaterial, PlateNestBill, ProfileAnalitic, ProfileMaterial, ProfileNestBill, StdPlate}
 import local.sql.ConnectionManager
 
 import java.sql.{ResultSet, Statement}
@@ -236,6 +236,42 @@ trait BillHelper {
         }
       }
       case None => List.empty[ForanMaterial]
+    }
+  }
+
+  def genForanStdPlates(project: String): List[StdPlate] = {
+    val sql = "select OID,KPL,MATERIAL_OID,LENGTH,WIDTH,THICKNESS,STORAGE_CODE,STOCK from STD_PLATE "
+    ConnectionManager.connectionByProject(project) match {
+      case Some(connection) => {
+        try {
+          connection.setAutoCommit(false)
+          val stmt: Statement = connection.createStatement()
+          val rs: ResultSet = stmt.executeQuery(sql)
+          val ret = ListBuffer.empty[StdPlate]
+          while (rs.next()) {
+            ret += StdPlate(
+              Option(rs.getInt("OID")).getOrElse(0),
+              Option(rs.getInt("KPL")).getOrElse(0),
+              Option(rs.getInt("MATERIAL_OID")).getOrElse(0),
+              Option(rs.getDouble("LENGTH")).getOrElse(0.0),
+              Option(rs.getDouble("WIDTH")).getOrElse(0.0),
+              Option(rs.getDouble("THICKNESS")).getOrElse(0.0),
+              Option(rs.getString("STORAGE_CODE")).getOrElse(""),
+              Option(rs.getInt("STOCK")).getOrElse(0),
+            )
+          }
+          rs.close()
+          stmt.close()
+          connection.close()
+          ret.toList
+        }
+        catch {
+          case _: Throwable =>
+            connection.close()
+            List.empty[StdPlate]
+        }
+      }
+      case None => List.empty[StdPlate]
     }
   }
 
