@@ -224,6 +224,9 @@ trait BillHelper {
               Option(rs.getDouble("DENSITY")).getOrElse(0.0)
             )
           }
+          rs.close()
+          stmt.close()
+          connection.close()
           ret.toList
         }
         catch {
