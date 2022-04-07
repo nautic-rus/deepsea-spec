@@ -589,7 +589,7 @@ object EleEqTrayESKDReport extends Codecs with UtilsPDF {
           }
         }
       } else {
-        val str = s"${rowcunter}|${item.A1}|${item.A3}|${item.A4}|${item.A5}|${item.A6}|${item.A7}|${item.A8}|${item.A9}|${item.A11}||${item.A10}||||MESTO|"
+        val str = s"${rowcunter}|${item.A1}|${item.A3}|${item.A4}|${item.A5}|${item.A6}|${item.A7}|${item.A8}|${item.A9}|${item.A11}||${item.A10}|||${item.A2}|MESTO|"
         pw1.println(str)
         rowcunter = rowcunter + 1
       }
