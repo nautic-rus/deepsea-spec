@@ -35,7 +35,7 @@ object BillManager extends BillHelper with Codecs {
                             plateForecast: Int = 0,
                             stock: Int = 0,
                             isDisabled: Boolean = true,
-                            oneSheetWeight: Double = 0.0
+                            oneSheetWeight: Int = 0
                           )
 
   case class ProfileNestBill(
@@ -147,7 +147,7 @@ object BillManager extends BillHelper with Codecs {
           case Some(value) => value.DENSITY
           case None => 0.0d
         }
-        val oneSheetWeight: Double = nest.head.W / 1000 * nest.head.L / 1000 * (nest.head.T / 1000) * density * 1000
+        val oneSheetWeight =Math.ceil( nest.head.W / 1000 * nest.head.L / 1000 * (nest.head.T / 1000) * density * 1000).toInt
         val isDisabled = isMatDisabled(mat, mats)
         val scantling = genScantling(realPrat.THICKNESS, nest.head.L / 1000, nest.head.W / 1000)
         val count = nest.map(_.NGP).sum
@@ -173,7 +173,7 @@ object BillManager extends BillHelper with Codecs {
         val realWeight = realPrat.WEIGHT
         val plateForecas = 0
         val nestedPatrs = 0
-        buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedPatrs, realPartsCount, realWeight, plateForecas, 0, isDisabled, 0.0d)
+        buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedPatrs, realPartsCount, realWeight, plateForecas, 0, isDisabled, 0)
       }
 
     })
