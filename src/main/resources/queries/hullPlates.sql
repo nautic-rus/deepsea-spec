@@ -103,4 +103,4 @@ FROM
                 GKSE IS NOT NULL AND
                 STD.KSE = P.GKSE
     )
-WHERE THICKNESS = &thickness AND MATERIAL = '&material'
+WHERE THICKNESS = &thickness AND MAT = '&material'
