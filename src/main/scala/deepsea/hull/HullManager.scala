@@ -72,7 +72,7 @@ object HullManager {
   implicit val HullEspEncoder: Encoder[HullEsp] = deriveEncoder[HullEsp]
 
 
-  case class PlatePart(code: String, block: String, description: String, weight: Double, thickness: Double, material: String)
+  case class PlatePart(code: String, block: String, name: String, description: String, weight: Double, thickness: Double, material: String)
 }
 
 class HullManager extends Actor {
@@ -605,6 +605,7 @@ class HullManager extends Actor {
           res += PlatePart(
             rs.getString("CODE"),
             rs.getString("BLOCK"),
+            rs.getString("NAME"),
             rs.getString("DESCRIPTION"),
             rs.getDouble("WEIGHT"),
             rs.getDouble("THICKNESS"),
