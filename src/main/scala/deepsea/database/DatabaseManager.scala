@@ -6,7 +6,7 @@ import akka.util.Timeout
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import deepsea.actors.ActorManager
 import deepsea.actors.ActorStartupManager.DatabaseManagerStarted
-import deepsea.database.DatabaseManager.{GetMongoConnectionFromPool, GetOracleConnectionFromPool, OracleConnection, codecRegistry}
+import deepsea.database.DatabaseManager.{GetMongoConnectionFromPool, GetOracleConnectionFromPool, OracleConnection}
 import org.mongodb.scala.{MongoClient, MongoDatabase}
 
 import java.sql.Connection
