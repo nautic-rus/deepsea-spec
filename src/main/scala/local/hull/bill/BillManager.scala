@@ -182,7 +182,7 @@ object BillManager extends BillHelper with Codecs {
         val realPartsCount = realPrat.COUNT
         val realWeight = realPrat.WEIGHT
         val wastages: Double = calculatePlateWastages(globNest, foranScraps, oneSheetWeight)
-        val scrap =calculatePlateScraps(nestsByMat, foranScraps, oneSheetWeight, globNest)
+        val scrap = calculatePlateScraps(nestsByMat, foranScraps, oneSheetWeight, globNest)
 
         //val plateForecas = Math.ceil((realWeight + (realWeight / 100) * scrap) / nest.head.TONETWGT).toInt
         //val plateForecas = Math.ceil((realWeight + (realWeight * 0.13 )) / nest.head.TONETWGT).toInt
@@ -263,9 +263,13 @@ object BillManager extends BillHelper with Codecs {
     totWeught
   }
 
-  private def calculatePlateScraps(nestsByMat: List[PlateNestBill], foranScraps: List[ForanScrap], oneSheetWeight: Double, globNest: PlateNestBill): Double = {
+
+  private def calculatePlateScrapsOld(nestsByMat: List[PlateNestBill], foranScraps: List[ForanScrap], oneSheetWeight: Double, globNest: PlateNestBill): Double = {
     var nestCount: Double = 0.0
     var scrapAcc: Double = 0.0
+    if (globNest.KPL == 2) {
+      val jj = 0
+    }
 
     nestsByMat.foreach(nbm => {
       val realScrap: Double = {
@@ -287,20 +291,83 @@ object BillManager extends BillHelper with Codecs {
                   })
                 })
               })
-
             })
             scrpW
           }
           val realScr = currscrp - (scrps / oneSheetWeight) * 100.0
+          nestCount = nestCount + 1.0
+          scrapAcc = scrapAcc + realScr
           realScr
         } else {
           nbm.SCRAP
         }
       }
-      nestCount = nestCount + 1.0
-      scrapAcc = scrapAcc + realScrap
+
     })
-    scrapAcc / nestCount
+    val ret = scrapAcc / nestCount
+    ret
   }
 
+
+  private def calculatePlateScraps(nestsByMat: List[PlateNestBill], foranScraps: List[ForanScrap], oneSheetWeight: Double, globNest: PlateNestBill): Double = {
+    val buff = ListBuffer.empty[Double]
+    nestsByMat.filter(s => s.KPL == globNest.KPL).foreach(nbm => {
+      var basePartsWeight = nbm.TONETWGT
+      foranScraps.filter(s => s.PARENTNESTID == nbm.NESTID).foreach(scrL1 => {
+        if (scrL1.NESTID.nonEmpty) {
+          nestsByMat.find(s => s.KPL.equals(scrL1.KPL)) match {
+            case Some(value) => basePartsWeight = basePartsWeight + value.TONETWGT
+            case None => None
+          }
+        } else {
+          basePartsWeight = basePartsWeight + scrL1.WEIGHT
+        }
+
+        foranScraps.filter(s => s.PARENTNESTID == scrL1.NESTID).foreach(scrL2 => {
+          if (scrL2.NESTID.nonEmpty) {
+            nestsByMat.find(s => s.KPL.equals(scrL2.KPL)) match {
+              case Some(value) => basePartsWeight = basePartsWeight + value.TONETWGT
+              case None => None
+            }
+          } else {
+            basePartsWeight = basePartsWeight + scrL2.WEIGHT
+          }
+
+          foranScraps.filter(s => s.PARENTNESTID == scrL2.NESTID).foreach(scrL3 => {
+            if (scrL3.NESTID.nonEmpty) {
+              nestsByMat.find(s => s.KPL.equals(scrL3.KPL)) match {
+                case Some(value) => basePartsWeight = basePartsWeight + value.TONETWGT
+                case None => None
+              }
+            } else {
+              basePartsWeight = basePartsWeight + scrL3.WEIGHT
+            }
+
+            foranScraps.filter(s => s.PARENTNESTID == scrL3.NESTID).foreach(scrL4 => {
+              if (scrL4.NESTID.nonEmpty) {
+                nestsByMat.find(s => s.KPL.equals(scrL4.KPL)) match {
+                  case Some(value) => basePartsWeight = basePartsWeight + value.TONETWGT
+                  case None => None
+                }
+              } else {
+                basePartsWeight = basePartsWeight + scrL4.WEIGHT
+              }
+              foranScraps.filter(s => s.PARENTNESTID == scrL4.NESTID).foreach(scrL5 => {
+                if (scrL5.NESTID.nonEmpty) {
+                  nestsByMat.find(s => s.KPL.equals(scrL5.KPL)) match {
+                    case Some(value) => basePartsWeight = basePartsWeight + value.TONETWGT
+                    case None => None
+                  }
+                } else {
+                  basePartsWeight = basePartsWeight + scrL5.WEIGHT
+                }
+              })
+            })
+          })
+        })
+      })
+      buff += (globNest.TOGROWGT - basePartsWeight) / globNest.TOGROWGT * 100
+    })
+    buff.sum / buff.length
+  }
 }
