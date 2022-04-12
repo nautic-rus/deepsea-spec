@@ -210,13 +210,13 @@ class HullManager extends Actor {
 
       val fileName = "bill-of-materials-" + new Date().getTime + ".zip"
       var pathId = UUID.randomUUID().toString.substring(0, 8)
-      file = new File(App.Cloud.Directory + "\\" + pathId)
+      file = new File(App.Cloud.Directory + File.separator + pathId)
       while (file.exists()) {
         pathId = UUID.randomUUID().toString.substring(0, 8)
-        file = new File(App.Cloud.Directory + "\\" + pathId)
+        file = new File(App.Cloud.Directory + File.separator + pathId)
       }
       file.mkdir()
-      file = new File(App.Cloud.Directory + "\\" + pathId + "\\" + fileName)
+      file = new File(App.Cloud.Directory + File.separator + pathId + File.separator + fileName)
       val zip = new ZipOutputStream(new FileOutputStream(file))
       Files.list(path).forEach(file => {
         zip.putNextEntry(new ZipEntry(file.getFileName.toString))
@@ -504,7 +504,8 @@ class HullManager extends Actor {
               rs.getString("MATERIAL"),
               rs.getInt("MATERIAL_OID"),
               rs.getDouble("THICK"),
-              rs.getString("STOCK_CODE")
+              ""
+//              rs.getString("STOCK_CODE")
             )
           }
           rs.close()
@@ -609,7 +610,7 @@ class HullManager extends Actor {
             rs.getString("DESCRIPTION"),
             rs.getDouble("WEIGHT"),
             rs.getDouble("THICKNESS"),
-            rs.getString("MATERIAL")
+            rs.getString("MAT")
           )
         }
         rs.close()
