@@ -105,10 +105,10 @@ class HTTPManager extends Actor {
       (get & path("hullNestingBlocks") & parameter("project")) { (project) =>
         askFor(ActorManager.spec, GetHullNestingBlocks(project))
       },
-      (get & path("hullNestingMaterials") & parameter("project") & parameter("blocks")) { (project, blocks) =>
+      (post & path("hullNestingMaterials") & entity(as[String]) & parameter("project")) { (blocks, project) =>
         askFor(ActorManager.spec, GetHullNestingMaterials(project, blocks))
       },
-      (get & path("hullNestingByMaterials") & parameter("project") & parameter("materials")) { (project, materials) =>
+      (post & path("hullNestingByMaterials") & entity(as[String]) & parameter("project")) { (materials, project) =>
         askFor(ActorManager.spec, GetHullNestingByMaterials(project, materials))
       },
       (get & path("hullBillPlates") & parameter("project")) { (project) =>
