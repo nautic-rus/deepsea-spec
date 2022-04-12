@@ -1,6 +1,6 @@
 package local.hull.bill
 
-import local.hull.bill.BillManager.{ForanMaterial, PlateAnalitic, PlateMaterial, PlateNestBill, ProfileAnalitic, ProfileMaterial, ProfileNestBill, StdPlate}
+import local.hull.bill.BillManager.{ForanMaterial, ForanScrap, PlateAnalitic, PlateMaterial, PlateNestBill, ProfileAnalitic, ProfileMaterial, ProfileNestBill, StdPlate}
 import local.sql.ConnectionManager
 
 import java.sql.{ResultSet, Statement}
@@ -22,6 +22,8 @@ trait BillHelper {
   //private def genTotalProfilesMateriallSqlOld(): String = "select\n    KSE,\n    PRF_SECTION,\n    MATERIAL,\n    WEB_H,\n    WEB_T,\n    FLANGE_H,\n    FLANGE_T,\n    sum(PART_NUM) as PARTS,\n    sum(TOTAL_LEN) as LENGHT\nfrom\nV_TOTAL_PROFILE_BILL\nwhere PRF_SECTION <>'FS'   group by KSE,\n    PRF_SECTION,\n    MATERIAL,\n    WEB_H,\n    WEB_T,\n    FLANGE_H,\n    FLANGE_T\n    order by KSE"
   //private def genTotalProfilesMateriallSql(): String ="select \n     KSE,\n     PRF_SECTION,\n     MATERIAL,\n     WEB_H,\n     WEB_T,\n     FLANGE_H,\n     FLANGE_T,\n    PARTS,\n    LENGHT,\n    (LENGHT*area*density/100) as PARTSWEIGHT\nfrom(\nselect\n     VPB.KSE,\n     VPB.PRF_SECTION,\n     VPB.MATERIAL,\n     VPB.WEB_H,\n     VPB.WEB_T,\n     VPB.FLANGE_H,\n     VPB.FLANGE_T,\n     s.area,\n     m.density,\n    sum( VPB.PART_NUM) as PARTS,\n    sum( VPB.TOTAL_LEN) as LENGHT\nfrom\nV_TOTAL_PROFILE_BILL VPB, std_profile s, material m\nwhere  \ns.KSE=VPB.KSE AND m.CODE=VPB.MATERIAL AND\n     VPB.PRF_SECTION <>'FS'   group by  VPB.KSE,\n     VPB.PRF_SECTION,\n     VPB.MATERIAL,\n     VPB.WEB_H,\n     VPB.WEB_T,\n     VPB.FLANGE_H,\n     VPB.FLANGE_T,\n     s.area,\n     m.density\n    order by  VPB.KSE)"
   private def genTotalProfilesMateriallSql(): String = "select \n     KSE,\n     PRF_SECTION,\n     MATERIAL,\n     WEB_H,\n     WEB_T,\n     FLANGE_H,\n     FLANGE_T,\n    PARTS,\n    LENGHT,\n    (LENGHT*area*density/100) as PARTSWEIGHT\nfrom(\nselect\n     VPB.KSE,\n     VPB.PRF_SECTION,\n     VPB.MATERIAL,\n     VPB.WEB_H,\n     VPB.WEB_T,\n     VPB.FLANGE_H,\n     VPB.FLANGE_T,\n     s.area,\n     m.density,\n    sum( VPB.PART_NUM) as PARTS,\n    sum( VPB.TOTAL_LEN) as LENGHT\nfrom\n(      SELECT STD_KSE as KSE,\n             DECODE (STD_SECTION,\n                     -1, '',\n                     0, 'FS',\n                     1, 'AS',\n                     2, 'IS',\n                     3, 'TS',\n                     4, 'US',\n                     5, 'BS',\n                     6, 'ST',\n                     7, 'AT',\n                     8, 'OS',\n                     9, 'PS',\n                     10, 'RS',\n                     11, 'MC',\n                     12, 'DB',\n                     13, 'SR',\n                     14, 'HR',\n                     15, 'LI',\n                     16, 'ZL',\n                     17, 'TL',\n                     18, 'AI',\n                     19, 'BL',\n                     20, 'LA',\n                     21, 'TA',\n                     '') as PRF_SECTION,\n             MAT_CODE as MATERIAL,\n             STD_WEB_HEIGHT as WEB_H,\n             STD_WEB_THICKNESS as WEB_T,\n             STD_FLANGE_HEIGHT as FLANGE_H,\n             STD_FLANGE_THICKNESS as FLANGE_T,\n             COUNT (PART_OID) as PART_NUM,\n             SUM (PRF_LENGTH) as TOTAL_LEN\n        FROM V_RPT_ALL_PROF_DATA\n         where BL_OID not in (select OID from BLOCK where code like 'L%')\n    GROUP BY STD_OID,\n             STD_KSE,\n             STD_SECTION,\n             STD_WEB_HEIGHT,\n             STD_WEB_THICKNESS,\n             STD_FLANGE_HEIGHT,\n             STD_FLANGE_THICKNESS,\n             MAT_CODE) VPB, std_profile s, material m\nwhere  \ns.KSE=VPB.KSE AND m.CODE=VPB.MATERIAL AND\n     VPB.PRF_SECTION <>'FS'   group by  VPB.KSE,\n     VPB.PRF_SECTION,\n     VPB.MATERIAL,\n     VPB.WEB_H,\n     VPB.WEB_T,\n     VPB.FLANGE_H,\n     VPB.FLANGE_T,\n     s.area,\n     m.density\n    order by  VPB.KSE)"
+
+  private def genForanScrapSQL() = "select \nENCL.OID,\nENCL.STD_PLATE_OID as STDPLATEOID,\nSTD.KPL,\nSTD2.KPL as PARENTKPL,\nGET_NEST_ID( \n(select OID from PRD_NEST_GEN where COD_PLT=(select OID from STD_PLATE where KPL=STD.KPL)),\n(select ID_SEQ_BLOCK from PRD_NEST_GEN where COD_PLT=(select OID from STD_PLATE where KPL=STD.KPL))\n) as NESTID,\nGET_NEST_ID(ENCL.FROM_NEST_OID, N.ID_SEQ_BLOCK) PARENTNESTID,\nENCL.TYPE,\nENCL.SLENGTH,\nENCL.SWIDTH,\nSTD.THICKNESS,\nMAT.DENSITY,\nENCL.AREA_M2 as AREAM2,\n(STD.THICKNESS/10*ENCL.AREA_M2*10000*MAT.DENSITY)/1000 as WEIGHT\n\nfrom PRD_STD_PLT_ENCLOS ENCL, STD_PLATE STD, MATERIAL MAT, PRD_NEST_GEN N, STD_PLATE STD2\nwhere \nENCL.STD_PROFILE_OID is NULL AND\nSTD.OID=ENCL.STD_PLATE_OID AND\nMAT.OID=STD.MATERIAL_OID AND\nN.OID=ENCL.FROM_NEST_OID AND\nSTD2.OID=N.COD_PLT"
 
   def genProfileNestBill(project: String): List[ProfileNestBill] = {
     ConnectionManager.connectionByProject(project) match {
@@ -117,6 +119,49 @@ trait BillHelper {
       case None => List.empty[PlateNestBill]
     }
   }
+
+
+  def genPlateForanScrap(project: String): List[ForanScrap] = {
+    ConnectionManager.connectionByProject(project) match {
+      case Some(connection) => {
+        try {
+          connection.setAutoCommit(false)
+          val stmt: Statement = connection.createStatement()
+          val sql = genForanScrapSQL()
+          val rs: ResultSet = stmt.executeQuery(sql)
+          val ret = ListBuffer.empty[ForanScrap]
+          while (rs.next()) {
+            ret += ForanScrap(
+              Option(rs.getInt("OID")).getOrElse(0),
+              Option(rs.getInt("STDPLATEOID")).getOrElse(0),
+              Option(rs.getInt("KPL")).getOrElse(0),
+              Option(rs.getInt("PARENTKPL")).getOrElse(0),
+              Option(rs.getString("NESTID")).getOrElse(""),
+              Option(rs.getString("PARENTNESTID")).getOrElse(""),
+              Option(rs.getInt("TYPE")).getOrElse(0),
+              Option(rs.getDouble("SLENGTH")).getOrElse(0.0),
+              Option(rs.getDouble("SWIDTH")).getOrElse(0.0),
+              Option(rs.getDouble("THICKNESS")).getOrElse(0.0),
+              Option(rs.getDouble("DENSITY")).getOrElse(0.0),
+              Option(rs.getDouble("AREAM2")).getOrElse(0.0),
+              Option(rs.getDouble("WEIGHT")).getOrElse(0.0)
+            )
+          }
+
+          stmt.close()
+          connection.close()
+          ret.toList
+        }
+        catch {
+          case _: Throwable =>
+            connection.close()
+            List.empty[ForanScrap]
+        }
+      }
+      case None => List.empty[ForanScrap]
+    }
+  }
+
 
   def genTotPlates(project: String): List[PlateMaterial] = {
     ConnectionManager.connectionByProject(project) match {

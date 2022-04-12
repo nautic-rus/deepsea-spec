@@ -4,12 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ebc20096-d70b-4412-983f-14fe275410ee" name="Default Changelist" comment="kokovin release 13.11.70">
+    <list default="true" id="ebc20096-d70b-4412-983f-14fe275410ee" name="Default Changelist" comment="kokovin release 13.11.86">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/local/hull/PartHelper.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/local/hull/PartHelper.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/local/hull/PartManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/local/hull/PartManager.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/scala/PRD.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/PRD.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/scala/a.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/local/hull/bill/BillHelper.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/local/hull/bill/BillHelper.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/local/hull/bill/BillManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/local/hull/bill/BillManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/scala/HullBill.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/HullBill.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/test/scala/TestElePdf.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/TestElePdf.scala" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -100,7 +100,7 @@
       <recent name="local.ele.cbfill.models" />
     </key>
   </component>
-  <component name="RunManager" selected="ScalaTest.PRD">
+  <component name="RunManager" selected="ScalaTest.HullBill">
     <configuration default="true" type="JetRunConfigurationType">
       <method v="2">
         <option name="Make" enabled="true" />
@@ -203,11 +203,11 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="ScalaTest.PRD" />
+        <item itemvalue="ScalaTest.HullBill" />
         <item itemvalue="ScalaTest.TestElePdf" />
+        <item itemvalue="ScalaTest.PRD" />
         <item itemvalue="ScalaTest.CNCTest" />
         <item itemvalue="ScalaTest.NestsTest" />
-        <item itemvalue="ScalaTest.HullBill" />
       </list>
     </recent_temporary>
   </component>
@@ -220,146 +220,6 @@
       <option name="presentableId" value="Default" />
       <updated>1623933574191</updated>
       <workItem from="1638960673599" duration="901000" />
-    </task>
-    <task id="LOCAL-00077" summary="kokovin release 13.11.32">
-      <created>1643038173530</created>
-      <option name="number" value="00077" />
-      <option name="presentableId" value="LOCAL-00077" />
-      <option name="project" value="LOCAL" />
-      <updated>1643038173530</updated>
-    </task>
-    <task id="LOCAL-00078" summary="kokovin release 13.11.33">
-      <created>1643040767513</created>
-      <option name="number" value="00078" />
-      <option name="presentableId" value="LOCAL-00078" />
-      <option name="project" value="LOCAL" />
-      <updated>1643040767513</updated>
-    </task>
-    <task id="LOCAL-00079" summary="kokovin release 13.11.33">
-      <created>1643041182516</created>
-      <option name="number" value="00079" />
-      <option name="presentableId" value="LOCAL-00079" />
-      <option name="project" value="LOCAL" />
-      <updated>1643041182516</updated>
-    </task>
-    <task id="LOCAL-00080" summary="kokovin release 13.11.33">
-      <created>1643041885636</created>
-      <option name="number" value="00080" />
-      <option name="presentableId" value="LOCAL-00080" />
-      <option name="project" value="LOCAL" />
-      <updated>1643041885636</updated>
-    </task>
-    <task id="LOCAL-00081" summary="kokovin release 13.11.34">
-      <created>1643105303015</created>
-      <option name="number" value="00081" />
-      <option name="presentableId" value="LOCAL-00081" />
-      <option name="project" value="LOCAL" />
-      <updated>1643105303016</updated>
-    </task>
-    <task id="LOCAL-00082" summary="kokovin release 13.11.35">
-      <created>1643186958670</created>
-      <option name="number" value="00082" />
-      <option name="presentableId" value="LOCAL-00082" />
-      <option name="project" value="LOCAL" />
-      <updated>1643186958670</updated>
-    </task>
-    <task id="LOCAL-00083" summary="kokovin release 13.11.36">
-      <created>1643189997727</created>
-      <option name="number" value="00083" />
-      <option name="presentableId" value="LOCAL-00083" />
-      <option name="project" value="LOCAL" />
-      <updated>1643189997727</updated>
-    </task>
-    <task id="LOCAL-00084" summary="kokovin release 13.11.37">
-      <created>1643206745049</created>
-      <option name="number" value="00084" />
-      <option name="presentableId" value="LOCAL-00084" />
-      <option name="project" value="LOCAL" />
-      <updated>1643206745049</updated>
-    </task>
-    <task id="LOCAL-00085" summary="kokovin release 13.11.38">
-      <created>1643209663864</created>
-      <option name="number" value="00085" />
-      <option name="presentableId" value="LOCAL-00085" />
-      <option name="project" value="LOCAL" />
-      <updated>1643209663864</updated>
-    </task>
-    <task id="LOCAL-00086" summary="kokovin release 13.11.39">
-      <created>1643707570776</created>
-      <option name="number" value="00086" />
-      <option name="presentableId" value="LOCAL-00086" />
-      <option name="project" value="LOCAL" />
-      <updated>1643707570776</updated>
-    </task>
-    <task id="LOCAL-00087" summary="kokovin release 13.11.40">
-      <created>1643888619888</created>
-      <option name="number" value="00087" />
-      <option name="presentableId" value="LOCAL-00087" />
-      <option name="project" value="LOCAL" />
-      <updated>1643888619889</updated>
-    </task>
-    <task id="LOCAL-00088" summary="kokovin release 13.11.40">
-      <created>1643888790966</created>
-      <option name="number" value="00088" />
-      <option name="presentableId" value="LOCAL-00088" />
-      <option name="project" value="LOCAL" />
-      <updated>1643888790966</updated>
-    </task>
-    <task id="LOCAL-00089" summary="kokovin release 13.11.41">
-      <created>1643896671194</created>
-      <option name="number" value="00089" />
-      <option name="presentableId" value="LOCAL-00089" />
-      <option name="project" value="LOCAL" />
-      <updated>1643896671194</updated>
-    </task>
-    <task id="LOCAL-00090" summary="kokovin release 13.11.42">
-      <created>1643964309888</created>
-      <option name="number" value="00090" />
-      <option name="presentableId" value="LOCAL-00090" />
-      <option name="project" value="LOCAL" />
-      <updated>1643964309888</updated>
-    </task>
-    <task id="LOCAL-00091" summary="kokovin release 13.11.43">
-      <created>1644240759365</created>
-      <option name="number" value="00091" />
-      <option name="presentableId" value="LOCAL-00091" />
-      <option name="project" value="LOCAL" />
-      <updated>1644240759366</updated>
-    </task>
-    <task id="LOCAL-00092" summary="kokovin release 13.11.43">
-      <created>1644242697320</created>
-      <option name="number" value="00092" />
-      <option name="presentableId" value="LOCAL-00092" />
-      <option name="project" value="LOCAL" />
-      <updated>1644242697320</updated>
-    </task>
-    <task id="LOCAL-00093" summary="kokovin release 13.11.43">
-      <created>1644311907844</created>
-      <option name="number" value="00093" />
-      <option name="presentableId" value="LOCAL-00093" />
-      <option name="project" value="LOCAL" />
-      <updated>1644311907844</updated>
-    </task>
-    <task id="LOCAL-00094" summary="kokovin release 13.11.44">
-      <created>1644493113594</created>
-      <option name="number" value="00094" />
-      <option name="presentableId" value="LOCAL-00094" />
-      <option name="project" value="LOCAL" />
-      <updated>1644493113594</updated>
-    </task>
-    <task id="LOCAL-00095" summary="kokovin release 13.11.45">
-      <created>1644497317756</created>
-      <option name="number" value="00095" />
-      <option name="presentableId" value="LOCAL-00095" />
-      <option name="project" value="LOCAL" />
-      <updated>1644497317756</updated>
-    </task>
-    <task id="LOCAL-00096" summary="kokovin release 13.11.46">
-      <created>1644506459893</created>
-      <option name="number" value="00096" />
-      <option name="presentableId" value="LOCAL-00096" />
-      <option name="project" value="LOCAL" />
-      <updated>1644506459893</updated>
     </task>
     <task id="LOCAL-00097" summary="kokovin release 13.11.47">
       <created>1644569787132</created>
@@ -564,7 +424,147 @@
       <option name="project" value="LOCAL" />
       <updated>1648144746959</updated>
     </task>
-    <option name="localTasksCounter" value="126" />
+    <task id="LOCAL-00126" summary="kokovin release 13.11.71">
+      <created>1648551658777</created>
+      <option name="number" value="00126" />
+      <option name="presentableId" value="LOCAL-00126" />
+      <option name="project" value="LOCAL" />
+      <updated>1648551658777</updated>
+    </task>
+    <task id="LOCAL-00127" summary="kokovin release 13.11.73">
+      <created>1648639327810</created>
+      <option name="number" value="00127" />
+      <option name="presentableId" value="LOCAL-00127" />
+      <option name="project" value="LOCAL" />
+      <updated>1648639327810</updated>
+    </task>
+    <task id="LOCAL-00128" summary="kokovin release 13.11.74">
+      <created>1648642427451</created>
+      <option name="number" value="00128" />
+      <option name="presentableId" value="LOCAL-00128" />
+      <option name="project" value="LOCAL" />
+      <updated>1648642427451</updated>
+    </task>
+    <task id="LOCAL-00129" summary="kokovin release 13.11.75">
+      <created>1648716171692</created>
+      <option name="number" value="00129" />
+      <option name="presentableId" value="LOCAL-00129" />
+      <option name="project" value="LOCAL" />
+      <updated>1648716171692</updated>
+    </task>
+    <task id="LOCAL-00130" summary="kokovin release 13.11.76">
+      <created>1648798247921</created>
+      <option name="number" value="00130" />
+      <option name="presentableId" value="LOCAL-00130" />
+      <option name="project" value="LOCAL" />
+      <updated>1648798247921</updated>
+    </task>
+    <task id="LOCAL-00131" summary="kokovin release 13.11.77">
+      <created>1649063250606</created>
+      <option name="number" value="00131" />
+      <option name="presentableId" value="LOCAL-00131" />
+      <option name="project" value="LOCAL" />
+      <updated>1649063250606</updated>
+    </task>
+    <task id="LOCAL-00132" summary="kokovin release 13.11.78">
+      <created>1649164165545</created>
+      <option name="number" value="00132" />
+      <option name="presentableId" value="LOCAL-00132" />
+      <option name="project" value="LOCAL" />
+      <updated>1649164165545</updated>
+    </task>
+    <task id="LOCAL-00133" summary="kokovin release 13.11.79">
+      <created>1649175558700</created>
+      <option name="number" value="00133" />
+      <option name="presentableId" value="LOCAL-00133" />
+      <option name="project" value="LOCAL" />
+      <updated>1649175558700</updated>
+    </task>
+    <task id="LOCAL-00134" summary="kokovin release 13.11.79">
+      <created>1649175638283</created>
+      <option name="number" value="00134" />
+      <option name="presentableId" value="LOCAL-00134" />
+      <option name="project" value="LOCAL" />
+      <updated>1649175638283</updated>
+    </task>
+    <task id="LOCAL-00135" summary="kokovin release 13.11.80">
+      <created>1649237579866</created>
+      <option name="number" value="00135" />
+      <option name="presentableId" value="LOCAL-00135" />
+      <option name="project" value="LOCAL" />
+      <updated>1649237579866</updated>
+    </task>
+    <task id="LOCAL-00136" summary="kokovin release 13.11.81">
+      <created>1649245730567</created>
+      <option name="number" value="00136" />
+      <option name="presentableId" value="LOCAL-00136" />
+      <option name="project" value="LOCAL" />
+      <updated>1649245730567</updated>
+    </task>
+    <task id="LOCAL-00137" summary="kokovin release 13.11.82">
+      <created>1649258144388</created>
+      <option name="number" value="00137" />
+      <option name="presentableId" value="LOCAL-00137" />
+      <option name="project" value="LOCAL" />
+      <updated>1649258144388</updated>
+    </task>
+    <task id="LOCAL-00138" summary="kokovin release 13.11.83">
+      <created>1649315215116</created>
+      <option name="number" value="00138" />
+      <option name="presentableId" value="LOCAL-00138" />
+      <option name="project" value="LOCAL" />
+      <updated>1649315215116</updated>
+    </task>
+    <task id="LOCAL-00139" summary="kokovin release 13.11.83">
+      <created>1649318052956</created>
+      <option name="number" value="00139" />
+      <option name="presentableId" value="LOCAL-00139" />
+      <option name="project" value="LOCAL" />
+      <updated>1649318052956</updated>
+    </task>
+    <task id="LOCAL-00140" summary="kokovin release 13.11.84">
+      <created>1649321795427</created>
+      <option name="number" value="00140" />
+      <option name="presentableId" value="LOCAL-00140" />
+      <option name="project" value="LOCAL" />
+      <updated>1649321795427</updated>
+    </task>
+    <task id="LOCAL-00141" summary="kokovin release 13.11.84">
+      <created>1649323985742</created>
+      <option name="number" value="00141" />
+      <option name="presentableId" value="LOCAL-00141" />
+      <option name="project" value="LOCAL" />
+      <updated>1649323985742</updated>
+    </task>
+    <task id="LOCAL-00142" summary="kokovin release 13.11.84">
+      <created>1649325076302</created>
+      <option name="number" value="00142" />
+      <option name="presentableId" value="LOCAL-00142" />
+      <option name="project" value="LOCAL" />
+      <updated>1649325076302</updated>
+    </task>
+    <task id="LOCAL-00143" summary="kokovin release 13.11.85">
+      <created>1649331254793</created>
+      <option name="number" value="00143" />
+      <option name="presentableId" value="LOCAL-00143" />
+      <option name="project" value="LOCAL" />
+      <updated>1649331254793</updated>
+    </task>
+    <task id="LOCAL-00144" summary="kokovin release 13.11.85">
+      <created>1649331966827</created>
+      <option name="number" value="00144" />
+      <option name="presentableId" value="LOCAL-00144" />
+      <option name="project" value="LOCAL" />
+      <updated>1649331966827</updated>
+    </task>
+    <task id="LOCAL-00145" summary="kokovin release 13.11.86">
+      <created>1649334808187</created>
+      <option name="number" value="00145" />
+      <option name="presentableId" value="LOCAL-00145" />
+      <option name="project" value="LOCAL" />
+      <updated>1649334808188</updated>
+    </task>
+    <option name="localTasksCounter" value="146" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -582,21 +582,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="kokovin release 13.11.46" />
-    <MESSAGE value="kokovin release 13.11.47" />
-    <MESSAGE value="kokovin release 13.11.48" />
-    <MESSAGE value="kokovin release 13.11.49" />
-    <MESSAGE value="kokovin release 13.11.50" />
-    <MESSAGE value="kokovin release 13.11.51" />
-    <MESSAGE value="kokovin release 13.11.52" />
-    <MESSAGE value="kokovin release 13.11.53" />
-    <MESSAGE value="kokovin release 13.11.54" />
-    <MESSAGE value="kokovin release 13.11.55" />
-    <MESSAGE value="kokovin release 13.11.56" />
-    <MESSAGE value="kokovin release 13.11.57" />
-    <MESSAGE value="kokovin release 13.11.58" />
-    <MESSAGE value="kokovin release 13.11.59" />
-    <MESSAGE value="kokovin release 13.11.60" />
     <MESSAGE value="kokovin release 13.11.61" />
     <MESSAGE value="kokovin release 13.11.62" />
     <MESSAGE value="kokovin release 13.11.63" />
@@ -607,7 +592,22 @@
     <MESSAGE value="kokovin release 13.11.68" />
     <MESSAGE value="kokovin release 13.11.69" />
     <MESSAGE value="kokovin release 13.11.70" />
-    <option name="LAST_COMMIT_MESSAGE" value="kokovin release 13.11.70" />
+    <MESSAGE value="kokovin release 13.11.71" />
+    <MESSAGE value="kokovin release 13.11.73" />
+    <MESSAGE value="kokovin release 13.11.74" />
+    <MESSAGE value="kokovin release 13.11.75" />
+    <MESSAGE value="kokovin release 13.11.76" />
+    <MESSAGE value="kokovin release 13.11.77" />
+    <MESSAGE value="kokovin release 13.11.78" />
+    <MESSAGE value="kokovin release 13.11.79" />
+    <MESSAGE value="kokovin release 13.11.80" />
+    <MESSAGE value="kokovin release 13.11.81" />
+    <MESSAGE value="kokovin release 13.11.82" />
+    <MESSAGE value="kokovin release 13.11.83" />
+    <MESSAGE value="kokovin release 13.11.84" />
+    <MESSAGE value="kokovin release 13.11.85" />
+    <MESSAGE value="kokovin release 13.11.86" />
+    <option name="LAST_COMMIT_MESSAGE" value="kokovin release 13.11.86" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -648,29 +648,9 @@
           <option name="timeStamp" value="202" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="scala-line">
-          <url>file://$PROJECT_DIR$/src/test/scala/HullBill.scala</url>
-          <line>15</line>
-          <option name="timeStamp" value="246" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="scala-line">
-          <url>file://$PROJECT_DIR$/src/test/scala/PRD.scala</url>
-          <line>12</line>
-          <option name="timeStamp" value="247" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="scala-line">
           <url>file://$PROJECT_DIR$/src/test/scala/CNCTest.scala</url>
           <line>14</line>
           <option name="timeStamp" value="249" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="scala-line">
-          <url>file://$PROJECT_DIR$/src/main/scala/local/pdf/ru/ele/EleEqTrayESKDReport.scala</url>
-          <line>239</line>
-          <option name="timeStamp" value="250" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="scala-line">
-          <url>file://$PROJECT_DIR$/src/main/scala/local/pdf/ru/ele/EleEqTrayESKDReport.scala</url>
-          <line>470</line>
-          <option name="timeStamp" value="255" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="scala-line">
           <url>file://$PROJECT_DIR$/src/main/scala/local/hull/PartHelper.scala</url>
@@ -683,9 +663,14 @@
           <option name="timeStamp" value="260" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="scala-line">
-          <url>file://$PROJECT_DIR$/src/main/scala/local/hull/PartHelper.scala</url>
-          <line>83</line>
-          <option name="timeStamp" value="261" />
+          <url>file://$PROJECT_DIR$/src/test/scala/HullBill.scala</url>
+          <line>17</line>
+          <option name="timeStamp" value="273" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="scala-line">
+          <url>file://$PROJECT_DIR$/src/test/scala/TestElePdf.scala</url>
+          <line>184</line>
+          <option name="timeStamp" value="275" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
