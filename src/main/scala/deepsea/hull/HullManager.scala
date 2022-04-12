@@ -8,7 +8,7 @@ import deepsea.App
 import deepsea.actors.ActorManager
 import deepsea.database.DatabaseManager.GetOracleConnection
 import deepsea.files.FileManager.GenerateUrl
-import deepsea.hull.HullManager.{GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, HullEsp, HullPartPlateDef, HullPartProfileDef, SetHullEsp}
+import deepsea.hull.HullManager.{GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, HullEsp, HullPartPlateDef, HullPartProfileDef, PlatePart, SetHullEsp}
 import deepsea.hull.classes.HullPart
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
@@ -65,8 +65,14 @@ object HullManager {
 
   case class HullEsp(project: String, department: String, content: List[PrdPart], var docNumber: String, var user: String, var revision: String, var date: Long, var version: Int)
 
+  case class GetHullPlatesForMaterial(project: String, material: String, thickness: String)
+  case class GetHullProfilesForMaterial()
+
   implicit val HullEspDecoder: Decoder[HullEsp] = deriveDecoder[HullEsp]
   implicit val HullEspEncoder: Encoder[HullEsp] = deriveEncoder[HullEsp]
+
+
+  case class PlatePart(code: String, block: String, name: String, description: String, weight: Double, thickness: Double, material: String)
 }
 
 class HullManager extends Actor {
@@ -204,13 +210,13 @@ class HullManager extends Actor {
 
       val fileName = "bill-of-materials-" + new Date().getTime + ".zip"
       var pathId = UUID.randomUUID().toString.substring(0, 8)
-      file = new File(App.Cloud.Directory + "\\" + pathId)
+      file = new File(App.Cloud.Directory + File.separator + pathId)
       while (file.exists()) {
         pathId = UUID.randomUUID().toString.substring(0, 8)
-        file = new File(App.Cloud.Directory + "\\" + pathId)
+        file = new File(App.Cloud.Directory + File.separator + pathId)
       }
       file.mkdir()
-      file = new File(App.Cloud.Directory + "\\" + pathId + "\\" + fileName)
+      file = new File(App.Cloud.Directory + File.separator + pathId + File.separator + fileName)
       val zip = new ZipOutputStream(new FileOutputStream(file))
       Files.list(path).forEach(file => {
         zip.putNextEntry(new ZipEntry(file.getFileName.toString))
@@ -274,6 +280,12 @@ class HullManager extends Actor {
         case url: String => sender() ! url.asJson.noSpaces
         case _ => sender() ! "error".asJson.noSpaces
       }
+
+    case GetHullPlatesForMaterial(project, material, thickness) =>
+      sender() ! getPlates(project, material, thickness.toDoubleOption.getOrElse(0)).asJson.noSpaces
+
+    case GetHullProfilesForMaterial() =>
+
   }
 
   def getHullPartsByDocNumber(project: String, docNumber: String): ListBuffer[HullPart] = {
@@ -299,7 +311,6 @@ class HullManager extends Actor {
     })
     parts
   }
-
   def getBsTree(project: String, oids: ListBuffer[Int]): ListBuffer[BsTreeItem] = {
     GetOracleConnection(project) match {
       case Some(c) =>
@@ -363,7 +374,6 @@ class HullManager extends Actor {
       case _ => ListBuffer.empty[BsTreeItem]
     }
   }
-
   def getHullParts(project: String): ListBuffer[HullPart] = {
     val res = ListBuffer.empty[HullPart]
     GetOracleConnection(project) match {
@@ -423,7 +433,6 @@ class HullManager extends Actor {
 
     res
   }
-
   def getHullParts(project: String, docNumber: String): ListBuffer[HullPart] = {
     val res = ListBuffer.empty[HullPart]
     GetOracleConnection(project) match {
@@ -481,7 +490,6 @@ class HullManager extends Actor {
 
     res
   }
-
   def getStdPlates(project: String, plateOids: ListBuffer[Int]): ListBuffer[HullPartPlateDef] = {
     val res = ListBuffer.empty[HullPartPlateDef]
     plateOids.grouped(900).toList.foreach(oids => {
@@ -496,7 +504,8 @@ class HullManager extends Actor {
               rs.getString("MATERIAL"),
               rs.getInt("MATERIAL_OID"),
               rs.getDouble("THICK"),
-              rs.getString("STOCK_CODE")
+              ""
+//              rs.getString("STOCK_CODE")
             )
           }
           rs.close()
@@ -508,7 +517,6 @@ class HullManager extends Actor {
 
     res
   }
-
   def getStdProfiles(project: String, kseOids: ListBuffer[Int]): ListBuffer[HullPartProfileDef] = {
     val res = ListBuffer.empty[HullPartProfileDef]
     kseOids.grouped(900).toList.foreach(oids => {
@@ -539,7 +547,6 @@ class HullManager extends Actor {
 
     res
   }
-
   def profileSectionDecode(kse: Int): String = kse match {
     case 0 =>
       "FS"
@@ -588,4 +595,31 @@ class HullManager extends Actor {
     case _ =>
       ""
   }
+  def getPlates(project: String, material: String, thickness: Double): ListBuffer[PlatePart] = {
+    val res = ListBuffer.empty[PlatePart]
+    GetOracleConnection(project) match {
+      case Some(c) =>
+        val s = c.createStatement()
+        val query = Source.fromResource("queries/hullPlates.sql").mkString.replaceAll("&thickness", thickness.toString).replaceAll("&material", material)
+        val rs = s.executeQuery(query)
+        while (rs.next()) {
+          res += PlatePart(
+            rs.getString("CODE"),
+            rs.getString("BLOCK"),
+            rs.getString("NAME"),
+            rs.getString("DESCRIPTION"),
+            rs.getDouble("WEIGHT"),
+            rs.getDouble("THICKNESS"),
+            rs.getString("MAT")
+          )
+        }
+        rs.close()
+        s.close()
+        c.close()
+      case _ =>
+    }
+
+    res
+  }
+
 }
