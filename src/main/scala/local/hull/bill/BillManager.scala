@@ -176,7 +176,8 @@ object BillManager extends BillHelper with Codecs {
         val oneSheetWeight = Math.ceil(globNest.W / 1000 * globNest.L / 1000 * (globNest.T / 1000) * density * 1000).toInt
         val isDisabled = isMatDisabled(mat, mats)
         val scantling = genScantling(realPrat.THICKNESS, globNest.L / 1000, globNest.W / 1000)
-        val count = nestsByMat.map(_.NGP).sum
+        //val count = nestsByMat.map(_.NGP).sum
+        val count = calculateNestPlatesCount(nestsByMat, foranScraps)
         //val scrap = globNest.TOTAL_KPL_SCRAP
         val nestedParts = nestsByMat.map(_.NP).sum
         val realPartsCount = realPrat.COUNT
@@ -262,7 +263,6 @@ object BillManager extends BillHelper with Codecs {
     val totWeught = (buff.filter(s => s.NESTID.isEmpty).map(_.WEIGHT).sum) / oneSheetWeight
     totWeught
   }
-
 
   private def calculatePlateScrapsOld(nestsByMat: List[PlateNestBill], foranScraps: List[ForanScrap], oneSheetWeight: Double, globNest: PlateNestBill): Double = {
     var nestCount: Double = 0.0
@@ -369,5 +369,13 @@ object BillManager extends BillHelper with Codecs {
       buff += (globNest.TOGROWGT - basePartsWeight) / globNest.TOGROWGT * 100
     })
     buff.sum / buff.length
+  }
+
+  private def calculateNestPlatesCount(nestsByMat: List[PlateNestBill], foranScraps: List[ForanScrap]): Int = {
+    val buff = ListBuffer.empty[PlateNestBill]
+    nestsByMat.foreach(s => {
+      if (!foranScraps.exists(d => d.KPL.equals(s.KPL))) buff += s
+    })
+    buff.map(_.NP).sum
   }
 }
