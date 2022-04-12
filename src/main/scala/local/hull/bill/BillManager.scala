@@ -177,6 +177,10 @@ object BillManager extends BillHelper with Codecs {
         val isDisabled = isMatDisabled(mat, mats)
         val scantling = genScantling(realPrat.THICKNESS, globNest.L / 1000, globNest.W / 1000)
         //val count = nestsByMat.map(_.NGP).sum
+
+        if (globNest.KPL == 2) {
+          val jhjh = 0
+        }
         val count = calculateNestPlatesCount(nestsByMat, foranScraps)
         //val scrap = globNest.TOTAL_KPL_SCRAP
         val nestedParts = nestsByMat.map(_.NP).sum
@@ -376,6 +380,6 @@ object BillManager extends BillHelper with Codecs {
     nestsByMat.foreach(s => {
       if (!foranScraps.exists(d => d.KPL.equals(s.KPL))) buff += s
     })
-    buff.map(_.NP).sum
+    buff.map(_.NGP).sum
   }
 }
