@@ -6,7 +6,8 @@ import akka.util.Timeout
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import deepsea.actors.ActorManager
 import deepsea.actors.ActorStartupManager.DatabaseManagerStarted
-import deepsea.database.DatabaseManager.{GetOracleConnectionFromPool, OracleConnection}
+import deepsea.database.DatabaseManager.{GetMongoConnectionFromPool, GetOracleConnectionFromPool, OracleConnection, codecRegistry}
+import org.mongodb.scala.{MongoClient, MongoDatabase}
 
 import java.sql.Connection
 import java.util.concurrent.TimeUnit
@@ -18,6 +19,7 @@ object DatabaseManager{
   implicit val timeout: Timeout = Timeout(5, TimeUnit.SECONDS)
   case class GetOracleConnectionFromPool(project: String)
   case class OracleConnection(project: String, ds: HikariDataSource)
+  case class GetMongoConnectionFromPool()
 
   def GetOracleConnection(project: String): Option[Connection] ={
     try{
@@ -30,14 +32,26 @@ object DatabaseManager{
       case e: Throwable => Option.empty
     }
   }
+  def GetMongoConnection(): Option[MongoDatabase] = {
+    try{
+      Await.result(ActorManager.dataBase ? GetMongoConnectionFromPool(), timeout.duration) match {
+        case response: MongoDatabase => Option(response)
+        case _ => Option.empty
+      }
+    }
+    catch {
+      case e: Throwable => Option.empty
+    }
+  }
 }
 
-class DatabaseManager extends Actor{
+class DatabaseManager extends Actor with MongoCodecs {
 
 
   private val configOracle = new HikariConfig()
   private val oracleConnections = ListBuffer.empty[OracleConnection]
 
+  private var mongoClient: MongoClient = _
 
 
   override def preStart(): Unit = {
@@ -51,6 +65,9 @@ class DatabaseManager extends Actor{
       oracleConnections += OracleConnection(project, new HikariDataSource(configOracle))
     })
 
+    mongoClient = MongoClient("mongodb://192.168.1.26")
+
+
     ActorManager.startup ! DatabaseManagerStarted()
   }
   override def receive: Receive = {
@@ -59,6 +76,8 @@ class DatabaseManager extends Actor{
         case Some(connection) => sender() ! connection.ds.getConnection
         case _ => Option.empty
       }
+    case GetMongoConnectionFromPool() => sender() ! mongoClient.getDatabase("3degdatabase").withCodecRegistry(codecRegistry)
+
     case _ => None
   }
 }

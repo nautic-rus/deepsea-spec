@@ -16,6 +16,7 @@ import local.ele.trays.TrayManager
 import local.ele.utils.EleUtils.fixFBS
 import local.pdf.ru.ele.EleEqTrayESKDReport.{generatePdfToFileNoRev, generatePdfToFileWithRev}
 import play.api.libs.json.{JsValue, Json}
+
 import java.io.{File, FileOutputStream}
 import java.nio.file.Files
 import java.util.concurrent.TimeUnit
@@ -43,7 +44,7 @@ object ElecManager{
 
 }
 class ElecManager extends Actor{
-  implicit val timeout: Timeout = Timeout(10, TimeUnit.SECONDS)
+  implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
 
   override def receive: Receive = {
     case GetTrayLabels(project, seqId) => sender() ! Json.toJson(TrayManager.trayLabels(project,seqId))

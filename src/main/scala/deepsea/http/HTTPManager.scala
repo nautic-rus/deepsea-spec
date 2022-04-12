@@ -13,11 +13,12 @@ import deepsea.App
 import deepsea.actors.ActorManager
 import deepsea.actors.ActorStartupManager.HTTPManagerStarted
 import deepsea.elec.ElecManager._
-import deepsea.hull.HullManager.{GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, SetHullEsp}
+import deepsea.hull.HullManager.{GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, SetHullEsp}
 import deepsea.spec.SpecManager._
 import org.apache.log4j.{LogManager, Logger}
 import play.api.libs.json.{JsValue, Json}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
+
 import java.util.concurrent.TimeUnit
 import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 
@@ -39,6 +40,9 @@ class HTTPManager extends Actor {
       },
       (get & path("hullPart") & parameter("project") & parameter("docNumber") & parameter("partCode")) { (project, docNumber, partCode) =>
         askFor(ActorManager.hullManager, GetHullPart(project, docNumber, partCode))
+      },
+      (get & path("hullPlates") & parameter("project") & parameter("material") & parameter("thickness")) { (project, material, thickness) =>
+        askFor(ActorManager.hullManager, GetHullPlatesForMaterial(project, material, thickness))
       },
 
       (get & path("hullPartList") & parameter("project") & parameter("docNumber")) { (project, docNumber) =>
