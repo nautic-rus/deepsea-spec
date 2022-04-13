@@ -178,9 +178,6 @@ object BillManager extends BillHelper with Codecs {
         val scantling = genScantling(realPrat.THICKNESS, globNest.L / 1000, globNest.W / 1000)
         //val count = nestsByMat.map(_.NGP).sum
 
-        if (globNest.KPL == 2) {
-          val jhjh = 0
-        }
         val count = calculateNestPlatesCount(nestsByMat, foranScraps)
         //val scrap = globNest.TOTAL_KPL_SCRAP
         val nestedParts = nestsByMat.map(_.NP).sum
@@ -192,7 +189,7 @@ object BillManager extends BillHelper with Codecs {
         //val plateForecas = Math.ceil((realWeight + (realWeight / 100) * scrap) / nest.head.TONETWGT).toInt
         //val plateForecas = Math.ceil((realWeight + (realWeight * 0.13 )) / nest.head.TONETWGT).toInt
 
-        val plateForecas = Math.ceil(realWeight / oneSheetWeight + (realWeight / oneSheetWeight) * 0.13d).toInt
+        val plateForecas = Math.ceil(((realWeight / oneSheetWeight + (realWeight / oneSheetWeight))-wastages) * 0.13d).toInt
 
         buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedParts, realPartsCount, realWeight, plateForecas, stock, isDisabled, oneSheetWeight, wastages)
       } else {
@@ -249,14 +246,19 @@ object BillManager extends BillHelper with Codecs {
     val buff = ListBuffer.empty[ForanScrap]
     val rootKpl = nest.KPL
     foranScraps.filter(s => s.PARENTKPL == rootKpl).foreach(scrL1 => {
+      if(scrL1.NESTID.isEmpty)
       buff += scrL1
       foranScraps.filter(s => s.PARENTKPL == scrL1.KPL).foreach(scrL2 => {
+        if(scrL1.NESTID.isEmpty)
         buff += scrL2
         foranScraps.filter(s => s.PARENTKPL == scrL2.KPL).foreach(scrL3 => {
+          if(scrL1.NESTID.isEmpty)
           buff += scrL3
           foranScraps.filter(s => s.PARENTKPL == scrL3.KPL).foreach(scrL4 => {
+            if(scrL1.NESTID.isEmpty)
             buff += scrL4
             foranScraps.filter(s => s.PARENTKPL == scrL4.KPL).foreach(scrL5 => {
+              if(scrL1.NESTID.isEmpty)
               buff += scrL5
             })
           })

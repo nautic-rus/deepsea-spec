@@ -1,29 +1,31 @@
 package local.hull.nest
 
 import local.common.DBRequests.{insertNestsLock, listToSqlString, retrieveNestsLocksByProject}
+import local.hull.bill.BillManager.ForanScrap
+import local.hull.bill.{BillHelper, BillManager}
 import local.hull.nest.CommonNest.{Nest, NestIdBlock, NestLock, NestMaterial}
 import local.sql.ConnectionManager
 
 import java.sql.{ResultSet, Statement}
 import scala.collection.mutable.ListBuffer
 
-trait NestHelper {
+trait NestHelper extends BillHelper{
 
 
   private def allPlateNestSQL(): String = "select  ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST,PARTS_WEIGHT,DENSITY,USAGE\nfrom(\nselect \n N.NEST_ID as ID, N.MATERIAL,N.THICKNESS,N.NEST_LENGTH,N.NEST_WIDTH,N.NUM_EQ_NEST,N.PARTS_WEIGHT,\n M.DENSITY,\n N.PARTS_WEIGHT/(((N.NEST_LENGTH*N.NEST_WIDTH*N.THICKNESS)/1000000000)*M.DENSITY*1000)*100 as USAGE\nfrom \n(\nselect NEST_ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST, SUM( WEIGHT_UNITS) as PARTS_WEIGHT\nfrom\n    (\n    select NEST_ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST,  WEIGHT_UNIT*NUM_PART_NEST as WEIGHT_UNITS\n    from V_PRD_PART_NEST_LIST \n    where NEST_ID like 'MU%'\n    )\nGROUP BY NEST_ID,MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST\n) N, MATERIAL M\nwhere N.MATERIAL=M.CODE\norder by N.NEST_ID\n)"
 
   private def plateNestByMaterial(mats: String) = s"select  ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST,PARTS_WEIGHT,DENSITY,USAGE\nfrom(\nselect \n N.NEST_ID as ID, N.MATERIAL,N.THICKNESS,N.NEST_LENGTH,N.NEST_WIDTH,N.NUM_EQ_NEST,N.PARTS_WEIGHT,\n M.DENSITY,\n N.PARTS_WEIGHT/(((N.NEST_LENGTH*N.NEST_WIDTH*N.THICKNESS)/1000000000)*M.DENSITY*1000)*100 as USAGE\nfrom \n(\nselect NEST_ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST, SUM( WEIGHT_UNITS) as PARTS_WEIGHT\nfrom\n    (\n    select NEST_ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST,  WEIGHT_UNIT*NUM_PART_NEST as WEIGHT_UNITS\n    from V_PRD_PART_NEST_LIST \n    where NEST_ID like 'MU%'\n    )\nGROUP BY NEST_ID,MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST\n) N, MATERIAL M\nwhere N.MATERIAL=M.CODE\norder by N.NEST_ID\n)\nwhere MATERIAL in(${mats})"
 
-  private def plateNestByMaterialAndDimOLD(par: String) = s"select  ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST,PARTS_WEIGHT,DENSITY,USAGE\nfrom(\nselect \n N.NEST_ID as ID, N.MATERIAL,N.THICKNESS,N.NEST_LENGTH,N.NEST_WIDTH,N.NUM_EQ_NEST,N.PARTS_WEIGHT,\n M.DENSITY,\n N.PARTS_WEIGHT/(((N.NEST_LENGTH*N.NEST_WIDTH*N.THICKNESS)/1000000000)*M.DENSITY*1000)*100 as USAGE\nfrom \n(\nselect NEST_ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST, SUM( WEIGHT_UNITS) as PARTS_WEIGHT\nfrom\n    (\n    select NEST_ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST,  WEIGHT_UNIT*NUM_PART_NEST as WEIGHT_UNITS\n    from V_PRD_PART_NEST_LIST \n    where NEST_ID like 'MU%'\n    )\nGROUP BY NEST_ID,MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST\n) N, MATERIAL M\nwhere N.MATERIAL=M.CODE\norder by N.NEST_ID\n)\nwhere (MATERIAL||THICKNESS||NEST_LENGTH||NEST_WIDTH) in(${par}) "
+  //private def plateNestByMaterialAndDimOLD(par: String) = s"select  ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST,PARTS_WEIGHT,DENSITY,USAGE\nfrom(\nselect \n N.NEST_ID as ID, N.MATERIAL,N.THICKNESS,N.NEST_LENGTH,N.NEST_WIDTH,N.NUM_EQ_NEST,N.PARTS_WEIGHT,\n M.DENSITY,\n N.PARTS_WEIGHT/(((N.NEST_LENGTH*N.NEST_WIDTH*N.THICKNESS)/1000000000)*M.DENSITY*1000)*100 as USAGE\nfrom \n(\nselect NEST_ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST, SUM( WEIGHT_UNITS) as PARTS_WEIGHT\nfrom\n    (\n    select NEST_ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST,  WEIGHT_UNIT*NUM_PART_NEST as WEIGHT_UNITS\n    from V_PRD_PART_NEST_LIST \n    where NEST_ID like 'MU%'\n    )\nGROUP BY NEST_ID,MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST\n) N, MATERIAL M\nwhere N.MATERIAL=M.CODE\norder by N.NEST_ID\n)\nwhere (MATERIAL||THICKNESS||NEST_LENGTH||NEST_WIDTH) in(${par}) "
   private def plateNestByMaterialAndDim(par: String) = s"select  ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST,PARTS_WEIGHT,DENSITY,USAGE\nfrom(\nselect \n N.NEST_ID as ID, N.MATERIAL,N.THICKNESS,N.NEST_LENGTH,N.NEST_WIDTH,N.NUM_EQ_NEST,N.PARTS_WEIGHT,\n M.DENSITY,\n N.PARTS_WEIGHT/(((N.NEST_LENGTH*N.NEST_WIDTH*N.THICKNESS)/1000000000)*M.DENSITY*1000)*100 as USAGE\nfrom \n(\nselect NEST_ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST, SUM( WEIGHT_UNITS) as PARTS_WEIGHT\nfrom\n    (\n    select NEST_ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST,  WEIGHT_UNIT*NUM_PART_NEST as WEIGHT_UNITS\n    from V_PRD_PART_NEST_LIST \n    where NEST_ID like 'MU%'\n    )\nGROUP BY NEST_ID,MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST\n) N, MATERIAL M\nwhere N.MATERIAL=M.CODE\norder by N.NEST_ID\n)\nwhere (MATERIAL||THICKNESS||ROUND(NEST_LENGTH)||ROUND(NEST_WIDTH)) in(${par}) "
 
   private def plateNestByBlocks(blocks: String) = s"select  ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST,PARTS_WEIGHT,DENSITY,USAGE\nfrom(\nselect \n N.NEST_ID as ID, N.MATERIAL,N.THICKNESS,N.NEST_LENGTH,N.NEST_WIDTH,N.NUM_EQ_NEST,N.PARTS_WEIGHT,\n M.DENSITY,\n N.PARTS_WEIGHT/(((N.NEST_LENGTH*N.NEST_WIDTH*N.THICKNESS)/1000000000)*M.DENSITY*1000)*100 as USAGE\nfrom \n(\nselect NEST_ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST, SUM( WEIGHT_UNITS) as PARTS_WEIGHT\nfrom\n    (\n    select NEST_ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST,  WEIGHT_UNIT*NUM_PART_NEST as WEIGHT_UNITS\n    from V_PRD_PART_NEST_LIST \n    where NEST_ID like 'MU%' and BLOCK_CODE in(${blocks})\n    )\nGROUP BY NEST_ID,MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST\n) N, MATERIAL M\nwhere N.MATERIAL=M.CODE\norder by N.NEST_ID\n)"
 
   private def nestBlockSql(): String = "select distinct NEST_ID,  BLOCK_CODE from V_PRD_PART_NEST_LIST order by nest_id"
 
-  private def materialListAllSQL(): String = "select distinct MATERIAL, THICKNESS,NEST_LENGTH,NEST_WIDTH from V_PRD_PART_NEST_LIST where  NEST_ID like 'MU%' order by MATERIAL,THICKNESS"
+  private def materialListAllSQL(): String = "select distinct MATERIAL, THICKNESS,NEST_LENGTH,NEST_WIDTH,NEST_ID from V_PRD_PART_NEST_LIST where  NEST_ID like 'MU%' order by MATERIAL,THICKNESS"
 
-  private def materialListByBlocksSQL(blocks: String): String = s"select distinct MATERIAL, THICKNESS,NEST_LENGTH,NEST_WIDTH from V_PRD_PART_NEST_LIST where  NEST_ID like 'MU%' and BLOCK_CODE in(${blocks})  order by MATERIAL,THICKNESS"
+  private def materialListByBlocksSQL(blocks: String): String = s"select distinct MATERIAL, THICKNESS,NEST_LENGTH,NEST_WIDTH,NEST_ID from V_PRD_PART_NEST_LIST where  NEST_ID like 'MU%' and BLOCK_CODE in(${blocks})  order by MATERIAL,THICKNESS"
 
   private def blocksListSql(): String = "select distinct BLOCK_CODE from V_PRD_PART_NEST_LIST where  NEST_ID like 'MU%'  order by BLOCK_CODE"
 
@@ -58,6 +60,7 @@ trait NestHelper {
 
   def allPlateNest(project: String): List[Nest] = {
     val nestsBlocks: List[NestIdBlock] = getNestBlock(project)
+    val scraps: List[ForanScrap] =genPlateForanScrap(project)
 
     val locks: List[NestLock] = retrieveNestsLocksByProject(project)
 
@@ -83,7 +86,12 @@ trait NestHelper {
               Option(rs.getDouble("USAGE")).getOrElse(0),
               nestsBlocks.filter(s => s.nestID.equals(id)).map(_.block).mkString(";"),
               li._2,
-              li._1
+              li._1,
+              scraps.find(s => s.NESTID.equals(id)) match {
+                case Some(value) => value.PARENTNESTID
+                case None => ""
+              }
+
             )
           }
           rs.close()
@@ -108,6 +116,8 @@ trait NestHelper {
       listToSqlString(b.toList)
     }
     val locks: List[NestLock] = retrieveNestsLocksByProject(project)
+    val scraps: List[ForanScrap] =genPlateForanScrap(project)
+
 
     val nestsBlocks: List[NestIdBlock] = getNestBlock(project)
     ConnectionManager.connectionByProject(project) match {
@@ -131,7 +141,11 @@ trait NestHelper {
               Option(rs.getDouble("USAGE")).getOrElse(0),
               nestsBlocks.filter(s => s.nestID.equals(id)).map(_.block).mkString(";"),
               li._2,
-              li._1
+              li._1,
+              scraps.find(s => s.NESTID.equals(id)) match {
+                case Some(value) => value.PARENTNESTID
+                case None => ""
+              }
             )
           }
           rs.close()
@@ -167,6 +181,8 @@ trait NestHelper {
     })
     val nestsBlocks: List[NestIdBlock] = getNestBlock(project)
     val locks: List[NestLock] = retrieveNestsLocksByProject(project)
+    val scraps: List[ForanScrap] =genPlateForanScrap(project)
+
     ConnectionManager.connectionByProject(project) match {
       case Some(connection) => {
         try {
@@ -189,7 +205,11 @@ trait NestHelper {
               Option(rs.getDouble("USAGE")).getOrElse(0),
               nestsBlocks.filter(s => s.nestID.equals(id)).map(_.block).mkString(";"),
               li._2,
-              li._1
+              li._1,
+              scraps.find(s => s.NESTID.equals(id)) match {
+                case Some(value) => value.PARENTNESTID
+                case None => ""
+              }
             )
           }
           rs.close()
@@ -213,6 +233,8 @@ trait NestHelper {
     val nestsBlocks: List[NestIdBlock] = getNestBlock(project)
 
     val locks: List[NestLock] = retrieveNestsLocksByProject(project)
+    val scraps: List[ForanScrap] =genPlateForanScrap(project)
+
 
     ConnectionManager.connectionByProject(project) match {
       case Some(connection) => {
@@ -236,7 +258,11 @@ trait NestHelper {
               Option(rs.getDouble("USAGE")).getOrElse(0),
               nestsBlocks.filter(s => s.nestID.equals(id)).map(_.block).mkString(";"),
               li._2,
-              li._1
+              li._1,
+              scraps.find(s => s.NESTID.equals(id)) match {
+                case Some(value) => value.PARENTNESTID
+                case None => ""
+              }
             )
           }
           rs.close()
@@ -255,24 +281,32 @@ trait NestHelper {
   }
 
   def genMateriaAlllList(project: String): List[NestMaterial] = {
+    val scraps: List[ForanScrap] =genPlateForanScrap(project)
+
     ConnectionManager.connectionByProject(project) match {
       case Some(connection) => {
         try {
           val buffer = ListBuffer.empty[NestMaterial]
           val stmt: Statement = connection.createStatement()
-          val rs: ResultSet = stmt.executeQuery(materialListAllSQL())
+          val sql=materialListAllSQL()
+          val rs: ResultSet = stmt.executeQuery(sql)
           while (rs.next()) {
+            val nestID: String =Option(rs.getString("NEST_ID")).getOrElse("")
             buffer += NestMaterial(
               Option(rs.getString("MATERIAL")).getOrElse(""),
               Option(rs.getDouble("THICKNESS")).getOrElse(0),
               Option(rs.getInt("NEST_LENGTH")).getOrElse(0),
               Option(rs.getInt("NEST_WIDTH")).getOrElse(0),
+              scraps.find(s => s.NESTID.equals(nestID)) match {
+                case Some(value) => value.PARENTNESTID
+                case None => ""
+              }
             )
           }
           rs.close()
           stmt.close()
           connection.close()
-          buffer.toList
+          buffer.toList.distinct
         }
         catch {
           case _: Throwable =>
@@ -286,25 +320,32 @@ trait NestHelper {
 
   def genMaterialByBlock(project: String, blockList: List[String]): List[NestMaterial] = {
     val blocks = listToSqlString(blockList)
+    val scraps: List[ForanScrap] =genPlateForanScrap(project)
 
     ConnectionManager.connectionByProject(project) match {
       case Some(connection) => {
         try {
           val buffer = ListBuffer.empty[NestMaterial]
           val stmt: Statement = connection.createStatement()
-          val rs: ResultSet = stmt.executeQuery(materialListByBlocksSQL(blocks))
+          val sql=materialListByBlocksSQL(blocks)
+          val rs: ResultSet = stmt.executeQuery(sql)
           while (rs.next()) {
+            val nestID: String =Option(rs.getString("NEST_ID")).getOrElse("")
             buffer += NestMaterial(
               Option(rs.getString("MATERIAL")).getOrElse(""),
               Option(rs.getDouble("THICKNESS")).getOrElse(0),
               Option(rs.getInt("NEST_LENGTH")).getOrElse(0),
               Option(rs.getInt("NEST_WIDTH")).getOrElse(0),
+              scraps.find(s => s.NESTID.equals(nestID)) match {
+                case Some(value) => value.PARENTNESTID
+                case None => ""
+              }
             )
           }
           rs.close()
           stmt.close()
           connection.close()
-          buffer.toList
+          buffer.toList.distinct
         }
         catch {
           case _: Throwable =>
