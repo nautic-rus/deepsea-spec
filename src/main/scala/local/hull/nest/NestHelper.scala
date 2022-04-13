@@ -9,7 +9,7 @@ import local.sql.ConnectionManager
 import java.sql.{ResultSet, Statement}
 import scala.collection.mutable.ListBuffer
 
-trait NestHelper extends BillHelper{
+trait NestHelper extends BillHelper {
 
 
   private def allPlateNestSQL(): String = "select  ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST,PARTS_WEIGHT,DENSITY,USAGE\nfrom(\nselect \n N.NEST_ID as ID, N.MATERIAL,N.THICKNESS,N.NEST_LENGTH,N.NEST_WIDTH,N.NUM_EQ_NEST,N.PARTS_WEIGHT,\n M.DENSITY,\n N.PARTS_WEIGHT/(((N.NEST_LENGTH*N.NEST_WIDTH*N.THICKNESS)/1000000000)*M.DENSITY*1000)*100 as USAGE\nfrom \n(\nselect NEST_ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST, SUM( WEIGHT_UNITS) as PARTS_WEIGHT\nfrom\n    (\n    select NEST_ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST,  WEIGHT_UNIT*NUM_PART_NEST as WEIGHT_UNITS\n    from V_PRD_PART_NEST_LIST \n    where NEST_ID like 'MU%'\n    )\nGROUP BY NEST_ID,MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST\n) N, MATERIAL M\nwhere N.MATERIAL=M.CODE\norder by N.NEST_ID\n)"
@@ -60,7 +60,7 @@ trait NestHelper extends BillHelper{
 
   def allPlateNest(project: String): List[Nest] = {
     val nestsBlocks: List[NestIdBlock] = getNestBlock(project)
-    val scraps: List[ForanScrap] =genPlateForanScrap(project)
+    val scraps: List[ForanScrap] = genPlateForanScrap(project)
 
     val locks: List[NestLock] = retrieveNestsLocksByProject(project)
 
@@ -116,7 +116,7 @@ trait NestHelper extends BillHelper{
       listToSqlString(b.toList)
     }
     val locks: List[NestLock] = retrieveNestsLocksByProject(project)
-    val scraps: List[ForanScrap] =genPlateForanScrap(project)
+    val scraps: List[ForanScrap] = genPlateForanScrap(project)
 
 
     val nestsBlocks: List[NestIdBlock] = getNestBlock(project)
@@ -181,7 +181,7 @@ trait NestHelper extends BillHelper{
     })
     val nestsBlocks: List[NestIdBlock] = getNestBlock(project)
     val locks: List[NestLock] = retrieveNestsLocksByProject(project)
-    val scraps: List[ForanScrap] =genPlateForanScrap(project)
+    val scraps: List[ForanScrap] = genPlateForanScrap(project)
 
     ConnectionManager.connectionByProject(project) match {
       case Some(connection) => {
@@ -233,7 +233,7 @@ trait NestHelper extends BillHelper{
     val nestsBlocks: List[NestIdBlock] = getNestBlock(project)
 
     val locks: List[NestLock] = retrieveNestsLocksByProject(project)
-    val scraps: List[ForanScrap] =genPlateForanScrap(project)
+    val scraps: List[ForanScrap] = genPlateForanScrap(project)
 
 
     ConnectionManager.connectionByProject(project) match {
@@ -244,8 +244,12 @@ trait NestHelper extends BillHelper{
           val sql = plateNestByBlocks(par)
           val rs: ResultSet = stmt.executeQuery(sql)
           while (rs.next()) {
-            val id = Option(rs.getString("ID")).getOrElse("")
+            val id: String = Option(rs.getString("ID")).getOrElse("")
             val li: (NestLock, Boolean) = calculateLockInfo(id, locks)
+            val foranUsage: Double = Option(rs.getDouble("USAGE")).getOrElse(0)
+            val partsWeight: Double = Option(rs.getDouble("PARTS_WEIGHT")).getOrElse(0)
+            val usage = calculateScrap(id, foranUsage, partsWeight, scraps)
+
             buffer += Nest(
               id,
               Option(rs.getString("MATERIAL")).getOrElse(""),
@@ -253,9 +257,9 @@ trait NestHelper extends BillHelper{
               Option(rs.getInt("NEST_LENGTH")).getOrElse(0),
               Option(rs.getInt("NEST_WIDTH")).getOrElse(0),
               Option(rs.getInt("NUM_EQ_NEST")).getOrElse(0),
-              Option(rs.getDouble("PARTS_WEIGHT")).getOrElse(0),
+              partsWeight,
               Option(rs.getDouble("DENSITY")).getOrElse(0),
-              Option(rs.getDouble("USAGE")).getOrElse(0),
+              usage,
               nestsBlocks.filter(s => s.nestID.equals(id)).map(_.block).mkString(";"),
               li._2,
               li._1,
@@ -281,24 +285,24 @@ trait NestHelper extends BillHelper{
   }
 
   def genMateriaAlllList(project: String): List[NestMaterial] = {
-    val scraps: List[ForanScrap] =genPlateForanScrap(project)
+    val scraps: List[ForanScrap] = genPlateForanScrap(project)
 
     ConnectionManager.connectionByProject(project) match {
       case Some(connection) => {
         try {
           val buffer = ListBuffer.empty[NestMaterial]
           val stmt: Statement = connection.createStatement()
-          val sql=materialListAllSQL()
+          val sql = materialListAllSQL()
           val rs: ResultSet = stmt.executeQuery(sql)
           while (rs.next()) {
-            val nestID: String =Option(rs.getString("NEST_ID")).getOrElse("")
+            val nestID: String = Option(rs.getString("NEST_ID")).getOrElse("")
             buffer += NestMaterial(
               Option(rs.getString("MATERIAL")).getOrElse(""),
               Option(rs.getDouble("THICKNESS")).getOrElse(0),
               Option(rs.getInt("NEST_LENGTH")).getOrElse(0),
               Option(rs.getInt("NEST_WIDTH")).getOrElse(0),
               scraps.find(s => s.NESTID.equals(nestID)) match {
-                case Some(value) => value.KPL+" "+ value.PARENTNESTID
+                case Some(value) => value.KPL + " " + value.PARENTNESTID
                 case None => ""
               }
             )
@@ -320,24 +324,24 @@ trait NestHelper extends BillHelper{
 
   def genMaterialByBlock(project: String, blockList: List[String]): List[NestMaterial] = {
     val blocks = listToSqlString(blockList)
-    val scraps: List[ForanScrap] =genPlateForanScrap(project)
+    val scraps: List[ForanScrap] = genPlateForanScrap(project)
 
     ConnectionManager.connectionByProject(project) match {
       case Some(connection) => {
         try {
           val buffer = ListBuffer.empty[NestMaterial]
           val stmt: Statement = connection.createStatement()
-          val sql=materialListByBlocksSQL(blocks)
+          val sql = materialListByBlocksSQL(blocks)
           val rs: ResultSet = stmt.executeQuery(sql)
           while (rs.next()) {
-            val nestID: String =Option(rs.getString("NEST_ID")).getOrElse("")
+            val nestID: String = Option(rs.getString("NEST_ID")).getOrElse("")
             buffer += NestMaterial(
               Option(rs.getString("MATERIAL")).getOrElse(""),
               Option(rs.getDouble("THICKNESS")).getOrElse(0),
               Option(rs.getInt("NEST_LENGTH")).getOrElse(0),
               Option(rs.getInt("NEST_WIDTH")).getOrElse(0),
               scraps.find(s => s.NESTID.equals(nestID)) match {
-                case Some(value) =>value.KPL+" "+ value.PARENTNESTID
+                case Some(value) => value.KPL + " " + value.PARENTNESTID
                 case None => ""
               }
             )
@@ -394,6 +398,22 @@ trait NestHelper extends BillHelper{
       Tuple2(nl, isLock)
     } else {
       Tuple2(NestLock(), false)
+    }
+  }
+
+
+  private def calculateScrap(id: String, foranUsage: Double, partsWeight: Double, scraps: List[ForanScrap]): Double = {
+    scraps.find(s => s.NESTID.equals(id)) match {
+      case Some(masterScrap) => {
+        scraps.find(s => s.PARENTNESTID.equals(id)) match {
+          case Some(slaveScrap) => {
+            //100.0 - ((partsWeight / (masterScrap.WEIGHT - slaveScrap.WEIGHT)) * 100.0)
+           (partsWeight / (masterScrap.WEIGHT - slaveScrap.WEIGHT)) * 100.0
+          }
+          case None => foranUsage
+        }
+      }
+      case None => foranUsage
     }
   }
 

@@ -181,7 +181,6 @@ object BillManager extends BillHelper with Codecs {
 
       if (nests.exists(p => p.KQ.equals(realPrat.MAT) && p.T == realPrat.THICKNESS)) {
         val nestsByMat: List[PlateNestBill] = nests.filter(p => p.KQ.equals(realPrat.MAT) && p.T == realPrat.THICKNESS)
-
         val globNest: PlateNestBill = nestsByMat.maxBy(s => s.W * s.L)
         val KPL = globNest.KPL
         val stock = globNest.STOCK

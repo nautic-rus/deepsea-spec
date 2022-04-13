@@ -122,7 +122,6 @@ trait BillHelper {
     }
   }
 
-
   def genPlateForanScrap(project: String): List[ForanScrap] = {
     ConnectionManager.connectionByProject(project) match {
       case Some(connection) => {
@@ -163,7 +162,6 @@ trait BillHelper {
       case None => List.empty[ForanScrap]
     }
   }
-
 
   def genTotPlates(project: String): List[PlateMaterial] = {
     ConnectionManager.connectionByProject(project) match {
