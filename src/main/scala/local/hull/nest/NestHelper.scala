@@ -298,7 +298,7 @@ trait NestHelper extends BillHelper{
               Option(rs.getInt("NEST_LENGTH")).getOrElse(0),
               Option(rs.getInt("NEST_WIDTH")).getOrElse(0),
               scraps.find(s => s.NESTID.equals(nestID)) match {
-                case Some(value) => value.PARENTNESTID
+                case Some(value) => value.KPL+" "+ value.PARENTNESTID
                 case None => ""
               }
             )
@@ -337,7 +337,7 @@ trait NestHelper extends BillHelper{
               Option(rs.getInt("NEST_LENGTH")).getOrElse(0),
               Option(rs.getInt("NEST_WIDTH")).getOrElse(0),
               scraps.find(s => s.NESTID.equals(nestID)) match {
-                case Some(value) => value.PARENTNESTID
+                case Some(value) =>value.KPL+" "+ value.PARENTNESTID
                 case None => ""
               }
             )
