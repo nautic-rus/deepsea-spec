@@ -13,7 +13,6 @@ object CommonNest {
 
   case class Nest(
                    ID: String = "",
-
                    MATERIAL: String = "",
                    THICKNESS: Double = 0.0,
                    NEST_LENGTH: Int = 0,

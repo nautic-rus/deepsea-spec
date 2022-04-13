@@ -20,7 +20,8 @@ object BillManager extends BillHelper with Codecs {
                               realLenght: Double = 0,
                               profileForecast: Int = 0,
                               partsweight: Double = 0.0,
-                              isDisabled: Boolean = true
+                              isDisabled: Boolean = true,
+                              stock: Int = 0
                             )
 
   case class PlateAnalitic(
@@ -60,7 +61,8 @@ object BillManager extends BillHelper with Codecs {
                               BLOCK: String = "",
                               BLOCK_OID: Int = 0,
                               TOTAL_BL_SCRAP: Double = 0.0,
-                              TOTAL_KSE_SCRAP: Double = 0.0
+                              TOTAL_KSE_SCRAP: Double = 0.0,
+                              STOCK: Int = 0
                             )
 
   case class PlateNestBill(
@@ -96,7 +98,18 @@ object BillManager extends BillHelper with Codecs {
 
   case class PlateMaterial(COUNT: Int, WEIGHT: Double, THICKNESS: Double, MAT: String)
 
-  case class ProfileMaterial(KSE: Int = 0, PRF_SECTION: String = "", MATERIAL: String = "", WEB_H: Double = 0.0, WEB_T: Double = 0.0, FLANGE_H: Double = 0.0, FLANGE_T: Double = 0.0, PARTS: Int = 0, LENGHT: Double = 0.0, PARTSWEIGHT: Double = 0.0)
+  case class ProfileMaterial(
+                              KSE: Int = 0,
+                              PRF_SECTION: String = "",
+                              MATERIAL: String = "",
+                              WEB_H: Double = 0.0,
+                              WEB_T: Double = 0.0,
+                              FLANGE_H: Double = 0.0,
+                              FLANGE_T: Double = 0.0,
+                              PARTS: Int = 0, LENGHT: Double = 0.0,
+                              PARTSWEIGHT: Double = 0.0,
+                              STOCK: Int = 0
+                            )
 
   case class ForanScrap(
                          OID: Int = 0,
@@ -111,7 +124,7 @@ object BillManager extends BillHelper with Codecs {
                          THICKNESS: Double = 0.0,
                          DENSITY: Double = 0.0,
                          AREAM2: Double = 0.0,
-                         WEIGHT: Double = 0.0
+                         WEIGHT: Double = 0.0,
                        )
 
 
@@ -126,27 +139,31 @@ object BillManager extends BillHelper with Codecs {
       val realLenghtMM: Double = realPart.LENGHT * 1000
       if (nest.exists(s => s.KSE.equals(realPart.KSE))) {
         val nests = nest.filter(p => p.KSE.equals(realPart.KSE) && p.KQ.equals(realPart.MATERIAL))
-        val kse = nests.head.KSE
-        val mat = nests.head.KQ
+        val nestGRO: ProfileNestBill =nests.maxBy(s=>s.GROLEN)
+        val kse = nestGRO.KSE
+        val mat = nestGRO.KQ
+        val stock=nestGRO.STOCK
+
         val isDisabled = isMatDisabled(mat, mats)
         val section = nests.head.TP
-        val scantling = genScantling(nests.head.WH, nests.head.WT, nests.head.FH, nests.head.FT)
-        val grossLenght = nests.head.GROLEN
+        val scantling = genScantling(nestGRO.WH, nestGRO.WT, nestGRO.FH, nestGRO.FT)
+        val grossLenght = nestGRO.GROLEN
         val count = nests.map(_.NGB).sum
-        val scrap = nests.head.TOTAL_KSE_SCRAP
+        val scrap = nestGRO.TOTAL_KSE_SCRAP
         val profileForecast: Int = Math.ceil((realLenghtMM + (realLenghtMM / 100) * scrap) / grossLenght).toInt
-        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT, isDisabled)
+        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT, isDisabled,stock)
       } else {
         val kse = realPart.KSE
         val mat = realPart.MATERIAL
         val isDisabled = isMatDisabled(mat, mats)
         val section = realPart.PRF_SECTION
         val scantling = genScantling(realPart.WEB_H, realPart.WEB_T, realPart.FLANGE_H, realPart.FLANGE_T)
+        val stock=realPart.STOCK
         val grossLenght = 0.0
         val count = 0
         val scrap = 0
         val profileForecast: Int = 0
-        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT, isDisabled)
+        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT, isDisabled,stock)
       }
     })
     buff.sortBy(s => (s.mat, s.section, s.scantling)).toList
@@ -189,7 +206,7 @@ object BillManager extends BillHelper with Codecs {
         //val plateForecas = Math.ceil((realWeight + (realWeight / 100) * scrap) / nest.head.TONETWGT).toInt
         //val plateForecas = Math.ceil((realWeight + (realWeight * 0.13 )) / nest.head.TONETWGT).toInt
 
-        val plateForecas = Math.ceil(((realWeight / oneSheetWeight + (realWeight / oneSheetWeight))-wastages) * 0.13d).toInt
+        val plateForecas = Math.ceil(((realWeight / oneSheetWeight + (realWeight / oneSheetWeight)) - wastages) * 0.13d).toInt
 
         buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedParts, realPartsCount, realWeight, plateForecas, stock, isDisabled, oneSheetWeight, wastages)
       } else {
@@ -198,7 +215,7 @@ object BillManager extends BillHelper with Codecs {
           case Some(value) => value.DENSITY
           case None => 0.0d
         }
-        val stdPlate = finfSuitableStdPlate(mat, realPrat.THICKNESS, stdPlates, mats)
+        val stdPlate = findSuitableStdPlate(mat, realPrat.THICKNESS, stdPlates, mats)
         val oneSheetWeight = Math.ceil(stdPlate.WIDTH / 1000 * stdPlate.LENGTH / 1000 * (stdPlate.THICKNESS / 1000) * density * 1000).toInt
         val KPL = stdPlate.KPL
         val isDisabled = isMatDisabled(mat, mats)
@@ -232,7 +249,7 @@ object BillManager extends BillHelper with Codecs {
     }
   }
 
-  private def finfSuitableStdPlate(matCode: String, thin: Double, stdPlates: List[StdPlate], mats: List[ForanMaterial]): StdPlate = {
+  private def findSuitableStdPlate(matCode: String, thin: Double, stdPlates: List[StdPlate], mats: List[ForanMaterial]): StdPlate = {
     mats.find(s => s.CODE.equals(matCode)) match {
       case Some(mat) => {
         val stdPlatesMat = stdPlates.filter(s => s.MATERIAL_OID == mat.OID && s.THICKNESS == thin)
@@ -246,20 +263,20 @@ object BillManager extends BillHelper with Codecs {
     val buff = ListBuffer.empty[ForanScrap]
     val rootKpl = nest.KPL
     foranScraps.filter(s => s.PARENTKPL == rootKpl).foreach(scrL1 => {
-      if(scrL1.NESTID.isEmpty)
-      buff += scrL1
+      if (scrL1.NESTID.isEmpty)
+        buff += scrL1
       foranScraps.filter(s => s.PARENTKPL == scrL1.KPL).foreach(scrL2 => {
-        if(scrL1.NESTID.isEmpty)
-        buff += scrL2
+        if (scrL1.NESTID.isEmpty)
+          buff += scrL2
         foranScraps.filter(s => s.PARENTKPL == scrL2.KPL).foreach(scrL3 => {
-          if(scrL1.NESTID.isEmpty)
-          buff += scrL3
+          if (scrL1.NESTID.isEmpty)
+            buff += scrL3
           foranScraps.filter(s => s.PARENTKPL == scrL3.KPL).foreach(scrL4 => {
-            if(scrL1.NESTID.isEmpty)
-            buff += scrL4
+            if (scrL1.NESTID.isEmpty)
+              buff += scrL4
             foranScraps.filter(s => s.PARENTKPL == scrL4.KPL).foreach(scrL5 => {
-              if(scrL1.NESTID.isEmpty)
-              buff += scrL5
+              if (scrL1.NESTID.isEmpty)
+                buff += scrL5
             })
           })
         })
@@ -269,51 +286,6 @@ object BillManager extends BillHelper with Codecs {
     val totWeught = (buff.filter(s => s.NESTID.isEmpty).map(_.WEIGHT).sum) / oneSheetWeight
     totWeught
   }
-
-  private def calculatePlateScrapsOld(nestsByMat: List[PlateNestBill], foranScraps: List[ForanScrap], oneSheetWeight: Double, globNest: PlateNestBill): Double = {
-    var nestCount: Double = 0.0
-    var scrapAcc: Double = 0.0
-    if (globNest.KPL == 2) {
-      val jj = 0
-    }
-
-    nestsByMat.foreach(nbm => {
-      val realScrap: Double = {
-        if (!foranScraps.exists(s => s.KPL.equals(nbm.KPL))) {
-          val currscrp = nbm.SCRAP
-          val scrps: Double = {
-            var scrpW: Double = 0.0
-            foranScraps.filter(s => s.PARENTNESTID == nbm.NESTID).foreach(scrL1 => {
-              scrpW = scrL1.WEIGHT
-              foranScraps.filter(s => s.PARENTNESTID == scrL1.NESTID).foreach(scrL2 => {
-                scrpW = scrL2.WEIGHT
-                foranScraps.filter(s => s.PARENTNESTID == scrL2.NESTID).foreach(scrL3 => {
-                  scrpW = scrL3.WEIGHT
-                  foranScraps.filter(s => s.PARENTNESTID == scrL3.NESTID).foreach(scrL4 => {
-                    scrpW = scrL4.WEIGHT
-                    foranScraps.filter(s => s.PARENTNESTID == scrL4.NESTID).foreach(scrL5 => {
-                      scrpW = scrL5.WEIGHT
-                    })
-                  })
-                })
-              })
-            })
-            scrpW
-          }
-          val realScr = currscrp - (scrps / oneSheetWeight) * 100.0
-          nestCount = nestCount + 1.0
-          scrapAcc = scrapAcc + realScr
-          realScr
-        } else {
-          nbm.SCRAP
-        }
-      }
-
-    })
-    val ret = scrapAcc / nestCount
-    ret
-  }
-
 
   private def calculatePlateScraps(nestsByMat: List[PlateNestBill], foranScraps: List[ForanScrap], oneSheetWeight: Double, globNest: PlateNestBill): Double = {
     val buff = ListBuffer.empty[Double]
