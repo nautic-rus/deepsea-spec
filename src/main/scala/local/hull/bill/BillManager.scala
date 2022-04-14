@@ -205,7 +205,9 @@ object BillManager extends BillHelper with Codecs {
         //val plateForecas = Math.ceil((realWeight + (realWeight / 100) * scrap) / nest.head.TONETWGT).toInt
         //val plateForecas = Math.ceil((realWeight + (realWeight * 0.13 )) / nest.head.TONETWGT).toInt
 
-        val plateForecas = Math.ceil(((realWeight / oneSheetWeight + (realWeight / oneSheetWeight)) - wastages) * 0.13d).toInt
+        //val plateForecas = Math.ceil(((realWeight / oneSheetWeight + (realWeight / oneSheetWeight)) - wastages) * 0.13d).toInt
+
+        val plateForecas =  Math.ceil(((realWeight / oneSheetWeight)-wastages)* 1.13d).toInt
 
         buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedParts, realPartsCount, realWeight, plateForecas, stock, isDisabled, oneSheetWeight, wastages)
       } else {
