@@ -8,7 +8,8 @@ object CommonNest {
                           THICKNESS: Double = 0.0,
                           NEST_LENGTH: Int = 0,
                           NEST_WIDTH: Int = 0,
-                          PARENTID: String = ""
+                          PARENTID: String = "",
+                          GROSSWEIGHT:Int=0
                          )
 
   case class Nest(
@@ -24,9 +25,13 @@ object CommonNest {
                    BLOCKS: String = "",
                    isLock: Boolean = false,
                    lockInfo: NestLock = NestLock(),
-                   PARENTID: String = ""
+                   PARENTID: String = "",
+                   GROSSWEIGHT:Int=0
                  )
 
   case class NestLock(project: String = "", nestId: String = "", date: Long = 0, user: String = "")
+
+
+  def calculateWeightKG(Wmm:Double,Lmm:Double, Tmm:Double,ROgrammBySm3:Double):Int=Math.ceil(((Wmm/10.0*Lmm/10.0*Tmm/10.0)*ROgrammBySm3)/1000.0).toInt
 
 }
