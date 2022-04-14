@@ -139,10 +139,10 @@ object BillManager extends BillHelper with Codecs {
       val realLenghtMM: Double = realPart.LENGHT * 1000
       if (nest.exists(s => s.KSE.equals(realPart.KSE))) {
         val nests = nest.filter(p => p.KSE.equals(realPart.KSE) && p.KQ.equals(realPart.MATERIAL))
-        val nestGRO: ProfileNestBill =nests.maxBy(s=>s.GROLEN)
+        val nestGRO: ProfileNestBill = nests.maxBy(s => s.GROLEN)
         val kse = nestGRO.KSE
         val mat = nestGRO.KQ
-        val stock=nestGRO.STOCK
+        val stock = nestGRO.STOCK
 
         val isDisabled = isMatDisabled(mat, mats)
         val section = nests.head.TP
@@ -151,19 +151,19 @@ object BillManager extends BillHelper with Codecs {
         val count = nests.map(_.NGB).sum
         val scrap = nestGRO.TOTAL_KSE_SCRAP
         val profileForecast: Int = Math.ceil((realLenghtMM + (realLenghtMM / 100) * scrap) / grossLenght).toInt
-        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT, isDisabled,stock)
+        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT, isDisabled, stock)
       } else {
         val kse = realPart.KSE
         val mat = realPart.MATERIAL
         val isDisabled = isMatDisabled(mat, mats)
         val section = realPart.PRF_SECTION
         val scantling = genScantling(realPart.WEB_H, realPart.WEB_T, realPart.FLANGE_H, realPart.FLANGE_T)
-        val stock=realPart.STOCK
+        val stock = realPart.STOCK
         val grossLenght = 0.0
         val count = 0
         val scrap = 0
         val profileForecast: Int = 0
-        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT, isDisabled,stock)
+        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT, isDisabled, stock)
       }
     })
     buff.sortBy(s => (s.mat, s.section, s.scantling)).toList
@@ -207,7 +207,7 @@ object BillManager extends BillHelper with Codecs {
 
         //val plateForecas = Math.ceil(((realWeight / oneSheetWeight + (realWeight / oneSheetWeight)) - wastages) * 0.13d).toInt
 
-        val plateForecas =  Math.ceil(((realWeight / oneSheetWeight)-wastages)* 1.13d).toInt
+        val plateForecas = Math.ceil(((realWeight / oneSheetWeight) - wastages) * 1.13d).toInt
 
         buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedParts, realPartsCount, realWeight, plateForecas, stock, isDisabled, oneSheetWeight, wastages)
 
@@ -227,12 +227,11 @@ object BillManager extends BillHelper with Codecs {
         val realPartsCount = realPrat.COUNT
         val realWeight = realPrat.WEIGHT
 
-        val plateForecas = if(oneSheetWeight==0.0) 0 else   Math.ceil(((realWeight / oneSheetWeight))* 1.13d).toInt
-            //Math.ceil(realWeight / oneSheetWeight + (realWeight / oneSheetWeight) * 0.13d).toInt
+        val plateForecas = if (oneSheetWeight == 0.0) 0 else Math.ceil(((realWeight / oneSheetWeight)) * 1.13d).toInt
+        //Math.ceil(realWeight / oneSheetWeight + (realWeight / oneSheetWeight) * 0.13d).toInt
         val nestedPatrs = 0
         val stock = stdPlate.STOCK
         buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedPatrs, realPartsCount, realWeight, plateForecas, stock, isDisabled, oneSheetWeight)
-
       }
 
     })
@@ -246,6 +245,29 @@ object BillManager extends BillHelper with Codecs {
   def genAnalyticPlateDataJson(project: String): String = {
     genAnalyticPlateData(project).asJson.noSpaces
   }
+
+  def genWastsgeByParentKpl(project: String, KPL: Int): List[ForanScrap] = {
+    val buff = ListBuffer.empty[ForanScrap]
+    val foranScraps: List[ForanScrap] = genPlateForanScrap(project)
+    foranScraps.filter(s => s.PARENTKPL == KPL).foreach(scrL1 => {
+      if (scrL1.NESTID.isEmpty) buff += scrL1
+      foranScraps.filter(s => s.PARENTNESTID == scrL1.NESTID).foreach(scrL2 => {
+        if (scrL2.NESTID.isEmpty) buff += scrL2
+        foranScraps.filter(s => s.PARENTNESTID == scrL2.NESTID).foreach(scrL3 => {
+          if (scrL3.NESTID.isEmpty) buff += scrL3
+          foranScraps.filter(s => s.PARENTNESTID == scrL3.NESTID).foreach(scrL4 => {
+            if (scrL4.NESTID.isEmpty) buff += scrL4
+            foranScraps.filter(s => s.PARENTNESTID == scrL4.NESTID).foreach(scrL5 => {
+              if (scrL5.NESTID.isEmpty) buff += scrL5
+            })
+          })
+        })
+      })
+    })
+    buff.toList
+  }
+
+  def genWastsgeByParentKplJson(project: String, KPL: Int): String=genWastsgeByParentKpl(project,KPL).asJson.noSpaces
 
   private def isMatDisabled(matCode: String, mats: List[ForanMaterial]): Boolean = {
     mats.find(s => s.CODE.equals(matCode)) match {

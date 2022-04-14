@@ -1,5 +1,5 @@
 import local.hull.bill.BillHelper
-import local.hull.bill.BillManager.{genAnalyticPlateDataJson, genAnalyticProfileData, genAnalyticProfileDataJson}
+import local.hull.bill.BillManager.{genAnalyticPlateDataJson, genAnalyticProfileData, genAnalyticProfileDataJson, genWastsgeByParentKplJson}
 import org.scalatest.funsuite.AnyFunSuite
 
 class HullBill   extends AnyFunSuite with BillHelper{
@@ -18,8 +18,9 @@ class HullBill   extends AnyFunSuite with BillHelper{
 
   //val ap=genAnalyticProfileDataJson("N004")
 
+  val jjh=genWastsgeByParentKplJson("N004",1)
 
-  val apl=genAnalyticPlateDataJson("N004")
+  //val apl=genAnalyticPlateDataJson("N004")
 
 
   val jj=0
