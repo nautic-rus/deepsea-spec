@@ -210,6 +210,7 @@ object BillManager extends BillHelper with Codecs {
         val plateForecas =  Math.ceil(((realWeight / oneSheetWeight)-wastages)* 1.13d).toInt
 
         buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedParts, realPartsCount, realWeight, plateForecas, stock, isDisabled, oneSheetWeight, wastages)
+
       } else {
         val mat = realPrat.MAT
         val density: Double = mats.find(s => s.CODE.equals(mat)) match {
@@ -225,10 +226,13 @@ object BillManager extends BillHelper with Codecs {
         val scrap = 0.0
         val realPartsCount = realPrat.COUNT
         val realWeight = realPrat.WEIGHT
-        val plateForecas = Math.ceil(realWeight / oneSheetWeight + (realWeight / oneSheetWeight) * 0.13d).toInt
+
+        val plateForecas = if(oneSheetWeight==0.0) 0 else   Math.ceil(((realWeight / oneSheetWeight))* 1.13d).toInt
+            //Math.ceil(realWeight / oneSheetWeight + (realWeight / oneSheetWeight) * 0.13d).toInt
         val nestedPatrs = 0
         val stock = stdPlate.STOCK
         buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedPatrs, realPartsCount, realWeight, plateForecas, stock, isDisabled, oneSheetWeight)
+
       }
 
     })
