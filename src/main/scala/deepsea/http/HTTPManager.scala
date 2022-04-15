@@ -120,7 +120,9 @@ class HTTPManager extends Actor {
       (get & path("insertNestLock") & parameter("project") & parameter("nestId") & parameter("user")) { (project, nestId, user) =>
         askFor(ActorManager.spec, InsertNestLock(project, nestId, user))
       },
-
+      (get & path("hullPlatesWastage") & parameter("project") & parameter("kpl")) { (project, kpl) =>
+        askFor(ActorManager.spec, GetHullBillPlatesWastage(project, kpl))
+      },
       (post & path("createCNC") & entity(as[String]) & parameter("user")) { (lines, user) =>
         askFor(ActorManager.spec, CreateCNC(lines, user))
       },
