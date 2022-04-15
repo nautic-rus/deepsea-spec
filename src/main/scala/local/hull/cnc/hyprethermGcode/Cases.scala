@@ -5,7 +5,11 @@ object Cases {
   val arcAlgoRadius: Boolean = false
 
   val commands: List[String] = List[String]("JUMP", "MARK", "CUTH", "CUT")
-  def doubleToStr(in:Double):String=f"$in%.2f"
+  def doubleToStr(in:Double):String={
+    val ret= f"$in%.2f"
+
+    if(ret.equals("-0.00"))"0.00" else ret
+  }
 
   case class CNCcoordsPackage(num: Int, coords: List[Point])
 
@@ -25,23 +29,17 @@ object Cases {
         val r=Math.sqrt((rotCenter.x-sp.x)*(rotCenter.x-sp.x)+(rotCenter.y-sp.y)*(rotCenter.y-sp.y))
         s"${cmd}X${doubleToStr(ep.x)}Y${doubleToStr(ep.y)}R${r}"
       }else{
-        val I=rotCenter.x-sp.x
-        val J=rotCenter.y-sp.y
+        val valueX=rotCenter.x-sp.x
+        val valueY=rotCenter.y-sp.y
+        val I: Double = {
+          if(Math.abs(0.0-valueX)<0.01  && Math.abs(0.0-valueY)<0.01) 0.01 else valueX
+        }
+        val J: Double = {
+          if(Math.abs(0.0-valueX)<0.01  && Math.abs(0.0-valueY)<0.01) 0.01 else valueY
+        }
         s"${cmd}X${doubleToStr(ep.x)}Y${doubleToStr(ep.y)}I${doubleToStr(I)}J${doubleToStr(J)}"
       }
     }
-    /*   def toGcode(cmd:String):String={
-          val r=Math.sqrt((rotCenter.x-sp.x)*(rotCenter.x-sp.x)+(rotCenter.y-sp.y)*(rotCenter.y-sp.y))
-          s"${cmd}X${ep.x.toString}Y${ep.y.toString}R${r}"
-        }*/
-
-    /*    def toGcode(cmd: String): String ={
-          val r=Math.sqrt((rotCenter.x-sp.x)*(rotCenter.x-sp.x)+(rotCenter.y-sp.y)*(rotCenter.y-sp.y))
-          val I=rotCenter.x-sp.x
-          val J=rotCenter.y-sp.y
-
-          s"${cmd}X${ep.x.toString}Y${ep.y.toString}I${I.toString}J${J.toString}"
-        }*/
   }
 
   case class MachineItem(pointOrArc: Either[Point, Arc]) {
