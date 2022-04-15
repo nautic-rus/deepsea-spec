@@ -4,7 +4,7 @@ import org.scalatest.funsuite.AnyFunSuite
 import scala.io.{BufferedSource, Source}
 
 class CNCTest extends AnyFunSuite{
- val src: BufferedSource = Source.fromFile("c:\\24\\U703_02_0.txt")
+ val src: BufferedSource = Source.fromFile("c:\\24\\TEST_ZERO.txt")
   val lines: List[String] = src.getLines.toList
   src.close()
  //val lines=List.empty[String]
