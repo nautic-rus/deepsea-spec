@@ -205,9 +205,13 @@ object BillManager extends BillHelper with Codecs {
         val scrap = calculatePlateScraps(nestsByMat, foranScraps, oneSheetWeight, globNest)
 
         val plateForecas: Int = {
-          val partsToNestWeight = realPrat.WEIGHT - nestedPartsWeight
+          val partsToNestWeight: Double ={
+            val v:Double=realPrat.WEIGHT - nestedPartsWeight
+            if(v<=0.0d) 0.0d else  v
+          }
           val alreadyUsedGrossPlatesWeight = (oneSheetWeight * count) - wastagesWeight
-          Math.ceil(((alreadyUsedGrossPlatesWeight + partsToNestWeight) / oneSheetWeight) * 1.13d).toInt
+          val ret=Math.ceil(((alreadyUsedGrossPlatesWeight + partsToNestWeight* 1.13d) / oneSheetWeight) ).toInt
+          ret
         }
         val wastages = wastagesWeight / oneSheetWeight
         buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedParts, nestedPartsWeight, realPartsCount, realWeight, plateForecas, stock, isDisabled, oneSheetWeight, wastages, wastagesToatal)
