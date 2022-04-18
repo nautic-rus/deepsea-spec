@@ -31,6 +31,7 @@ object BillManager extends BillHelper with Codecs {
                             count: Int,
                             scrap: Double = 0.0,
                             nestedParts: Int = 0,
+                            nestedPartsWeight: Double = 0,
                             realPartsCount: Int = 0,
                             realWeight: Double = 0,
                             plateForecast: Int = 0,
@@ -185,18 +186,17 @@ object BillManager extends BillHelper with Codecs {
         val globNest: PlateNestBill = nestsByMat.maxBy(s => s.W * s.L)
         val KPL = globNest.KPL
         val stock = globNest.STOCK
+
         val mat = realPrat.MAT
         val density: Double = mats.find(s => s.CODE.equals(mat)) match {
           case Some(value) => value.DENSITY
           case None => 0.0d
         }
         val oneSheetWeight = Math.ceil(globNest.W / 1000 * globNest.L / 1000 * (globNest.T / 1000) * density * 1000).toInt
+        val nestedPartsWeight = nestsByMat.map(_.TONETWGT).sum
         val isDisabled = isMatDisabled(mat, mats)
         val scantling = genScantling(realPrat.THICKNESS, globNest.L / 1000, globNest.W / 1000)
-        //val count = nestsByMat.map(_.NGP).sum
-
         val count = calculateNestPlatesCount(nestsByMat, foranScraps)
-        //val scrap = globNest.TOTAL_KPL_SCRAP
         val nestedParts = nestsByMat.map(_.NP).sum
         val realPartsCount = realPrat.COUNT
         val realWeight = realPrat.WEIGHT
@@ -204,15 +204,13 @@ object BillManager extends BillHelper with Codecs {
         val wastagesWeight: Double = wastagesToatal.map(_.WEIGHT).sum
         val scrap = calculatePlateScraps(nestsByMat, foranScraps, oneSheetWeight, globNest)
 
-        //val plateForecas = Math.ceil((realWeight + (realWeight / 100) * scrap) / nest.head.TONETWGT).toInt
-        //val plateForecas = Math.ceil((realWeight + (realWeight * 0.13 )) / nest.head.TONETWGT).toInt
-
-        //val plateForecas = Math.ceil(((realWeight / oneSheetWeight + (realWeight / oneSheetWeight)) - wastages) * 0.13d).toInt
-
-        val plateForecas = Math.ceil(((realWeight - wastagesWeight) / oneSheetWeight) * 1.13d).toInt
+        val plateForecas: Int = {
+          val partsToNestWeight = realPrat.WEIGHT - nestedPartsWeight
+          val alreadyUsedGrossPlatesWeight = (oneSheetWeight * count) - wastagesWeight
+          Math.ceil(((alreadyUsedGrossPlatesWeight + partsToNestWeight) / oneSheetWeight) * 1.13d).toInt
+        }
         val wastages = wastagesWeight / oneSheetWeight
-
-        buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedParts, realPartsCount, realWeight, plateForecas, stock, isDisabled, oneSheetWeight, wastages, wastagesToatal)
+        buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedParts, nestedPartsWeight, realPartsCount, realWeight, plateForecas, stock, isDisabled, oneSheetWeight, wastages, wastagesToatal)
 
       } else {
         val mat = realPrat.MAT
@@ -229,12 +227,11 @@ object BillManager extends BillHelper with Codecs {
         val scrap = 0.0
         val realPartsCount = realPrat.COUNT
         val realWeight = realPrat.WEIGHT
-
         val plateForecas = if (oneSheetWeight == 0.0) 0 else Math.ceil(((realWeight / oneSheetWeight)) * 1.13d).toInt
-        //Math.ceil(realWeight / oneSheetWeight + (realWeight / oneSheetWeight) * 0.13d).toInt
         val nestedPatrs = 0
+        val nestedPartsWeight: Double = 0.0
         val stock = stdPlate.STOCK
-        buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedPatrs, realPartsCount, realWeight, plateForecas, stock, isDisabled, oneSheetWeight)
+        buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedPatrs, nestedPartsWeight, realPartsCount, realWeight, plateForecas, stock, isDisabled, oneSheetWeight)
       }
 
     })
