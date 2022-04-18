@@ -2,6 +2,8 @@ SELECT *
 FROM
     (
         SELECT
+            PRD.CODE AS NAME,
+            CASE WHEN PRD.DESCRIPTION IS NULL THEN 'Aux Profile' ELSE PRD.DESCRIPTION END AS DESCRIPTION,
             PARTS.STD_KSE AS KSE,
             DECODE (PARTS.STD_SECTION,
                     -1, '',
@@ -38,14 +40,18 @@ FROM
             STDPROF.AREA AS AREA,
             STDPROF.STOCK_CODE0 AS STOCK,
             MAT.DENSITY,
-            (PARTS.PRF_LENGTH * STDPROF.AREA * MAT.DENSITY / 100) AS WEIGHT
+            (PARTS.PRF_LENGTH * STDPROF.AREA * MAT.DENSITY / 100) AS WEIGHT,
+            RPT_GET_STR_GROUP(PRD.OID) AS STRGROUP
         FROM
             V_RPT_ALL_PROF_DATA PARTS,
             STD_PROFILE STDPROF,
-            MATERIAL MAT
+            MATERIAL MAT,
+            PRD_PART PRD
         WHERE
-                BL_CODE NOT LIKE 'L%' AND
-                PARTS.STD_KSE = STDPROF.KSE AND
-                MAT.OID = STDPROF.MATERIAL_OID
+            BL_CODE NOT LIKE 'L%' AND
+            PARTS.STD_KSE = STDPROF.KSE AND
+            MAT.OID = STDPROF.MATERIAL_OID AND
+            PRD.OID = PARTS.PART_OID
+
     )
 WHERE KSE = &kse AND MATERIAL = '&material'

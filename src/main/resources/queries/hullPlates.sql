@@ -8,7 +8,8 @@ FROM
             DESCRIPTION,
             WEIGHT,
             THICKNESS,
-            MAT
+            MAT,
+            RPT_GET_STR_GROUP(POID) AS STRGROUP
         FROM
             (
                 SELECT
@@ -34,7 +35,8 @@ FROM
                         UNION ALL
                         SELECT MATQ AS MAT FROM AS_STD_PART_PLATE
                         WHERE OID = P.OID
-                    ) AS MAT
+                    ) AS MAT,
+                    P.OID AS POID
                 FROM
                     PRD_PART P, PRD_EXPL_PART PEP
                 WHERE
@@ -76,7 +78,8 @@ FROM
             P.DESCRIPTION,
             P.WEIGHT,
             (SELECT WEB_THICKNESS FROM STD_PROFILE WHERE KSE = GKSE) AS THICKNESS,
-            (SELECT CODE FROM MATERIAL WHERE OID =(SELECT MATERIAL_OID FROM STD_PROFILE WHERE KSE = GKSE)) AS MATERIAL
+            (SELECT CODE FROM MATERIAL WHERE OID =(SELECT MATERIAL_OID FROM STD_PROFILE WHERE KSE = GKSE)) AS MATERIAL,
+            RPT_GET_STR_GROUP(POID) AS STRGROUP
         FROM
             (SELECT
                  P.CODE AS CODE,
@@ -91,16 +94,17 @@ FROM
                      SELECT STD.kse AS KSE FROM STD_PROFILE STD, INP_LC_ATT_DB PRF WHERE STD.OID=PRF.STD_SECTION_OID AND PRF.INP_PART_OID = P.OID AND STD.SECTION = 0
                      UNION ALL
                      SELECT STD.kse AS KSE FROM STD_PROFILE STD, AS_STD_PART_PROF PRF WHERE STD.KSE=PRF.KSE AND PRF.OID=P.OID  AND STD.SECTION = 0
-                 ) AS GKSE
+                 ) AS GKSE,
+                 P.OID AS POID
              FROM
                  PRD_PART P, PRD_EXPL_PART PEP
              WHERE
-                     P.PART_TYPE IN (17, 19, 24, 21) AND
-                     P.BLOCK_OID NOT IN (SELECT OID FROM BLOCK WHERE CODE LIKE 'L%') AND
-                     PEP.PRD_PART_OID = P.OID) P,
-            STD_PROFILE STD
+                 P.PART_TYPE IN (17, 19, 24, 21) AND
+                 P.BLOCK_OID NOT IN (SELECT OID FROM BLOCK WHERE CODE LIKE 'L%') AND
+                 PEP.PRD_PART_OID = P.OID) P,
+                 STD_PROFILE STD
         WHERE
-                GKSE IS NOT NULL AND
-                STD.KSE = P.GKSE
+            GKSE IS NOT NULL AND
+            STD.KSE = P.GKSE
     )
 WHERE THICKNESS = &thickness AND MAT = '&material'

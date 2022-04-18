@@ -72,8 +72,8 @@ object HullManager {
   implicit val HullEspEncoder: Encoder[HullEsp] = deriveEncoder[HullEsp]
 
 
-  case class PlatePart(code: String, block: String, name: String, description: String, weight: Double, thickness: Double, material: String)
-  case class ProfilePart(kse: Int, section: String, material: String, w_h: Double, w_t: Double, f_h: Double, f_t: Double, block: String, length: Double, area: Double, stock: String, density: Double, weight: Double)
+  case class PlatePart(code: String, block: String, name: String, description: String, weight: Double, thickness: Double, material: String, struct: String)
+  case class ProfilePart(name: String, description: String, kse: Int, section: String, material: String, w_h: Double, w_t: Double, f_h: Double, f_t: Double, block: String, length: Double, area: Double, stock: String, density: Double, weight: Double, struct: String)
 }
 
 class HullManager extends Actor {
@@ -612,7 +612,8 @@ class HullManager extends Actor {
             rs.getString("DESCRIPTION"),
             rs.getDouble("WEIGHT"),
             rs.getDouble("THICKNESS"),
-            rs.getString("MAT")
+            rs.getString("MAT"),
+            rs.getString("STRGROUP")
           )
         }
         rs.close()
@@ -632,6 +633,8 @@ class HullManager extends Actor {
         val rs = s.executeQuery(query)
         while (rs.next()) {
           res += ProfilePart(
+            rs.getString("NAME"),
+            rs.getString("DESCRIPTION"),
             rs.getInt("KSE"),
             rs.getString("SECTION"),
             rs.getString("MATERIAL"),
@@ -648,6 +651,10 @@ class HullManager extends Actor {
             },
             rs.getDouble("DENSITY"),
             rs.getDouble("WEIGHT"),
+            rs.getString("STRGROUP") match {
+              case stock: String => stock
+              case _ => ""
+            },
           )
         }
         rs.close()
