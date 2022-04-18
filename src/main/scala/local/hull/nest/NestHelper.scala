@@ -78,7 +78,7 @@ trait NestHelper extends BillHelper {
             val RO = Option(rs.getDouble("DENSITY")).getOrElse(0.0)
             val grossW: Int = calculateWeightKG(W, L, T, RO)
             val partsWeight: Double = Option(rs.getDouble("PARTS_WEIGHT")).getOrElse(0)
-            val usage = calculateScrap(id, grossW, partsWeight, scraps)
+            val usage: (Double, ForanScrap) = calculateScrap(id, grossW, partsWeight, scraps)
             buffer += Nest(
               id,
               Option(rs.getString("MATERIAL")).getOrElse(""),
@@ -88,7 +88,7 @@ trait NestHelper extends BillHelper {
               Option(rs.getInt("NUM_EQ_NEST")).getOrElse(0),
               partsWeight,
               RO,
-              usage,
+              usage._1,
               nestsBlocks.filter(s => s.nestID.equals(id)).map(_.block).mkString(";"),
               li._2,
               li._1,
@@ -96,7 +96,8 @@ trait NestHelper extends BillHelper {
                 case Some(value) => value.PARENTNESTID
                 case None => ""
               },
-              grossW
+              grossW,
+              usage._2
             )
           }
           rs.close()
@@ -140,7 +141,7 @@ trait NestHelper extends BillHelper {
             val RO = Option(rs.getDouble("DENSITY")).getOrElse(0.0)
             val grossW: Int = calculateWeightKG(W, L, T, RO)
             val partsWeight: Double = Option(rs.getDouble("PARTS_WEIGHT")).getOrElse(0)
-            val usage = calculateScrap(id, grossW, partsWeight, scraps)
+            val usage: (Double, ForanScrap) = calculateScrap(id, grossW, partsWeight, scraps)
             buffer += Nest(
               id,
               Option(rs.getString("MATERIAL")).getOrElse(""),
@@ -150,7 +151,7 @@ trait NestHelper extends BillHelper {
               Option(rs.getInt("NUM_EQ_NEST")).getOrElse(0),
               partsWeight,
               Option(rs.getDouble("DENSITY")).getOrElse(0),
-              usage,
+              usage._1,
               nestsBlocks.filter(s => s.nestID.equals(id)).map(_.block).mkString(";"),
               li._2,
               li._1,
@@ -158,7 +159,8 @@ trait NestHelper extends BillHelper {
                 case Some(value) => value.PARENTNESTID
                 case None => ""
               },
-              grossW
+              grossW,
+              usage._2
             )
           }
           rs.close()
@@ -212,7 +214,7 @@ trait NestHelper extends BillHelper {
             val RO = Option(rs.getDouble("DENSITY")).getOrElse(0.0)
             val grossW: Int = calculateWeightKG(W, L, T, RO)
             val partsWeight: Double = Option(rs.getDouble("PARTS_WEIGHT")).getOrElse(0)
-            val usage = calculateScrap(id, grossW, partsWeight, scraps)
+            val usage: (Double, ForanScrap) = calculateScrap(id, grossW, partsWeight, scraps)
             buffer += Nest(
               id,
               Option(rs.getString("MATERIAL")).getOrElse(""),
@@ -222,7 +224,7 @@ trait NestHelper extends BillHelper {
               Option(rs.getInt("NUM_EQ_NEST")).getOrElse(0),
               partsWeight,
               Option(rs.getDouble("DENSITY")).getOrElse(0.0),
-              usage,
+              usage._1,
               nestsBlocks.filter(s => s.nestID.equals(id)).map(_.block).mkString(";"),
               li._2,
               li._1,
@@ -230,7 +232,8 @@ trait NestHelper extends BillHelper {
                 case Some(value) => value.PARENTNESTID
                 case None => ""
               },
-              grossW
+              grossW,
+              usage._2
             )
           }
           rs.close()
@@ -270,7 +273,7 @@ trait NestHelper extends BillHelper {
             val T = Option(rs.getDouble("THICKNESS")).getOrElse(0.0)
             val RO = Option(rs.getDouble("DENSITY")).getOrElse(0.0)
             val grossW: Int = calculateWeightKG(W, L, T, RO)
-            val usage = calculateScrap(id, grossW, partsWeight, scraps)
+            val usage: (Double, ForanScrap) = calculateScrap(id, grossW, partsWeight, scraps)
 
             buffer += Nest(
               id,
@@ -281,7 +284,7 @@ trait NestHelper extends BillHelper {
               Option(rs.getInt("NUM_EQ_NEST")).getOrElse(0),
               partsWeight,
               Option(rs.getDouble("DENSITY")).getOrElse(0),
-              usage,
+              usage._1,
               nestsBlocks.filter(s => s.nestID.equals(id)).map(_.block).mkString(";"),
               li._2,
               li._1,
@@ -289,7 +292,8 @@ trait NestHelper extends BillHelper {
                 case Some(value) => value.PARENTNESTID
                 case None => ""
               },
-              grossW
+              grossW,
+              usage._2
             )
           }
           rs.close()
@@ -424,19 +428,17 @@ trait NestHelper extends BillHelper {
     }
   }
 
-
-  private def calculateScrap(id: String, grossW: Double, partsWeight: Double, scraps: List[ForanScrap]): Double = {
-    val scrapW: Double = {
+  private def calculateScrap(id: String, grossW: Double, partsWeight: Double, scraps: List[ForanScrap]): (Double, ForanScrap) = {
+    val scrap: ForanScrap = {
       scraps.find(s => s.PARENTNESTID.equals(id)) match {
-        case Some(value) => value.WEIGHT
-        case None => 0.0d
+        case Some(value) => value
+        case None => ForanScrap()
       }
     }
-    val totParts = partsWeight + scrapW
+    val totParts = partsWeight + scrap.WEIGHT
     val usage = totParts / grossW * 100.0d
-    usage
+    (usage, scrap)
   }
-
 
   /*
     private def calculateScrapOld(id: String, foranUsage: Double, partsWeight: Double, scraps: List[ForanScrap]): Double = {

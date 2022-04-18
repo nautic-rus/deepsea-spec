@@ -1,5 +1,7 @@
 package local.hull.nest
 
+import local.hull.bill.BillManager.ForanScrap
+
 object CommonNest {
 
   case class NestIdBlock(nestID: String, block: String)
@@ -26,7 +28,8 @@ object CommonNest {
                    isLock: Boolean = false,
                    lockInfo: NestLock = NestLock(),
                    PARENTID: String = "",
-                   GROSSWEIGHT:Int=0
+                   GROSSWEIGHT:Int=0,
+                   SCRAP:ForanScrap=ForanScrap()
                  )
 
   case class NestLock(project: String = "", nestId: String = "", date: Long = 0, user: String = "")
