@@ -613,7 +613,10 @@ class HullManager extends Actor {
             rs.getDouble("WEIGHT"),
             rs.getDouble("THICKNESS"),
             rs.getString("MAT"),
-            rs.getString("STRGROUP")
+            rs.getString("STRGROUP") match {
+              case value: String => value
+              case _ => ""
+            }
           )
         }
         rs.close()
