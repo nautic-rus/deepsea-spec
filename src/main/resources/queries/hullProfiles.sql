@@ -48,4 +48,4 @@ FROM
                 PARTS.STD_KSE = STDPROF.KSE AND
                 MAT.OID = STDPROF.MATERIAL_OID
     )
-WHERE KSE = &kse AND MATERIAL = &material
+WHERE KSE = &kse AND MATERIAL = '&material'

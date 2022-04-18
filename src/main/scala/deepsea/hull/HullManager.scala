@@ -642,7 +642,10 @@ class HullManager extends Actor {
             rs.getString("BLOCK"),
             rs.getDouble("LENGTH"),
             rs.getDouble("AREA"),
-            rs.getString("STOCK"),
+            rs.getString("STOCK") match {
+              case stock: String => stock
+              case _ => ""
+            },
             rs.getDouble("DENSITY"),
             rs.getDouble("WEIGHT"),
           )

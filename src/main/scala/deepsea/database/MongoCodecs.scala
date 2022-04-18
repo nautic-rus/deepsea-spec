@@ -1,6 +1,6 @@
 package deepsea.database
 
-import deepsea.hull.HullManager.PlatePart
+import deepsea.hull.HullManager._
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.{Decoder, Encoder}
 import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
@@ -10,11 +10,16 @@ import org.mongodb.scala.bson.codecs.Macros._
 
 trait MongoCodecs {
 
-  implicit val MaterialDecoder: Decoder[PlatePart] = deriveDecoder[PlatePart]
-  implicit val MaterialEncoder: Encoder[PlatePart] = deriveEncoder[PlatePart]
+  implicit val PlatePartDecoder: Decoder[PlatePart] = deriveDecoder[PlatePart]
+  implicit val PlatePartEncoder: Encoder[PlatePart] = deriveEncoder[PlatePart]
+
+  implicit val ProfilePartDecoder: Decoder[ProfilePart] = deriveDecoder[ProfilePart]
+  implicit val ProfilePartEncoder: Encoder[ProfilePart] = deriveEncoder[ProfilePart]
+
 
 
   def codecRegistry: CodecRegistry = fromRegistries(fromProviders(
     classOf[PlatePart],
+    classOf[ProfilePart],
   ), DEFAULT_CODEC_REGISTRY)
 }
