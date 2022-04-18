@@ -20,5 +20,6 @@ trait MongoCodecs {
 
   def codecRegistry: CodecRegistry = fromRegistries(fromProviders(
     classOf[PlatePart],
+    classOf[ProfilePart],
   ), DEFAULT_CODEC_REGISTRY)
 }
