@@ -8,7 +8,7 @@ import deepsea.App
 import deepsea.actors.ActorManager
 import deepsea.database.DatabaseManager.GetOracleConnection
 import deepsea.files.FileManager.GenerateUrl
-import deepsea.hull.HullManager.{GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, HullEsp, HullPartPlateDef, HullPartProfileDef, PlatePart, SetHullEsp}
+import deepsea.hull.HullManager.{GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, HullEsp, HullPartPlateDef, HullPartProfileDef, PlatePart, ProfilePart, SetHullEsp}
 import deepsea.hull.classes.HullPart
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
@@ -66,13 +66,14 @@ object HullManager {
   case class HullEsp(project: String, department: String, content: List[PrdPart], var docNumber: String, var user: String, var revision: String, var date: Long, var version: Int)
 
   case class GetHullPlatesForMaterial(project: String, material: String, thickness: String)
-  case class GetHullProfilesForMaterial()
+  case class GetHullProfilesForMaterial(project: String, material: String, kse: String)
 
   implicit val HullEspDecoder: Decoder[HullEsp] = deriveDecoder[HullEsp]
   implicit val HullEspEncoder: Encoder[HullEsp] = deriveEncoder[HullEsp]
 
 
   case class PlatePart(code: String, block: String, name: String, description: String, weight: Double, thickness: Double, material: String)
+  case class ProfilePart(kse: Int, section: String, material: String, w_h: Double, w_t: Double, f_h: Double, f_t: Double, block: String, length: Double, area: Double, stock: String, density: Double, weight: Double)
 }
 
 class HullManager extends Actor {
@@ -284,7 +285,8 @@ class HullManager extends Actor {
     case GetHullPlatesForMaterial(project, material, thickness) =>
       sender() ! getPlates(project, material, thickness.toDoubleOption.getOrElse(0)).asJson.noSpaces
 
-    case GetHullProfilesForMaterial() =>
+    case GetHullProfilesForMaterial(project, material, kse) =>
+      sender() ! getProfiles(project, material, kse.toIntOption.getOrElse(0)).asJson.noSpaces
 
   }
 
@@ -619,6 +621,37 @@ class HullManager extends Actor {
       case _ =>
     }
 
+    res
+  }
+  def getProfiles(project: String, material: String, kse: Int): ListBuffer[ProfilePart] = {
+    val res = ListBuffer.empty[ProfilePart]
+    GetOracleConnection(project) match {
+      case Some(c) =>
+        val s = c.createStatement()
+        val query = Source.fromResource("queries/hullProfiles.sql").mkString.replaceAll("&kse", kse.toString).replaceAll("&material", material)
+        val rs = s.executeQuery(query)
+        while (rs.next()) {
+          res += ProfilePart(
+            rs.getInt("KSE"),
+            rs.getString("SECTION"),
+            rs.getString("MATERIAL"),
+            rs.getDouble("W_H"),
+            rs.getDouble("W_T"),
+            rs.getDouble("F_H"),
+            rs.getDouble("F_T"),
+            rs.getString("BLOCK"),
+            rs.getDouble("LENGTH"),
+            rs.getDouble("AREA"),
+            rs.getString("STOCK"),
+            rs.getDouble("DENSITY"),
+            rs.getDouble("WEIGHT"),
+          )
+        }
+        rs.close()
+        s.close()
+        c.close()
+      case _ =>
+    }
     res
   }
 
