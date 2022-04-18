@@ -9,7 +9,7 @@ class PRD extends AnyFunSuite {
 
   //val s=ForanPartLabelByDrawingNumAndPartName("N004","210101-102-0203","0657")
   //val sы=genForanPartLabelByDrawingNumAndPartNameJSON("N004","NR004-101-0103","0001")
-  val b=genForanPartsByDrawingNum("N002","200101-222-0105")
+  val b=genForanPartsByDrawingNum("N004","210101-102-0101").filter(p=>p.PART_CODE.equals("0919"))
   val h=0
 
 /*  val parts: List[PrdPart] = genForanPartsByDrawingNum("N004", "210101-102-0103")

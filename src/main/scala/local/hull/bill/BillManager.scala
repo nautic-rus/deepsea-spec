@@ -37,7 +37,8 @@ object BillManager extends BillHelper with Codecs {
                             stock: Int = 0,
                             isDisabled: Boolean = true,
                             oneSheetWeight: Int = 0,
-                            wastages: Double = 0.0
+                            wastages: Double = 0.0,
+                            wastagesTotal: List[ForanScrap] = List.empty[ForanScrap]
                           )
 
   case class ProfileNestBill(
@@ -199,7 +200,8 @@ object BillManager extends BillHelper with Codecs {
         val nestedParts = nestsByMat.map(_.NP).sum
         val realPartsCount = realPrat.COUNT
         val realWeight = realPrat.WEIGHT
-        val wastages: Double = calculatePlateWastages(globNest, foranScraps, oneSheetWeight)
+        val wastagesToatal: List[ForanScrap] = genWastsgeByParentKpl(project, KPL)
+        val wastagesWeight: Double = wastagesToatal.map(_.WEIGHT).sum
         val scrap = calculatePlateScraps(nestsByMat, foranScraps, oneSheetWeight, globNest)
 
         //val plateForecas = Math.ceil((realWeight + (realWeight / 100) * scrap) / nest.head.TONETWGT).toInt
@@ -207,9 +209,10 @@ object BillManager extends BillHelper with Codecs {
 
         //val plateForecas = Math.ceil(((realWeight / oneSheetWeight + (realWeight / oneSheetWeight)) - wastages) * 0.13d).toInt
 
-        val plateForecas = Math.ceil(((realWeight / oneSheetWeight) - wastages) * 1.13d).toInt
+        val plateForecas = Math.ceil(((realWeight - wastagesWeight) / oneSheetWeight) * 1.13d).toInt
+        val wastages = wastagesWeight / oneSheetWeight
 
-        buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedParts, realPartsCount, realWeight, plateForecas, stock, isDisabled, oneSheetWeight, wastages)
+        buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedParts, realPartsCount, realWeight, plateForecas, stock, isDisabled, oneSheetWeight, wastages, wastagesToatal)
 
       } else {
         val mat = realPrat.MAT
@@ -267,7 +270,7 @@ object BillManager extends BillHelper with Codecs {
     buff.toList
   }
 
-  def genWastsgeByParentKplJson(project: String, KPL: Int): String=genWastsgeByParentKpl(project,KPL).asJson.noSpaces
+  def genWastsgeByParentKplJson(project: String, KPL: Int): String = genWastsgeByParentKpl(project, KPL).asJson.noSpaces
 
   private def isMatDisabled(matCode: String, mats: List[ForanMaterial]): Boolean = {
     mats.find(s => s.CODE.equals(matCode)) match {
@@ -286,33 +289,35 @@ object BillManager extends BillHelper with Codecs {
     }
   }
 
-  private def calculatePlateWastages(nest: PlateNestBill, foranScraps: List[ForanScrap], oneSheetWeight: Double): Double = {
-    val buff = ListBuffer.empty[ForanScrap]
-    val rootKpl = nest.KPL
-    foranScraps.filter(s => s.PARENTKPL == rootKpl).foreach(scrL1 => {
-      if (scrL1.NESTID.isEmpty)
-        buff += scrL1
-      foranScraps.filter(s => s.PARENTKPL == scrL1.KPL).foreach(scrL2 => {
+  /*
+    private def calculatePlateWastages(nest: PlateNestBill, foranScraps: List[ForanScrap], oneSheetWeight: Double): Double = {
+      val buff = ListBuffer.empty[ForanScrap]
+      val rootKpl = nest.KPL
+      foranScraps.filter(s => s.PARENTKPL == rootKpl).foreach(scrL1 => {
         if (scrL1.NESTID.isEmpty)
-          buff += scrL2
-        foranScraps.filter(s => s.PARENTKPL == scrL2.KPL).foreach(scrL3 => {
+          buff += scrL1
+        foranScraps.filter(s => s.PARENTKPL == scrL1.KPL).foreach(scrL2 => {
           if (scrL1.NESTID.isEmpty)
-            buff += scrL3
-          foranScraps.filter(s => s.PARENTKPL == scrL3.KPL).foreach(scrL4 => {
+            buff += scrL2
+          foranScraps.filter(s => s.PARENTKPL == scrL2.KPL).foreach(scrL3 => {
             if (scrL1.NESTID.isEmpty)
-              buff += scrL4
-            foranScraps.filter(s => s.PARENTKPL == scrL4.KPL).foreach(scrL5 => {
+              buff += scrL3
+            foranScraps.filter(s => s.PARENTKPL == scrL3.KPL).foreach(scrL4 => {
               if (scrL1.NESTID.isEmpty)
-                buff += scrL5
+                buff += scrL4
+              foranScraps.filter(s => s.PARENTKPL == scrL4.KPL).foreach(scrL5 => {
+                if (scrL1.NESTID.isEmpty)
+                  buff += scrL5
+              })
             })
           })
         })
-      })
 
-    })
-    val totWeught = (buff.filter(s => s.NESTID.isEmpty).map(_.WEIGHT).sum) / oneSheetWeight
-    totWeught
-  }
+      })
+      val totWeught = (buff.filter(s => s.NESTID.isEmpty).map(_.WEIGHT).sum) / oneSheetWeight
+      totWeught
+    }
+  */
 
   private def calculatePlateScraps(nestsByMat: List[PlateNestBill], foranScraps: List[ForanScrap], oneSheetWeight: Double, globNest: PlateNestBill): Double = {
     val buff = ListBuffer.empty[Double]

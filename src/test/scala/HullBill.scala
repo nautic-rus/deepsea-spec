@@ -18,9 +18,9 @@ class HullBill   extends AnyFunSuite with BillHelper{
 
   //val ap=genAnalyticProfileDataJson("N004")
 
-  val jjh=genWastsgeByParentKplJson("N004",1)
+  //val jjh=genWastsgeByParentKplJson("N004",1)
 
-  //val apl=genAnalyticPlateDataJson("N004")
+  val apl=genAnalyticPlateDataJson("N004")
 
 
   val jj=0
