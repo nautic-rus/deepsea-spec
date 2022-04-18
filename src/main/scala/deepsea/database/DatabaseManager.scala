@@ -7,6 +7,7 @@ import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import deepsea.actors.ActorManager
 import deepsea.actors.ActorStartupManager.DatabaseManagerStarted
 import deepsea.database.DatabaseManager.{GetMongoConnectionFromPool, GetOracleConnectionFromPool, OracleConnection}
+import local.common.Codecs
 import org.mongodb.scala.{MongoClient, MongoDatabase}
 
 import java.sql.Connection
@@ -45,7 +46,7 @@ object DatabaseManager{
   }
 }
 
-class DatabaseManager extends Actor with MongoCodecs {
+class DatabaseManager extends Actor with Codecs {
 
 
   private val configOracle = new HikariConfig()

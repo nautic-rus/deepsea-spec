@@ -1,5 +1,6 @@
 package local.common
 
+import deepsea.hull.HullManager.{PlatePart, ProfilePart}
 import io.circe.{Decoder, Encoder}
 import io.circe.parser._
 import io.circe.{Decoder, Encoder}
@@ -34,6 +35,12 @@ import org.mongodb.scala.bson.codecs.Macros._
 trait Codecs {
 
   //BOGDAN
+
+  implicit val PlatePartDecoder: Decoder[PlatePart] = deriveDecoder[PlatePart]
+  implicit val PlatePartEncoder: Encoder[PlatePart] = deriveEncoder[PlatePart]
+
+  implicit val ProfilePartDecoder: Decoder[ProfilePart] = deriveDecoder[ProfilePart]
+  implicit val ProfilePartEncoder: Encoder[ProfilePart] = deriveEncoder[ProfilePart]
 
 
   //KOKOVIN
@@ -109,8 +116,11 @@ trait Codecs {
   implicit val ForanScrapEncoder: Encoder[ForanScrap] = deriveEncoder[ForanScrap]
 
 
-  private val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
+  val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
     //BOGDAN
+
+    classOf[PlatePart],
+    classOf[ProfilePart],
 
     //KOKOVIN
     classOf[EleComplect],
