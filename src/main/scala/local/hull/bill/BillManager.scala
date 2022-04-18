@@ -211,6 +211,11 @@ object BillManager extends BillHelper with Codecs {
           }
           val alreadyUsedGrossPlatesWeight = (oneSheetWeight * count) - wastagesWeight
           val ret=Math.ceil(((alreadyUsedGrossPlatesWeight + partsToNestWeight* 1.13d) / oneSheetWeight) ).toInt
+
+          if(KPL==250){
+            val jj=0
+          }
+
           ret
         }
         val wastages = wastagesWeight / oneSheetWeight

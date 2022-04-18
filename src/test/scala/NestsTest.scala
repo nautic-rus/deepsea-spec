@@ -27,7 +27,9 @@ class NestsTest  extends AnyFunSuite with Codecs with NestHelper{
 
   //insertLock("N004","MU10305","DEMO")
 
-  val jjs=plateNestByBlocksJson("N004",blocks.filter(s=>s.equals("U103")||s.equals("U104")))
+  //val jjs=plateNestByBlocksJson("N004",blocks.filter(s=>s.equals("U102")||s.equals("U104")))
+
+  val jjs=plateNestByBlocksJson("N004",blocks)
 
   val jj=0
 }
