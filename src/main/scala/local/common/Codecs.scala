@@ -33,6 +33,10 @@ import org.mongodb.scala.bson.codecs.Macros._
 
 trait Codecs {
 
+  //BOGDAN
+
+
+  //KOKOVIN
 
   implicit val EleComplectDecoder: Decoder[EleComplect] = deriveDecoder[EleComplect]
   implicit val EleComplectEncoder: Encoder[EleComplect] = deriveEncoder[EleComplect]
@@ -106,6 +110,9 @@ trait Codecs {
 
 
   private val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
+    //BOGDAN
+
+    //KOKOVIN
     classOf[EleComplect],
     classOf[TrayMountData],
     classOf[TrayMountRules],
