@@ -112,8 +112,8 @@ object BillManager extends BillHelper with Codecs {
                               LENGHT: Double = 0.0,
                               PARTSWEIGHT: Double = 0.0,
                               STOCK: Int = 0,
-                              GROWLEN:Double=0.0,
-                              GROWWEIGHT:Double=0.0
+                              GROWLEN: Double = 0.0,
+                              GROWWEIGHT: Double = 0.0
                             )
 
   case class ForanScrap(
@@ -158,9 +158,11 @@ object BillManager extends BillHelper with Codecs {
 
         //val profileForecast: Int = Math.ceil((realLenghtMM + (realLenghtMM / 100) * scrap) / grossLenght).toInt
         val profileForecast: Int = {
-          val res=Math.ceil(((realPart.LENGHT*1000-(count*grossLenght))/grossLenght)*1.11d).toInt
-          if (res<=0) count else res
+          val res = Math.ceil(((realPart.LENGHT * 1000 - (count * grossLenght)) / grossLenght) * 1.11d).toInt
+          if (res <= 0) count else res
         }
+
+
         buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT, isDisabled, stock)
       } else {
         val kse = realPart.KSE
@@ -172,8 +174,16 @@ object BillManager extends BillHelper with Codecs {
         val grossLenght = realPart.GROWLEN
         val count = 0
         val scrap = 0
-        val profileForecast: Int = Math.ceil((realPart.LENGHT/realPart.GROWLEN)*1.11d).toInt
-        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght*1000, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT, isDisabled, stock)
+        val profileForecast: Int = {
+
+          if (realPart.GROWLEN <= 0.0d) {
+            0
+          } else {
+            Math.ceil((realPart.LENGHT / realPart.GROWLEN) * 1.11d).toInt
+          }
+        }
+
+        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght * 1000, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT, isDisabled, stock)
       }
     })
     buff.sortBy(s => (s.mat, s.section, s.scantling)).toList
@@ -213,15 +223,15 @@ object BillManager extends BillHelper with Codecs {
         val scrap = calculatePlateScraps(nestsByMat, foranScraps, oneSheetWeight, globNest)
 
         val plateForecas: Int = {
-          val partsToNestWeight: Double ={
-            val v:Double=realPrat.WEIGHT - nestedPartsWeight
-            if(v<=0.0d) 0.0d else  v
+          val partsToNestWeight: Double = {
+            val v: Double = realPrat.WEIGHT - nestedPartsWeight
+            if (v <= 0.0d) 0.0d else v
           }
           val alreadyUsedGrossPlatesWeight = (oneSheetWeight * count) - wastagesWeight
-          val ret=Math.ceil(((alreadyUsedGrossPlatesWeight + partsToNestWeight* 1.13d) / oneSheetWeight) ).toInt
+          val ret = Math.ceil(((alreadyUsedGrossPlatesWeight + partsToNestWeight * 1.13d) / oneSheetWeight)).toInt
 
-          if(KPL==250){
-            val jj=0
+          if (KPL == 250) {
+            val jj = 0
           }
 
           ret
