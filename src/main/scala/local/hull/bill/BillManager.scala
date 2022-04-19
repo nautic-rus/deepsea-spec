@@ -108,9 +108,12 @@ object BillManager extends BillHelper with Codecs {
                               WEB_T: Double = 0.0,
                               FLANGE_H: Double = 0.0,
                               FLANGE_T: Double = 0.0,
-                              PARTS: Int = 0, LENGHT: Double = 0.0,
+                              PARTS: Int = 0,
+                              LENGHT: Double = 0.0,
                               PARTSWEIGHT: Double = 0.0,
-                              STOCK: Int = 0
+                              STOCK: Int = 0,
+                              GROWLEN:Double=0.0,
+                              GROWWEIGHT:Double=0.0
                             )
 
   case class ForanScrap(
@@ -152,7 +155,12 @@ object BillManager extends BillHelper with Codecs {
         val grossLenght = nestGRO.GROLEN
         val count = nests.map(_.NGB).sum
         val scrap = nestGRO.TOTAL_KSE_SCRAP
-        val profileForecast: Int = Math.ceil((realLenghtMM + (realLenghtMM / 100) * scrap) / grossLenght).toInt
+
+        //val profileForecast: Int = Math.ceil((realLenghtMM + (realLenghtMM / 100) * scrap) / grossLenght).toInt
+        val profileForecast: Int = {
+          val res=Math.ceil(((realPart.LENGHT*1000-(count*grossLenght))/grossLenght)*1.11d).toInt
+          if (res<=0) count else res
+        }
         buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT, isDisabled, stock)
       } else {
         val kse = realPart.KSE
@@ -161,11 +169,11 @@ object BillManager extends BillHelper with Codecs {
         val section = realPart.PRF_SECTION
         val scantling = genScantling(realPart.WEB_H, realPart.WEB_T, realPart.FLANGE_H, realPart.FLANGE_T)
         val stock = realPart.STOCK
-        val grossLenght = 0.0
+        val grossLenght = realPart.GROWLEN
         val count = 0
         val scrap = 0
-        val profileForecast: Int = 0
-        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT, isDisabled, stock)
+        val profileForecast: Int = Math.ceil((realPart.LENGHT/realPart.GROWLEN)*1.11d).toInt
+        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght*1000, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT, isDisabled, stock)
       }
     })
     buff.sortBy(s => (s.mat, s.section, s.scantling)).toList
