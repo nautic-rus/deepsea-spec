@@ -158,7 +158,7 @@ object BillManager extends BillHelper with Codecs {
 
         //val profileForecast: Int = Math.ceil((realLenghtMM + (realLenghtMM / 100) * scrap) / grossLenght).toInt
         val profileForecast: Int = {
-          val res = Math.ceil(((realPart.LENGHT * 1000 - (count * grossLenght)) / grossLenght) * 1.11d).toInt
+          val res =count+ Math.ceil(((realPart.LENGHT * 1000 - (count * grossLenght)) / grossLenght) * 1.11d).toInt
           if (res <= 0) count else res
         }
 
