@@ -14,6 +14,7 @@ object BillManager extends BillHelper with Codecs {
                               section: String = "",
                               scantling: String = "",
                               grossLenght: Double = 0.0,
+                              grossWeight: Double = 0.0,
                               count: Int,
                               scrap: Double = 0.0,
                               realPartsCount: Int = 0,
@@ -141,7 +142,7 @@ object BillManager extends BillHelper with Codecs {
 
     real.foreach(realPart => {
       val realPartsCpunt: Int = realPart.PARTS
-      val realLenghtMM: Double = realPart.LENGHT * 1000
+      //val realLenghtMM: Double = realPart.LENGHT * 1000
       if (nest.exists(s => s.KSE.equals(realPart.KSE))) {
         val nests = nest.filter(p => p.KSE.equals(realPart.KSE) && p.KQ.equals(realPart.MATERIAL))
         val nestGRO: ProfileNestBill = nests.maxBy(s => s.GROLEN)
@@ -158,12 +159,12 @@ object BillManager extends BillHelper with Codecs {
 
         //val profileForecast: Int = Math.ceil((realLenghtMM + (realLenghtMM / 100) * scrap) / grossLenght).toInt
         val profileForecast: Int = {
-          val res =count+ Math.ceil(((realPart.LENGHT * 1000 - (count * grossLenght)) / grossLenght) * 1.11d).toInt
+          val res = count + Math.ceil(((realPart.LENGHT * 1000 - (count * grossLenght)) / grossLenght) * 1.11d).toInt
           if (res <= 0) count else res
         }
 
 
-        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT, isDisabled, stock)
+        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght, realPart.GROWWEIGHT, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT, isDisabled, stock)
       } else {
         val kse = realPart.KSE
         val mat = realPart.MATERIAL
@@ -183,7 +184,7 @@ object BillManager extends BillHelper with Codecs {
           }
         }
 
-        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght * 1000, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT, isDisabled, stock)
+        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght * 1000, realPart.GROWWEIGHT, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT, isDisabled, stock)
       }
     })
     buff.sortBy(s => (s.mat, s.section, s.scantling)).toList
