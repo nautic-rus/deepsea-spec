@@ -22,7 +22,7 @@ import local.ele.eq.EleEqManager.EleEq
 import local.hull.BStree.{Block, BsTreeItem, HullPL, Room}
 import local.hull.PartManager.PrdPart
 import local.hull.bill.BillManager.{ForanScrap, PlateAnalitic, ProfileAnalitic}
-import local.hull.nest.CommonNest.{Nest, NestLock, NestMaterial}
+import local.hull.nest.CommonNest.{Nest, Nest2, NestLock, NestMaterial}
 import local.pdf.ru.common.ReportCommon.Item11Columns
 import local.sql.MongoDB
 import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
@@ -114,6 +114,9 @@ trait Codecs {
 
   implicit val ForanScrapecoder: Decoder[ForanScrap] = deriveDecoder[ForanScrap]
   implicit val ForanScrapEncoder: Encoder[ForanScrap] = deriveEncoder[ForanScrap]
+
+  implicit val Nest2Decoder: Decoder[Nest2] = deriveDecoder[Nest2]
+  implicit val Nest2Encoder: Encoder[Nest2] = deriveEncoder[Nest2]
 
 
   val codecRegistry: CodecRegistry = fromRegistries(fromProviders(

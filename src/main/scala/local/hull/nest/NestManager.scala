@@ -1,12 +1,15 @@
 package local.hull.nest
 
-import local.hull.nest.CommonNest.{Nest, NestMaterial}
+import local.hull.nest.CommonNest.{Nest, Nest2, NestMaterial}
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 import local.common.Codecs
 
 object NestManager extends NestHelper with Codecs {
+
+  def genAllPlateNest2(project: String): List[Nest2] =allPlateNest2(project)
+  def genAllPlateNest2Json(project: String): String = genAllPlateNest2(project).asJson.noSpaces
 
   def genAllPlateNest(project: String): List[Nest] = allPlateNest(project)
 

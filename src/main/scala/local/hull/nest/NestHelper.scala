@@ -3,7 +3,7 @@ package local.hull.nest
 import local.common.DBRequests.{insertNestsLock, listToSqlString, retrieveNestsLocksByProject}
 import local.hull.bill.BillManager.ForanScrap
 import local.hull.bill.{BillHelper, BillManager}
-import local.hull.nest.CommonNest.{Nest, NestIdBlock, NestLock, NestMaterial, calculateWeightKG}
+import local.hull.nest.CommonNest.{Nest, Nest2, NestIdBlock, NestLock, NestMaterial, calculateWeightKG}
 import local.sql.ConnectionManager
 
 import java.sql.{ResultSet, Statement}
@@ -13,6 +13,9 @@ trait NestHelper extends BillHelper {
 
 
   private def allPlateNestSQL(): String = "select  ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST,PARTS_WEIGHT,DENSITY,USAGE\nfrom(\nselect \n N.NEST_ID as ID, N.MATERIAL,N.THICKNESS,N.NEST_LENGTH,N.NEST_WIDTH,N.NUM_EQ_NEST,N.PARTS_WEIGHT,\n M.DENSITY,\n N.PARTS_WEIGHT/(((N.NEST_LENGTH*N.NEST_WIDTH*N.THICKNESS)/1000000000)*M.DENSITY*1000)*100 as USAGE\nfrom \n(\nselect NEST_ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST, SUM( WEIGHT_UNITS) as PARTS_WEIGHT\nfrom\n    (\n    select NEST_ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST,  WEIGHT_UNIT*NUM_PART_NEST as WEIGHT_UNITS\n    from V_PRD_PART_NEST_LIST \n    where NEST_ID like 'MU%'\n    )\nGROUP BY NEST_ID,MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST\n) N, MATERIAL M\nwhere N.MATERIAL=M.CODE\norder by N.NEST_ID\n)"
+
+
+  private def allPlateNestSQL2(): String = "select \nOID,\nNESTID,\nKPL,\nLENGTH,\nWIDTH,\nTHICKNESS,\nMAT,\nDENSITY,\nlistagg(CODE,';') within group( order by CODE ) AS BLOCKS,\nNUM_PRT,\nNUM_EQ_NEST,\nAREA,\n(AREA*THICKNESS*DENSITY) AS PARTS_WEIGHT,\n(LENGTH*WIDTH*THICKNESS*DENSITY/1000000) AS GROSS_WEIGHT,\n((AREA*THICKNESS*DENSITY)/(LENGTH*WIDTH*THICKNESS*DENSITY/1000000))*100 as USAGE,\nPARENTNESTID,\nCHILDNESTID,\nCHILDKPL,\nCHILDLENGTH,\nCHILDWIDTH,\nCHILDAREAM2,\n(CHILDAREAM2*THICKNESS*DENSITY) AS CHILDWEIGHT\nfrom\n(\nselect distinct \nB.CODE,\nGET_NEST_ID(N.OID, N.ID_SEQ_BLOCK) as NESTID,\nSTD.KPL,\nSTD.LENGTH,\nSTD.WIDTH,\nSTD.THICKNESS,\nM.CODE as MAT,\nM.DENSITY,\nN.NUM_PRT,\nN.NUM_EQ_NEST+1 as NUM_EQ_NEST,\nN.AREA,\nN.OID as OID,\nGET_NEST_ID(\n(select FROM_NEST_OID from PRD_STD_PLT_ENCLOS where STD_PLATE_OID=N.COD_PLT) ,\n(select ID_SEQ_BLOCK from PRD_NEST_GEN where OID =(select FROM_NEST_OID from PRD_STD_PLT_ENCLOS where STD_PLATE_OID=N.COD_PLT))\n) as PARENTNESTID,\nGET_NEST_ID(\n(select OID from PRD_NEST_GEN where COD_PLT = (select STD_PLATE_OID from PRD_STD_PLT_ENCLOS where FROM_NEST_OID=N.OID)),\n(select ID_SEQ_BLOCK from PRD_NEST_GEN where COD_PLT = (select STD_PLATE_OID from PRD_STD_PLT_ENCLOS where FROM_NEST_OID=N.OID))\n) as CHILDNESTID,\n(select KPL from STD_PLATE where OID=(select STD_PLATE_OID from PRD_STD_PLT_ENCLOS where FROM_NEST_OID=N.OID)) as CHILDKPL,\n(select SLENGTH from PRD_STD_PLT_ENCLOS where FROM_NEST_OID=N.OID) as CHILDLENGTH,\n(select SWIDTH from PRD_STD_PLT_ENCLOS where FROM_NEST_OID=N.OID) as CHILDWIDTH,\n(select AREA_M2 from PRD_STD_PLT_ENCLOS where FROM_NEST_OID=N.OID) as CHILDAREAM2\nfrom PRD_NEST_GEN N, BLOCK B, PRD_NEST_PART NP, PRD_PART PP, STD_PLATE STD, MATERIAL M\nwhere \nNP.NESTING_OID=N.OID AND\nPP.OID=NP.PART_OID AND\nPP.BLOCK_OID=B.OID AND\nSTD.OID=N.COD_PLT AND\nSTD.MATERIAL_OID=M.OID AND\nN.NEST_TYPE=0\n)\ngroup by \nOID,\nNESTID,\nKPL,\nLENGTH,\nWIDTH,\nTHICKNESS,\nMAT,\nDENSITY,\nNUM_PRT,\nNUM_EQ_NEST,\nAREA,\nPARENTNESTID,\nCHILDNESTID,\nCHILDKPL,\nCHILDLENGTH,\nCHILDWIDTH,\nCHILDAREAM2\norder by\nNESTID"
 
   private def plateNestByMaterial(mats: String) = s"select  ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST,PARTS_WEIGHT,DENSITY,USAGE\nfrom(\nselect \n N.NEST_ID as ID, N.MATERIAL,N.THICKNESS,N.NEST_LENGTH,N.NEST_WIDTH,N.NUM_EQ_NEST,N.PARTS_WEIGHT,\n M.DENSITY,\n N.PARTS_WEIGHT/(((N.NEST_LENGTH*N.NEST_WIDTH*N.THICKNESS)/1000000000)*M.DENSITY*1000)*100 as USAGE\nfrom \n(\nselect NEST_ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST, SUM( WEIGHT_UNITS) as PARTS_WEIGHT\nfrom\n    (\n    select NEST_ID, MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST,  WEIGHT_UNIT*NUM_PART_NEST as WEIGHT_UNITS\n    from V_PRD_PART_NEST_LIST \n    where NEST_ID like 'MU%'\n    )\nGROUP BY NEST_ID,MATERIAL,THICKNESS,NEST_LENGTH,NEST_WIDTH,NUM_EQ_NEST\n) N, MATERIAL M\nwhere N.MATERIAL=M.CODE\norder by N.NEST_ID\n)\nwhere MATERIAL in(${mats})"
 
@@ -58,6 +61,73 @@ trait NestHelper extends BillHelper {
       case None => List.empty[NestIdBlock]
     }
   }
+
+
+  def allPlateNest2(project: String): List[Nest2] = {
+    val locks: List[NestLock] = retrieveNestsLocksByProject(project)
+    ConnectionManager.connectionByProject(project) match {
+      case Some(connection) => {
+        try {
+          val buffer = ListBuffer.empty[Nest2]
+          val stmt: Statement = connection.createStatement()
+          val sql = allPlateNestSQL2()
+          val rs: ResultSet = stmt.executeQuery(sql)
+          while (rs.next()) {
+            val NESTID: String = Option(rs.getString("NESTID")).getOrElse("")
+            val PARTS_WEIGHT: Double = Option(rs.getDouble("PARTS_WEIGHT")).getOrElse(0.0)
+            val GROSS_WEIGHT: Double = Option(rs.getDouble("GROSS_WEIGHT")).getOrElse(0.0)
+            val CHILDWEIGHT: Double = Option(rs.getDouble("CHILDWEIGHT")).getOrElse(0.0)
+            val usage: Double = {
+              if (GROSS_WEIGHT > 0.0) {
+                (PARTS_WEIGHT + CHILDWEIGHT) / GROSS_WEIGHT * 100.0d
+              } else {
+                0.0d
+              }
+
+            }
+            val lock = calculateLockInfo(NESTID, locks)
+            buffer += Nest2(
+              Option(rs.getInt("OID")).getOrElse(0),
+              NESTID,
+              Option(rs.getInt("KPL")).getOrElse(0),
+              Option(rs.getDouble("LENGTH")).getOrElse(0.0),
+              Option(rs.getDouble("WIDTH")).getOrElse(0.0),
+              Option(rs.getDouble("THICKNESS")).getOrElse(0.0),
+              Option(rs.getString("MAT")).getOrElse(""),
+              Option(rs.getDouble("DENSITY")).getOrElse(0.0),
+              Option(rs.getString("BLOCKS")).getOrElse(""),
+              Option(rs.getInt("NUM_PRT")).getOrElse(0),
+              Option(rs.getInt("NUM_EQ_NEST")).getOrElse(0),
+              Option(rs.getDouble("AREA")).getOrElse(0.0),
+              PARTS_WEIGHT,
+              GROSS_WEIGHT,
+              usage,
+              Option(rs.getString("PARENTNESTID")).getOrElse(""),
+              Option(rs.getString("CHILDNESTID")).getOrElse(""),
+              Option(rs.getInt("CHILDKPL")).getOrElse(0),
+              Option(rs.getDouble("CHILDLENGTH")).getOrElse(0.0),
+              Option(rs.getDouble("CHILDWIDTH")).getOrElse(0.0),
+              Option(rs.getDouble("CHILDAREAM2")).getOrElse(0.0),
+              Option(rs.getDouble("CHILDWEIGHT")).getOrElse(0.0),
+              lock._2,
+              lock._1
+            )
+          }
+          rs.close()
+          stmt.close()
+          connection.close()
+          rearrangeBlockNests(buffer.toList)
+        }
+        catch {
+          case _: Throwable =>
+            connection.close()
+            List.empty[Nest2]
+        }
+      }
+      case None => List.empty[Nest2]
+    }
+  }
+
 
   def allPlateNest(project: String): List[Nest] = {
     val nestsBlocks: List[NestIdBlock] = getNestBlock(project)
@@ -395,7 +465,7 @@ trait NestHelper extends BillHelper {
         try {
           val buffer = ListBuffer.empty[String]
           val stmt: Statement = connection.createStatement()
-          val sql=blocksListSql()
+          val sql = blocksListSql()
           val rs: ResultSet = stmt.executeQuery(sql)
           while (rs.next()) {
             buffer += Option(rs.getString("BLOCK_CODE")).getOrElse("")
@@ -442,27 +512,41 @@ trait NestHelper extends BillHelper {
     (usage, scrap)
   }
 
-  /*
-    private def calculateScrapOld(id: String, foranUsage: Double, partsWeight: Double, scraps: List[ForanScrap]): Double = {
-      scraps.find(s => s.NESTID.equals(id) || s.PARENTNESTID.equals(id)) match {
-        case Some(masterScrap) => {
-          scraps.find(s => s.PARENTNESTID.equals(id)) match {
-            case Some(slaveScrap) => {
-              //100.0 - ((partsWeight / (masterScrap.WEIGHT - slaveScrap.WEIGHT)) * 100.0)
-             val ret= (partsWeight / (masterScrap.WEIGHT - slaveScrap.WEIGHT)) * 100.0
-              if(id.toUpperCase().equals("MU10231")){
-                val hh=0
-              }
+  private def rearrangeBlockNests(in: List[Nest2]): List[Nest2] = {
 
-              ret
-            }
-            case None => foranUsage
-          }
-        }
-        case None => foranUsage
+    val arrangesBlocksNames: List[String] = in.filter(s => s.BLOCKS.contains(";")).map(_.BLOCKS).distinct
+    val buff = ListBuffer.empty[Nest2]
+    in.foreach(card => {
+      arrangesBlocksNames.find(s => s.contains(card.BLOCKS) || s.equals(card.BLOCKS)) match {
+        case Some(v) =>buff+= Nest2(
+          card.OID,
+          card.NESTID: String,
+          card.KPL,
+          card.LENGTH,
+          card.WIDTH,
+          card.THICKNESS,
+          card.MAT,
+          card.DENSITY,
+          v,
+          card.NUMPRT,
+          card.NUMEQNEST,
+          card.AREA,
+          card.PARTSWEIGHT,
+          card.GROSSWEIGHT,
+          card.USAGE,
+          card.PARENTNESTID,
+          card.CHILDNESTID,
+          card.CHILDKPL,
+          card.CHILDLENGTH,
+          card.CHILDWIDTH,
+          card.CHILDAREAM2,
+          card.CHILDWEIGHT,
+          card.isLock,
+          card.lockInfo
+        )
+        case None => buff += card
       }
-    }
-
-  */
-
+    })
+    buff.toList
+  }
 }
