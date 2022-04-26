@@ -39,6 +39,7 @@ object SpecManager {
   case class GetHullNestingBlocks(project: String)
   case class GetHullNestingMaterials(project: String, blocks: String)
   case class GetHullNestingByMaterials(project: String, materials: String)
+  case class GetHullNestingByProject(project: String)
   case class GetHullBillPlatesWastage(project: String, kpl: String)
 
   case class CreateCNC(lines: String, user: String)
@@ -75,6 +76,8 @@ class SpecManager extends Actor with BStree {
       sender() ! genMaterialNyBlockJson(project, Json.parse(blocks).asOpt[List[String]].getOrElse(List.empty[String]))
     case GetHullNestingByMaterials(project, materials) =>
       sender() ! plateNestByMaterialsAndDimsJson(project, decode[List[NestMaterial]](materials).getOrElse(List.empty[NestMaterial]))
+    case GetHullNestingByProject(project) =>
+      sender() ! genAllPlateNest2Json(project)
     case GetHullBillPlates(project) =>
       sender() ! genAnalyticPlateDataJson(project)
     case GetHullBillProfiles(project) =>
