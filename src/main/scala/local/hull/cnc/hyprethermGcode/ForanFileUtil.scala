@@ -66,8 +66,10 @@ trait ForanFileUtil {
   }
 
   private def doCNC(in: String): CNC = {
+
     val arr = in.split(" ")
     arr.head match {
+
       case "JUMP" => {
         CNC(arr.head, 1, 0, List[CNCcoordsPackage](CNCcoordsPackage(1, doubleListToPoints(List[Double](arr(1).toDoubleOption.getOrElse(0.0), arr(2).toDoubleOption.getOrElse(0.0))))))
       }
@@ -188,10 +190,10 @@ trait ForanFileUtil {
     }
   }
 
-  def toGcode(cmd: String, in: MachineItem): String = {
+  def toGcode(cmd: String, in: MachineItem, offsetCorrection:Point): String = {
     in.pointOrArc match {
-      case Right(value) => value.toGcode(cmd)
-      case Left(value) => value.toGcode(cmd)
+      case Right(value) => value.toGcode(cmd,offsetCorrection)
+      case Left(value) => value.toGcode(cmd,offsetCorrection)
     }
   }
 

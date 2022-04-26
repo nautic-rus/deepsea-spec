@@ -18,13 +18,13 @@ object Cases {
   case class Point(x: Double, y: Double) {
     override def toString: String = s"${doubleToStr(x)} ${doubleToStr(y)}"
 
-    def toGcode(cmd: String): String = s"${cmd}X${doubleToStr(x)}Y${doubleToStr(y)}"
+    def toGcode(cmd: String, offsetCorrection:Point): String = s"${cmd}X${doubleToStr(x-offsetCorrection.x)}Y${doubleToStr(y-offsetCorrection.y)}"
   }
 
   case class Arc(sp: Point, rotCenter: Point, ep: Point) {
     override def toString: String = s"sp=${sp.toString} rp=${rotCenter.toString} ep=${ep.toString}"
 
-    def toGcode(cmd:String):String={
+    def toGcode(cmd:String, offsetCorrection:Point):String={
       if(arcAlgoRadius){
         val r=Math.sqrt((rotCenter.x-sp.x)*(rotCenter.x-sp.x)+(rotCenter.y-sp.y)*(rotCenter.y-sp.y))
         s"${cmd}X${doubleToStr(ep.x)}Y${doubleToStr(ep.y)}R${r}"
@@ -37,16 +37,16 @@ object Cases {
         val J: Double = {
           if(Math.abs(0.0-valueX)<0.01  && Math.abs(0.0-valueY)<0.01) 0.01 else valueY
         }
-        s"${cmd}X${doubleToStr(ep.x)}Y${doubleToStr(ep.y)}I${doubleToStr(I)}J${doubleToStr(J)}"
+        s"${cmd}X${doubleToStr(ep.x-offsetCorrection.x)}Y${doubleToStr(ep.y-offsetCorrection.y)}I${doubleToStr(I)}J${doubleToStr(J)}"
       }
     }
   }
 
   case class MachineItem(pointOrArc: Either[Point, Arc]) {
-    override def toString: String = pointOrArc match {
+/*    override def toString: String = pointOrArc match {
       case Right(value: Arc) => value.toString
       case Left(value: Point) => value.toString
-    }
+    }*/
   }
 
   case class PseudoMachineOps(name: String, ops: List[MachineItem]) {
