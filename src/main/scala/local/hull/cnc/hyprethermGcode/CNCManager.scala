@@ -9,6 +9,19 @@ object CNCManager extends ForanFileUtil {
 
 
   def doCNCStrings(in: List[String], username: String): List[String]={
+    val offsetCorrection: Point = in.find(s => s.startsWith("STAR")) match {
+      case Some(value) =>{
+        val arr=value.split(" ")
+        if(arr.length==3 && checkDigitOrPlusMinus(arr(1)) &&  checkDigitOrPlusMinus(arr(2))){
+          Point(arr(1).toDoubleOption.getOrElse(0.0d),arr(2).toDoubleOption.getOrElse(0.0d))
+        }else{
+          Point(0,0)
+        }
+      }
+      case None => Point(0,0)
+    }
+
+
     val buff=ListBuffer.empty[String]
 
     val clp: List[CNC] = procForanCLPfromList(in)
@@ -33,25 +46,25 @@ object CNCManager extends ForanFileUtil {
             currentTool = markToolOp
             buff+=(markToolOp)
           }
-          buff+=(toGcode(move, MachineItem(Left(getStartPos(op.ops.head)))))
+          buff+=(toGcode(move, MachineItem(Left(getStartPos(op.ops.head))),offsetCorrection))
           lastOpPoint = getStartPos(op.ops.head)
           buff+=(startMark)
           buff+=(markPauseOp)
           op.ops.foreach(c => {
             c.pointOrArc match {
               case Right(value: Arc) => {
-                if (!pointsEquals(value.sp, lastOpPoint)) buff+=(toGcode(stright, MachineItem(Left(value.sp))))
+                if (!pointsEquals(value.sp, lastOpPoint)) buff+=(toGcode(stright, MachineItem(Left(value.sp)),offsetCorrection))
                 if (isClockWise(value)) {
-                  buff+=(toGcode(arcCW, c))
+                  buff+=(toGcode(arcCW, c,offsetCorrection))
                   lastOpPoint = getLastPos(c)
                 } else {
-                  buff+=(toGcode(arcACW, c))
+                  buff+=(toGcode(arcACW, c,offsetCorrection))
                   lastOpPoint = getLastPos(c)
                 }
               }
               case Left(value: Point) => {
-                if (!pointsEquals(value, lastOpPoint)) buff+=(toGcode(stright, MachineItem(Left(value))))
-                buff+=(toGcode(stright, c))
+                if (!pointsEquals(value, lastOpPoint)) buff+=(toGcode(stright, MachineItem(Left(value)),offsetCorrection))
+                buff+=(toGcode(stright, c,offsetCorrection))
                 lastOpPoint = getLastPos(c)
               }
             }
@@ -65,7 +78,7 @@ object CNCManager extends ForanFileUtil {
             currentTool = cutToolOp
             buff+=(cutToolOp)
           }
-          buff+=(toGcode(move, MachineItem(Left(getStartPos(op.ops.head)))))
+          buff+=(toGcode(move, MachineItem(Left(getStartPos(op.ops.head))),offsetCorrection))
           lastOpPoint = getStartPos(op.ops.head)
           buff+=(startCutHoles)
           buff+=(cutPauseOp)
@@ -73,18 +86,18 @@ object CNCManager extends ForanFileUtil {
           op.ops.foreach(c => {
             c.pointOrArc match {
               case Right(value: Arc) => {
-                if (!pointsEquals(value.sp, lastOpPoint)) buff+=(toGcode(stright, MachineItem(Left(value.sp))))
+                if (!pointsEquals(value.sp, lastOpPoint)) buff+=(toGcode(stright, MachineItem(Left(value.sp)),offsetCorrection))
                 if (isClockWise(value)) {
-                  buff+=(toGcode(arcCW, c))
+                  buff+=(toGcode(arcCW, c,offsetCorrection))
                   lastOpPoint = getLastPos(c)
                 } else {
-                  buff+=(toGcode(arcACW, c))
+                  buff+=(toGcode(arcACW, c,offsetCorrection))
                   lastOpPoint = getLastPos(c)
                 }
               }
               case Left(value: Point) => {
-                if (!pointsEquals(value, lastOpPoint)) buff+=(toGcode(stright, MachineItem(Left(value))))
-                buff+=(toGcode(stright, c))
+                if (!pointsEquals(value, lastOpPoint)) buff+=(toGcode(stright, MachineItem(Left(value)),offsetCorrection))
+                buff+=(toGcode(stright, c,offsetCorrection))
                 lastOpPoint = getLastPos(c)
               }
             }
@@ -97,7 +110,7 @@ object CNCManager extends ForanFileUtil {
             currentTool = cutToolOp
             buff+=(cutToolOp)
           }
-          buff+=(toGcode(move, MachineItem(Left(getStartPos(op.ops.head)))))
+          buff+=(toGcode(move, MachineItem(Left(getStartPos(op.ops.head))),offsetCorrection))
           lastOpPoint = getStartPos(op.ops.head)
           buff+=(startCutOuter)
           buff+=(cutPauseOp)
@@ -105,18 +118,18 @@ object CNCManager extends ForanFileUtil {
           op.ops.foreach(c => {
             c.pointOrArc match {
               case Right(value: Arc) => {
-                if (!pointsEquals(value.sp, lastOpPoint)) buff+=(toGcode(stright, MachineItem(Left(value.sp))))
+                if (!pointsEquals(value.sp, lastOpPoint)) buff+=(toGcode(stright, MachineItem(Left(value.sp)),offsetCorrection))
                 if (isClockWise(value)) {
-                  buff+=(toGcode(arcCW, c))
+                  buff+=(toGcode(arcCW, c,offsetCorrection))
                   lastOpPoint = getLastPos(c)
                 } else {
-                  buff+=(toGcode(arcACW, c))
+                  buff+=(toGcode(arcACW, c,offsetCorrection))
                   lastOpPoint = getLastPos(c)
                 }
               }
               case Left(value: Point) => {
-                if (!pointsEquals(value, lastOpPoint)) buff+=(toGcode(stright, MachineItem(Left(value))))
-                buff+=(toGcode(stright, c))
+                if (!pointsEquals(value, lastOpPoint)) buff+=(toGcode(stright, MachineItem(Left(value)),offsetCorrection))
+                buff+=(toGcode(stright, c,offsetCorrection))
                 lastOpPoint = getLastPos(c)
               }
             }
@@ -135,6 +148,20 @@ object CNCManager extends ForanFileUtil {
 
 
   def doCNC(in: List[String], pathOut: String, username: String): String = {
+
+    val offsetCorrection: Point = in.find(s => s.startsWith("STAR")) match {
+      case Some(value) =>{
+        val arr=value.split(" ")
+        if(arr.length==3 && checkDigitOrPlusMinus(arr(1)) &&  checkDigitOrPlusMinus(arr(2))){
+          Point(arr(1).toDoubleOption.getOrElse(0.0d),arr(2).toDoubleOption.getOrElse(0.0d))
+        }else{
+          Point(0,0)
+        }
+      }
+      case None => Point(0,0)
+    }
+
+
     val clp: List[CNC] = procForanCLPfromList(in)
     val machineOpts: List[PseudoMachineOps] = genPseudoMachineOps(clp)
     val pw = new PrintWriter(new File(pathOut))
@@ -149,6 +176,7 @@ object CNCManager extends ForanFileUtil {
     pw.println(startOps)
     var currentTool = ""
     var lastOpPoint: Point = initOp
+
     machineOpts.foreach(op => {
 
       op.name match {
@@ -163,25 +191,25 @@ object CNCManager extends ForanFileUtil {
             currentTool = markToolOp
             pw.println(markToolOp)
           }
-          pw.println(toGcode(move, MachineItem(Left(getStartPos(op.ops.head)))))
+          pw.println(toGcode(move, MachineItem(Left(getStartPos(op.ops.head))),offsetCorrection))
           lastOpPoint = getStartPos(op.ops.head)
           pw.println(startMark)
           pw.println(markPauseOp)
           op.ops.foreach(c => {
             c.pointOrArc match {
               case Right(value: Arc) => {
-                if (!pointsEquals(value.sp, lastOpPoint)) pw.println(toGcode(stright, MachineItem(Left(value.sp))))
+                if (!pointsEquals(value.sp, lastOpPoint)) pw.println(toGcode(stright, MachineItem(Left(value.sp)),offsetCorrection))
                 if (isClockWise(value)) {
-                  pw.println(toGcode(arcCW, c))
+                  pw.println(toGcode(arcCW, c,offsetCorrection))
                   lastOpPoint = getLastPos(c)
                 } else {
-                  pw.println(toGcode(arcACW, c))
+                  pw.println(toGcode(arcACW, c,offsetCorrection))
                   lastOpPoint = getLastPos(c)
                 }
               }
               case Left(value: Point) => {
-                if (!pointsEquals(value, lastOpPoint)) pw.println(toGcode(stright, MachineItem(Left(value))))
-                pw.println(toGcode(stright, c))
+                if (!pointsEquals(value, lastOpPoint)) pw.println(toGcode(stright, MachineItem(Left(value)),offsetCorrection))
+                pw.println(toGcode(stright, c,offsetCorrection))
                 lastOpPoint = getLastPos(c)
               }
             }
@@ -190,14 +218,12 @@ object CNCManager extends ForanFileUtil {
 
         }
 
-
         case "CUTH"  => { //
-
           if (!currentTool.equals(cutToolOp)) {
             currentTool = cutToolOp
             pw.println(cutToolOp)
           }
-          pw.println(toGcode(move, MachineItem(Left(getStartPos(op.ops.head)))))
+          pw.println(toGcode(move, MachineItem(Left(getStartPos(op.ops.head))),offsetCorrection))
           lastOpPoint = getStartPos(op.ops.head)
           pw.println(startCutHoles)
           pw.println(cutPauseOp)
@@ -205,18 +231,18 @@ object CNCManager extends ForanFileUtil {
           op.ops.foreach(c => {
             c.pointOrArc match {
               case Right(value: Arc) => {
-                if (!pointsEquals(value.sp, lastOpPoint)) pw.println(toGcode(stright, MachineItem(Left(value.sp))))
+                if (!pointsEquals(value.sp, lastOpPoint)) pw.println(toGcode(stright, MachineItem(Left(value.sp)),offsetCorrection))
                 if (isClockWise(value)) {
-                  pw.println(toGcode(arcCW, c))
+                  pw.println(toGcode(arcCW, c,offsetCorrection))
                   lastOpPoint = getLastPos(c)
                 } else {
-                  pw.println(toGcode(arcACW, c))
+                  pw.println(toGcode(arcACW, c,offsetCorrection))
                   lastOpPoint = getLastPos(c)
                 }
               }
               case Left(value: Point) => {
-                if (!pointsEquals(value, lastOpPoint)) pw.println(toGcode(stright, MachineItem(Left(value))))
-                pw.println(toGcode(stright, c))
+                if (!pointsEquals(value, lastOpPoint)) pw.println(toGcode(stright, MachineItem(Left(value)),offsetCorrection))
+                pw.println(toGcode(stright, c,offsetCorrection))
                 lastOpPoint = getLastPos(c)
               }
             }
@@ -225,38 +251,35 @@ object CNCManager extends ForanFileUtil {
         }
 
         case "CUT" => { //
-
           if (!currentTool.equals(cutToolOp)) {
             currentTool = cutToolOp
             pw.println(cutToolOp)
           }
-          pw.println(toGcode(move, MachineItem(Left(getStartPos(op.ops.head)))))
+          pw.println(toGcode(move, MachineItem(Left(getStartPos(op.ops.head))),offsetCorrection))
           lastOpPoint = getStartPos(op.ops.head)
           pw.println(startCutOuter)
           pw.println(cutPauseOp)
-
           op.ops.foreach(c => {
             c.pointOrArc match {
               case Right(value: Arc) => {
-                if (!pointsEquals(value.sp, lastOpPoint)) pw.println(toGcode(stright, MachineItem(Left(value.sp))))
+                if (!pointsEquals(value.sp, lastOpPoint)) pw.println(toGcode(stright, MachineItem(Left(value.sp)),offsetCorrection))
                 if (isClockWise(value)) {
-                  pw.println(toGcode(arcCW, c))
+                  pw.println(toGcode(arcCW, c,offsetCorrection))
                   lastOpPoint = getLastPos(c)
                 } else {
-                  pw.println(toGcode(arcACW, c))
+                  pw.println(toGcode(arcACW, c,offsetCorrection))
                   lastOpPoint = getLastPos(c)
                 }
               }
               case Left(value: Point) => {
-                if (!pointsEquals(value, lastOpPoint)) pw.println(toGcode(stright, MachineItem(Left(value))))
-                pw.println(toGcode(stright, c))
+                if (!pointsEquals(value, lastOpPoint)) pw.println(toGcode(stright, MachineItem(Left(value)),offsetCorrection))
+                pw.println(toGcode(stright, c,offsetCorrection))
                 lastOpPoint = getLastPos(c)
               }
             }
           })
           pw.println(stopCut)
         }
-
 
         case _ => None
       }
