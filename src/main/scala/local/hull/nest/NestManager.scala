@@ -9,6 +9,7 @@ import local.common.Codecs
 object NestManager extends NestHelper with Codecs {
 
   def genAllPlateNest2(project: String): List[Nest2] =allPlateNest2(project)
+
   def genAllPlateNest2Json(project: String): String = genAllPlateNest2(project).asJson.noSpaces
 
   def genAllPlateNest(project: String): List[Nest] = allPlateNest(project)
