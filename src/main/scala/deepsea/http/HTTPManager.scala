@@ -13,7 +13,7 @@ import deepsea.App
 import deepsea.actors.ActorManager
 import deepsea.actors.ActorStartupManager.HTTPManagerStarted
 import deepsea.elec.ElecManager._
-import deepsea.hull.HullManager.{GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, RemoveParts, SetHullEsp}
+import deepsea.hull.HullManager.{GetBsDesignNodes, GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, RemoveParts, SetHullEsp}
 import deepsea.spec.SpecManager._
 import org.apache.log4j.{LogManager, Logger}
 import play.api.libs.json.{JsValue, Json}
@@ -46,6 +46,9 @@ class HTTPManager extends Actor {
       },
       (get & path("hullProfiles") & parameter("project") & parameter("material") & parameter("kse")) { (project, material, kse) =>
         askFor(ActorManager.hullManager, GetHullProfilesForMaterial(project, material, kse))
+      },
+      (get & path("bsDesignNodes") & parameter("project")) { (project) =>
+        askFor(ActorManager.hullManager, GetBsDesignNodes(project))
       },
 
       (get & path("hullPartList") & parameter("project") & parameter("docNumber")) { (project, docNumber) =>

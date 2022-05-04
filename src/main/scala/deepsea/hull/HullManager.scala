@@ -8,7 +8,7 @@ import deepsea.App
 import deepsea.actors.ActorManager
 import deepsea.database.DatabaseManager.{GetConnection, GetOracleConnection}
 import deepsea.files.FileManager.GenerateUrl
-import deepsea.hull.HullManager.{GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, HullEsp, HullPartPlateDef, HullPartProfileDef, PlatePart, ProfilePart, RemoveParts, SetHullEsp}
+import deepsea.hull.HullManager.{BsDesignNode, GetBsDesignNodes, GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, HullEsp, HullPartPlateDef, HullPartProfileDef, PlatePart, ProfilePart, RemoveParts, SetHullEsp}
 import deepsea.hull.classes.HullPart
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
@@ -67,6 +67,9 @@ object HullManager {
 
   case class GetHullPlatesForMaterial(project: String, material: String, thickness: String)
   case class GetHullProfilesForMaterial(project: String, material: String, kse: String)
+
+  case class GetBsDesignNodes(project: String)
+  case class BsDesignNode(OID: Int, TYPE: String, NAME: String, DESCRIPTION: String, PARENT_NODE: Int, ATOM_TYPE: Int, BLOCK_OID: Int, WEIGHT: Double, X_COG: Double, Y_COG: Double, Z_COG: Double)
 
   implicit val HullEspDecoder: Decoder[HullEsp] = deriveDecoder[HullEsp]
   implicit val HullEspEncoder: Encoder[HullEsp] = deriveEncoder[HullEsp]
@@ -292,6 +295,9 @@ class HullManager extends Actor {
     case RemoveParts(project, block, parts, user) =>
       removeParts(project, block, parts, user)
       sender() ! "success"
+
+    case GetBsDesignNodes(project) =>
+
 
   }
 
@@ -693,4 +699,52 @@ class HullManager extends Actor {
       case _ =>
     }
   }
+  def getBsDesignNodes(project: String): ListBuffer[BsDesignNode] = {
+    val res = ListBuffer.empty[BsDesignNode]
+    GetOracleConnection(project) match {
+      case Some(c) =>
+        val s = c.createStatement()
+        val query = "SELECT * FROM V_BS_DESIGN_NODE"
+        val rs = s.executeQuery(query)
+        while (rs.next()) {
+          res += BsDesignNode(
+            rs.getInt("OID"),
+            rs.getString("TYPE"),
+            rs.getString("NAME"),
+            rs.getString("DESCRIPTION"),
+            rs.getInt("PARENT_NODE"),
+            rs.getInt("ATOM_TYPE") match {
+              case value: Int => value
+              case _ => 0
+            },
+            rs.getInt("BLOCK_OID") match {
+              case value: Int => value
+              case _ => 0
+            },
+            rs.getDouble("WEIGHT") match {
+              case value: Double => value
+              case _ => 0
+            },
+            rs.getDouble("X_COG")match {
+              case value: Double => value
+              case _ => 0
+            },
+            rs.getDouble("Y_COG")match {
+              case value: Double => value
+              case _ => 0
+            },
+            rs.getDouble("Z_COG")match {
+              case value: Double => value
+              case _ => 0
+            }
+          )
+        }
+        rs.close()
+        s.close()
+        c.close()
+      case _ =>
+    }
+    res
+  }
+
 }
