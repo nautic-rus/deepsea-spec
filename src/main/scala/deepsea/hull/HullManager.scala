@@ -6,9 +6,9 @@ import akka.util.Timeout
 import com.mongodb.BasicDBObject
 import deepsea.App
 import deepsea.actors.ActorManager
-import deepsea.database.DatabaseManager.GetOracleConnection
+import deepsea.database.DatabaseManager.{GetConnection, GetOracleConnection}
 import deepsea.files.FileManager.GenerateUrl
-import deepsea.hull.HullManager.{GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, HullEsp, HullPartPlateDef, HullPartProfileDef, PlatePart, ProfilePart, SetHullEsp}
+import deepsea.hull.HullManager.{BsDesignNode, GetBsDesignNodes, GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, HullEsp, HullPartPlateDef, HullPartProfileDef, PlatePart, ProfilePart, RemoveParts, SetHullEsp}
 import deepsea.hull.classes.HullPart
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
@@ -68,9 +68,13 @@ object HullManager {
   case class GetHullPlatesForMaterial(project: String, material: String, thickness: String)
   case class GetHullProfilesForMaterial(project: String, material: String, kse: String)
 
+  case class GetBsDesignNodes(project: String)
+  case class BsDesignNode(OID: Int, TYPE: String, NAME: String, DESCRIPTION: String, PARENT_NODE: Int, ATOM_TYPE: Int, BLOCK_OID: Int, WEIGHT: Double, X_COG: Double, Y_COG: Double, Z_COG: Double)
+
   implicit val HullEspDecoder: Decoder[HullEsp] = deriveDecoder[HullEsp]
   implicit val HullEspEncoder: Encoder[HullEsp] = deriveEncoder[HullEsp]
 
+  case class RemoveParts(project: String, block: String, parts: String, user: String)
 
   case class PlatePart(code: String, block: String, name: String, description: String, weight: Double, thickness: Double, material: String, struct: String)
   case class ProfilePart(name: String, description: String, kse: Int, section: String, material: String, w_h: Double, w_t: Double, f_h: Double, f_t: Double, block: String, length: Double, area: Double, stock: String, density: Double, weight: Double, struct: String)
@@ -287,6 +291,13 @@ class HullManager extends Actor {
 
     case GetHullProfilesForMaterial(project, material, kse) =>
       sender() ! getProfiles(project, material, kse.toIntOption.getOrElse(0)).asJson.noSpaces
+
+    case RemoveParts(project, block, parts, user) =>
+      removeParts(project, block, parts, user)
+      sender() ! "success"
+
+    case GetBsDesignNodes(project) =>
+
 
   }
 
@@ -658,6 +669,74 @@ class HullManager extends Actor {
               case stock: String => stock
               case _ => ""
             },
+          )
+        }
+        rs.close()
+        s.close()
+        c.close()
+      case _ =>
+    }
+    res
+  }
+  def removeParts(project: String, block: String, parts: String, user: String): Unit = {
+    GetOracleConnection(project) match {
+      case Some(c) =>
+        val s = c.createStatement()
+        val query = Source.fromResource("queries/removeParts.sql").mkString.replaceAll("&parts", parts).replaceAll("&block", block)
+        s.execute(query)
+        s.close()
+        c.close()
+      case _ =>
+    }
+    GetConnection() match {
+      case Some(c) =>
+        val s = c.createStatement()
+        val date = new Date().getTime
+        val query = s"insert into log_remove_parts values ('$project', '$block', '$parts', '$user', $date)"
+        s.execute(query)
+        s.close()
+        c.close()
+      case _ =>
+    }
+  }
+  def getBsDesignNodes(project: String): ListBuffer[BsDesignNode] = {
+    val res = ListBuffer.empty[BsDesignNode]
+    GetOracleConnection(project) match {
+      case Some(c) =>
+        val s = c.createStatement()
+        val query = "SELECT * FROM V_BS_DESIGN_NODE"
+        val rs = s.executeQuery(query)
+        while (rs.next()) {
+          res += BsDesignNode(
+            rs.getInt("OID"),
+            rs.getString("TYPE"),
+            rs.getString("NAME"),
+            rs.getString("DESCRIPTION"),
+            rs.getInt("PARENT_NODE"),
+            rs.getInt("ATOM_TYPE") match {
+              case value: Int => value
+              case _ => 0
+            },
+            rs.getInt("BLOCK_OID") match {
+              case value: Int => value
+              case _ => 0
+            },
+            rs.getDouble("WEIGHT") match {
+              case value: Double => value
+              case _ => 0
+            },
+            rs.getDouble("X_COG")match {
+              case value: Double => value
+              case _ => 0
+            },
+            rs.getDouble("Y_COG")match {
+              case value: Double => value
+              case _ => 0
+            },
+            rs.getDouble("Z_COG")match {
+              case value: Double => value
+              case _ => 0
+            }
           )
         }
         rs.close()
