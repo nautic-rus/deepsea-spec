@@ -296,7 +296,7 @@ class HullManager extends Actor {
       removeParts(project, block, parts, user)
       sender() ! "success"
 
-    case GetBsDesignNodes(project) =>
+    case GetBsDesignNodes(project) => sender() ! getBsDesignNodes(project).asJson.noSpaces
 
 
   }
