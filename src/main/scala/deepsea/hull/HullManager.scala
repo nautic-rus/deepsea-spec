@@ -45,7 +45,7 @@ import java.util.{Date, UUID}
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.io.Source
-
+import local.common.Codecs
 
 object HullManager {
 
@@ -82,15 +82,10 @@ object HullManager {
   case class ProfilePart(name: String, description: String, kse: Int, section: String, material: String, w_h: Double, w_t: Double, f_h: Double, f_t: Double, block: String, length: Double, area: Double, stock: String, density: Double, weight: Double, struct: String)
 }
 
-class HullManager extends Actor {
+class HullManager extends Actor with Codecs{
   implicit val timeout: Timeout = Timeout(300, TimeUnit.SECONDS)
 
   private val espCollectionName = "hullEsp"
-
-  private val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
-    classOf[HullEsp],
-    classOf[PrdPart],
-  ), DEFAULT_CODEC_REGISTRY)
 
   override def receive: Receive = {
     //TOOLS
@@ -298,8 +293,8 @@ class HullManager extends Actor {
       removeParts(project, block, parts, user)
       sender() ! "success"
 
-    case GetBsDesignNodes(project) => sender() ! getBsDesignNodes(project).asJson.noSpaces
-
+    case GetBsDesignNodes(project) =>
+      sender() ! getBsDesignNodes(project).asJson.noSpaces
   }
 
 

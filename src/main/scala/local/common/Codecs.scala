@@ -1,6 +1,6 @@
 package local.common
 
-import deepsea.hull.HullManager.{BsDesignNode, PlatePart, ProfilePart}
+import deepsea.hull.HullManager.{BsDesignNode, HullEsp, PlatePart, ProfilePart}
 import io.circe.{Decoder, Encoder}
 import io.circe.parser._
 import io.circe.{Decoder, Encoder}
@@ -128,6 +128,8 @@ trait Codecs {
     classOf[PlatePart],
     classOf[ProfilePart],
     classOf[BsDesignNode],
+    classOf[HullEsp],
+    classOf[PrdPart],
 
     //KOKOVIN
     classOf[EleComplect],
