@@ -38,9 +38,11 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.{File, FileOutputStream}
 import java.nio.file.Files
 import java.sql.ResultSet
+import java.util
 import java.util.concurrent.TimeUnit
 import java.util.zip.{ZipEntry, ZipOutputStream}
 import java.util.{Date, UUID}
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.io.Source
 
@@ -69,7 +71,7 @@ object HullManager {
   case class GetHullProfilesForMaterial(project: String, material: String, kse: String)
 
   case class GetBsDesignNodes(project: String)
-  case class BsDesignNode(OID: Int, TYPE: String, NAME: String, DESCRIPTION: String, PARENT_NODE: Int, ATOM_TYPE: Int, BLOCK_OID: Int, WEIGHT: Double, X_COG: Double, Y_COG: Double, Z_COG: Double)
+  case class BsDesignNode(OID: Int, TYPE: String, NAME: String, DESCRIPTION: String, PARENT_NODE: Int, ATOM_TYPE: Int, BLOCK_OID: Int, WEIGHT: Double, X_COG: Double, Y_COG: Double, Z_COG: Double, ATOM_NAME: String)
 
   implicit val HullEspDecoder: Decoder[HullEsp] = deriveDecoder[HullEsp]
   implicit val HullEspEncoder: Encoder[HullEsp] = deriveEncoder[HullEsp]
@@ -296,10 +298,10 @@ class HullManager extends Actor {
       removeParts(project, block, parts, user)
       sender() ! "success"
 
-    case GetBsDesignNodes(project) =>
-
+    case GetBsDesignNodes(project) => sender() ! getBsDesignNodes(project).asJson.noSpaces
 
   }
+
 
   def getHullPartsByDocNumber(project: String, docNumber: String): ListBuffer[HullPart] = {
     val parts = getHullParts(project, docNumber)
@@ -704,15 +706,30 @@ class HullManager extends Actor {
     GetOracleConnection(project) match {
       case Some(c) =>
         val s = c.createStatement()
-        val query = "SELECT * FROM V_BS_DESIGN_NODE"
+        val query = "SELECT N.OID, N.TYPE, N.NAME, N.DESCRIPTION, N.PARENT_NODE, N.ATOM_TYPE, N.BLOCK_OID, N.WEIGHT, N.X_COG, N.Y_COG, N.Z_COG, NT.NAME AS ATOM_NAME FROM V_BS_DESIGN_NODE N, BS_NODE_TYPE NT WHERE NT.ATOM_TYPE = N.ATOM_TYPE"
         val rs = s.executeQuery(query)
         while (rs.next()) {
           res += BsDesignNode(
-            rs.getInt("OID"),
-            rs.getString("TYPE"),
-            rs.getString("NAME"),
-            rs.getString("DESCRIPTION"),
-            rs.getInt("PARENT_NODE"),
+            rs.getInt("OID") match {
+              case value: Int => value
+              case _ => 0
+            },
+            rs.getString("TYPE") match {
+              case value: String => value
+              case _ => ""
+            },
+            rs.getString("NAME") match {
+              case value: String => value
+              case _ => ""
+            },
+            rs.getString("DESCRIPTION") match {
+              case value: String => value
+              case _ => ""
+            },
+            rs.getInt("PARENT_NODE") match {
+              case value: Int => value
+              case _ => 0
+            },
             rs.getInt("ATOM_TYPE") match {
               case value: Int => value
               case _ => 0
@@ -725,17 +742,21 @@ class HullManager extends Actor {
               case value: Double => value
               case _ => 0
             },
-            rs.getDouble("X_COG")match {
+            rs.getDouble("X_COG") match {
               case value: Double => value
               case _ => 0
             },
-            rs.getDouble("Y_COG")match {
+            rs.getDouble("Y_COG") match {
               case value: Double => value
               case _ => 0
             },
-            rs.getDouble("Z_COG")match {
+            rs.getDouble("Z_COG") match {
               case value: Double => value
               case _ => 0
+            },
+            rs.getString("ATOM_NAME") match {
+              case value: String => value
+              case _ => ""
             }
           )
         }
