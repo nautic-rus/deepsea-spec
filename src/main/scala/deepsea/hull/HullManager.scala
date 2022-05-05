@@ -71,7 +71,7 @@ object HullManager {
   case class GetHullProfilesForMaterial(project: String, material: String, kse: String)
 
   case class GetBsDesignNodes(project: String)
-  case class BsDesignNode(OID: Int, TYPE: String, NAME: String, DESCRIPTION: String, PARENT_NODE: Int, ATOM_TYPE: Int, BLOCK_OID: Int, WEIGHT: Double, X_COG: Double, Y_COG: Double, Z_COG: Double, ATOM_NAME: String)
+  case class BsDesignNode(OID: Int, TYPE: String, NAME: String, DESCRIPTION: String, PARENT_NODE: Int, ATOM_TYPE: Int, BLOCK_OID: Int, WEIGHT: Double, X_COG: Double, Y_COG: Double, Z_COG: Double, ATOM_NAME: String, DNA: String)
 
   implicit val HullEspDecoder: Decoder[HullEsp] = deriveDecoder[HullEsp]
   implicit val HullEspEncoder: Encoder[HullEsp] = deriveEncoder[HullEsp]
@@ -755,6 +755,10 @@ class HullManager extends Actor {
               case _ => 0
             },
             rs.getString("ATOM_NAME") match {
+              case value: String => value
+              case _ => ""
+            },
+            rs.getString("DNA") match {
               case value: String => value
               case _ => ""
             }
