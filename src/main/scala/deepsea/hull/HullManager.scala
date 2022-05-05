@@ -701,7 +701,7 @@ class HullManager extends Actor with Codecs{
     GetOracleConnection(project) match {
       case Some(c) =>
         val s = c.createStatement()
-        val query = "SELECT N.OID, N.TYPE, N.NAME, N.DESCRIPTION, N.PARENT_NODE, N.ATOM_TYPE, N.BLOCK_OID, N.WEIGHT, N.X_COG, N.Y_COG, N.Z_COG, NT.NAME AS ATOM_NAME FROM V_BS_DESIGN_NODE N, BS_NODE_TYPE NT WHERE NT.ATOM_TYPE = N.ATOM_TYPE"
+        val query =  Source.fromResource("queries/bsDesignNodes.sql").mkString
         val rs = s.executeQuery(query)
         while (rs.next()) {
           res += BsDesignNode(
