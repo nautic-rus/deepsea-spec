@@ -1,6 +1,6 @@
 package local.common
 
-import deepsea.hull.HullManager.{BsDesignNode, HullEsp, PlatePart, ProfilePart}
+import deepsea.hull.HullManager._
 import io.circe.{Decoder, Encoder}
 import io.circe.parser._
 import io.circe.{Decoder, Encoder}
@@ -45,6 +45,11 @@ trait Codecs {
 
   implicit val BsDesignNodeDecoder: Decoder[BsDesignNode] = deriveDecoder[BsDesignNode]
   implicit val BsDesignNodeEncoder: Encoder[BsDesignNode] = deriveEncoder[BsDesignNode]
+
+  implicit val HullSystemDecoder: Decoder[HullSystem] = deriveDecoder[HullSystem]
+  implicit val HullSystemEncoder: Encoder[HullSystem] = deriveEncoder[HullSystem]
+
+
 
   //KOKOVIN
 
@@ -130,6 +135,7 @@ trait Codecs {
     classOf[BsDesignNode],
     classOf[HullEsp],
     classOf[PrdPart],
+    classOf[HullSystem],
 
     //KOKOVIN
     classOf[EleComplect],
