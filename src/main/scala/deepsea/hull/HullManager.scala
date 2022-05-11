@@ -788,7 +788,7 @@ class HullManager extends Actor with Codecs{
               case value: String => value
               case _ => ""
             },
-            rs.getDate("DATE") match {
+            rs.getDate("MODIFY_DATE") match {
               case value: java.sql.Date  => value.getTime
               case _ => 0
             }
