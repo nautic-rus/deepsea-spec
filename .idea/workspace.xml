@@ -4,10 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ebc20096-d70b-4412-983f-14fe275410ee" name="Default Changelist" comment="kokovin release 13.11.58">
+    <list default="true" id="ebc20096-d70b-4412-983f-14fe275410ee" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/deepsea/hull/HullManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/hull/HullManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/local/hull/cnc/hyprethermGcode/Cases.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/local/hull/cnc/hyprethermGcode/Cases.scala" afterDir="false" />
     </list>
     <list id="47bff93a-d6a1-475e-8d81-ca2260470515" name="Changes by isaev" comment="">
       <change afterPath="$PROJECT_DIR$/build/deepsea.jar" afterDir="false" />
@@ -226,21 +226,7 @@
       <workItem from="1648641016341" duration="2592000" />
       <workItem from="1649161529715" duration="5483000" />
       <workItem from="1650282792731" duration="3072000" />
-      <workItem from="1651647067031" duration="1182000" />
-    </task>
-    <task id="LOCAL-00069" summary="kokovin release 13.11.25">
-      <created>1642850015295</created>
-      <option name="number" value="00069" />
-      <option name="presentableId" value="LOCAL-00069" />
-      <option name="project" value="LOCAL" />
-      <updated>1642850015295</updated>
-    </task>
-    <task id="LOCAL-00070" summary="kokovin release 13.11.26">
-      <created>1642857261278</created>
-      <option name="number" value="00070" />
-      <option name="presentableId" value="LOCAL-00070" />
-      <option name="project" value="LOCAL" />
-      <updated>1642857261278</updated>
+      <workItem from="1651647067031" duration="2878000" />
     </task>
     <task id="LOCAL-00071" summary="kokovin release 13.11.27">
       <created>1642858510070</created>
@@ -571,7 +557,21 @@
       <option name="project" value="LOCAL" />
       <updated>1650615153435</updated>
     </task>
-    <option name="localTasksCounter" value="118" />
+    <task id="LOCAL-00118" summary="kokovin release 13.11.58">
+      <created>1651649796629</created>
+      <option name="number" value="00118" />
+      <option name="presentableId" value="LOCAL-00118" />
+      <option name="project" value="LOCAL" />
+      <updated>1651649796629</updated>
+    </task>
+    <task id="LOCAL-00119" summary="some changes">
+      <created>1651733909225</created>
+      <option name="number" value="00119" />
+      <option name="presentableId" value="LOCAL-00119" />
+      <option name="project" value="LOCAL" />
+      <updated>1651733909225</updated>
+    </task>
+    <option name="localTasksCounter" value="120" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -612,9 +612,9 @@
     <MESSAGE value="kokovin release 13.11.55" />
     <MESSAGE value="kokovin release 13.11.56" />
     <MESSAGE value="kokovin release 13.11.57" />
-    <MESSAGE value="some changes" />
     <MESSAGE value="kokovin release 13.11.58" />
-    <option name="LAST_COMMIT_MESSAGE" value="kokovin release 13.11.58" />
+    <MESSAGE value="some changes" />
+    <option name="LAST_COMMIT_MESSAGE" value="some changes" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -671,22 +671,22 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="scala-line">
           <url>file://$PROJECT_DIR$/src/main/scala/deepsea/hull/HullManager.scala</url>
-          <line>425</line>
+          <line>422</line>
           <option name="timeStamp" value="216" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="scala-line">
           <url>file://$PROJECT_DIR$/src/main/scala/deepsea/hull/HullManager.scala</url>
-          <line>446</line>
+          <line>443</line>
           <option name="timeStamp" value="217" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="scala-line">
           <url>file://$PROJECT_DIR$/src/main/scala/deepsea/hull/HullManager.scala</url>
-          <line>503</line>
+          <line>500</line>
           <option name="timeStamp" value="228" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="scala-line">
           <url>file://$PROJECT_DIR$/src/main/scala/deepsea/hull/HullManager.scala</url>
-          <line>215</line>
+          <line>212</line>
           <option name="timeStamp" value="239" />
         </line-breakpoint>
       </breakpoints>

@@ -15,24 +15,12 @@
     <option name="openedFilesInfos">
       <list>
         <OpenedFileInfo>
-          <option name="caretOffset" value="1320" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/main/resources/queries/hullProfiles.sql" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="4274" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/main/scala/deepsea/spec/SpecManager.scala" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="6640" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/main/scala/deepsea/http/HTTPManager.scala" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="406" />
+          <option name="caretOffset" value="228" />
           <option name="fileUrl" value="file://$PROJECT_DIR$/src/main/scala/deepsea/App.scala" />
         </OpenedFileInfo>
         <OpenedFileInfo>
-          <option name="caretOffset" value="30798" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/main/scala/deepsea/hull/HullManager.scala" />
+          <option name="caretOffset" value="2270" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/main/scala/local/hull/cnc/hyprethermGcode/Cases.scala" />
         </OpenedFileInfo>
       </list>
     </option>

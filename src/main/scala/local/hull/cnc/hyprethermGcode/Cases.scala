@@ -78,8 +78,10 @@ object Cases {
   val stopMark = "M10"
 
   val startCutHoles = "M07\nG42"
+  //val startCutHoles = "G42\nM07"
 
   val startCutOuter = "M07\nG42"
+  //val startCutOuter = "G42\nM07"
 
   val stopCut = "M08"
 
