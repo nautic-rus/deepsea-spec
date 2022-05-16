@@ -163,6 +163,31 @@ trait ForanFileUtil {
     buf.toList
   }
 
+  private def pointsToMachineItemOld(in: List[Point]): List[MachineItem] = {
+    val buf = ListBuffer.empty[MachineItem]
+    if (in.length == 1) {
+      buf += MachineItem(Left(in.head))
+    } else {
+      val arcs = ListBuffer.empty[Arc]
+      var p1: Point = Point(NaN, NaN)
+      var p2: Point = Point(NaN, NaN)
+      arcs += Arc(in(0), in(1), in(2))
+      in.drop(3).foreach(p => {
+        if (p1.x.isNaN && p1.y.isNaN && p2.x.isNaN && p2.y.isNaN) {
+          p1 = arcs.toList.last.ep
+          p2 = p
+        } else {
+          arcs += Arc(p1, p2, p)
+          p1 = Point(NaN, NaN)
+          p2 = Point(NaN, NaN)
+        }
+      })
+      arcs.foreach(arc => buf += MachineItem(Right(arc)))
+    }
+
+    buf.toList
+  }
+
   def genPseudoMachineOps(in: List[CNC]): List[PseudoMachineOps] = {
     val buff = ListBuffer.empty[PseudoMachineOps]
     in.foreach((op: CNC) => {
@@ -190,10 +215,10 @@ trait ForanFileUtil {
     }
   }
 
-  def toGcode(cmd: String, in: MachineItem, offsetCorrection:Point): String = {
+  def toGcode(cmd: String, in: MachineItem, offsetCorrection: Point): String = {
     in.pointOrArc match {
-      case Right(value) => value.toGcode(cmd,offsetCorrection)
-      case Left(value) => value.toGcode(cmd,offsetCorrection)
+      case Right(value) => value.toGcode(cmd, offsetCorrection)
+      case Left(value) => value.toGcode(cmd, offsetCorrection)
     }
   }
 

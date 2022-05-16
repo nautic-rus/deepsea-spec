@@ -8,141 +8,149 @@ import scala.collection.mutable.ListBuffer
 object CNCManager extends ForanFileUtil {
 
 
-  def doCNCStrings(in: List[String], username: String): List[String]={
+  def doCNCStrings(in: List[String], username: String): List[String] = {
     val offsetCorrection: Point = in.find(s => s.startsWith("STAR")) match {
-      case Some(value) =>{
-        val arr=value.split(" ")
-        if(arr.length==3 && checkDigitOrPlusMinus(arr(1)) &&  checkDigitOrPlusMinus(arr(2))){
-          Point(arr(1).toDoubleOption.getOrElse(0.0d),arr(2).toDoubleOption.getOrElse(0.0d))
-        }else{
-          Point(0,0)
+      case Some(value) => {
+        val arr = value.split(" ")
+        if (arr.length == 3 && checkDigitOrPlusMinus(arr(1)) && checkDigitOrPlusMinus(arr(2))) {
+          Point(arr(1).toDoubleOption.getOrElse(0.0d), arr(2).toDoubleOption.getOrElse(0.0d))
+        } else {
+          Point(0, 0)
         }
       }
-      case None => Point(0,0)
+      case None => Point(0, 0)
     }
 
-
-    val buff=ListBuffer.empty[String]
+    val buff = ListBuffer.empty[String]
 
     val clp: List[CNC] = procForanCLPfromList(in)
     val machineOpts: List[PseudoMachineOps] = genPseudoMachineOps(clp)
 
-    buff+=("(This file has been generated for use ONLY on CelikTrans's HYPERTHERM plasma table)")
-    if (username.nonEmpty) buff+=("(designed by " + username + ")")
+    buff += ("(This file has been generated for use ONLY on CelikTrans's HYPERTHERM plasma table)")
+    if (username.nonEmpty) buff += ("(designed by " + username + ")")
     in.find(p => p.startsWith("PLAT")) match {
       case Some(value) => {
-        buff+=("(" + value.replace("\n", "") + ")")
+        buff += ("(" + value.replace("\n", "") + ")")
       }
       case None => None
     }
-    buff+=(startOps)
+    buff += (startOps)
     var currentTool = ""
     var lastOpPoint: Point = initOp
     machineOpts.foreach(op => {
-
       op.name match {
+        case "JUMP" => None
+
+
         case "MARK" => {
-          if (!currentTool.equals(markToolOp)) {
-            currentTool = markToolOp
-            buff+=(markToolOp)
-          }
-          buff+=(toGcode(move, MachineItem(Left(getStartPos(op.ops.head))),offsetCorrection))
+          val m1 = (toGcode(move, MachineItem(Left(getStartPos(op.ops.head))), offsetCorrection))
+          if (!buff.last.equals(m1)) buff += m1
           lastOpPoint = getStartPos(op.ops.head)
-          buff+=(startMark)
-          buff+=(markPauseOp)
+          if (!buff.last.equals(startMark)) buff += startMark
           op.ops.foreach(c => {
             c.pointOrArc match {
               case Right(value: Arc) => {
-                if (!pointsEquals(value.sp, lastOpPoint)) buff+=(toGcode(stright, MachineItem(Left(value.sp)),offsetCorrection))
+                if (!pointsEquals(value.sp, lastOpPoint)) {
+                  val m1 = (toGcode(stright, MachineItem(Left(value.sp)), offsetCorrection))
+                  if (!buff.last.equals(m1)) buff += m1
+                }
                 if (isClockWise(value)) {
-                  buff+=(toGcode(arcCW, c,offsetCorrection))
+                  val m1 = (toGcode(arcCW, c, offsetCorrection))
+                  if (!buff.last.equals(m1)) buff += m1
                   lastOpPoint = getLastPos(c)
                 } else {
-                  buff+=(toGcode(arcACW, c,offsetCorrection))
-                  lastOpPoint = getLastPos(c)
+                  val m1 = (toGcode(arcACW, c, offsetCorrection))
+                  if (!buff.last.equals(m1)) buff += m1
                 }
               }
               case Left(value: Point) => {
-                if (!pointsEquals(value, lastOpPoint)) buff+=(toGcode(stright, MachineItem(Left(value)),offsetCorrection))
-                buff+=(toGcode(stright, c,offsetCorrection))
+                if (!pointsEquals(value, lastOpPoint)) {
+                  val m1 = (toGcode(stright, MachineItem(Left(value)), offsetCorrection))
+                  if (!buff.last.equals(m1)) buff += m1
+                }
+                val m1 = (toGcode(stright, c, offsetCorrection))
+                if (!buff.last.equals(m1)) buff += m1
                 lastOpPoint = getLastPos(c)
               }
             }
           })
-          buff+=(stopMark)
-
+          if (!buff.last.equals(stopMark)) buff += stopMark
         }
-        case "CUTH" => { //
-
-          if (!currentTool.equals(cutToolOp)) {
-            currentTool = cutToolOp
-            buff+=(cutToolOp)
-          }
-          buff+=(toGcode(move, MachineItem(Left(getStartPos(op.ops.head))),offsetCorrection))
+        case "CUTH" => {
+          val m1 = (toGcode(moveCut, MachineItem(Left(getStartPos(op.ops.head))), offsetCorrection))
+          if (!buff.last.equals(m1)) buff += m1
           lastOpPoint = getStartPos(op.ops.head)
-          buff+=(startCutHoles)
-          buff+=(cutPauseOp)
-
+          if (!buff.last.equals(startCutHoles)) buff += startCutHoles
           op.ops.foreach(c => {
             c.pointOrArc match {
               case Right(value: Arc) => {
-                if (!pointsEquals(value.sp, lastOpPoint)) buff+=(toGcode(stright, MachineItem(Left(value.sp)),offsetCorrection))
+                if (!pointsEquals(value.sp, lastOpPoint)) {
+                  val m1 = (toGcode(stright, MachineItem(Left(value.sp)), offsetCorrection))
+                  if (!buff.last.equals(m1)) buff += m1
+                }
                 if (isClockWise(value)) {
-                  buff+=(toGcode(arcCW, c,offsetCorrection))
+                  val m1 = (toGcode(arcCW, c, offsetCorrection))
+                  if (!buff.last.equals(m1)) buff += m1
                   lastOpPoint = getLastPos(c)
                 } else {
-                  buff+=(toGcode(arcACW, c,offsetCorrection))
+                  val m1 = (toGcode(arcACW, c, offsetCorrection))
+                  if (!buff.last.equals(m1)) buff += m1
                   lastOpPoint = getLastPos(c)
                 }
               }
               case Left(value: Point) => {
-                if (!pointsEquals(value, lastOpPoint)) buff+=(toGcode(stright, MachineItem(Left(value)),offsetCorrection))
-                buff+=(toGcode(stright, c,offsetCorrection))
+                if (!pointsEquals(value, lastOpPoint)) {
+                  val m1 = (toGcode(stright, MachineItem(Left(value)), offsetCorrection))
+                  if (!buff.last.equals(m1)) buff += m1
+                }
+                val m1 = (toGcode(stright, c, offsetCorrection))
+                if (!buff.last.equals(m1)) buff += m1
                 lastOpPoint = getLastPos(c)
               }
             }
           })
-          buff+=(stopCut)
+          if (!buff.last.equals(stopCut)) buff += stopCut
         }
-
         case "CUT" => {
-          if (!currentTool.equals(cutToolOp)) {
-            currentTool = cutToolOp
-            buff+=(cutToolOp)
-          }
-          buff+=(toGcode(move, MachineItem(Left(getStartPos(op.ops.head))),offsetCorrection))
+          val m1 = (toGcode(moveCut, MachineItem(Left(getStartPos(op.ops.head))), offsetCorrection))
+          if (!buff.last.equals(m1)) buff += m1
           lastOpPoint = getStartPos(op.ops.head)
-          buff+=(startCutOuter)
-          buff+=(cutPauseOp)
-
+          if (!buff.last.equals(startCutOuter)) buff += startCutOuter
           op.ops.foreach(c => {
             c.pointOrArc match {
               case Right(value: Arc) => {
-                if (!pointsEquals(value.sp, lastOpPoint)) buff+=(toGcode(stright, MachineItem(Left(value.sp)),offsetCorrection))
+                if (!pointsEquals(value.sp, lastOpPoint)) {
+                  val m1 = (toGcode(stright, MachineItem(Left(value.sp)), offsetCorrection))
+                  if (!buff.last.equals(m1)) buff += m1
+                }
                 if (isClockWise(value)) {
-                  buff+=(toGcode(arcCW, c,offsetCorrection))
+                  val m1 = (toGcode(arcCW, c, offsetCorrection))
+                  if (!buff.last.equals(m1)) buff += m1
                   lastOpPoint = getLastPos(c)
                 } else {
-                  buff+=(toGcode(arcACW, c,offsetCorrection))
+                  val m1 = (toGcode(arcACW, c, offsetCorrection))
+                  if (!buff.last.equals(m1)) buff += m1
                   lastOpPoint = getLastPos(c)
                 }
               }
               case Left(value: Point) => {
-                if (!pointsEquals(value, lastOpPoint)) buff+=(toGcode(stright, MachineItem(Left(value)),offsetCorrection))
-                buff+=(toGcode(stright, c,offsetCorrection))
+                if (!pointsEquals(value, lastOpPoint)) {
+                  val m1 = (toGcode(stright, MachineItem(Left(value)), offsetCorrection))
+                  if (!buff.last.equals(m1)) buff += m1
+                }
+                val m1 = (toGcode(stright, c, offsetCorrection))
+                if (!buff.last.equals(m1)) buff += m1
                 lastOpPoint = getLastPos(c)
               }
             }
           })
-          buff+=(stopCut)
+          if (!buff.last.equals(stopCut)) buff += stopCut
         }
-
         case _ => None
       }
-
     })
-    buff+=(finishOp)
 
+    buff += (finishOp)
     buff.toList
   }
 
@@ -150,30 +158,35 @@ object CNCManager extends ForanFileUtil {
   def doCNC(in: List[String], pathOut: String, username: String): String = {
 
     val offsetCorrection: Point = in.find(s => s.startsWith("STAR")) match {
-      case Some(value) =>{
-        val arr=value.split(" ")
-        if(arr.length==3 && checkDigitOrPlusMinus(arr(1)) &&  checkDigitOrPlusMinus(arr(2))){
-          Point(arr(1).toDoubleOption.getOrElse(0.0d),arr(2).toDoubleOption.getOrElse(0.0d))
-        }else{
-          Point(0,0)
+      case Some(value) => {
+        val arr = value.split(" ")
+        if (arr.length == 3 && checkDigitOrPlusMinus(arr(1)) && checkDigitOrPlusMinus(arr(2))) {
+          Point(arr(1).toDoubleOption.getOrElse(0.0d), arr(2).toDoubleOption.getOrElse(0.0d))
+        } else {
+          Point(0, 0)
         }
       }
-      case None => Point(0,0)
+      case None => Point(0, 0)
     }
 
 
     val clp: List[CNC] = procForanCLPfromList(in)
     val machineOpts: List[PseudoMachineOps] = genPseudoMachineOps(clp)
-    val pw = new PrintWriter(new File(pathOut))
-    pw.println("(This file has been generated for use ONLY on CelikTrans's HYPERTHERM plasma table)")
-    if (username.nonEmpty) pw.println("(designed by " + username + ")")
+
+    //val pw = new PrintWriter(new File(pathOut))
+
+    val retStrBuff = ListBuffer.empty[String]
+
+
+    retStrBuff += ("(This file has been generated for use ONLY on CelikTrans's HYPERTHERM plasma table)")
+    if (username.nonEmpty) retStrBuff += "(designed by " + username + ")"
     in.find(p => p.startsWith("PLAT")) match {
       case Some(value) => {
-        pw.println("(" + value.replace("\n", "") + ")")
+        retStrBuff += ("(" + value.replace("\n", "") + ")")
       }
       case None => None
     }
-    pw.println(startOps)
+    retStrBuff += (startOps)
     var currentTool = ""
     var lastOpPoint: Point = initOp
 
@@ -187,105 +200,148 @@ object CNCManager extends ForanFileUtil {
           //pw.println(toGcode(move,MachineItem(Left(getStartPos(op.ops.head)))))
         }
         case "MARK" => {
-          if (!currentTool.equals(markToolOp)) {
-            currentTool = markToolOp
-            pw.println(markToolOp)
-          }
-          pw.println(toGcode(move, MachineItem(Left(getStartPos(op.ops.head))),offsetCorrection))
+          /*          if (!currentTool.equals(markToolOp)) {
+                      currentTool = markToolOp
+                      if(!retStrBuff.last.equals(markToolOp)) retStrBuff+=(markToolOp)
+                    }*/
+          val m1 = (toGcode(move, MachineItem(Left(getStartPos(op.ops.head))), offsetCorrection))
+          if (!retStrBuff.last.equals(m1)) retStrBuff += m1
           lastOpPoint = getStartPos(op.ops.head)
-          pw.println(startMark)
-          pw.println(markPauseOp)
+          if (!retStrBuff.last.equals(startMark)) retStrBuff += startMark
+          //if(!retStrBuff.last.equals(markPauseOp)) retStrBuff+=(markPauseOp)
           op.ops.foreach(c => {
             c.pointOrArc match {
               case Right(value: Arc) => {
-                if (!pointsEquals(value.sp, lastOpPoint)) pw.println(toGcode(stright, MachineItem(Left(value.sp)),offsetCorrection))
+
+                if (!pointsEquals(value.sp, lastOpPoint)) {
+                  val m1 = (toGcode(stright, MachineItem(Left(value.sp)), offsetCorrection))
+                  if (!retStrBuff.last.equals(m1)) retStrBuff += m1
+                }
+
+
                 if (isClockWise(value)) {
-                  pw.println(toGcode(arcCW, c,offsetCorrection))
+                  val m1 = (toGcode(arcCW, c, offsetCorrection))
+                  if (!retStrBuff.last.equals(m1)) retStrBuff += m1
+
                   lastOpPoint = getLastPos(c)
                 } else {
-                  pw.println(toGcode(arcACW, c,offsetCorrection))
-                  lastOpPoint = getLastPos(c)
+                  val m1 = (toGcode(arcACW, c, offsetCorrection))
+                  if (!retStrBuff.last.equals(m1)) retStrBuff += m1
                 }
               }
               case Left(value: Point) => {
-                if (!pointsEquals(value, lastOpPoint)) pw.println(toGcode(stright, MachineItem(Left(value)),offsetCorrection))
-                pw.println(toGcode(stright, c,offsetCorrection))
+                if (!pointsEquals(value, lastOpPoint)) {
+                  val m1 = (toGcode(stright, MachineItem(Left(value)), offsetCorrection))
+                  if (!retStrBuff.last.equals(m1)) retStrBuff += m1
+                }
+
+                val m1 = (toGcode(stright, c, offsetCorrection))
+                if (!retStrBuff.last.equals(m1)) retStrBuff += m1
                 lastOpPoint = getLastPos(c)
               }
             }
           })
-          pw.println(stopMark)
 
+          if (!retStrBuff.last.equals(stopMark)) retStrBuff += stopMark
         }
 
-        case "CUTH"  => { //
-          if (!currentTool.equals(cutToolOp)) {
-            currentTool = cutToolOp
-            pw.println(cutToolOp)
-          }
-          pw.println(toGcode(move, MachineItem(Left(getStartPos(op.ops.head))),offsetCorrection))
+        case "CUTH" => { //
+          /*          if (!currentTool.equals(cutToolOp)) {
+                      currentTool = cutToolOp
+                      if(!retStrBuff.last.equals(cutToolOp))retStrBuff+=cutToolOp
+                    }*/
+          val m1 = (toGcode(moveCut, MachineItem(Left(getStartPos(op.ops.head))), offsetCorrection))
+          if (!retStrBuff.last.equals(m1)) retStrBuff += m1
           lastOpPoint = getStartPos(op.ops.head)
-          pw.println(startCutHoles)
-          pw.println(cutPauseOp)
+          if (!retStrBuff.last.equals(startCutHoles)) retStrBuff += startCutHoles
+          //if(!retStrBuff.last.equals(cutPauseOp))retStrBuff+=cutPauseOp
+
 
           op.ops.foreach(c => {
             c.pointOrArc match {
               case Right(value: Arc) => {
-                if (!pointsEquals(value.sp, lastOpPoint)) pw.println(toGcode(stright, MachineItem(Left(value.sp)),offsetCorrection))
+                if (!pointsEquals(value.sp, lastOpPoint)) {
+                  val m1 = (toGcode(stright, MachineItem(Left(value.sp)), offsetCorrection))
+                  if (!retStrBuff.last.equals(m1)) retStrBuff += m1
+                }
+
                 if (isClockWise(value)) {
-                  pw.println(toGcode(arcCW, c,offsetCorrection))
+                  val m1 = (toGcode(arcCW, c, offsetCorrection))
+                  if (!retStrBuff.last.equals(m1)) retStrBuff += m1
                   lastOpPoint = getLastPos(c)
                 } else {
-                  pw.println(toGcode(arcACW, c,offsetCorrection))
+                  val m1 = (toGcode(arcACW, c, offsetCorrection))
+                  if (!retStrBuff.last.equals(m1)) retStrBuff += m1
                   lastOpPoint = getLastPos(c)
                 }
               }
               case Left(value: Point) => {
-                if (!pointsEquals(value, lastOpPoint)) pw.println(toGcode(stright, MachineItem(Left(value)),offsetCorrection))
-                pw.println(toGcode(stright, c,offsetCorrection))
+                if (!pointsEquals(value, lastOpPoint)) {
+                  val m1 = (toGcode(stright, MachineItem(Left(value)), offsetCorrection))
+                  if (!retStrBuff.last.equals(m1)) retStrBuff += m1
+                }
+                val m1 = (toGcode(stright, c, offsetCorrection))
+                if (!retStrBuff.last.equals(m1)) retStrBuff += m1
                 lastOpPoint = getLastPos(c)
               }
             }
           })
-          pw.println(stopCut)
+          if (!retStrBuff.last.equals(stopCut)) retStrBuff += stopCut
         }
 
         case "CUT" => { //
-          if (!currentTool.equals(cutToolOp)) {
-            currentTool = cutToolOp
-            pw.println(cutToolOp)
-          }
-          pw.println(toGcode(move, MachineItem(Left(getStartPos(op.ops.head))),offsetCorrection))
+          /*          if (!currentTool.equals(cutToolOp)) {
+                      currentTool = cutToolOp
+                      if(!retStrBuff.last.equals(cutToolOp))retStrBuff+=cutToolOp
+                    }*/
+          val m1 = (toGcode(moveCut, MachineItem(Left(getStartPos(op.ops.head))), offsetCorrection))
+          if (!retStrBuff.last.equals(m1)) retStrBuff += m1
           lastOpPoint = getStartPos(op.ops.head)
-          pw.println(startCutOuter)
-          pw.println(cutPauseOp)
+          if (!retStrBuff.last.equals(startCutOuter)) retStrBuff += startCutOuter
+          //if(!retStrBuff.last.equals(cutPauseOp))retStrBuff+=cutPauseOp
           op.ops.foreach(c => {
             c.pointOrArc match {
               case Right(value: Arc) => {
-                if (!pointsEquals(value.sp, lastOpPoint)) pw.println(toGcode(stright, MachineItem(Left(value.sp)),offsetCorrection))
+                if (!pointsEquals(value.sp, lastOpPoint)) {
+                  val m1 = (toGcode(stright, MachineItem(Left(value.sp)), offsetCorrection))
+                  if (!retStrBuff.last.equals(m1)) retStrBuff += m1
+                }
                 if (isClockWise(value)) {
-                  pw.println(toGcode(arcCW, c,offsetCorrection))
+                  val m1 = (toGcode(arcCW, c, offsetCorrection))
+                  if (!retStrBuff.last.equals(m1)) retStrBuff += m1
                   lastOpPoint = getLastPos(c)
                 } else {
-                  pw.println(toGcode(arcACW, c,offsetCorrection))
+                  val m1 = (toGcode(arcACW, c, offsetCorrection))
+                  if (!retStrBuff.last.equals(m1)) retStrBuff += m1
                   lastOpPoint = getLastPos(c)
                 }
               }
               case Left(value: Point) => {
-                if (!pointsEquals(value, lastOpPoint)) pw.println(toGcode(stright, MachineItem(Left(value)),offsetCorrection))
-                pw.println(toGcode(stright, c,offsetCorrection))
+                if (!pointsEquals(value, lastOpPoint)) {
+                  val m1 = (toGcode(stright, MachineItem(Left(value)), offsetCorrection))
+                  if (!retStrBuff.last.equals(m1)) retStrBuff += m1
+                }
+                val m1 = (toGcode(stright, c, offsetCorrection))
+                if (!retStrBuff.last.equals(m1)) retStrBuff += m1
                 lastOpPoint = getLastPos(c)
               }
             }
           })
-          pw.println(stopCut)
+          if (!retStrBuff.last.equals(stopCut)) retStrBuff += stopCut
         }
 
         case _ => None
       }
 
     })
-    pw.println(finishOp)
+
+
+    if (!retStrBuff.last.equals(finishOp)) retStrBuff += finishOp
+
+
+    val pw = new PrintWriter(new File(pathOut))
+    retStrBuff.foreach(line => pw.println(line))
+
     pw.close()
     pathOut
   }
