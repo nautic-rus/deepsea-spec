@@ -19,7 +19,6 @@ object Cases {
     override def toString: String = s"${doubleToStr(x)} ${doubleToStr(y)}"
 
     def toGcode(cmd: String, offsetCorrection:Point): String = s"${cmd}X${doubleToStr(x-offsetCorrection.x)}Y${doubleToStr(y-offsetCorrection.y)}"
-
   }
 
   case class Arc(sp: Point, rotCenter: Point, ep: Point) {
@@ -66,8 +65,7 @@ object Cases {
 
   val markToolOp = "M37T5\nM11"
 
-  //val cutToolOp = "M37T3\nM12"
-  val cutToolOp = "G42\nM37T3"
+  val cutToolOp = "M37T3\nM12"
 
   val finishOp = "M02"
 
@@ -79,19 +77,13 @@ object Cases {
 
   val stopMark = "M10"
 
-  val startCutHoles = "G42\nM07"
+  val startCutHoles = "M07\nG42"
 
-  val startCutOuter = "G42\nM07"
+  val startCutOuter = "M07\nG42"
 
-  //val startCutHoles = "M07\nG42"
-
- // val startCutOuter = "M07\nG42"
-
-  val stopCut = "M08\nG40"
+  val stopCut = "M08"
 
   val move = "G00"
-
-  val moveCut = "G00"
 
   val stright = "G01"
 

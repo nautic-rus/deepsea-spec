@@ -8,7 +8,7 @@ import deepsea.App
 import deepsea.actors.ActorManager
 import deepsea.database.DatabaseManager.{GetConnection, GetOracleConnection}
 import deepsea.files.FileManager.GenerateUrl
-import deepsea.hull.HullManager.{GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, HullEsp, HullPartPlateDef, HullPartProfileDef, PlatePart, ProfilePart, RemoveParts, SetHullEsp}
+import deepsea.hull.HullManager.{BsDesignNode, GetBsDesignNodes, GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, GetHullSystems, HullEsp, HullPartPlateDef, HullPartProfileDef, HullSystem, PlatePart, ProfilePart, RemoveParts, SetHullEsp}
 import deepsea.hull.classes.HullPart
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
@@ -38,12 +38,14 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.{File, FileOutputStream}
 import java.nio.file.Files
 import java.sql.ResultSet
+import java.util
 import java.util.concurrent.TimeUnit
 import java.util.zip.{ZipEntry, ZipOutputStream}
 import java.util.{Date, UUID}
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.io.Source
-
+import local.common.Codecs
 
 object HullManager {
 
@@ -68,6 +70,10 @@ object HullManager {
   case class GetHullPlatesForMaterial(project: String, material: String, thickness: String)
   case class GetHullProfilesForMaterial(project: String, material: String, kse: String)
 
+  case class GetBsDesignNodes(project: String)
+  case class GetHullSystems(project: String)
+  case class BsDesignNode(OID: Int, TYPE: String, NAME: String, DESCRIPTION: String, PARENT_NODE: Int, ATOM_TYPE: Int, BLOCK_OID: Int, WEIGHT: Double, X_COG: Double, Y_COG: Double, Z_COG: Double, ATOM_NAME: String, DNA: String, DATE: Long)
+
   implicit val HullEspDecoder: Decoder[HullEsp] = deriveDecoder[HullEsp]
   implicit val HullEspEncoder: Encoder[HullEsp] = deriveEncoder[HullEsp]
 
@@ -75,17 +81,13 @@ object HullManager {
 
   case class PlatePart(code: String, block: String, name: String, description: String, weight: Double, thickness: Double, material: String, struct: String)
   case class ProfilePart(name: String, description: String, kse: Int, section: String, material: String, w_h: Double, w_t: Double, f_h: Double, f_t: Double, block: String, length: Double, area: Double, stock: String, density: Double, weight: Double, struct: String)
+  case class HullSystem(code: String, name: String)
 }
 
-class HullManager extends Actor {
+class HullManager extends Actor with Codecs{
   implicit val timeout: Timeout = Timeout(300, TimeUnit.SECONDS)
 
   private val espCollectionName = "hullEsp"
-
-  private val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
-    classOf[HullEsp],
-    classOf[PrdPart],
-  ), DEFAULT_CODEC_REGISTRY)
 
   override def receive: Receive = {
     //TOOLS
@@ -293,7 +295,13 @@ class HullManager extends Actor {
       removeParts(project, block, parts, user)
       sender() ! "success"
 
+    case GetHullSystems(project) =>
+      sender() ! getSystems(project).asJson.noSpaces
+
+    case GetBsDesignNodes(project) => sender() ! getBsDesignNodes(project).asJson.noSpaces
+
   }
+
 
   def getHullPartsByDocNumber(project: String, docNumber: String): ListBuffer[HullPart] = {
     val parts = getHullParts(project, docNumber)
@@ -602,6 +610,32 @@ class HullManager extends Actor {
     case _ =>
       ""
   }
+  def getSystems(project: String): ListBuffer[HullSystem] = {
+    val res = ListBuffer.empty[HullSystem]
+    GetOracleConnection(project) match {
+      case Some(c) =>
+        val s = c.createStatement()
+        val query = "SELECT NAME, DESC1 FROM V_SYSTEM"
+        val rs = s.executeQuery(query)
+        while (rs.next()) {
+          res += HullSystem(
+            rs.getString("NAME") match {
+              case value: String => value
+              case _ => ""
+            },
+            rs.getString("DESC1") match {
+              case value: String => value
+              case _ => ""
+            }
+          )
+        }
+        rs.close()
+        s.close()
+        c.close()
+      case _ =>
+    }
+    res
+  }
   def getPlates(project: String, material: String, thickness: Double): ListBuffer[PlatePart] = {
     val res = ListBuffer.empty[PlatePart]
     GetOracleConnection(project) match {
@@ -693,4 +727,79 @@ class HullManager extends Actor {
       case _ =>
     }
   }
+  def getBsDesignNodes(project: String): ListBuffer[BsDesignNode] = {
+    val res = ListBuffer.empty[BsDesignNode]
+    GetOracleConnection(project) match {
+      case Some(c) =>
+        val s = c.createStatement()
+        val query =  Source.fromResource("queries/bsDesignNodes.sql").mkString
+        val rs = s.executeQuery(query)
+        while (rs.next()) {
+          res += BsDesignNode(
+            rs.getInt("OID") match {
+              case value: Int => value
+              case _ => 0
+            },
+            rs.getString("TYPE") match {
+              case value: String => value
+              case _ => ""
+            },
+            rs.getString("NAME") match {
+              case value: String => value
+              case _ => ""
+            },
+            rs.getString("DESCRIPTION") match {
+              case value: String => value
+              case _ => ""
+            },
+            rs.getInt("PARENT_NODE") match {
+              case value: Int => value
+              case _ => 0
+            },
+            rs.getInt("ATOM_TYPE") match {
+              case value: Int => value
+              case _ => 0
+            },
+            rs.getInt("BLOCK_OID") match {
+              case value: Int => value
+              case _ => 0
+            },
+            rs.getDouble("WEIGHT") match {
+              case value: Double => value
+              case _ => 0
+            },
+            rs.getDouble("X_COG") match {
+              case value: Double => value
+              case _ => 0
+            },
+            rs.getDouble("Y_COG") match {
+              case value: Double => value
+              case _ => 0
+            },
+            rs.getDouble("Z_COG") match {
+              case value: Double => value
+              case _ => 0
+            },
+            rs.getString("ATOM_NAME") match {
+              case value: String => value
+              case _ => ""
+            },
+            rs.getString("DNA") match {
+              case value: String => value
+              case _ => ""
+            },
+            rs.getDate("MODIFY_DATE") match {
+              case value: java.sql.Date  => value.getTime
+              case _ => 0
+            }
+          )
+        }
+        rs.close()
+        s.close()
+        c.close()
+      case _ =>
+    }
+    res
+  }
+
 }

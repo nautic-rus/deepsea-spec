@@ -15,36 +15,12 @@
     <option name="openedFilesInfos">
       <list>
         <OpenedFileInfo>
-          <option name="caretOffset" value="116" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/main/scala/local/hull/nest/CommonNest.scala" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="946" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/main/scala/local/hull/nest/NestManager.scala" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="11532" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/main/scala/local/hull/nest/NestHelper.scala" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="681" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/test/scala/NestsTest.scala" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="430" />
+          <option name="caretOffset" value="228" />
           <option name="fileUrl" value="file://$PROJECT_DIR$/src/main/scala/deepsea/App.scala" />
         </OpenedFileInfo>
         <OpenedFileInfo>
-          <option name="caretOffset" value="3900" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/main/scala/deepsea/spec/SpecManager.scala" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="6966" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/pom.xml" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="537" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/main/scala/deepsea/http/HTTPManager.scala" />
+          <option name="caretOffset" value="2270" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/main/scala/local/hull/cnc/hyprethermGcode/Cases.scala" />
         </OpenedFileInfo>
       </list>
     </option>

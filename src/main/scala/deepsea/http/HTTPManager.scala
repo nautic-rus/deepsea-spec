@@ -13,7 +13,7 @@ import deepsea.App
 import deepsea.actors.ActorManager
 import deepsea.actors.ActorStartupManager.HTTPManagerStarted
 import deepsea.elec.ElecManager._
-import deepsea.hull.HullManager.{GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, RemoveParts, SetHullEsp}
+import deepsea.hull.HullManager.{GetBsDesignNodes, GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, GetHullSystems, RemoveParts, SetHullEsp}
 import deepsea.spec.SpecManager._
 import org.apache.log4j.{LogManager, Logger}
 import play.api.libs.json.{JsValue, Json}
@@ -47,6 +47,9 @@ class HTTPManager extends Actor {
       (get & path("hullProfiles") & parameter("project") & parameter("material") & parameter("kse")) { (project, material, kse) =>
         askFor(ActorManager.hullManager, GetHullProfilesForMaterial(project, material, kse))
       },
+      (get & path("bsDesignNodes") & parameter("project")) { (project) =>
+        askFor(ActorManager.hullManager, GetBsDesignNodes(project))
+      },
 
       (get & path("hullPartList") & parameter("project") & parameter("docNumber")) { (project, docNumber) =>
         askFor(ActorManager.hullManager, GetHullPartsByDocNumber(project, docNumber))
@@ -60,7 +63,9 @@ class HTTPManager extends Actor {
       (get & path("hullEspFiles") & parameter("project") & parameter("docNumber") & parameter("docName") & parameter("revision")) { (project, docNumber, docName, revision) =>
         askFor(ActorManager.hullManager, GetHullEspFiles(project, docNumber, docName, revision))
       },
-
+      (get & path("hullSystems") & parameter("project")) { (project) =>
+        askFor(ActorManager.hullManager, GetHullSystems(project))
+      },
 
       (get & path("foranPartsExcel") & parameter("project")) { (project) =>
         askFor(ActorManager.hullManager, GetHullPartsExcel(project))
@@ -114,7 +119,7 @@ class HTTPManager extends Actor {
       (post & path("hullNestingByMaterials") & entity(as[String]) & parameter("project")) { (materials, project) =>
         askFor(ActorManager.spec, GetHullNestingByMaterials(project, materials))
       },
-      (post & path("hullNestingByProject") & parameter("project")) { (project) =>
+      (get & path("hullNestingByProject") & parameter("project")) { (project) =>
         askFor(ActorManager.spec, GetHullNestingByProject(project))
       },
       (get & path("hullBillPlates") & parameter("project")) { (project) =>
