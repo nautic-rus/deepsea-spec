@@ -77,7 +77,7 @@ object CNCManager extends ForanFileUtil {
           if (!buff.last.equals(stopMark)) buff += stopMark
         }
         case "CUTH" => {
-          val m1 = (toGcode(moveCut, MachineItem(Left(getStartPos(op.ops.head))), offsetCorrection))
+          val m1 = (toGcode(move, MachineItem(Left(getStartPos(op.ops.head))), offsetCorrection))
           if (!buff.last.equals(m1)) buff += m1
           lastOpPoint = getStartPos(op.ops.head)
           if (!buff.last.equals(startCutHoles)) buff += startCutHoles
@@ -112,7 +112,7 @@ object CNCManager extends ForanFileUtil {
           if (!buff.last.equals(stopCut)) buff += stopCut
         }
         case "CUT" => {
-          val m1 = (toGcode(moveCut, MachineItem(Left(getStartPos(op.ops.head))), offsetCorrection))
+          val m1 = (toGcode(move, MachineItem(Left(getStartPos(op.ops.head))), offsetCorrection))
           if (!buff.last.equals(m1)) buff += m1
           lastOpPoint = getStartPos(op.ops.head)
           if (!buff.last.equals(startCutOuter)) buff += startCutOuter
@@ -250,7 +250,7 @@ object CNCManager extends ForanFileUtil {
                       currentTool = cutToolOp
                       if(!retStrBuff.last.equals(cutToolOp))retStrBuff+=cutToolOp
                     }*/
-          val m1 = (toGcode(moveCut, MachineItem(Left(getStartPos(op.ops.head))), offsetCorrection))
+          val m1 = (toGcode(move, MachineItem(Left(getStartPos(op.ops.head))), offsetCorrection))
           if (!retStrBuff.last.equals(m1)) retStrBuff += m1
           lastOpPoint = getStartPos(op.ops.head)
           if (!retStrBuff.last.equals(startCutHoles)) retStrBuff += startCutHoles
@@ -294,7 +294,7 @@ object CNCManager extends ForanFileUtil {
                       currentTool = cutToolOp
                       if(!retStrBuff.last.equals(cutToolOp))retStrBuff+=cutToolOp
                     }*/
-          val m1 = (toGcode(moveCut, MachineItem(Left(getStartPos(op.ops.head))), offsetCorrection))
+          val m1 = (toGcode(move, MachineItem(Left(getStartPos(op.ops.head))), offsetCorrection))
           if (!retStrBuff.last.equals(m1)) retStrBuff += m1
           lastOpPoint = getStartPos(op.ops.head)
           if (!retStrBuff.last.equals(startCutOuter)) retStrBuff += startCutOuter
