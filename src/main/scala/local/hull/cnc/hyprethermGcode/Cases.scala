@@ -63,9 +63,9 @@ object Cases {
 
   val startOps: String = "G21\nG90\nG99X1Y0I0J0"
 
-  val markToolOp = "M37T5\nM11"
+  val markToolOp = "M11"
 
-  val cutToolOp = "M37T3\nM12"
+  val cutToolOp = "M12"
 
   val finishOp = "M02"
 
@@ -75,7 +75,7 @@ object Cases {
 
   val startMark = "M09"
 
-  val stopMark = "M10"
+  val stopMark = "M10\nG40"
 
   val startCutHoles = "G42\nM07"
 
