@@ -61,11 +61,11 @@ object Cases {
 
   val initOp: Point = Point(0, 0)
 
-  val startOps: String = "G21\nG40\nG90"
+  val startOps: String = "G21\nG90\nG99X1Y0I0J0"
 
-  val markToolOp = "M37T5\nM11"
+  val markToolOp = "M11"
 
-  val cutToolOp = "M37T3\nM12"
+  val cutToolOp = "M12"
 
   val finishOp = "M02"
 
@@ -75,15 +75,13 @@ object Cases {
 
   val startMark = "M09"
 
-  val stopMark = "M10"
+  val stopMark = "M10\nG40"
 
-  val startCutHoles = "M07\nG42"
-  //val startCutHoles = "G42\nM07"
+  val startCutHoles = "G42\nM07"
 
-  val startCutOuter = "M07\nG42"
-  //val startCutOuter = "G42\nM07"
+  val startCutOuter = "G42\nM07"
 
-  val stopCut = "M08"
+  val stopCut = "M08\nG40"
 
   val move = "G00"
 
