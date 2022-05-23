@@ -72,7 +72,7 @@ object HullManager {
 
   case class GetBsDesignNodes(project: String)
   case class GetHullSystems(project: String)
-  case class BsDesignNode(OID: Int, TYPE: String, NAME: String, DESCRIPTION: String, PARENT_NODE: Int, ATOM_TYPE: Int, BLOCK_OID: Int, WEIGHT: Double, X_COG: Double, Y_COG: Double, Z_COG: Double, ATOM_NAME: String, DNA: String, DATE: Long)
+  case class BsDesignNode(OID: Int, TYPE: String, NAME: String, DESCRIPTION: String, PARENT_NODE: Int, ATOM_TYPE: Int, BLOCK_OID: Int, WEIGHT: Double, X_COG: Double, Y_COG: Double, Z_COG: Double, ATOM_NAME: String, DNA: String, DATE: Long, block: String, zone: String, elec: Int)
 
   implicit val HullEspDecoder: Decoder[HullEsp] = deriveDecoder[HullEsp]
   implicit val HullEspEncoder: Encoder[HullEsp] = deriveEncoder[HullEsp]
@@ -791,6 +791,18 @@ class HullManager extends Actor with Codecs{
             rs.getDate("MODIFY_DATE") match {
               case value: java.sql.Date  => value.getTime
               case _ => 0
+            },
+            rs.getString("BLOCK") match {
+              case value: String => value
+              case _ => ""
+            },
+            rs.getString("ZONE") match {
+              case value: String => value
+              case _ => ""
+            },
+            rs.getInt("ELEC") match {
+              case value: Int => value
+              case _ => -1
             }
           )
         }
