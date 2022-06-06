@@ -9,6 +9,7 @@ import deepsea.elec.ElecManager
 import deepsea.files.FileManager
 import deepsea.http.HTTPManager
 import deepsea.hull.HullManager
+import deepsea.pipe.PipeManager
 import deepsea.spec.SpecManager
 
 
@@ -29,5 +30,6 @@ class ActorStartupManager extends Actor{
       ActorManager.hullManager = system.actorOf(RoundRobinPool(10).props(Props[HullManager]))
       ActorManager.elec = system.actorOf(RoundRobinPool(10).props(Props[ElecManager]))
       ActorManager.files = system.actorOf(RoundRobinPool(3).props(Props[FileManager]))
+      ActorManager.pipe = system.actorOf(RoundRobinPool(1).props(Props[PipeManager]))
   }
 }
