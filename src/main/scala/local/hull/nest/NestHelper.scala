@@ -83,8 +83,8 @@ trait NestHelper extends BillHelper {
               } else {
                 0.0d
               }
-
             }
+
             val lock = calculateLockInfo(NESTID, locks)
             buffer += Nest2(
               Option(rs.getInt("OID")).getOrElse(0),

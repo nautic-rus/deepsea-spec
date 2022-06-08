@@ -134,6 +134,11 @@ object BillManager extends BillHelper with Codecs {
                        )
 
 
+  def genProfileNestBillJson(project: String):String= genProfileNestBill(project).sortBy(s => s.KSE).asJson.noSpaces
+
+
+
+
   def genAnalyticProfileData(project: String): List[ProfileAnalitic] = {
     val buff = ListBuffer.empty[ProfileAnalitic]
     val nest: List[ProfileNestBill] = genProfileNestBill(project).sortBy(s => s.KSE)
