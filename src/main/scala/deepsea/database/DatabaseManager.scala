@@ -6,7 +6,7 @@ import akka.util.Timeout
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import deepsea.actors.ActorManager
 import deepsea.actors.ActorStartupManager.DatabaseManagerStarted
-import deepsea.database.DatabaseManager.{GetConnectionFromPool, GetMongoConnectionFromPool, GetOracleConnectionFromPool, OracleConnection}
+import deepsea.database.DatabaseManager.{GetConnectionFromPool, GetMongoCacheConnectionFromPool, GetMongoConnectionFromPool, GetOracleConnectionFromPool, OracleConnection}
 import local.common.Codecs
 import org.mongodb.scala.{MongoClient, MongoDatabase}
 
@@ -21,6 +21,7 @@ object DatabaseManager{
   case class GetOracleConnectionFromPool(project: String)
   case class OracleConnection(project: String, ds: HikariDataSource)
   case class GetMongoConnectionFromPool()
+  case class GetMongoCacheConnectionFromPool()
   case class GetConnectionFromPool()
 
   def GetConnection(): Option[Connection] ={
@@ -48,6 +49,17 @@ object DatabaseManager{
   def GetMongoConnection(): Option[MongoDatabase] = {
     try{
       Await.result(ActorManager.dataBase ? GetMongoConnectionFromPool(), timeout.duration) match {
+        case response: MongoDatabase => Option(response)
+        case _ => Option.empty
+      }
+    }
+    catch {
+      case e: Throwable => Option.empty
+    }
+  }
+  def GetMongoCacheConnection(): Option[MongoDatabase] = {
+    try{
+      Await.result(ActorManager.dataBase ? GetMongoCacheConnectionFromPool(), timeout.duration) match {
         case response: MongoDatabase => Option(response)
         case _ => Option.empty
       }
@@ -99,6 +111,7 @@ class DatabaseManager extends Actor with Codecs {
         case _ => Option.empty
       }
     case GetMongoConnectionFromPool() => sender() ! mongoClient.getDatabase("3degdatabase").withCodecRegistry(codecRegistry)
+    case GetMongoCacheConnectionFromPool() => sender() ! mongoClient.getDatabase("cache").withCodecRegistry(codecRegistry)
 
     case _ => None
   }
