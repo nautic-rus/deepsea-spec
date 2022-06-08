@@ -18,7 +18,7 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import local.hull.cnc.hyprethermGcode.CNCManager.{doCNC, doCNCStrings}
 import local.pdf.ru.ele.EleEqTrayESKDReport.{generatePdfToFileNoRev, generatePdfToFileWithRev}
 import akka.pattern.ask
-import local.hull.bill.BillManager.{genAnalyticPlateDataJson, genAnalyticProfileDataJson, genWastsgeByParentKplJson}
+import local.hull.bill.BillManager.{genAnalyticPlateDataJson, genAnalyticProfileDataJson, genProfileNestBillJson, genWastsgeByParentKplJson}
 
 import java.nio.file.Files
 import scala.concurrent.Await
@@ -39,7 +39,8 @@ object SpecManager {
   case class GetHullNestingBlocks(project: String)
   case class GetHullNestingMaterials(project: String, blocks: String)
   case class GetHullNestingByMaterials(project: String, materials: String)
-  case class GetHullNestingByProject(project: String)
+  case class GetHullNestingByProjectPlates(project: String)
+  case class GetHullNestingByProjectProfiles(project: String)
   case class GetHullBillPlatesWastage(project: String, kpl: String)
 
   case class CreateCNC(lines: String, user: String)
@@ -76,8 +77,10 @@ class SpecManager extends Actor with BStree {
       sender() ! genMaterialNyBlockJson(project, Json.parse(blocks).asOpt[List[String]].getOrElse(List.empty[String]))
     case GetHullNestingByMaterials(project, materials) =>
       sender() ! plateNestByMaterialsAndDimsJson(project, decode[List[NestMaterial]](materials).getOrElse(List.empty[NestMaterial]))
-    case GetHullNestingByProject(project) =>
+    case GetHullNestingByProjectPlates(project) =>
       sender() ! genAllPlateNest2Json(project)
+    case GetHullNestingByProjectProfiles(project) =>
+      sender() ! genProfileNestBillJson(project)
     case GetHullBillPlates(project) =>
       sender() ! genAnalyticPlateDataJson(project)
     case GetHullBillProfiles(project) =>

@@ -3,7 +3,7 @@ package deepsea.pipe
 import akka.actor.{Actor, ActorSystem}
 import akka.http.scaladsl.{Http, HttpExt}
 import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection}
-import deepsea.pipe.PipeManager.{GetPipeSegs, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, UpdatePipeComp}
+import deepsea.pipe.PipeManager.{GetPipeSegs, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, ProjectName, UpdatePipeComp}
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.Filters.{and, equal}
 import org.mongodb.scala.{Document, MongoCollection, bson}
@@ -36,12 +36,12 @@ object PipeManager{
                        comment: String = "",
                        coefficient: Double = 1,
                        id: String = UUID.randomUUID().toString)
+  case class ProjectName(id: Int, rkd: String, pdsp: String, foran: String)
 
   case class UpdatePipeComp()
   case class GetPipeSegs(project: String, system: String)
   case class GetSystems(project: String)
   case class GetZones(project: String)
-
 }
 class PipeManager extends Actor with Codecs{
 
@@ -210,11 +210,23 @@ class PipeManager extends Actor with Codecs{
           case Some(mongoData) =>
             val materialsNCollectionName = "materials-n"
             val materialsCollection: MongoCollection[Material] = mongoData.getCollection(materialsNCollectionName)
+            val projectNamesCollection: MongoCollection[ProjectName] = mongoData.getCollection("project-names")
 
-            val materials = Await.result(materialsCollection.find(equal("project", project)).toFuture(), Duration(30, SECONDS)) match {
+            val projectNames = Await.result(projectNamesCollection.find().toFuture(), Duration(30, SECONDS)) match {
+              case values: Seq[ProjectName] => values.toList
+              case _ => List.empty[ProjectName]
+            }
+
+            val rkdProject = projectNames.find(_.foran == project) match {
+              case Some(value) => value
+              case _ => ""
+            }
+
+            val materials = Await.result(materialsCollection.find(equal("project", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
               case values: Seq[Material] => values.toList
               case _ => List.empty[Material]
             }
+
 
             Await.result(vPipeCompActualCollection.find().toFuture(), Duration(30, SECONDS)) match {
               case values: Seq[PipeSegActual] =>
