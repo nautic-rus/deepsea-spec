@@ -5,7 +5,7 @@ import akka.http.scaladsl.{Http, HttpExt}
 import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection}
 import deepsea.pipe.PipeManager.{GetPipeSegs, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, ProjectName, UpdatePipeComp}
 import org.mongodb.scala.bson.BsonDocument
-import org.mongodb.scala.model.Filters.{and, equal, notEqual}
+import org.mongodb.scala.model.Filters.{all, and, equal, in, notEqual}
 import org.mongodb.scala.{Document, MongoCollection, bson}
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
@@ -225,7 +225,7 @@ class PipeManager extends Actor with Codecs{
               case _ => ""
             }
 
-            val materials = Await.result(materialsCollection.find(equal("project", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
+            val materials = Await.result(materialsCollection.find(equal("projects", "200101")).toFuture(), Duration(30, SECONDS)) match {
               case values: Seq[Material] => values.toList
               case _ => List.empty[Material]
             }
