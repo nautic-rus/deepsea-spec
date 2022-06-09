@@ -3,7 +3,7 @@ package deepsea.pipe
 import akka.actor.{Actor, ActorSystem}
 import akka.http.scaladsl.{Http, HttpExt}
 import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection}
-import deepsea.pipe.PipeManager.{GetPipeSegs, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, ProjectName, UpdatePipeComp}
+import deepsea.pipe.PipeManager.{GetPipeSegs, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, ProjectName, SystemDef, UpdatePipeComp}
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.Filters.{all, and, equal, in, notEqual}
 import org.mongodb.scala.{Document, MongoCollection, bson}
@@ -21,7 +21,7 @@ import scala.concurrent.duration.{Duration, DurationInt, SECONDS}
 
 object PipeManager{
 
-  case class PipeSeg(project: String, zone: String, system: String, typeCode: String, classAlpha: String, compType: String, compUserId: String, smat: String, sqInSystem: Int, isPieceId: Int, spPieceId: Int, isom: String, spool: String, length: Double, radius: Double, angle: Double, weight: Double, stock: String, insul: String, var material: Material = Material())
+  case class PipeSeg(project: String, zone: String, system: String, typeCode: String, classAlpha: String, compType: String, compUserId: String, smat: String, sqInSystem: Int, isPieceId: Int, spPieceId: Int, isom: String, spool: String, length: Double, radius: Double, angle: Double, weight: Double, stock: String, insul: String, var material: Material = Material(), var systemDescr: String = "")
   case class PipeSegActual(name: String, date: Long)
   case class Material(
                        name: String = "",
@@ -38,6 +38,7 @@ object PipeManager{
                        coefficient: Double = 1,
                        id: String = UUID.randomUUID().toString)
   case class ProjectName(id: String, rkd: String, pdsp: String, foran: String)
+  case class SystemDef(name: String, descr: String)
 
   case class UpdatePipeComp()
   case class GetPipeSegs(project: String, system: String)
@@ -164,7 +165,7 @@ class PipeManager extends Actor with Codecs{
       case _ =>
     }
   }
-  def getSystems(project: String): List[String] = {
+  def getSystems(project: String): List[SystemDef] = {
     GetMongoCacheConnection() match {
       case Some(mongo) =>
 
@@ -176,10 +177,10 @@ class PipeManager extends Actor with Codecs{
           case values: Seq[PipeSegActual] =>
             Await.result(mongo.getCollection(values.last.name).distinct("system", equal("project", project)).toFuture(), Duration(30, SECONDS)) match {
               case systems: Seq[String] =>
-                systems.toList
-              case _ => List.empty[String]
+                getSystemDefs(project).filter(x => systems.contains(x.name))
+              case _ => List.empty[SystemDef]
             }
-          case _ => List.empty[String]
+          case _ => List.empty[SystemDef]
         }
     }
   }
@@ -231,6 +232,8 @@ class PipeManager extends Actor with Codecs{
             }
 
 
+            val systemDefs = getSystemDefs(project)
+
             Await.result(vPipeCompActualCollection.find().toFuture(), Duration(30, SECONDS)) match {
               case values: Seq[PipeSegActual] =>
                 Await.result(mongo.getCollection[PipeSeg](values.last.name).find(and(equal("project", project), equal("system", system))).toFuture(), Duration(300, SECONDS)) match {
@@ -238,6 +241,10 @@ class PipeManager extends Actor with Codecs{
                     case Some(value) => value
                     case _ => Material()
                   })
+                    res.foreach(p => p.systemDescr = systemDefs.find(_.name == p.system) match {
+                      case Some(systemDef) => systemDef.descr
+                      case _ => ""
+                    })
                     res.toList
                   case _ => List.empty[PipeSeg]
                 }
@@ -248,5 +255,28 @@ class PipeManager extends Actor with Codecs{
         }
 
     }
+  }
+  private def getSystemDefs(project: String): List[SystemDef] ={
+    val systemDefs = ListBuffer.empty[SystemDef]
+    GetOracleConnection(project) match {
+      case Some(oracleConnection) =>
+        val stmt = oracleConnection.createStatement()
+        val query = "SELECT S.NAME AS NAME, L.DESCR AS DESCR FROM SYSTEMS S, SYSTEMS_LANG L WHERE S.OID = L.SYSTEM AND L.LANG = -2"
+        val rs = stmt.executeQuery(query)
+        while (rs.next()){
+          systemDefs += SystemDef(rs.getString("NAME") match {
+            case value: String => value
+            case _ => ""
+          }, rs.getString("DESCR") match {
+            case value: String => value
+            case _ => ""
+          })
+        }
+        stmt.close()
+        rs.close()
+        oracleConnection.close()
+      case _ =>
+    }
+    systemDefs.toList
   }
 }
