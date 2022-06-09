@@ -5,7 +5,7 @@ import akka.http.scaladsl.{Http, HttpExt}
 import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection}
 import deepsea.pipe.PipeManager.{GetPipeSegs, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, ProjectName, UpdatePipeComp}
 import org.mongodb.scala.bson.BsonDocument
-import org.mongodb.scala.model.Filters.{and, equal}
+import org.mongodb.scala.model.Filters.{and, equal, notEqual}
 import org.mongodb.scala.{Document, MongoCollection, bson}
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
@@ -37,7 +37,7 @@ object PipeManager{
                        comment: String = "",
                        coefficient: Double = 1,
                        id: String = UUID.randomUUID().toString)
-  case class ProjectName(id: Int, rkd: String, pdsp: String, foran: String)
+  case class ProjectName(id: String, rkd: String, pdsp: String, foran: String)
 
   case class UpdatePipeComp()
   case class GetPipeSegs(project: String, system: String)
@@ -52,7 +52,6 @@ class PipeManager extends Actor with Codecs{
 
   override def preStart(): Unit = {
     system.scheduler.scheduleWithFixedDelay(0.seconds, 15.minutes, self, UpdatePipeComp())
-    self ! GetPipeSegs("N004", "0003")
   }
 
   override def receive: Receive = {
@@ -148,7 +147,7 @@ class PipeManager extends Actor with Codecs{
         val vPipeCompActual: MongoCollection[PipeSegActual] = mongo.getCollection(vPipeCompCollectionActual)
 
         Await.result(vPipeComp.insertMany(pipeSegs.toList).toFuture(), Duration(300, SECONDS))
-        Await.result(vPipeCompActual.insertOne(PipeSegActual(vPipeCompCollection, date)).toFuture(), Duration(300, SECONDS))
+        Await.result(vPipeCompActual.insertOne(PipeSegActual(vPipeCompCollection, date)).toFuture(), Duration(30, SECONDS))
 
         Await.result(mongo.listCollectionNames().toFuture(), Duration(30, SECONDS)) match {
           case values: Seq[String] =>
@@ -158,7 +157,9 @@ class PipeManager extends Actor with Codecs{
             }
           case _ =>
         }
-        Await.result(vPipeCompActual.deleteMany(Filters.where("date < " + (date - 60 * 60 * 1000).toString)).toFuture(), Duration(30, SECONDS))
+
+        Await.result(vPipeCompActual.deleteMany(notEqual("date", date)).toFuture(), Duration(30, SECONDS))
+
 
       case _ =>
     }

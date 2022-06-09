@@ -11,6 +11,7 @@ object App {
 
   object HTTPServer{
     val Host = "192.168.1.28"
+    val Host1 = "192.168.1.122"
     val Port = 1113
     val Url = "https://deep-sea.ru"
     val RestUrl = "https://deep-sea.ru/rest"
