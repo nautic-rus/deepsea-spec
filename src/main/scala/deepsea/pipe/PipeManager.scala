@@ -11,6 +11,7 @@ import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 import local.common.Codecs
+import org.mongodb.scala.model.Filters
 
 import java.util.{Date, UUID}
 import scala.collection.mutable.ListBuffer
@@ -157,6 +158,7 @@ class PipeManager extends Actor with Codecs{
             }
           case _ =>
         }
+        Await.result(vPipeCompActual.deleteMany(Filters.where("date < " + (date - 60 * 60 * 1000).toString)).toFuture(), Duration(30, SECONDS))
 
       case _ =>
     }
