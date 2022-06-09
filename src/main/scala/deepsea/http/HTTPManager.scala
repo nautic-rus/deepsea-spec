@@ -18,7 +18,7 @@ import deepsea.spec.SpecManager._
 import org.apache.log4j.{LogManager, Logger}
 import play.api.libs.json.{JsValue, Json}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
-import deepsea.pipe.PipeManager.{GetPipeSegs, GetSystems, GetZones}
+import deepsea.pipe.PipeManager.{GetPipeSegs, GetPipeSegsByDocNumber, GetSystems, GetZones}
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.{Await, ExecutionContextExecutor, Future}
@@ -156,7 +156,9 @@ class HTTPManager extends Actor {
       (get & path("pipeSegs") & parameter("project") & parameter("system")) { (project, system) =>
         askFor(ActorManager.pipe, GetPipeSegs(project, system))
       },
-
+      (get & path("pipeSegs") & parameter("docNumber")) { (docNumber) =>
+        askFor(ActorManager.pipe, GetPipeSegsByDocNumber(docNumber))
+      },
     )
   }
 

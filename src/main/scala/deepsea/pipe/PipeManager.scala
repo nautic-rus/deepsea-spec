@@ -3,7 +3,7 @@ package deepsea.pipe
 import akka.actor.{Actor, ActorSystem}
 import akka.http.scaladsl.{Http, HttpExt}
 import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection}
-import deepsea.pipe.PipeManager.{GetPipeSegs, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, ProjectName, SystemDef, UpdatePipeComp}
+import deepsea.pipe.PipeManager.{GetPipeSegs, GetPipeSegsByDocNumber, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, ProjectName, SystemDef, UpdatePipeComp}
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.Filters.{all, and, equal, in, notEqual}
 import org.mongodb.scala.{Document, MongoCollection, bson}
@@ -38,10 +38,11 @@ object PipeManager{
                        coefficient: Double = 1,
                        id: String = UUID.randomUUID().toString)
   case class ProjectName(id: String, rkd: String, pdsp: String, foran: String)
-  case class SystemDef(name: String, descr: String)
+  case class SystemDef(project: String, name: String, descr: String)
 
   case class UpdatePipeComp()
   case class GetPipeSegs(project: String, system: String)
+  case class GetPipeSegsByDocNumber(docNumber: String)
   case class GetSystems(project: String)
   case class GetZones(project: String)
 }
@@ -63,6 +64,9 @@ class PipeManager extends Actor with Codecs{
     case GetSystems(project) => sender() ! getSystems(project).asJson.noSpaces
     case GetZones(project) => sender() ! getZones(project).asJson.noSpaces
     case GetPipeSegs(project, system) => sender() ! getPipeSegs(project, system).asJson.noSpaces
+    case GetPipeSegsByDocNumber(docNumber) =>
+      val projectSystem = getSystemAndProjectFromDocNumber(docNumber)
+      sender() ! getPipeSegs(projectSystem._1, projectSystem._2).asJson.noSpaces
 
     case _ => None
 
@@ -264,7 +268,7 @@ class PipeManager extends Actor with Codecs{
         val query = "SELECT S.NAME AS NAME, L.DESCR AS DESCR FROM SYSTEMS S, SYSTEMS_LANG L WHERE S.OID = L.SYSTEM AND L.LANG = -2"
         val rs = stmt.executeQuery(query)
         while (rs.next()){
-          systemDefs += SystemDef(rs.getString("NAME") match {
+          systemDefs += SystemDef(project, rs.getString("NAME") match {
             case value: String => value
             case _ => ""
           }, rs.getString("DESCR") match {
@@ -278,5 +282,29 @@ class PipeManager extends Actor with Codecs{
       case _ =>
     }
     systemDefs.toList
+  }
+  private def getSystemAndProjectFromDocNumber(docNumber: String): (String, String) = {
+    GetMongoConnection() match {
+      case Some(mongoData) =>
+        val projectNamesCollection: MongoCollection[ProjectName] = mongoData.getCollection("project-names")
+        val projectNames = Await.result(projectNamesCollection.find().toFuture(), Duration(30, SECONDS)) match {
+          case values: Seq[ProjectName] => values.toList
+          case _ => List.empty[ProjectName]
+        }
+        """\d{6}(?=-\d{3}-\d{4})""".r.findFirstIn(docNumber) match {
+          case Some(rkdProject) =>
+            projectNames.find(_.rkd == rkdProject) match {
+              case Some(project) =>
+                val systems = getSystemDefs(project.foran)
+                systems.find(x => x.descr.contains(docNumber)) match {
+                  case Some(system) =>
+                    (project.foran, system.name)
+                  case _ => ("", "")
+                }
+              case _ => ("", "")
+            }
+          case _ => ("", "")
+        }
+    }
   }
 }
