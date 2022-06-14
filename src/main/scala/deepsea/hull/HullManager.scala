@@ -498,6 +498,7 @@ class HullManager extends Actor with Codecs{
           case Some(value) =>
             part.MATERIAL = value.MATERIAL
             part.SECTION = value.THICK.toString
+            part.THICK = value.THICK
           case _ => None
         }
       }
