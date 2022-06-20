@@ -42,7 +42,7 @@ object PipeManager{
 
   case class UpdatePipeComp()
   case class GetPipeSegs(project: String, system: String)
-  case class GetPipeSegsByDocNumber(docNumber: String)
+  case class GetPipeSegsByDocNumber(docNumber: String, json: Boolean = true)
   case class GetSystems(project: String)
   case class GetZones(project: String)
 }
@@ -64,9 +64,10 @@ class PipeManager extends Actor with Codecs{
     case GetSystems(project) => sender() ! getSystems(project).asJson.noSpaces
     case GetZones(project) => sender() ! getZones(project).asJson.noSpaces
     case GetPipeSegs(project, system) => sender() ! getPipeSegs(project, system).asJson.noSpaces
-    case GetPipeSegsByDocNumber(docNumber) =>
+    case GetPipeSegsByDocNumber(docNumber, json) =>
       val projectSystem = getSystemAndProjectFromDocNumber(docNumber)
-      sender() ! getPipeSegs(projectSystem._1, projectSystem._2).asJson.noSpaces
+      val pipeSegs = getPipeSegs(projectSystem._1, projectSystem._2)
+      sender() ! (if (json) pipeSegs.asJson.noSpaces else pipeSegs)
 
     case _ => None
 
@@ -229,7 +230,7 @@ class PipeManager extends Actor with Codecs{
             }
 
             val rkdProject = projectNames.find(_.foran == project) match {
-              case Some(value) => value
+              case Some(value) => value.rkd
               case _ => ""
             }
 
