@@ -21,7 +21,7 @@ import scala.concurrent.duration.{Duration, DurationInt, SECONDS}
 
 object PipeManager{
 
-  case class PipeSeg(project: String, zone: String, system: String, typeCode: String, classAlpha: String, compType: String, compUserId: String, smat: String, sqInSystem: Int, isPieceId: Int, spPieceId: Int, isom: String, spool: String, length: Double, radius: Double, angle: Double, weight: Double, stock: String, insul: String, var material: Material = Material(), var systemDescr: String = "")
+  case class PipeSeg(project: String, zone: String, system: String, typeCode: String, typeDesc: String, classAlpha: String, compType: String, compUserId: String, smat: String, sqInSystem: Int, isPieceId: Int, spPieceId: Int, isom: String, spool: String, length: Double, radius: Double, angle: Double, weight: Double, stock: String, insul: String, var material: Material = Material(), var systemDescr: String = "")
   case class PipeSegActual(name: String, date: Long)
   case class Material(
                        name: String = "",
@@ -87,6 +87,9 @@ class PipeManager extends Actor with Codecs{
               case value: String => value
               case _ => ""
             }, typeCode = rs.getString("TYPECODE") match {
+              case value: String => value
+              case _ => ""
+            }, typeDesc = rs.getString("TYPEDESC") match {
               case value: String => value
               case _ => ""
             }, classAlpha = rs.getString("CLASSALPHA") match {
