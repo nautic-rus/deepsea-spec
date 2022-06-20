@@ -3,7 +3,7 @@ package deepsea.pipe
 import akka.actor.{Actor, ActorSystem}
 import akka.http.scaladsl.{Http, HttpExt}
 import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection}
-import deepsea.pipe.PipeManager.{GetPipeSegs, GetPipeSegsByDocNumber, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, ProjectName, SystemDef, UpdatePipeComp}
+import deepsea.pipe.PipeManager.{GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SystemDef, UpdatePipeComp}
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.Filters.{all, and, equal, in, notEqual}
 import org.mongodb.scala.{Document, MongoCollection, bson}
@@ -22,6 +22,7 @@ import scala.concurrent.duration.{Duration, DurationInt, SECONDS}
 object PipeManager{
 
   case class PipeSeg(project: String, zone: String, system: String, typeCode: String, typeDesc: String, classAlpha: String, compType: String, compUserId: String, smat: String, sqInSystem: Int, isPieceId: Int, spPieceId: Int, isom: String, spool: String, length: Double, radius: Double, angle: Double, weight: Double, stock: String, insul: String, var material: Material = Material(), var systemDescr: String = "")
+  case class PipeSegBilling(zone: String, system: String, typeCode: String, typeDesc: String, classAlpha: String, compType: String, compUserId: String, smat: String, length: Double, weight: Double, stock: String, insul: String, material: Material = Material(), systemDescr: String = "", count: Int = 1)
   case class PipeSegActual(name: String, date: Long)
   case class Material(
                        name: String = "",
@@ -42,6 +43,7 @@ object PipeManager{
 
   case class UpdatePipeComp()
   case class GetPipeSegs(project: String, system: String)
+  case class GetPipeSegsBilling(project: String)
   case class GetPipeSegsByDocNumber(docNumber: String, json: Boolean = true)
   case class GetSystems(project: String)
   case class GetZones(project: String)
@@ -64,6 +66,7 @@ class PipeManager extends Actor with Codecs{
     case GetSystems(project) => sender() ! getSystems(project).asJson.noSpaces
     case GetZones(project) => sender() ! getZones(project).asJson.noSpaces
     case GetPipeSegs(project, system) => sender() ! getPipeSegs(project, system).asJson.noSpaces
+    case GetPipeSegsBilling(project) => sender() ! getPipeSegsBilling(project).asJson.noSpaces
     case GetPipeSegsByDocNumber(docNumber, json) =>
       val projectSystem = getSystemAndProjectFromDocNumber(docNumber)
       val pipeSegs = getPipeSegs(projectSystem._1, projectSystem._2)
@@ -260,6 +263,61 @@ class PipeManager extends Actor with Codecs{
             }
 
           case _ => List.empty[PipeSeg]
+        }
+
+    }
+  }
+  def getPipeSegsBilling(project: String): List[PipeSegBilling] ={
+    GetMongoCacheConnection() match {
+      case Some(mongo) =>
+
+        val vPipeCompCollectionActualName = "vPipeCompActual"
+        val vPipeCompActualCollection: MongoCollection[PipeSegActual] = mongo.getCollection(vPipeCompCollectionActualName)
+
+        GetMongoConnection() match {
+          case Some(mongoData) =>
+            val materialsNCollectionName = "materials-n"
+            val materialsCollection: MongoCollection[Material] = mongoData.getCollection(materialsNCollectionName)
+            val projectNamesCollection: MongoCollection[ProjectName] = mongoData.getCollection("project-names")
+            val projectNames = Await.result(projectNamesCollection.find().toFuture(), Duration(30, SECONDS)) match {
+              case values: Seq[ProjectName] => values.toList
+              case _ => List.empty[ProjectName]
+            }
+            val rkdProject = projectNames.find(_.foran == project) match {
+              case Some(value) => value.rkd
+              case _ => ""
+            }
+            val materials = Await.result(materialsCollection.find(equal("projects", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
+              case values: Seq[Material] => values.toList
+              case _ => List.empty[Material]
+            }
+            val systemDefs = getSystemDefs(project)
+            val pipeSegs = Await.result(vPipeCompActualCollection.find().toFuture(), Duration(30, SECONDS)) match {
+              case values: Seq[PipeSegActual] =>
+                Await.result(mongo.getCollection[PipeSeg](values.last.name).find(equal("project", project)).toFuture(), Duration(300, SECONDS)) match {
+                  case res: Seq[PipeSeg] => res.foreach(x => x.material = materials.find(_.code == x.stock) match {
+                    case Some(value) => value
+                    case _ => Material()
+                  })
+                    res.foreach(p => p.systemDescr = systemDefs.find(_.name == p.system) match {
+                      case Some(systemDef) => systemDef.descr
+                      case _ => ""
+                    })
+                    res.toList
+                  case _ => List.empty[PipeSeg]
+                }
+              case _ => List.empty[PipeSeg]
+            }
+
+            val result = pipeSegs.groupBy(x => (x.stock, x.insul, x.typeCode, x.compType, x.material)).map(group => {
+              val t = group._2.head
+              PipeSegBilling(t.zone, t.system, t.typeCode, t.typeDesc, t.classAlpha, t.compType, t.compUserId, t.smat,
+                group._2.map(_.length).sum, group._2.map(_.weight).sum, t.stock, t.insul, t.material, t.systemDescr, group._2.length)
+            }).toList
+
+            result
+
+          case _ => List.empty[PipeSegBilling]
         }
 
     }
