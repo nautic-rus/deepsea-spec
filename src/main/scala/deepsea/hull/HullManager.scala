@@ -648,7 +648,10 @@ class HullManager extends Actor with Codecs{
         while (rs.next()) {
           res += PlatePart(
             rs.getString("CODE"),
-            rs.getString("BLOCK"),
+            rs.getString("BLOCK") match {
+              case value: String => value
+              case _ => "Unknown"
+            },
             rs.getString("NAME"),
             rs.getString("DESCRIPTION"),
             rs.getDouble("WEIGHT"),
