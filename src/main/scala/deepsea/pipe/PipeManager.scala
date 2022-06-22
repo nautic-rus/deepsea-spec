@@ -311,7 +311,7 @@ class PipeManager extends Actor with Codecs{
 
             val result = pipeSegs.groupBy(x => (x.stock, x.insul, x.typeCode, x.compType, x.material)).map(group => {
               val t = group._2.head
-              PipeSegBilling(t.zone, t.system, t.typeCode, t.typeDesc, t.classAlpha, t.compType, t.compUserId, t.smat,
+              PipeSegBilling(group._2.map(_.zone).distinct.mkString(","), group._2.map(_.system).distinct.mkString(","), t.typeCode, t.typeDesc, t.classAlpha, t.compType, t.compUserId, t.smat,
                 group._2.map(_.length).sum, group._2.map(_.weight).sum, t.stock, t.insul, t.material, t.systemDescr, group._2.length)
             }).toList
 
