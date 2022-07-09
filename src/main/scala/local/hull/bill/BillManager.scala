@@ -235,11 +235,6 @@ object BillManager extends BillHelper with Codecs {
           }
           val alreadyUsedGrossPlatesWeight = (oneSheetWeight * count) - wastagesWeight
           val ret = Math.ceil(((alreadyUsedGrossPlatesWeight + partsToNestWeight * 1.13d) / oneSheetWeight)).toInt
-
-          if (KPL == 250) {
-            val jj = 0
-          }
-
           ret
         }
         val wastages = wastagesWeight / oneSheetWeight
@@ -318,36 +313,6 @@ object BillManager extends BillHelper with Codecs {
       case None => StdPlate()
     }
   }
-
-  /*
-    private def calculatePlateWastages(nest: PlateNestBill, foranScraps: List[ForanScrap], oneSheetWeight: Double): Double = {
-      val buff = ListBuffer.empty[ForanScrap]
-      val rootKpl = nest.KPL
-      foranScraps.filter(s => s.PARENTKPL == rootKpl).foreach(scrL1 => {
-        if (scrL1.NESTID.isEmpty)
-          buff += scrL1
-        foranScraps.filter(s => s.PARENTKPL == scrL1.KPL).foreach(scrL2 => {
-          if (scrL1.NESTID.isEmpty)
-            buff += scrL2
-          foranScraps.filter(s => s.PARENTKPL == scrL2.KPL).foreach(scrL3 => {
-            if (scrL1.NESTID.isEmpty)
-              buff += scrL3
-            foranScraps.filter(s => s.PARENTKPL == scrL3.KPL).foreach(scrL4 => {
-              if (scrL1.NESTID.isEmpty)
-                buff += scrL4
-              foranScraps.filter(s => s.PARENTKPL == scrL4.KPL).foreach(scrL5 => {
-                if (scrL1.NESTID.isEmpty)
-                  buff += scrL5
-              })
-            })
-          })
-        })
-
-      })
-      val totWeught = (buff.filter(s => s.NESTID.isEmpty).map(_.WEIGHT).sum) / oneSheetWeight
-      totWeught
-    }
-  */
 
   private def calculatePlateScraps(nestsByMat: List[PlateNestBill], foranScraps: List[ForanScrap], oneSheetWeight: Double, globNest: PlateNestBill): Double = {
     val buff = ListBuffer.empty[Double]
