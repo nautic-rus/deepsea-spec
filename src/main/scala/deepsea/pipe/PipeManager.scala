@@ -3,7 +3,7 @@ package deepsea.pipe
 import akka.actor.{Actor, ActorSystem}
 import akka.http.scaladsl.{Http, HttpExt}
 import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection}
-import deepsea.pipe.PipeManager.{GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SystemDef, UpdatePipeComp}
+import deepsea.pipe.PipeManager.{GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SystemDef, UpdatePipeComp, UpdatePipeJoints}
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.Filters.{all, and, equal, in, notEqual}
 import org.mongodb.scala.{Document, MongoCollection, bson}
@@ -42,6 +42,7 @@ object PipeManager{
   case class SystemDef(project: String, name: String, descr: String)
 
   case class UpdatePipeComp()
+  case class UpdatePipeJoints()
   case class GetPipeSegs(project: String, system: String)
   case class GetPipeSegsBilling(project: String)
   case class GetPipeSegsByDocNumber(docNumber: String, json: Boolean = true)
@@ -55,12 +56,16 @@ class PipeManager extends Actor with Codecs{
   val executor: ExecutionContextExecutor = system.dispatcher
 
   override def preStart(): Unit = {
+    self ! UpdatePipeJoints()
     system.scheduler.scheduleWithFixedDelay(0.seconds, 15.minutes, self, UpdatePipeComp())
+    system.scheduler.scheduleWithFixedDelay(0.seconds, 15.minutes, self, UpdatePipeJoints())
+    val qwe = getPipeSegs("TEST", "582-01")
   }
 
   override def receive: Receive = {
 
     case UpdatePipeComp() => updatePipeComp()
+    case UpdatePipeJoints() => updatePipeJoints()
 
 
     case GetSystems(project) => sender() ! getSystems(project).asJson.noSpaces
@@ -176,6 +181,63 @@ class PipeManager extends Actor with Codecs{
       case _ =>
     }
   }
+  def updatePipeJoints(): Unit = {
+    val pipeSegs = ListBuffer.empty[PipeSeg]
+    List("N002","N004", "TEST").foreach(proj => {
+      GetOracleConnection(proj) match {
+        case Some(c) =>
+          val s = c.createStatement()
+          val query = s"select * from v_pipejoins"
+          val rs = s.executeQuery(query)
+          while (rs.next()){
+            val zoneName = Option(rs.getString("ZONENAME")).getOrElse("")
+            val systemName = Option(rs.getString("SYSTEMNAME")).getOrElse("")
+            val gasket = Option(rs.getString("JOINSTOCKCODE")).getOrElse("")
+            val bolts = Option(rs.getString("BOLTS1STOCKCODE")).getOrElse("")
+            val nuts = Option(rs.getString("NUTS1STOCKCODE")).getOrElse("")
+            val boltsNumber = Option(rs.getInt("BOLTS1NUMBER")).getOrElse(0)
+            val nutsNumber = Option(rs.getInt("NUTS1NUMBER")).getOrElse(0)
+            val jointNumber = Option(rs.getInt("JOINTNUMBER")).getOrElse(0)
+
+            pipeSegs += PipeSeg(proj, zoneName, systemName, "JOINT", "", "", "GASKET", "", "", 0, 0, 0, "", "", jointNumber, 0, 0, 0, gasket.trim, "")
+            pipeSegs += PipeSeg(proj, zoneName, systemName, "JOINT", "", "", "BOLT", "", "", 0, 0, 0, "", "", boltsNumber, 0, 0, 0, bolts.trim, "")
+            pipeSegs += PipeSeg(proj, zoneName, systemName, "JOINT", "", "", "NUT", "", "", 0, 0, 0, "", "", nutsNumber, 0, 0, 0, nuts.trim, "")
+
+          }
+          s.close()
+          c.close()
+        case _ =>
+      }
+    })
+    GetMongoCacheConnection() match {
+      case Some(mongo) =>
+
+        val date = new Date().getTime
+        val vPipeCompCollection = "vPipeJoints-" + date.toString
+        val vPipeCompCollectionActual = "vPipeJointsActual"
+
+        val vPipeComp: MongoCollection[PipeSeg] = mongo.getCollection(vPipeCompCollection)
+        val vPipeCompActual: MongoCollection[PipeSegActual] = mongo.getCollection(vPipeCompCollectionActual)
+
+        Await.result(vPipeComp.insertMany(pipeSegs.toList).toFuture(), Duration(300, SECONDS))
+        Await.result(vPipeCompActual.insertOne(PipeSegActual(vPipeCompCollection, date)).toFuture(), Duration(30, SECONDS))
+
+        Await.result(mongo.listCollectionNames().toFuture(), Duration(30, SECONDS)) match {
+          case values: Seq[String] =>
+            val caches = values.filter(x => x.contains("vPipeJoints-") && !x.contains("actual") && x != vPipeCompCollection).sortBy(x => x)
+            if (caches.length > 3){
+              caches.take(caches.length - 3).foreach(x => Await.result(mongo.getCollection(x).drop().toFuture(), Duration(30, SECONDS)))
+            }
+          case _ =>
+        }
+
+        Await.result(vPipeCompActual.deleteMany(notEqual("date", date)).toFuture(), Duration(30, SECONDS))
+
+
+      case _ =>
+    }
+  }
+
   def getSystems(project: String): List[SystemDef] = {
     GetMongoCacheConnection() match {
       case Some(mongo) =>
@@ -221,6 +283,9 @@ class PipeManager extends Actor with Codecs{
         val vPipeCompCollectionActualName = "vPipeCompActual"
         val vPipeCompActualCollection: MongoCollection[PipeSegActual] = mongo.getCollection(vPipeCompCollectionActualName)
 
+        val vPipeJointsCollectionActualName = "vPipeJointsActual"
+        val vPipeJointsActualCollection: MongoCollection[PipeSegActual] = mongo.getCollection(vPipeJointsCollectionActualName)
+
         GetMongoConnection() match {
           case Some(mongoData) =>
             val materialsNCollectionName = "materials-n"
@@ -244,23 +309,45 @@ class PipeManager extends Actor with Codecs{
 
 
             val systemDefs = getSystemDefs(project)
+            val res = ListBuffer.empty[PipeSeg]
 
             Await.result(vPipeCompActualCollection.find().toFuture(), Duration(30, SECONDS)) match {
               case values: Seq[PipeSegActual] =>
                 Await.result(mongo.getCollection[PipeSeg](values.last.name).find(and(equal("project", project), equal("system", system))).toFuture(), Duration(300, SECONDS)) match {
-                  case res: Seq[PipeSeg] => res.foreach(x => x.material = materials.find(_.code == x.stock) match {
-                    case Some(value) => value
-                    case _ => Material()
-                  })
-                    res.foreach(p => p.systemDescr = systemDefs.find(_.name == p.system) match {
+                  case pipeSegs: Seq[PipeSeg] =>
+                    pipeSegs.foreach(x => x.material = materials.find(_.code == x.stock) match {
+                      case Some(value) => value
+                      case _ => Material()
+                    })
+                    pipeSegs.foreach(p => p.systemDescr = systemDefs.find(_.name == p.system) match {
                       case Some(systemDef) => systemDef.descr
                       case _ => ""
                     })
-                    res.toList
-                  case _ => List.empty[PipeSeg]
+                    res ++= pipeSegs
+                  case _ =>
                 }
-              case _ => List.empty[PipeSeg]
+              case _ =>
             }
+
+            Await.result(vPipeJointsActualCollection.find().toFuture(), Duration(30, SECONDS)) match {
+              case values: Seq[PipeSegActual] =>
+                Await.result(mongo.getCollection[PipeSeg](values.last.name).find(and(equal("project", project), equal("system", system))).toFuture(), Duration(300, SECONDS)) match {
+                  case pipeSegs: Seq[PipeSeg] =>
+                    pipeSegs.foreach(x => x.material = materials.find(_.code == x.stock) match {
+                      case Some(value) => value
+                      case _ => Material()
+                    })
+                    pipeSegs.foreach(p => p.systemDescr = systemDefs.find(_.name == p.system) match {
+                      case Some(systemDef) => systemDef.descr
+                      case _ => ""
+                    })
+                    res ++= pipeSegs
+                  case _ =>
+                }
+              case _ =>
+            }
+
+            res.toList
 
           case _ => List.empty[PipeSeg]
         }

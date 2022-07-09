@@ -6,10 +6,11 @@ import akka.util.Timeout
 import com.mongodb.BasicDBObject
 import deepsea.App
 import deepsea.actors.ActorManager
-import deepsea.database.DatabaseManager.{GetConnection, GetOracleConnection}
+import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection}
 import deepsea.files.FileManager.GenerateUrl
 import deepsea.hull.HullManager.{BsDesignNode, GetBsDesignNodes, GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, GetHullSystems, HullEsp, HullPartPlateDef, HullPartProfileDef, HullSystem, PlatePart, ProfilePart, RemoveParts, SetHullEsp}
 import deepsea.hull.classes.HullPart
+import deepsea.pipe.PipeManager.{Material, PipeSeg, PipeSegActual, ProjectName}
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import local.sql.MongoDB
@@ -18,7 +19,7 @@ import org.bson.codecs.configuration.CodecRegistry
 import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
 import org.mongodb.scala.{Document, MongoCollection, MongoDatabase}
 import org.mongodb.scala.bson.codecs.Macros._
-import org.mongodb.scala.model.Filters.equal
+import org.mongodb.scala.model.Filters.{and, equal}
 
 import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, FiniteDuration, SECONDS}
@@ -826,5 +827,4 @@ class HullManager extends Actor with Codecs{
     }
     res
   }
-
 }
