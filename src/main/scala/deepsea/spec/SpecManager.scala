@@ -19,6 +19,7 @@ import local.hull.cnc.hyprethermGcode.CNCManager.{doCNC, doCNCStrings}
 import local.pdf.ru.ele.EleEqTrayESKDReport.{generatePdfToFileNoRev, generatePdfToFileWithRev}
 import akka.pattern.ask
 import local.hull.bill.BillManager.{genAnalyticPlateDataJson, genAnalyticProfileDataJson, genProfileNestBillJson, genWastsgeByParentKplJson}
+import local.hull.cnc.pellaESSI.EssiCNCManager.doEssiCNC
 
 import java.nio.file.Files
 import scala.concurrent.Await
@@ -44,6 +45,7 @@ object SpecManager {
   case class GetHullBillPlatesWastage(project: String, kpl: String)
 
   case class CreateCNC(lines: String, user: String)
+  case class CreateESSI(lines: String, user: String)
   case class InsertNestLock(project: String, nestId: String, user: String)
 
   case class PartDef(name: String, section: String, description: String)
@@ -90,6 +92,9 @@ class SpecManager extends Actor with BStree {
 
     case CreateCNC(lines, user) =>
       val res = doCNCStrings(Json.parse(lines).asOpt[List[String]].getOrElse(List.empty[String]), user)
+      sender() ! Json.toJson(res)
+    case CreateESSI(lines, user) =>
+      val res = doEssiCNC(Json.parse(lines).asOpt[List[String]].getOrElse(List.empty[String]), user)
       sender() ! Json.toJson(res)
     case InsertNestLock(project, nestId, user) =>
       insertLock(project, nestId, user)
