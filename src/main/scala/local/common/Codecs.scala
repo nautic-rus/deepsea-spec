@@ -1,7 +1,7 @@
 package local.common
 
 import deepsea.hull.HullManager._
-import deepsea.pipe.PipeManager.{Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SystemDef}
+import deepsea.pipe.PipeManager.{Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SpoolLock, SystemDef}
 import io.circe.{Decoder, Encoder}
 import io.circe.parser._
 import io.circe.{Decoder, Encoder}
@@ -67,6 +67,9 @@ trait Codecs {
 
   implicit val PipeSegBillingDecoder: Decoder[PipeSegBilling] = deriveDecoder[PipeSegBilling]
   implicit val PipeSegBillingEncoder: Encoder[PipeSegBilling] = deriveEncoder[PipeSegBilling]
+
+  implicit val SpoolLockDecoder: Decoder[SpoolLock] = deriveDecoder[SpoolLock]
+  implicit val SpoolLockEncoder: Encoder[SpoolLock] = deriveEncoder[SpoolLock]
 
 
   //KOKOVIN
@@ -162,6 +165,7 @@ trait Codecs {
     classOf[ProjectName],
     classOf[SystemDef],
     classOf[PipeSegBilling],
+    classOf[SpoolLock],
 
     //KOKOVIN
     classOf[EleComplect],

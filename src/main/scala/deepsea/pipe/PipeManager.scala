@@ -2,8 +2,9 @@ package deepsea.pipe
 
 import akka.actor.{Actor, ActorSystem}
 import akka.http.scaladsl.{Http, HttpExt}
+import deepsea.database.DatabaseManager
 import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection}
-import deepsea.pipe.PipeManager.{GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SystemDef, UpdatePipeComp, UpdatePipeJoints}
+import deepsea.pipe.PipeManager.{GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SetSpoolLock, SpoolLock, SystemDef, UpdatePipeComp, UpdatePipeJoints}
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.Filters.{all, and, equal, in, notEqual}
 import org.mongodb.scala.{Document, MongoCollection, bson}
@@ -12,6 +13,7 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 import local.common.Codecs
 import org.mongodb.scala.model.Filters
+import io.circe.parser.decode
 
 import java.util.{Date, UUID}
 import scala.collection.mutable.ListBuffer
@@ -40,6 +42,7 @@ object PipeManager{
                        id: String = UUID.randomUUID().toString)
   case class ProjectName(id: String, rkd: String, pdsp: String, foran: String)
   case class SystemDef(project: String, name: String, descr: String)
+  case class SpoolLock(docNumber: String, spool: String, var lock: Int)
 
   case class UpdatePipeComp()
   case class UpdatePipeJoints()
@@ -48,6 +51,8 @@ object PipeManager{
   case class GetPipeSegsByDocNumber(docNumber: String, json: Boolean = true)
   case class GetSystems(project: String)
   case class GetZones(project: String)
+  case class GetSpoolLocks(docNumber: String)
+  case class SetSpoolLock(jsValue: String)
 }
 class PipeManager extends Actor with Codecs{
 
@@ -76,7 +81,9 @@ class PipeManager extends Actor with Codecs{
       val projectSystem = getSystemAndProjectFromDocNumber(docNumber)
       val pipeSegs = getPipeSegs(projectSystem._1, projectSystem._2)
       sender() ! (if (json) pipeSegs.asJson.noSpaces else pipeSegs)
-
+    case SetSpoolLock(jsValue) =>
+      setSpoolLock(jsValue)
+      sender() ! "success".asJson.noSpaces
     case _ => None
 
   }
@@ -407,6 +414,31 @@ class PipeManager extends Actor with Codecs{
           case _ => List.empty[PipeSegBilling]
         }
 
+    }
+  }
+  def getSpoolLocks(docNumber: String): List[SpoolLock] ={
+    DatabaseManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val userWatches: MongoCollection[SpoolLock] = mongo.getCollection("spoolLocks")
+        Await.result(userWatches.find(equal("docNumber", docNumber)).toFuture(), Duration(30, SECONDS)) match {
+          case values: Seq[SpoolLock] =>
+            values.toList
+          case _ => List.empty[SpoolLock]
+        }
+      case _ => List.empty[SpoolLock]
+    }
+  }
+  def setSpoolLock(json: String): Unit ={
+    decode[SpoolLock](json) match {
+      case Right(value) =>
+        DatabaseManager.GetMongoConnection() match {
+          case Some(mongo) =>
+            val locks: MongoCollection[SpoolLock] = mongo.getCollection("spoolLocks")
+            value.lock = if (value.lock == 1) 0 else 1
+            Await.result(locks.replaceOne(and(equal("docNumber", value.docNumber), equal("docNumber", value.spool)), value, org.mongodb.scala.model.ReplaceOptions().upsert(true)).toFuture(), Duration(30, SECONDS))
+          case _ =>
+        }
+      case Left(value) =>
     }
   }
   private def getSystemDefs(project: String): List[SystemDef] ={
