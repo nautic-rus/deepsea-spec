@@ -205,10 +205,15 @@ class PipeManager extends Actor with Codecs{
             val boltsNumber = Option(rs.getInt("BOLTS1NUMBER")).getOrElse(0)
             val nutsNumber = Option(rs.getInt("NUTS1NUMBER")).getOrElse(0)
             val jointNumber = Option(rs.getInt("JOINTNUMBER")).getOrElse(0)
+            val isomId = Option(rs.getInt("ISOMID")).getOrElse(0)
+            val isomUserId = Option(rs.getString("ISOMUSERID")).getOrElse("")
+            val spoolUserId = Option(rs.getString("SPOOLUSERID")).getOrElse("")
+            val smat = Option(rs.getString("SMAT")).getOrElse("")
+            val apClass = Option(rs.getString("APCLASS")).getOrElse("")
 
-            pipeSegs += PipeSeg(proj, zoneName, systemName, "JOINT", "", "", "GASKET", "", "", 0, 0, 0, "", "", jointNumber, 0, 0, 0, gasket.trim, "")
-            pipeSegs += PipeSeg(proj, zoneName, systemName, "JOINT", "", "", "BOLT", "", "", 0, 0, 0, "", "", boltsNumber, 0, 0, 0, bolts.trim, "")
-            pipeSegs += PipeSeg(proj, zoneName, systemName, "JOINT", "", "", "NUT", "", "", 0, 0, 0, "", "", nutsNumber, 0, 0, 0, nuts.trim, "")
+            pipeSegs += PipeSeg(proj, zoneName, systemName, "JOINT", "", apClass, "GASKET", "", smat, 0, 100, 100, isomUserId, spoolUserId, jointNumber, 0, 0, 0, gasket.trim, "")
+            pipeSegs += PipeSeg(proj, zoneName, systemName, "JOINT", "", apClass, "BOLT", "", smat, 0, 101, 101, isomUserId, spoolUserId, boltsNumber, 0, 0, 0, bolts.trim, "")
+            pipeSegs += PipeSeg(proj, zoneName, systemName, "JOINT", "", apClass, "NUT", "", smat, 0, 102, 102, isomUserId, spoolUserId, nutsNumber, 0, 0, 0, nuts.trim, "")
 
           }
           s.close()
