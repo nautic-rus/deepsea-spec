@@ -46,8 +46,9 @@ object PipeManager{
 
   case class UpdatePipeComp()
   case class UpdatePipeJoints()
-  case class GetPipeSegs(project: String, system: String)
+  case class GetPipeSegs(project: String, system: String = "")
   case class GetPipeSegsBilling(project: String)
+  case class GetPipeSegsSpools(project: String)
   case class GetPipeSegsByDocNumber(docNumber: String, json: Boolean = true)
   case class GetSystems(project: String)
   case class GetZones(project: String)
@@ -288,7 +289,7 @@ class PipeManager extends Actor with Codecs{
         }
     }
   }
-  def getPipeSegs(project: String, system: String): List[PipeSeg] ={
+  def getPipeSegs(project: String, system: String = ""): List[PipeSeg] ={
     GetMongoCacheConnection() match {
       case Some(mongo) =>
 
@@ -325,7 +326,7 @@ class PipeManager extends Actor with Codecs{
 
             Await.result(vPipeCompActualCollection.find().toFuture(), Duration(30, SECONDS)) match {
               case values: Seq[PipeSegActual] =>
-                Await.result(mongo.getCollection[PipeSeg](values.last.name).find(and(equal("project", project), equal("system", system))).toFuture(), Duration(300, SECONDS)) match {
+                Await.result(mongo.getCollection[PipeSeg](values.last.name).find(and(equal("project", project), if (system != "") equal("system", system) else notEqual("system", system))).toFuture(), Duration(300, SECONDS)) match {
                   case pipeSegs: Seq[PipeSeg] =>
                     pipeSegs.foreach(x => x.material = materials.find(_.code == x.stock) match {
                       case Some(value) => value
@@ -343,7 +344,7 @@ class PipeManager extends Actor with Codecs{
 
             Await.result(vPipeJointsActualCollection.find().toFuture(), Duration(30, SECONDS)) match {
               case values: Seq[PipeSegActual] =>
-                Await.result(mongo.getCollection[PipeSeg](values.last.name).find(and(equal("project", project), equal("system", system))).toFuture(), Duration(300, SECONDS)) match {
+                Await.result(mongo.getCollection[PipeSeg](values.last.name).find(and(equal("project", project), if (system != "") equal("system", system) else notEqual("system", system))).toFuture(), Duration(300, SECONDS)) match {
                   case pipeSegs: Seq[PipeSeg] =>
                     pipeSegs.foreach(x => x.material = materials.find(_.code == x.stock) match {
                       case Some(value) => value
