@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorSystem}
 import akka.http.scaladsl.{Http, HttpExt}
 import deepsea.database.DatabaseManager
 import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection}
-import deepsea.pipe.PipeManager.{GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SetSpoolLock, SpoolLock, SystemDef, UpdatePipeComp, UpdatePipeJoints}
+import deepsea.pipe.PipeManager.{GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SetSpoolLock, SpoolLock, SystemDef, UpdatePipeComp, UpdatePipeJoints}
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.Filters.{all, and, equal, in, notEqual}
 import org.mongodb.scala.{Document, MongoCollection, bson}
@@ -42,7 +42,7 @@ object PipeManager{
                        id: String = UUID.randomUUID().toString)
   case class ProjectName(id: String, rkd: String, pdsp: String, foran: String)
   case class SystemDef(project: String, name: String, descr: String)
-  case class SpoolLock(docNumber: String, spool: String, var lock: Int)
+  case class SpoolLock(docNumber: String, spool: String, var lock: Int, user: String, var date: Long)
 
   case class UpdatePipeComp()
   case class UpdatePipeJoints()
@@ -85,6 +85,8 @@ class PipeManager extends Actor with Codecs{
     case SetSpoolLock(jsValue) =>
       setSpoolLock(jsValue)
       sender() ! "success".asJson.noSpaces
+    case GetSpoolLocks(docNumber) =>
+      sender() ! getSpoolLocks(docNumber).asJson.noSpaces
     case _ => None
 
   }
@@ -441,6 +443,7 @@ class PipeManager extends Actor with Codecs{
           case Some(mongo) =>
             val locks: MongoCollection[SpoolLock] = mongo.getCollection("spoolLocks")
             value.lock = if (value.lock == 1) 0 else 1
+            value.date = new Date().getTime
             Await.result(locks.replaceOne(and(equal("docNumber", value.docNumber), equal("docNumber", value.spool)), value, org.mongodb.scala.model.ReplaceOptions().upsert(true)).toFuture(), Duration(30, SECONDS))
           case _ =>
         }
