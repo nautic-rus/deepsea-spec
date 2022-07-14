@@ -158,7 +158,7 @@ class HTTPManager extends Actor {
       (get & path("pipeSegs") & parameter("project") & parameter("system")) { (project, system) =>
         askFor(ActorManager.pipe, GetPipeSegs(project, system))
       },
-      (get & path("pipeSegs") & parameter("project")) { (project) =>
+      (get & path("pipeSegsByProject") & parameter("project")) { (project) =>
         askFor(ActorManager.pipe, GetPipeSegs(project))
       },
       (get & path("pipeSegs") & parameter("docNumber")) { (docNumber) =>
