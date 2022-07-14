@@ -42,7 +42,7 @@ object PipeManager{
                        id: String = UUID.randomUUID().toString)
   case class ProjectName(id: String, rkd: String, pdsp: String, foran: String)
   case class SystemDef(project: String, name: String, descr: String)
-  case class SpoolLock(docNumber: String, spool: String, var lock: Int, user: String, var date: Long)
+  case class SpoolLock(issueId: Int, docNumber: String, spool: String, var lock: Int, user: String, var date: Long)
 
   case class UpdatePipeComp()
   case class UpdatePipeJoints()
@@ -427,8 +427,8 @@ class PipeManager extends Actor with Codecs{
   def getSpoolLocks(docNumber: String): List[SpoolLock] ={
     DatabaseManager.GetMongoConnection() match {
       case Some(mongo) =>
-        val userWatches: MongoCollection[SpoolLock] = mongo.getCollection("spoolLocks")
-        Await.result(userWatches.find(equal("docNumber", docNumber)).toFuture(), Duration(30, SECONDS)) match {
+        val spoolLocks: MongoCollection[SpoolLock] = mongo.getCollection("spoolLocks")
+        Await.result(spoolLocks.find(equal("docNumber", docNumber)).toFuture(), Duration(30, SECONDS)) match {
           case values: Seq[SpoolLock] =>
             values.toList
           case _ => List.empty[SpoolLock]
