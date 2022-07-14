@@ -444,7 +444,7 @@ class PipeManager extends Actor with Codecs{
             val locks: MongoCollection[SpoolLock] = mongo.getCollection("spoolLocks")
             value.lock = if (value.lock == 1) 0 else 1
             value.date = new Date().getTime
-            Await.result(locks.replaceOne(and(equal("docNumber", value.docNumber), equal("docNumber", value.spool)), value, org.mongodb.scala.model.ReplaceOptions().upsert(true)).toFuture(), Duration(30, SECONDS))
+            Await.result(locks.replaceOne(and(equal("docNumber", value.docNumber), equal("spool", value.spool)), value, org.mongodb.scala.model.ReplaceOptions().upsert(true)).toFuture(), Duration(30, SECONDS))
           case _ =>
         }
       case Left(value) =>
