@@ -218,8 +218,6 @@ class PipeManager extends Actor with Codecs{
             pipeSegs += PipeSeg(proj, zoneName, systemName, "JOINT", "", apClass, "BOLT", "", smat, 0, 101, 101, isomUserId, spoolUserId, boltsNumber, 0, 0, 0, bolts.trim, "")
             pipeSegs += PipeSeg(proj, zoneName, systemName, "JOINT", "", apClass, "NUT", "", smat, 0, 102, 102, isomUserId, spoolUserId, nutsNumber, 0, 0, 0, nuts.trim, "")
 
-            pipeSegs.filter(_.stock != "")
-
           }
           s.close()
           c.close()
@@ -358,7 +356,7 @@ class PipeManager extends Actor with Codecs{
                       case Some(systemDef) => systemDef.descr
                       case _ => ""
                     })
-                    res ++= pipeSegs
+                    res ++= pipeSegs.filter(_.stock != "")
                   case _ =>
                 }
               case _ =>
