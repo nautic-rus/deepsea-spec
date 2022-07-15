@@ -338,7 +338,7 @@ class PipeManager extends Actor with Codecs{
                       case Some(systemDef) => systemDef.descr
                       case _ => ""
                     })
-                    res ++= pipeSegs
+                    res ++= pipeSegs.filter(_.typeCode != "GASK")
                   case _ =>
                 }
               case _ =>
