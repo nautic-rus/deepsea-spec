@@ -28,7 +28,7 @@ import scala.concurrent.duration.{Duration, DurationInt, SECONDS}
 
 object PipeManager{
 
-  case class PipeSeg(project: String, zone: String, system: String, typeCode: String, typeDesc: String, classAlpha: String, compType: String, compUserId: String, smat: String, sqInSystem: Int, isPieceId: Int, spPieceId: Int, isom: String, spool: String, length: Double, radius: Double, angle: Double, weight: Double, stock: String, insul: String, var material: Material = Material(), var systemDescr: String = "")
+  case class PipeSeg(project: String, zone: String, system: String, line: String, pls: Int, elem: Int, typeCode: String, typeDesc: String, classAlpha: String, compType: String, compUserId: String, smat: String, sqInSystem: Int, isPieceId: Int, spPieceId: Int, isom: String, spool: String, length: Double, radius: Double, angle: Double, weight: Double, stock: String, insul: String, var material: Material = Material(), var systemDescr: String = "")
   case class PipeSegBilling(zone: String, system: String, typeCode: String, typeDesc: String, classAlpha: String, compType: String, compUserId: String, smat: String, length: Double, weight: Double, stock: String, insul: String, material: Material = Material(), systemDescr: String = "", count: Int = 1)
   case class PipeSegActual(name: String, date: Long)
   case class Material(
@@ -116,7 +116,11 @@ class PipeManager extends Actor with Codecs with PipeHelper {
             }, system = rs.getString("SYSTEMNAME") match {
               case value: String => value
               case _ => ""
-            }, typeCode = rs.getString("TYPECODE") match {
+            },
+            line = Option(rs.getString("LINE")).getOrElse(""),
+            pls = Option(rs.getInt("PLS")).getOrElse(0),
+            elem = Option(rs.getInt("ELEM")).getOrElse(0),
+            typeCode = rs.getString("TYPECODE") match {
               case value: String => value
               case _ => ""
             }, typeDesc = rs.getString("TYPEDESC") match {
@@ -226,9 +230,9 @@ class PipeManager extends Actor with Codecs with PipeHelper {
             val smat = Option(rs.getString("SMAT")).getOrElse("")
             val apClass = Option(rs.getString("APCLASS")).getOrElse("")
 
-            pipeSegs += PipeSeg(proj, zoneName, systemName, "JOINT", "", apClass, "GASKET", "", smat, 0, 100, 100, isomUserId, spoolUserId, jointNumber, 0, 0, 0, gasket.trim, "")
-            pipeSegs += PipeSeg(proj, zoneName, systemName, "JOINT", "", apClass, "BOLT", "", smat, 0, 101, 101, isomUserId, spoolUserId, boltsNumber, 0, 0, 0, bolts.trim, "")
-            pipeSegs += PipeSeg(proj, zoneName, systemName, "JOINT", "", apClass, "NUT", "", smat, 0, 102, 102, isomUserId, spoolUserId, nutsNumber, 0, 0, 0, nuts.trim, "")
+            pipeSegs += PipeSeg(proj, zoneName, systemName, "", 0, 0, "JOINT", "", apClass, "GASKET", "", smat, 0, 100, 100, isomUserId, spoolUserId, jointNumber, 0, 0, 0, gasket.trim, "")
+            pipeSegs += PipeSeg(proj, zoneName, systemName, "", 0, 0, "JOINT", "", apClass, "BOLT", "", smat, 0, 101, 101, isomUserId, spoolUserId, boltsNumber, 0, 0, 0, bolts.trim, "")
+            pipeSegs += PipeSeg(proj, zoneName, systemName, "", 0, 0, "JOINT", "", apClass, "NUT", "", smat, 0, 102, 102, isomUserId, spoolUserId, nutsNumber, 0, 0, 0, nuts.trim, "")
 
           }
           s.close()
