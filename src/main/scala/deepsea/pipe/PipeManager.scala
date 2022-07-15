@@ -63,8 +63,8 @@ class PipeManager extends Actor with Codecs{
 
   override def preStart(): Unit = {
     self ! UpdatePipeJoints()
-    system.scheduler.scheduleWithFixedDelay(0.seconds, 15.minutes, self, UpdatePipeComp())
-    system.scheduler.scheduleWithFixedDelay(0.seconds, 15.minutes, self, UpdatePipeJoints())
+    system.scheduler.scheduleWithFixedDelay(0.seconds, 3.minutes, self, UpdatePipeComp())
+    system.scheduler.scheduleWithFixedDelay(0.seconds, 3.minutes, self, UpdatePipeJoints())
     val qwe = getPipeSegs("TEST", "582-01")
   }
 
@@ -217,6 +217,8 @@ class PipeManager extends Actor with Codecs{
             pipeSegs += PipeSeg(proj, zoneName, systemName, "JOINT", "", apClass, "GASKET", "", smat, 0, 100, 100, isomUserId, spoolUserId, jointNumber, 0, 0, 0, gasket.trim, "")
             pipeSegs += PipeSeg(proj, zoneName, systemName, "JOINT", "", apClass, "BOLT", "", smat, 0, 101, 101, isomUserId, spoolUserId, boltsNumber, 0, 0, 0, bolts.trim, "")
             pipeSegs += PipeSeg(proj, zoneName, systemName, "JOINT", "", apClass, "NUT", "", smat, 0, 102, 102, isomUserId, spoolUserId, nutsNumber, 0, 0, 0, nuts.trim, "")
+
+            pipeSegs.filter(_.stock != "")
 
           }
           s.close()
