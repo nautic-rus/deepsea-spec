@@ -8,7 +8,7 @@ import deepsea.actors.ActorManager
 import deepsea.database.DatabaseManager
 import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection}
 import deepsea.files.FileManager.GenerateUrl
-import deepsea.pipe.PipeManager.{GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SetSpoolLock, SpoolLock, SystemDef, UpdatePipeComp, UpdatePipeJoints}
+import deepsea.pipe.PipeManager.{GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetPipeSegsInSystem, GetSpoolLocks, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SetSpoolLock, SpoolLock, SystemDef, UpdatePipeComp, UpdatePipeJoints}
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.Filters.{all, and, equal, in, notEqual}
 import org.mongodb.scala.{Document, MongoCollection, bson}
@@ -51,7 +51,7 @@ object PipeManager{
 
   case class UpdatePipeComp()
   case class UpdatePipeJoints()
-  case class GetPipeSegs(project: String, system: String = "")
+  case class GetPipeSegs(project: String, system: String = "", sqInSystem: String = "")
   case class GetPipeSegsBilling(project: String)
   case class GetPipeSegsSpools(project: String)
   case class GetPipeSegsByDocNumber(docNumber: String, json: Boolean = true)
@@ -86,7 +86,7 @@ class PipeManager extends Actor with Codecs with PipeHelper {
 
     case GetSystems(project) => sender() ! getSystems(project).asJson.noSpaces
     case GetZones(project) => sender() ! getZones(project).asJson.noSpaces
-    case GetPipeSegs(project, system) => sender() ! getPipeSegs(project, system).asJson.noSpaces
+    case GetPipeSegs(project, system, sqInSystem) => sender() ! getPipeSegs(project, system, sqInSystem).asJson.noSpaces
     case GetPipeSegsBilling(project) => sender() ! getPipeSegsBilling(project).asJson.noSpaces
     case GetPipeSegsByDocNumber(docNumber, json) =>
       val projectSystem = getSystemAndProjectFromDocNumber(docNumber)
