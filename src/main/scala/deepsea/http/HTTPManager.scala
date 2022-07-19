@@ -155,11 +155,11 @@ class HTTPManager extends Actor {
       (get & path("pipeZones") & parameter("project")) { (project) =>
         askFor(ActorManager.pipe, GetZones(project))
       },
-      (get & path("pipeSegs") & parameter("project") & parameter("system")) { (project, system) =>
-        askFor(ActorManager.pipe, GetPipeSegs(project, system))
-      },
       (get & path("pipeSegs") & parameter("project") & parameter("system") & parameter("sqInSystem")) { (project, system, sqInSystem) =>
         askFor(ActorManager.pipe, GetPipeSegs(project, system, sqInSystem))
+      },
+      (get & path("pipeSegs") & parameter("project") & parameter("system")) { (project, system) =>
+        askFor(ActorManager.pipe, GetPipeSegs(project, system))
       },
       (get & path("pipeSegsByProject") & parameter("project")) { (project) =>
         askFor(ActorManager.pipe, GetPipeSegs(project))
