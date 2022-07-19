@@ -442,7 +442,7 @@ class HullManager extends Actor with Codecs{
             part.MATERIAL = value.MATERIAL
             part.STOCK_CODE = value.STOCK_CODE
             part.SECTION = value.THICK.toString
-            part.THICK = value.THICK
+            part.THICK = value.THICK / 1000
           case _ => None
         }
       }

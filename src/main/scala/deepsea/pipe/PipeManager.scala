@@ -8,7 +8,7 @@ import deepsea.actors.ActorManager
 import deepsea.database.DatabaseManager
 import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection}
 import deepsea.files.FileManager.GenerateUrl
-import deepsea.pipe.PipeManager.{GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetPipeSegsInSystem, GetSpoolLocks, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SetSpoolLock, SpoolLock, SystemDef, UpdatePipeComp, UpdatePipeJoints}
+import deepsea.pipe.PipeManager.{GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SetSpoolLock, SpoolLock, SystemDef, UpdatePipeComp, UpdatePipeJoints}
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.Filters.{all, and, equal, in, notEqual}
 import org.mongodb.scala.{Document, MongoCollection, bson}
