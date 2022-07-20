@@ -123,7 +123,7 @@ trait PipeHelper extends Codecs {
 
             Await.result(vPipeJointsActualCollection.find().toFuture(), Duration(30, SECONDS)) match {
               case values: Seq[PipeSegActual] =>
-                Await.result(mongo.getCollection[PipeSeg](values.last.name).find(and(equal("project", project), if (system != "") equal("system", system) else notEqual("system", system), if (sqInSystem != "") equal("sqInSystem", sqInSystem) else notEqual("sqInSystem", sqInSystem))).toFuture(), Duration(300, SECONDS)) match {
+                Await.result(mongo.getCollection[PipeSeg](values.last.name).find(and(equal("project", project), if (system != "") equal("system", system) else notEqual("system", system), if (sqInSystem != -1) equal("sqInSystem", sqInSystem) else notEqual("sqInSystem", sqInSystem))).toFuture(), Duration(300, SECONDS)) match {
                   case pipeSegs: Seq[PipeSeg] =>
                     pipeSegs.foreach(x => x.material = materials.find(_.code == x.stock) match {
                       case Some(value) => value
