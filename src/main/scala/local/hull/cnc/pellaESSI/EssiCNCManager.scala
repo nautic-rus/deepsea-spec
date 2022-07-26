@@ -10,10 +10,10 @@ object EssiCNCManager {
 
   private val startOffset: Double = 60.0
   //private val arcRatio:Double=0.3
-  private val arcRatio:Double=0
+  private val arcRatio:Double=0.016
   //private val arcRadiiusRange=Tuple2(100.0,250000.0)
 
-  private val arcRadiiusRange=Tuple2(150.0,800000.0)
+  private val arcRadiiusRange=Tuple2(290.0,800000.0)
 
 
   private val arcAlgoRadius: Boolean = false
