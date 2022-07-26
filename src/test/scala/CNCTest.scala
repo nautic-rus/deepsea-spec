@@ -1,108 +1,189 @@
 
+import breeze.linalg
+import breeze.linalg.{DenseVector, norm}
 import local.hull.cnc.pellaESSI.EssiCNCManager.doEssiCNC
+import local.hull.cnc.pellaESSI.EssiCNCManagerTest.doEssiCNCTestData
 import org.scalatest.funsuite.AnyFunSuite
+import spire.std.ArraySupport.dot
 
 import java.io.{File, PrintWriter}
 import scala.io.{BufferedSource, Source}
 
 class CNCTest extends AnyFunSuite {
 
-  val listIn: List[String] =List(
-    "C-N004-ULTT-01",
-    "C-N004-ULTT-02",
-    "C-N004-ULTT-03",
-    "C-N004-ULTT-04",
-    "C-N004-ULTT-05",
-    "C-N004-ULTT-06",
-    "C-N004-ULTT-07",
-    "C-N004-ULTT-08",
-    "C-N004-ULTT-09",
-    "C-N004-ULTT-10",
-    "C-N004-ULTT-11",
 
 
-    "C-N004-U302-01",
-    "C-N004-U302-02",
-    "C-N004-U302-03",
-    "C-N004-U302-04",
-    "C-N004-U302-05",
-    "C-N004-U302-06",
-    "C-N004-U302-07",
-    "C-N004-U302-08",
-    "C-N004-U302-09",
-    "C-N004-U302-10",
-    "C-N004-U302-11",
-    "C-N004-U302-12",
-    "C-N004-U302-13",
-    "C-N004-U302-14",
-    "C-N004-U302-15",
-    "C-N004-U302-16",
-    "C-N004-U302-17",
-    "C-N004-U302-18",
-    "C-N004-U302-19",
-    "C-N004-U302-20",
+/*
+  val v: DenseVector[Double] = DenseVector[Double](-10, 10)
+  val vNorm: Double = norm(v)
+
+  val ox: DenseVector[Double] = DenseVector[Double](1, 0)
+  val oy: DenseVector[Double] = DenseVector[Double](0, 1)
+
+  val cosX: Double = Math.max(Math.min((v dot ox) / (vNorm * norm(ox)), 1), -1)
+  val cosY: Double = Math.max(Math.min((v dot oy) / (vNorm * norm(oy)), 1), -1)
+
+  val angle = -Math.PI / 2.0
+
+  val xRotated = (v(0) * Math.cos(angle) - v(1) * Math.sin(angle)) / vNorm
+  val yRotated = (v(0) * Math.sin(angle) + v(1) * Math.cos(angle)) / vNorm
+
+
+  cutOffseCalc(10, 10, 20, 20)
+
+  //x1 = x0 + 0.1 * vx / size(vector) ---xRotated
+  //y1 = y0 + 0.1 * vy / size(vector) ---yRotated
+
+
+  def cutOffseCalc(spX: Double, spY: Double, epX: Double, epY: Double): Unit = {
+    val dist = 6
+    val vX = epX - spX
+    val vY = epY - spY
+    val angle = Math.PI / 2.0
+    val xRotated = spX + dist * ((vX * Math.cos(angle) - vY * Math.sin(angle)) / vNorm)
+    val yRotated = spY + dist * ((vX * Math.sin(angle) + vY * Math.cos(angle)) / vNorm)
+  }
+
+
+  def cutOffseCalc2(spX: Double, spY: Double, epX: Double, epY: Double): Unit = {
+
+    val dist = 6
+
+    val v: DenseVector[Double] = DenseVector[Double](epX - spX, epY - spY)
+    val ox: DenseVector[Double] = DenseVector[Double](1, 0)
+    val oy: DenseVector[Double] = DenseVector[Double](0, 1)
+
+    val cosX: Double = Math.max(Math.min((v dot ox) / (vNorm * norm(ox)), 1), -1)
+    val cosY: Double = Math.max(Math.min((v dot oy) / (vNorm * norm(oy)), 1), -1)
+
+    val angle = Math.PI / 2.0
+
+    val xRotated = spX + dist * ((v(0) * Math.cos(angle) - v(1) * Math.sin(angle)) / vNorm)
+    val yRotated = spY + dist * ((v(0) * Math.sin(angle) + v(1) * Math.cos(angle)) / vNorm)
+
+    val jj = 0
+
+
+  }
+
+*/
+
+  val listIn: List[String] = List(
+/*    "U0105-01",
+    "U0105-02",
+    "U0105-03",
+    "U0105-04",
+    "U0105-05",
+    "U0105-06",
+    "U0105-07",
+    "U0105-08",
+    "U0105-09",
+    "U0105-10",
+
+    "U0105-11",
+    "U0105-12",
+    "U0105-13",
+    "U0105-14",
+    "U0105-15",
+    "U0105-16",
+    "U0105-17",
+    "U0105-18",
+    "U0105-19",
+    "U0105-20",
+
+    "U0105-21",
+    "U0105-22",
+    "U0105-23",
+    "U0105-24",
+    "U0105-25",
+    "U0105-26",
+    "U0105-27",
+
+    "U0105-30",
+
+    "U0105-31",
+    "U0105-32",
+    "U0105-33",
+    "U0105-34",
+    "U0105-35",
+    "U0105-36",
+    "U0105-37",
+    "U0105-38",
+    "U0105-39",
+    "U0105-40",
+
+    "U0105-41",*/
+
+   "U010501",
+   "U010521",
+    "U010537",
+    "U010538",
+    "U010502",
   )
 
 
-  val listInOne: List[String] =List(
-    "C-N004-U302-19"
-  )
-  listIn.foreach(f=>{
+/*  val retStar: List[String]=doEssiCNCTestData()
+  val pw = new PrintWriter(new File("c:\\27\\demoESSI105\\" + "testdata" + ".esi"))
+  retStar.foreach(line => pw.println(line))
+  pw.close()
+  val jjs=0*/
 
-    val src: BufferedSource = Source.fromFile("c:\\27\\demo\\"+f+".txt")
+
+  listIn.foreach(f => {
+
+    val src: BufferedSource = Source.fromFile("c:\\27\\NR002\\" + f + ".txt")
     val lines: List[String] = src.getLines.toList
     src.close()
-    val retStar=doEssiCNC(lines, "", "Misha")
-    val pw = new PrintWriter(new File("c:\\27\\demoESSI\\"+f+".esi"))
-    retStar.foreach(line=>pw.println(line))
+    val retStar: List[String] = doEssiCNC(lines, "", "Misha")
+    val pw = new PrintWriter(new File("c:\\27\\demoESSI105\\" + f + ".esi"))
+    retStar.foreach(line => pw.println(line))
     pw.close()
   })
 
 
-/*  val src: BufferedSource = Source.fromFile("c:\\27\\C-N004-ULTT-02.txt")
-  val lines: List[String] = src.getLines.toList
-  src.close()
-  val ret = doEssiCNC(lines, "c:\\27\\demo.esi", "Misha")
-  */
+  /*  val src: BufferedSource = Source.fromFile("c:\\27\\C-N004-ULTT-02.txt")
+    val lines: List[String] = src.getLines.toList
+    src.close()
+    val ret = doEssiCNC(lines, "c:\\27\\demo.esi", "Misha")
+    */
 
 
- // val retStar=doCNCStrings(lines,"Misha")
- // val pw = new PrintWriter(new File("c:\\27\\C-N004-ULTT-02.esi"))
- // retStar.foreach(line=>pw.println(line))
+  // val retStar=doCNCStrings(lines,"Misha")
+  // val pw = new PrintWriter(new File("c:\\27\\C-N004-ULTT-02.esi"))
+  // retStar.foreach(line=>pw.println(line))
   //pw.close()
 
 
-/*  val listIn: List[String] =List(
-    "C-N004-ULTT-01",
-    "C-N004-ULTT-02",
-    "C-N004-ULTT-03",
-    "C-N004-ULTT-04",
-    "C-N004-ULTT-05",
-    "C-N004-ULTT-06",
-    "C-N004-ULTT-07",
-    "C-N004-ULTT-08",
-    "C-N004-ULTT-09",
-    "C-N004-ULTT-10",
-    "C-N004-ULTT-11",
-  )
+  /*  val listIn: List[String] =List(
+      "C-N004-ULTT-01",
+      "C-N004-ULTT-02",
+      "C-N004-ULTT-03",
+      "C-N004-ULTT-04",
+      "C-N004-ULTT-05",
+      "C-N004-ULTT-06",
+      "C-N004-ULTT-07",
+      "C-N004-ULTT-08",
+      "C-N004-ULTT-09",
+      "C-N004-ULTT-10",
+      "C-N004-ULTT-11",
+    )
 
-  listIn.foreach(f=>{
-    val src: BufferedSource = Source.fromFile("c:\\26\\"+f+".txt")
+    listIn.foreach(f=>{
+      val src: BufferedSource = Source.fromFile("c:\\26\\"+f+".txt")
+      val lines: List[String] = src.getLines.toList
+      src.close()
+      //val ret: String = doCNC(lines, "c:\\26\\C-N004-ULTT-01"+f+".mpg", "Misha")
+      val retStar=doCNCStrings(lines,"Misha")
+      val pw = new PrintWriter(new File("c:\\26\\C-N004-ULTT-01"+f+".mpg"))
+      retStar.foreach(line=>pw.println(line))
+      pw.close()
+
+    })*/
+
+  /*  val src: BufferedSource = Source.fromFile("c:\\26\\C-N004-ULTT-01.txt")
     val lines: List[String] = src.getLines.toList
     src.close()
-    //val ret: String = doCNC(lines, "c:\\26\\C-N004-ULTT-01"+f+".mpg", "Misha")
-    val retStar=doCNCStrings(lines,"Misha")
-    val pw = new PrintWriter(new File("c:\\26\\C-N004-ULTT-01"+f+".mpg"))
-    retStar.foreach(line=>pw.println(line))
-    pw.close()
-
-  })*/
-
-/*  val src: BufferedSource = Source.fromFile("c:\\26\\C-N004-ULTT-01.txt")
-  val lines: List[String] = src.getLines.toList
-  src.close()
-  val ret: String = doCNC(lines, "c:\\26\\C-N004-ULTT-01.mpg", "Misha")*/
-
+    val ret: String = doCNC(lines, "c:\\26\\C-N004-ULTT-01.mpg", "Misha")*/
 
 
   val jj = 0

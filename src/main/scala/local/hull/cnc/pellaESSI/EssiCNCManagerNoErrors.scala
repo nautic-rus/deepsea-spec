@@ -2,19 +2,12 @@ package local.hull.cnc.pellaESSI
 
 import breeze.linalg.{DenseVector, norm}
 
-import java.io.{File, PrintWriter}
 import scala.Double.NaN
 import scala.collection.mutable.ListBuffer
 
-object EssiCNCManager {
+object EssiCNCManagerNoErrors {
 
   private val startOffset: Double = 60.0
-  //private val arcRatio:Double=0.3
-  private val arcRatio:Double=0
-  //private val arcRadiiusRange=Tuple2(100.0,250000.0)
-
-  private val arcRadiiusRange=Tuple2(150.0,800000.0)
-
 
   private val arcAlgoRadius: Boolean = false
 
@@ -53,7 +46,7 @@ object EssiCNCManager {
     val radius: Double = Math.sqrt((rotCenter.x - sp.x) * (rotCenter.x - sp.x) + (rotCenter.y - sp.y) * (rotCenter.y - sp.y))
 
 
-   // val radius2: Double = Math.sqrt((rotCenter.x - ep.x) * (rotCenter.x - ep.x) + (rotCenter.y - ep.y) * (rotCenter.y - ep.y))
+    val radius2: Double = Math.sqrt((rotCenter.x - ep.x) * (rotCenter.x - ep.x) + (rotCenter.y - ep.y) * (rotCenter.y - ep.y))
     val vecEx: Double = ep.x - rotCenter.x
     val vecEy: Double = ep.y - rotCenter.y
 
@@ -87,7 +80,7 @@ object EssiCNCManager {
       if (
        // (n > 180.0 && radius < 99999.0 && radius2 < 99999.0)
 
-        rad>arcRatio && radius>arcRadiiusRange._1 && radius<arcRadiiusRange._2
+        rad>0.3 && radius>100.0 && radius<25000.0
           //&& rad <0.6
 
         //(n<180)  || (n<500 && radius >2400) || (radius > 99999.0 && radius2 > 99999.0)
