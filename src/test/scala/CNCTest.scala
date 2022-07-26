@@ -2,7 +2,6 @@
 import breeze.linalg
 import breeze.linalg.{DenseVector, norm}
 import local.hull.cnc.pellaESSI.EssiCNCManager.doEssiCNC
-import local.hull.cnc.pellaESSI.EssiCNCManagerTest.doEssiCNCTestData
 import org.scalatest.funsuite.AnyFunSuite
 import spire.std.ArraySupport.dot
 
