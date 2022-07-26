@@ -15,12 +15,8 @@
     <option name="openedFilesInfos">
       <list>
         <OpenedFileInfo>
-          <option name="caretOffset" value="228" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/main/scala/deepsea/App.scala" />
-        </OpenedFileInfo>
-        <OpenedFileInfo>
-          <option name="caretOffset" value="2270" />
-          <option name="fileUrl" value="file://$PROJECT_DIR$/src/main/scala/local/hull/cnc/hyprethermGcode/Cases.scala" />
+          <option name="caretOffset" value="9205" />
+          <option name="fileUrl" value="file://$PROJECT_DIR$/src/main/scala/deepsea/pipe/PipeManager.scala" />
         </OpenedFileInfo>
       </list>
     </option>
