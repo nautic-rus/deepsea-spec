@@ -1,15 +1,13 @@
 package local.hull.cnc.pellaESSI
 
-import breeze.linalg
-import breeze.linalg.{DenseVector, max, min, norm}
-import spire.optional.unicode.ⅉ.dot
+import breeze.linalg.{DenseVector, norm}
 
 import scala.Double.NaN
 import scala.collection.mutable.ListBuffer
 
-object EssiCNCManager {
-  private var offset: Double = 20.0
-  private val startOffset: Double = 80.0
+object State1 {
+  private var offset: Double = 40.0
+  private val startOffset: Double = 60.0
   private val minArcBugle: Double = 16 //14
 
   private val commands: List[String] = List[String]("CUTH", "CUT")
@@ -41,13 +39,10 @@ object EssiCNCManager {
 
   private case class Arc(var sp: Point, var rotCenter: Point, var ep: Point) {
 
-    private val midP: Point = Point((sp.x + ep.x) / 2.0, (sp.y + ep.y) / 2.0)
-    private val midPoint: DenseVector[Double] = DenseVector[Double](midP.x, midP.y)
-    private val midPCenterVector: DenseVector[Double] = DenseVector[Double](rotCenter.x - midP.x, rotCenter.y - midP.y)
-    private  val midPCenterVectorLen: Double = norm(midPCenterVector)
-
-
-
+    val midP: Point = Point((sp.x + ep.x) / 2.0, (sp.y + ep.y) / 2.0)
+    val midPoint: DenseVector[Double] = DenseVector[Double](midP.x, midP.y)
+    val midPCenterVector: DenseVector[Double] = DenseVector[Double](rotCenter.x - midP.x, rotCenter.y - midP.y)
+    val midPCenterVectorLen: Double = norm(midPCenterVector)
 
     rotCenter = {
       val hordVector: DenseVector[Double] = DenseVector[Double]((ep.x - sp.x), (ep.y - sp.y))
@@ -68,44 +63,28 @@ object EssiCNCManager {
       Point(correctedCenterPoint(0), correctedCenterPoint(1))
     }
 
-    val rc: DenseVector[Double] = DenseVector[Double](rotCenter.x, rotCenter.y)
-    private val centeMidPVectorDir: DenseVector[Double] = (midPCenterVector / midPCenterVectorLen) * -1.0
-    val radius: Double = Math.sqrt((rotCenter.x - sp.x) * (rotCenter.x - sp.x) + (rotCenter.y - sp.y) * (rotCenter.y - sp.y))
-    private val radius2: Double = Math.sqrt((rotCenter.x - ep.x) * (rotCenter.x - ep.x) + (rotCenter.y - ep.y) * (rotCenter.y - ep.y))
-
-    private val arcLineCenter: DenseVector[Double] =rc + (radius * centeMidPVectorDir)
-    private val spv= DenseVector[Double](sp.x, sp.y)
-    private val epv= DenseVector[Double](ep.x, ep.y)
-
-    private val arcCtoSpVec: DenseVector[Double] =DenseVector[Double](spv(0)-arcLineCenter(0), spv(1)-arcLineCenter(1))
-    private val arcCtoSpVecLen=norm(arcCtoSpVec)
-    val arcCtoSpDir: DenseVector[Double] =arcCtoSpVec/arcCtoSpVecLen
-
-    private val arcCtoEpVec: DenseVector[Double] = DenseVector[Double](epv(0) - arcLineCenter(0), epv(1) - arcLineCenter(1))
-    private val arcCtoEpVecLen = norm(arcCtoEpVec)
-    val arcCtoEpDir: DenseVector[Double] = arcCtoEpVec / arcCtoEpVecLen
-
-
     override def toString: String = s"sp=${sp.toString} rp=${rotCenter.toString} ep=${ep.toString}"
 
     val originalEP: Point = ep
 
+    val radius: Double = Math.sqrt((rotCenter.x - sp.x) * (rotCenter.x - sp.x) + (rotCenter.y - sp.y) * (rotCenter.y - sp.y))
+    val radius2: Double = Math.sqrt((rotCenter.x - ep.x) * (rotCenter.x - ep.x) + (rotCenter.y - ep.y) * (rotCenter.y - ep.y))
 
-    private val vecEx: Double = ep.x - rotCenter.x
-    private val vecEy: Double = ep.y - rotCenter.y
+    val vecEx: Double = ep.x - rotCenter.x
+    val vecEy: Double = ep.y - rotCenter.y
 
-    private val vesSx: Double = sp.x - rotCenter.x
-    private val vecSy: Double = sp.y - rotCenter.y
+    val vesSx: Double = sp.x - rotCenter.x
+    val vecSy: Double = sp.y - rotCenter.y
 
-    private val OS: DenseVector[Double] = DenseVector[Double](vesSx, vecSy)
-    private val OE: DenseVector[Double] = DenseVector[Double](vecEx, vecEy)
-    private val angle: Double = Math.acos(Math.max(Math.min((OS dot OE) / (norm(OS) * norm(OE)), 1), -1))
+    val OS: DenseVector[Double] = DenseVector[Double](vesSx, vecSy)
+    val OE: DenseVector[Double] = DenseVector[Double](vecEx, vecEy)
+    val angle: Double = Math.acos(Math.max(Math.min((OS dot OE) / (norm(OS) * norm(OE)), 1), -1))
 
 
-    private val v: DenseVector[Double] = DenseVector[Double](vecEx, vecEy)
-    private val centerVec: DenseVector[Double] = DenseVector[Double](rotCenter.x, rotCenter.y)
-    private val vNorm: Double = norm(v)
-    private val correctedPoint: DenseVector[Double] = centerVec + (radius * v) / vNorm
+    val v: DenseVector[Double] = DenseVector[Double](vecEx, vecEy)
+    val centerVec: DenseVector[Double] = DenseVector[Double](rotCenter.x, rotCenter.y)
+    val vNorm: Double = norm(v)
+    val correctedPoint: DenseVector[Double] = centerVec + (radius * v) / vNorm
 
     //rotCenter = Point((Math.round(rotCenter.x/100.0))*100.0, (Math.round(rotCenter.y/100.0))*100.0)
     //sp = Point((Math.round(sp.x/100.0))*100.0, (Math.round(sp.y/100.0))*100.0)
@@ -120,7 +99,10 @@ object EssiCNCManager {
       val r = (radius + radius2) / 2
       Math.abs(r - midPCenterVectorLen)
     }
-
+    /*    val bulge: Double = {
+          val r = (radius + radius2) / 2
+          Math.abs(r - midPCenterVectorLen)
+        }*/
 
     //ep = Point(correctedPoint(0), correctedPoint(1))
 
@@ -153,6 +135,7 @@ object EssiCNCManager {
 
 
   }
+
 
   private case class MachineItem(pointOrArc: Either[Point, Arc])
 
@@ -321,38 +304,6 @@ object EssiCNCManager {
     buff.toList
   }
 
-  private def pointsToMachineItemOld(in: List[Point]): List[MachineItem] = {
-    val buf = ListBuffer.empty[MachineItem]
-    if (in.length == 1) {
-      buf += MachineItem(Left(in.head))
-    } else {
-      val arcs = ListBuffer.empty[Arc]
-      var p1: Point = Point(NaN, NaN)
-      var p2: Point = Point(NaN, NaN)
-      arcs += Arc(in(0), in(1), in(2))
-      in.drop(3).foreach(p => {
-        if (p1.x.isNaN && p1.y.isNaN && p2.x.isNaN && p2.y.isNaN) {
-          p1 = arcs.toList.last.ep
-          p2 = p
-        } else {
-          arcs += Arc(p1, p2, p)
-          p1 = Point(NaN, NaN)
-          p2 = Point(NaN, NaN)
-        }
-      })
-
-      arcs.foreach(arc => {
-        if (arc.isArc) {
-          buf += MachineItem(Right(arc))
-        } else {
-          buf += MachineItem(Left(arc.sp))
-          buf += MachineItem(Left(arc.originalEP))
-        }
-      })
-    }
-    buf.toList
-  }
-
   private def pointsToMachineItem(in: List[Point]): List[MachineItem] = {
     val buf = ListBuffer.empty[MachineItem]
     if (in.length == 1) {
@@ -383,27 +334,7 @@ object EssiCNCManager {
       })
     }
     buf.toList
-
-    val lb=ListBuffer.empty[MachineItem]
-    buf.foreach(item=>{
-
-      item.pointOrArc match {
-        case Right(arc) => {
-
-          val points=subdivideArc(arc)
-          points.foreach(np=>{
-            lb+= MachineItem(Left(np))
-          })
-
-        }
-        case Left(p) =>
-          lb+=item
-      }
-
-    })
-    lb.toList
   }
-
 
   private def isClockWise(arc: Arc): Boolean = {
     val xRot: Double = arc.rotCenter.x
@@ -419,7 +350,7 @@ object EssiCNCManager {
     val buffPath: ListBuffer[String] = ListBuffer.empty[String]
     var currPos: Point = Point(10, 10)
     var currPosOrig: Point = Point(10, 10)
-
+    offset=40.0
     inList.foreach(contour => {
       val isOuter: Boolean =if (contour.name.equals("CUTH")) false else true
 
@@ -453,7 +384,7 @@ object EssiCNCManager {
 
       val pOffsetOrig: (Point, Point) = cutOffseCalc(freeMovePoint, freeMovePointEP)
 
-      val pOffset: Point =pOffsetOrig._1// offsetPoint(pOffsetOrig._1, pOffsetOrig._2, freeMovePoint, isOuter)
+      val pOffset: Point = offsetPoint(pOffsetOrig._1, pOffsetOrig._2, freeMovePoint, isOuter)
 
       val dx = pOffset.x - currPos.x
       val dy = pOffset.y - currPos.y
@@ -523,12 +454,12 @@ object EssiCNCManager {
             val p = offsetPoint(pOrig, pBefore, pNext, isOuter)
             val dx = p.x - currPos.x
             val dy = p.y - currPos.y
-            if ((Math.abs(dx) + Math.abs(dy))/2  > 10) {
+            if ((Math.abs(dx) + Math.abs(dy))  > 10) {
               buffPath += Point(dx, dy).toESSI
               currPos = p
               currPosOrig = pOrig
               points += currPos
-              pointsOrig += currPos //currPosOrig
+              pointsOrig += currPosOrig
             }
           }
         }
@@ -625,6 +556,11 @@ object EssiCNCManager {
       buffPath += "8"
     })
 
+
+    offset=0.01
+
+
+    buffPath += "38"
     buffPath += "63"
     buffPath.toList
   }
@@ -654,40 +590,7 @@ object EssiCNCManager {
   }
 
   private def offsetArc(src: Arc, isOuter: Boolean): Arc = {
-
-    val rotFactor = if (isClockWise(src)) 1.0 else -1.0
-
-    //val rotFactor = if (isClockWise(this)) -1.0 else 1.0
-
-    val correntSP: DenseVector[Double] = DenseVector[Double]((src.sp.x), (src.sp.y))
-    val correntEp: DenseVector[Double] = DenseVector[Double]((src.ep.x), (src.ep.y))
-    val correntSPVec: DenseVector[Double] = DenseVector[Double]((src.rotCenter.x - src.sp.x), (src.rotCenter.y - src.sp.y))
-    val correntEPVec: DenseVector[Double] = DenseVector[Double]((src.rotCenter.x - src.ep.x), (src.rotCenter.y - src.ep.y))
-    val newSP = {
-      val BP_PLen: Double = norm(correntSPVec)
-      val BP_PDir: DenseVector[Double] = (correntSPVec / BP_PLen)
-      val offsetted: DenseVector[Double] = correntSP + (offset * BP_PDir)*rotFactor
-      Point(offsetted(0), offsetted(1))
-    }
-    val newEP = {
-      val BP_PLen: Double = norm(correntEPVec)
-      val BP_PDir: DenseVector[Double] = (correntEPVec / BP_PLen)
-      val offsetted: DenseVector[Double] = correntEp + (offset * BP_PDir)*rotFactor
-      Point(offsetted(0), offsetted(1))
-    }
-    val ofsettedArc = Arc(newSP, src.rotCenter, newEP)
-
-   val extraSP: DenseVector[Double] = DenseVector[Double](ofsettedArc.sp.x,ofsettedArc.sp.y) + (offset * ofsettedArc.arcCtoSpDir)//*rotFactor
-    val extraEP: DenseVector[Double] = DenseVector[Double](ofsettedArc.ep.x, ofsettedArc.ep.y) + (offset * ofsettedArc.arcCtoEpDir) //*rotFactor
-    val retVal: Arc =Arc(Point(extraSP(0),extraSP(1)),src.rotCenter,Point( extraEP(0), extraEP(1)))
-
-    //val retVal=ofsettedArc
-    retVal
-  }
-
-  private def offsetArcOld(src: Arc, isOuter: Boolean): Arc = {
-
-    val rotFactor = if (isClockWise(src)) 1.0 else -1.0
+    val rotFactor = if (isOuter) 1.0 else -1.0
 
     //val rotFactor = if (isClockWise(this)) -1.0 else 1.0
 
@@ -698,13 +601,13 @@ object EssiCNCManager {
     val newSP = {
       val BP_PLen: Double = norm(correntSPVec)
       val BP_PDir: DenseVector[Double] = (correntSPVec / BP_PLen)
-      val offsetted: DenseVector[Double] = correntSP + (offset * BP_PDir) * rotFactor
+      val offsetted: DenseVector[Double] = correntSP + (offset * BP_PDir)
       Point(offsetted(0), offsetted(1))
     }
     val newEP = {
       val BP_PLen: Double = norm(correntEPVec)
       val BP_PDir: DenseVector[Double] = (correntEPVec / BP_PLen)
-      val offsetted: DenseVector[Double] = correntEp + (offset * BP_PDir) * rotFactor
+      val offsetted: DenseVector[Double] = correntEp + (offset * BP_PDir)
       Point(offsetted(0), offsetted(1))
     }
     val retVal = Arc(newSP, src.rotCenter, newEP)
@@ -716,7 +619,7 @@ object EssiCNCManager {
 
     val outerFactor:Double=if(isOuter) -1.0 else 1.0
 
-    val scalar: Double = 1000.0
+    val scalar: Double = 1000000.0
 
     val cp = DenseVector[Double](src.x, src.y)
     val bp = DenseVector[Double](beforeP.x, beforeP.y)
@@ -745,10 +648,8 @@ object EssiCNCManager {
 
     val cosPHI: Double = Math.abs((Math.max(Math.min((PtNPOffsetDir dot BPtPOffsetDir) / (norm(PtNPOffsetDir) * norm(BPtPOffsetDir)), 1), -1)))
 
-
-    if(cosPHI.isNaN || 1.0-cosPHI<0.001 ){
-      val cpnp: DenseVector[Double] = bpcp //+ (offset * BPtPDir)
-      Point(cpnp(0),cpnp(1))
+    if(1.0-cosPHI<0.01){
+      Point(bpcp(0),bpcp(1))
     }else{
       val D1Vec: DenseVector[Double] = cpnp + (scalar * PtNPDir)
       val D1: Point = Point(D1Vec(0), D1Vec(1))
@@ -758,13 +659,10 @@ object EssiCNCManager {
 
       val retVal: Point = intersection(S1, S2, D1, D2)
 
-      if (retVal.x.isNaN || retVal.y.isNaN){
-        val cpnp: DenseVector[Double] = bpcp //+ (offset * BPtPDir)
-        Point(cpnp(0), cpnp(1))
-      }  else retVal
+      if (retVal.x.isNaN || retVal.y.isNaN) Point(bpcp(0), bpcp(1)) else retVal
     }
 
-    //Point(bpcp(0),bpcp(1))
+
 
   }
 
@@ -785,38 +683,5 @@ object EssiCNCManager {
 
     Point(x, y)
   }
-
-  private def subdivideArc(in:Arc):List[Point]={
-    val r: Double =in.radius
-    val buf=ListBuffer.empty[Point]
-    buf+=in.sp
-
-    val sp=DenseVector[Double](in.sp.x,in.sp.y)
-    val cp=DenseVector[Double](in.rotCenter.x,in.rotCenter.y)
-
-    val spep=DenseVector[Double](in.ep.x-in.sp.x,in.ep.y-in.sp.y)
-    val len=norm(spep)
-    val spepDir=spep/len
-
-    val divideParts:Int={
-      if(r<501.0) 8 else 16
-    }
-
-    val k: Double = 1.0 / divideParts.toDouble
-
-    (1 until divideParts).foreach(i=>{
-
-      val np: DenseVector[Double] =sp + k*len*i.toDouble*spepDir
-      val spnp = DenseVector[Double](np(0) - in.rotCenter.x, np(1) - in.rotCenter.y)
-      val lenS = norm(spnp)
-      val spnpDir = spnp / lenS
-      val retP=cp + r*spnpDir
-      buf+=Point(retP(0),retP(1))
-    })
-    buf+=in.ep
-    buf.toList
-
-  }
-
 
 }
