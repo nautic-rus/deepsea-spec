@@ -142,7 +142,7 @@ class HTTPManager extends Actor {
         askFor(ActorManager.spec, CreateCNC(lines, user))
       },
       (post & path("createESSI") & entity(as[String]) & parameter("user")) { (lines, user) =>
-        askFor(ActorManager.spec, CreateCNC(lines, user))
+        askFor(ActorManager.spec, CreateESSI(lines, user))
       },
       (get & path("removeParts") & parameter("project") & parameter("block") & parameter("parts") & parameter("user")){ (project, block, parts, user) =>
         askFor(ActorManager.hullManager, RemoveParts(project, block, parts, user))

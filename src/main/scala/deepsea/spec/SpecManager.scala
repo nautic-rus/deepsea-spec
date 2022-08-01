@@ -19,7 +19,7 @@ import local.hull.cnc.hyprethermGcode.CNCManager.{doCNC, doCNCStrings}
 import local.pdf.ru.ele.EleEqTrayESKDReport.{generatePdfToFileNoRev, generatePdfToFileWithRev}
 import akka.pattern.ask
 import local.hull.bill.BillManager.{genAnalyticPlateDataJson, genAnalyticProfileDataJson, genProfileNestBillJson, genWastsgeByParentKplJson}
-import local.hull.cnc.pellaESSI.EssiCNCManager.doEssiCNC
+import local.hull.cnc.pellaESSI.EssiCNCManagerSubdiv.doEssiCNC
 
 import java.nio.file.Files
 import scala.concurrent.Await
