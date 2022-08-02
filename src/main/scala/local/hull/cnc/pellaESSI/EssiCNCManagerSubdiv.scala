@@ -456,9 +456,9 @@ object EssiCNCManagerSubdiv {
       })
 
       buff += "8"
+      buff += "38"
 
     })
-    buff += "38"
     buff += "63"
     buff.toList
   }

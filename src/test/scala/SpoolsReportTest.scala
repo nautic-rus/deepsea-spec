@@ -41,17 +41,12 @@ class SpoolsReportTest extends AnyFunSuite with PipeHelper {
     getPipeSegsFromMongo(projectSystem._1, projectSystem._2, -1, mongoClient.getDatabase("cache").withCodecRegistry(codecRegistry), mongoClient.getDatabase("3degdatabase").withCodecRegistry(codecRegistry))
   }
 
-
   val rawData: List[PipeSeg] = dbData.filter(s => s.spool.nonEmpty && s.system.equals(systemName))
 
-  val test = rawData.filter(s => s.material.code.contains("SYSPRTNONNON0209"))
 
 
   val rows: List[Item11ColumnsEN] = genRows(rawData)
   val totalRows: List[Item11ColumnsEN] =genTotal(rows)
-
-
-  val t2=rows.filter(s=>s.A2.equals("onnecting sleeve L=60 mm DN65 (Pipe DIN 2448-St35.8-101.6x11.0)"))
 
   //genSpoolsListEnPDF(project, docNumber, docName, revision, path, rows)
   //genSpoolsListEnPDF(project, docNumber, docName, revision, path, rows,totalRows)
@@ -71,7 +66,6 @@ class SpoolsReportTest extends AnyFunSuite with PipeHelper {
     })
     rows.sortBy(s => s.A1).toList
   }
-
 
   private def formatSpoolId(spool: String, elem: String): String = {
 
