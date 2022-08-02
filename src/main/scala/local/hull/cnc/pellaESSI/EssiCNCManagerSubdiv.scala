@@ -385,6 +385,9 @@ object EssiCNCManagerSubdiv {
     var currPos: Point = Point(10, 10)
     inList.foreach(contour => {
 
+
+      val nameOp: String =contour.name
+
       val freeMovePoint: Point = {
         contour.ops.head.pointOrArc match {
           case Right(value: Arc) => value.sp
@@ -417,7 +420,7 @@ object EssiCNCManagerSubdiv {
       buff += "+5+5"
       buff += "6"
       buff += "7"
-      buff += "29" //left compensation 30//rightcompensation
+      buff += (if (nameOp.equals("CUT") )  "29" else "30") //left compensation 30//rightcompensation
 
 
       contour.ops.foreach(op => {
