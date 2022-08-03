@@ -420,7 +420,7 @@ object EssiCNCManagerSubdiv {
       buff += "+5+5"
       buff += "6"
       buff += "7"
-      buff += (if (nameOp.equals("CUT") )  "29" else "30") //left compensation 30//rightcompensation
+      buff += "29" //(if (nameOp.equals("CUT") )  "29" else "30") //left compensation 30//rightcompensation
 
 
       contour.ops.foreach(op => {
