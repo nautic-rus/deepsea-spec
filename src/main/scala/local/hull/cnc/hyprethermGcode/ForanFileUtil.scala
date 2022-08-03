@@ -62,11 +62,10 @@ trait ForanFileUtil {
   private def doCommand(in: List[String]): String = {
     var str = ""
     in.foreach(l => str += l)
-    str.replace("  ", " ").replace("   ", " ").trim
+    str.replace("  ", " ").replace("   ", " ").replace("     ", " ").trim
   }
 
   private def doCNC(in: String): CNC = {
-
     val arr = in.split(" ")
     arr.head match {
 
@@ -93,6 +92,29 @@ trait ForanFileUtil {
         })
         CNC(arr.head, A, B, lb.toList)
       }
+
+      case "MKBN" => {
+        val lb = ListBuffer.empty[CNCcoordsPackage]
+        val A = arr(1).toIntOption.getOrElse(0)
+
+        val splitTogroup = in.split("999999 999999")
+        val coords: List[Double] = {
+          val buff = ListBuffer.empty[Double]
+          splitTogroup.head.split(" ").drop(2).foreach(d => buff += d.toDoubleOption.getOrElse(0.0))
+          buff.toList
+        }
+        lb += CNCcoordsPackage(1, doubleListToPoints(coords))
+        var counter = 2
+        splitTogroup.tail.foreach(gr => {
+          val buff = ListBuffer.empty[Double]
+          gr.trim.split(" ").foreach(d => buff += d.toDoubleOption.getOrElse(0.0))
+          lb += CNCcoordsPackage(counter, doubleListToPoints(buff.toList))
+          counter = counter + 1
+        })
+        CNC(arr.head, A, 0, lb.toList)
+      }
+
+
       case "CUTH" | "CUT" => {
         val lb = ListBuffer.empty[CNCcoordsPackage]
         val A = arr(1).toIntOption.getOrElse(0)
