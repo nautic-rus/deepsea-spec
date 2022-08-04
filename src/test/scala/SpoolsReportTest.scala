@@ -11,10 +11,10 @@ import scala.collection.mutable.ListBuffer
 
 class SpoolsReportTest extends AnyFunSuite with PipeHelper {
 
-  val docNumber = "210101-701-0001"
-  val docName = "Fuel System"
-  val docNumberForPrint = "210101-701-01ML"
-  val systemName="701-01"
+  val docNumber = "210101-819-0001"
+  val docName = "Air vent and overflow system"
+  val docNumberForPrint = "210101-819-01ML"
+  val systemName="819-01"
 
 /* val docNumber = "210101-819-0001"
   val docName = "Air vent and overflow system"
@@ -80,7 +80,14 @@ class SpoolsReportTest extends AnyFunSuite with PipeHelper {
   private def formatQTY(ps: PipeSeg): String = {
 
     ps.material.units match {
-      case "006" => if (ps.length < 0.1) "0.1" else String.format("%.1f", ps.length)
+      case "006" =>{
+        if(ps.typeCode.equals("PIPE")){
+          if (ps.length < 0.1) "0.1" else String.format("%.1f", ps.length/1000.0)
+        } else{
+          if (ps.length < 0.1) "0.1" else String.format("%.1f", ps.length)
+        }
+
+      }
       case "796" => {
         ps.typeCode match {
           case "PIPE" => {

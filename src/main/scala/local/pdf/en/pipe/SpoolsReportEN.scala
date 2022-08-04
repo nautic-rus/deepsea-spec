@@ -65,9 +65,9 @@ object SpoolsReportEN extends UtilsPDF{
       page.copyPagesTo(1, 1, pdfDoc)
     })
 
-    generatePartListPages(docNameEN, totalItems).foreach(page => {
+/*    generatePartListPages(docNameEN, totalItems).foreach(page => {
       page.copyPagesTo(1, 1, pdfDoc)
-    })
+    })*/
 
 
     (1 to pdfDoc.getNumberOfPages).foreach(i => {
@@ -269,7 +269,7 @@ object SpoolsReportEN extends UtilsPDF{
         setStampText(cellBuff(1), "Material", italic = false, bold = true)
         setStampText(cellBuff(2), "Unit", italic = false, bold = true)
         setStampText(cellBuff(3), "QTY", italic = false, bold = true)
-        setStampText(cellBuff(4), "WGT", italic = false, bold = true)
+        setStampText(cellBuff(4), "WGT, kg", italic = false, bold = true)
       }
 
       def setStampText(cell: Cell, text: String,
