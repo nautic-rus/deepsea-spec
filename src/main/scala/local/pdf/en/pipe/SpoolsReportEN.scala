@@ -279,8 +279,8 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
 
       def processStaticText(): Unit = {
         setStampText(cellBuff(0), "N", italic = false, bold = true)
-        setStampText(cellBuff(1), "Material", italic = false, bold = true)
-        setStampText(cellBuff(2), "Unit", italic = false, bold = true)
+        setStampText(cellBuff(1), "MATERIAL", italic = false, bold = true)
+        setStampText(cellBuff(2), "UNIT", italic = false, bold = true)
         setStampText(cellBuff(3), "QTY", italic = false, bold = true)
         setStampText(cellBuff(4), "WGT, kg", italic = false, bold = true)
       }
