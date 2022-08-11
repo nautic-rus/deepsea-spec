@@ -28,37 +28,21 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
   )
 
 
-  def genSpoolsListEnPDF(docNumber: String, docName: String, revision: String): String = {
+  def genSpoolsListEnPDF(docNumber: String, docName: String, revision: String, rawData: List[PipeSeg]): String = {
     val filePath: String = Files.createTempDirectory("spoolPdf").toAbsolutePath.toString + File.separator + docNumber + "ML_rev" + revision + ".pdf"
-    val rawData: List[PipeSeg] = getPipeSegsFromMongo(docNumber)
     val rows: List[Item11ColumnsEN] = genRows(rawData)
     val totalRows: List[Item11ColumnsEN] = genTotal(rows)
-    val dn: DocNameEN = {
-      if (revision != "") {
-        DocNameEN(num = docNumber, name = docName, lastRev = revision)
-      }
-      else {
-        DocNameEN(num = docNumber, name = docName)
-      }
-    }
-    processPDF(dn, filePath, rows, totalRows, false)
+    val dn = DocNameEN(docNumber, docName, if (revision != "") revision else "0")
+    processPDF(dn, filePath, rows, totalRows)
     filePath
   }
 
-  def genSpoolsListEnPDFAll(docNumber: String, docName: String, revision: String): String = {
+  def genSpoolsListEnPDFAll(docNumber: String, docName: String, revision: String, rawData: List[PipeSeg]): String = {
     val filePath: String = Files.createTempDirectory("spoolPdf").toAbsolutePath.toString + File.separator + docNumber + "ML_rev" + revision + ".pdf"
-    val rawData: List[PipeSeg] = getPipeSegsFromMongo(docNumber)
     val rows: List[Item11ColumnsEN] = genRows(rawData)
     val totalRows: List[Item11ColumnsEN] = genTotal(rows)
-    val dn: DocNameEN = {
-      if (revision != "") {
-        DocNameEN(num = docNumber, name = docName, lastRev = revision)
-      }
-      else {
-        DocNameEN(num = docNumber, name = docName)
-      }
-    }
-    processPDF(dn, filePath, rows, totalRows, true)
+    val dn = DocNameEN(docNumber, docName, if (revision != "") revision else "0")
+    processPDF(dn, filePath, rows, totalRows, genAll = true)
     filePath
   }
 

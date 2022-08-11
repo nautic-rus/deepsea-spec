@@ -8,7 +8,7 @@ import deepsea.actors.ActorManager
 import deepsea.database.DatabaseManager
 import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection}
 import deepsea.files.FileManager.GenerateUrl
-import deepsea.pipe.PipeManager.{GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SetSpoolLock, SpoolLock, SystemDef, UpdatePipeComp, UpdatePipeJoints}
+import deepsea.pipe.PipeManager.{GetPipeESP, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SetSpoolLock, SpoolLock, SystemDef, UpdatePipeComp, UpdatePipeJoints}
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.Filters.{all, and, equal, in, notEqual}
 import org.mongodb.scala.{Document, MongoCollection, bson}
@@ -18,6 +18,7 @@ import io.circe.syntax.EncoderOps
 import local.common.Codecs
 import org.mongodb.scala.model.Filters
 import io.circe.parser.decode
+import local.pdf.en.pipe.SpoolsReportEN.{genSpoolsListEnPDF, genSpoolsListEnPDFAll}
 
 import java.util.concurrent.TimeUnit
 import java.util.{Date, UUID}
@@ -59,7 +60,7 @@ object PipeManager{
   case class GetZones(project: String)
   case class GetSpoolLocks(docNumber: String)
   case class SetSpoolLock(jsValue: String)
-
+  case class GetPipeESP(docNumber: String, revision: String, bySpool: String)
 
 
 
@@ -97,6 +98,20 @@ class PipeManager extends Actor with Codecs with PipeHelper {
       sender() ! "success".asJson.noSpaces
     case GetSpoolLocks(docNumber) =>
       sender() ! getSpoolLocks(docNumber).asJson.noSpaces
+    case GetPipeESP(docNumber: String, revision: String, bySpool: String) =>
+      val projectSystem = getSystemAndProjectFromDocNumber(docNumber)
+      val pipeSegs = getPipeSegs(projectSystem._1, projectSystem._2)
+      val systemDefs = getSystemDefs(projectSystem._1)
+      val systemDescr = systemDefs.find(_.name == projectSystem._2) match {
+        case Some(value) => value.descr.toUpperCase
+        case _ => "NO DESCR"
+      }
+      if (bySpool == "1"){
+        genSpoolsListEnPDF(docNumber, systemDescr, revision, pipeSegs)
+      }
+      else{
+        genSpoolsListEnPDFAll(docNumber, systemDescr, revision, pipeSegs)
+      }
     case _ => None
 
   }
