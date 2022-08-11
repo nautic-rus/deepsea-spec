@@ -3,11 +3,12 @@ package deepsea.pipe
 import deepsea.database.DatabaseManager
 import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection, OracleConnection}
 import deepsea.pipe.PipeManager.{Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SpoolLock, SystemDef}
-import org.mongodb.scala.{Document, MongoCollection, MongoDatabase, bson}
+import org.mongodb.scala.{Document, MongoClient, MongoCollection, MongoDatabase, bson}
 import org.mongodb.scala.model.Filters.{and, equal, notEqual}
 import akka.http.scaladsl.{Http, HttpExt}
 import akka.pattern.ask
 import akka.util.Timeout
+import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import deepsea.actors.ActorManager
 import deepsea.database.DatabaseManager
 import deepsea.files.FileManager.GenerateUrl
@@ -146,7 +147,23 @@ trait PipeHelper extends Codecs {
 
     }
   }
-  def getPipeSegsFromMongo(project: String, system: String = "", sqInSystem: Int = -1, mongo: MongoDatabase, mongoData: MongoDatabase): List[PipeSeg] ={
+  def getPipeSegsFromMongo(docNumber: String): List[PipeSeg] ={
+
+    val configOracle = new HikariConfig()
+    configOracle.setDriverClassName("oracle.jdbc.driver.OracleDriver")
+    configOracle.setJdbcUrl("jdbc:oracle:thin:@office.nautic-rus.ru:1521:ORA3DB")
+    configOracle.setUsername("C" + "N004")
+    configOracle.setPassword("Whatab0utus")
+    configOracle.setMaximumPoolSize(5)
+    val ds = new HikariDataSource(configOracle)
+    val mongoClient: MongoClient = MongoClient("mongodb://192.168.1.26")
+    val projectSystem: (String, String) = getSystemAndProjectFromDocNumber(docNumber, mongoClient.getDatabase("3degdatabase").withCodecRegistry(codecRegistry), ds.getConnection)
+    val mongo = mongoClient.getDatabase("cache").withCodecRegistry(codecRegistry)
+    val mongoData = mongoClient.getDatabase("3degdatabase").withCodecRegistry(codecRegistry)
+    val project = projectSystem._1
+    val system = projectSystem._2
+
+
     val vPipeCompCollectionActualName = "vPipeCompActual"
     val vPipeCompActualCollection: MongoCollection[PipeSegActual] = mongo.getCollection(vPipeCompCollectionActualName)
 
@@ -175,7 +192,7 @@ trait PipeHelper extends Codecs {
     val res = ListBuffer.empty[PipeSeg]
     Await.result(vPipeCompActualCollection.find().toFuture(), Duration(30, SECONDS)) match {
       case values: Seq[PipeSegActual] =>
-        Await.result(mongo.getCollection[PipeSeg](values.last.name).find(and(equal("project", project), if (system != "") equal("system", system) else notEqual("system", system), if (sqInSystem != -1) equal("sqInSystem", sqInSystem) else notEqual("sqInSystem", sqInSystem))).toFuture(), Duration(300, SECONDS)) match {
+        Await.result(mongo.getCollection[PipeSeg](values.last.name).find(and(equal("project", project), if (system != "") equal("system", system) else notEqual("system", system))).toFuture(), Duration(300, SECONDS)) match {
           case pipeSegs: Seq[PipeSeg] =>
             val jk = pipeSegs
             val jkk = jk
@@ -194,7 +211,7 @@ trait PipeHelper extends Codecs {
     }
     Await.result(vPipeJointsActualCollection.find().toFuture(), Duration(30, SECONDS)) match {
       case values: Seq[PipeSegActual] =>
-        Await.result(mongo.getCollection[PipeSeg](values.last.name).find(and(equal("project", project), if (system != "") equal("system", system) else notEqual("system", system), if (sqInSystem != -1) equal("sqInSystem", sqInSystem) else notEqual("sqInSystem", sqInSystem))).toFuture(), Duration(300, SECONDS)) match {
+        Await.result(mongo.getCollection[PipeSeg](values.last.name).find(and(equal("project", project), if (system != "") equal("system", system) else notEqual("system", system))).toFuture(), Duration(300, SECONDS)) match {
           case pipeSegs: Seq[PipeSeg] =>
             pipeSegs.foreach(x => x.material = materials.find(_.code == x.stock) match {
               case Some(value) => value

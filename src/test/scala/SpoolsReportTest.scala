@@ -7,6 +7,8 @@ import local.pdf.en.pipe.SpoolsReportEN.genSpoolsListEnPDF
 import org.mongodb.scala.MongoClient
 import org.scalatest.funsuite.AnyFunSuite
 
+import java.io.File
+import java.nio.file.Files
 import scala.collection.mutable.ListBuffer
 
 class SpoolsReportTest extends AnyFunSuite with PipeHelper {
@@ -28,18 +30,13 @@ class SpoolsReportTest extends AnyFunSuite with PipeHelper {
   val revision = "0"
   val path = s"c:\\14\\${docNumberForPrint}_${docName}.pdf"
   val project = "N004"
-  val dbData: List[PipeSeg] = {
-    val configOracle = new HikariConfig()
-    configOracle.setDriverClassName("oracle.jdbc.driver.OracleDriver")
-    configOracle.setJdbcUrl("jdbc:oracle:thin:@office.nautic-rus.ru:1521:ORA3DB")
-    configOracle.setUsername("C" + "N004")
-    configOracle.setPassword("Whatab0utus")
-    configOracle.setMaximumPoolSize(5)
-    val ds = new HikariDataSource(configOracle)
-    val mongoClient: MongoClient = MongoClient("mongodb://192.168.1.26")
-    val projectSystem: (String, String) = getSystemAndProjectFromDocNumber(docNumber, mongoClient.getDatabase("3degdatabase").withCodecRegistry(codecRegistry), ds.getConnection)
-    getPipeSegsFromMongo(projectSystem._1, projectSystem._2, -1, mongoClient.getDatabase("cache").withCodecRegistry(codecRegistry), mongoClient.getDatabase("3degdatabase").withCodecRegistry(codecRegistry))
-  }
+
+  val dbData: List[PipeSeg] = getPipeSegsFromMongo(docNumber)
+  val filePath: String = Files.createTempDirectory("spoolPdf").toAbsolutePath.toString + File.separator + docNumber + ".pdf"
+  val postFix = "ML"
+
+  //todo genSpoolPDF(project, docNumber + postFix, docName, revision, filePath, dbData)
+
 
   val rawData: List[PipeSeg] = dbData.filter(s => s.spool.nonEmpty && s.system.equals(systemName))
 
