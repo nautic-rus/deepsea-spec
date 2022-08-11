@@ -61,7 +61,11 @@ object PrdPartsReportEN extends UtilsPDF {
         val weight = String.format("%.2f", gr._2.head.WEIGHT_UNIT)
         val totWeight = String.format("%.2f", gr._2.head.WEIGHT_UNIT * qty)
         val symm = gr._2.head.SYMMETRY
-        val elemType = gr._2.head.ELEM_TYPE
+        val elemType: String = {
+          val v = gr._2.head.ELEM_TYPE.toUpperCase
+          if (v.equals("FS")) "FB" else if (v.equals("BS")) "HP" else
+            v
+        }
         val mat = gr._2.head.MATERIAL
         val kpl_kse = {
           elemType match {
@@ -70,7 +74,7 @@ object PrdPartsReportEN extends UtilsPDF {
             case _ => String.format("%.1f", gr._2.head.WIDTH) + "x" + String.format("%.1f", gr._2.head.THICKNESS)
           }
         }
-        buff += Item11ColumnsEN(A1 = id, A2 = symm, A3 = elemType, A4 = kpl_kse, A5 = mat, A6 = qty.toString, A7 = weight, A8 = totWeight, A9 = nestids, A12 = findChessPos(id+ "-" + symm, chess) )
+        buff += Item11ColumnsEN(A1 = id, A2 = symm, A3 = elemType, A4 = kpl_kse, A5 = mat, A6 = qty.toString, A7 = weight, A8 = totWeight, A9 = nestids, A12 = findChessPos(id + "-" + symm, chess))
       })
       buff.sortBy(s => s.A1).toList
     }
