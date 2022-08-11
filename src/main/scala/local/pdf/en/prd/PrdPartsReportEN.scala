@@ -47,7 +47,6 @@ object PrdPartsReportEN extends UtilsPDF {
       }
 
     }
-
     val rows: List[Item11ColumnsEN] = {
       val buff: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
       parts.groupBy(s => (s.PART_CODE, s.SYMMETRY)).toList.foreach(gr => {
