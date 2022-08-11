@@ -103,7 +103,7 @@ class PipeManager extends Actor with Codecs with PipeHelper {
       val pipeSegs = getPipeSegs(projectSystem._1, projectSystem._2)
       val systemDefs = getSystemDefs(projectSystem._1)
       val systemDescr = systemDefs.find(_.name == projectSystem._2) match {
-        case Some(value) => value.descr.toUpperCase
+        case Some(value) => value.descr.replace(docNumber, "").trim
         case _ => "NO DESCR"
       }
       if (bySpool == "1"){
