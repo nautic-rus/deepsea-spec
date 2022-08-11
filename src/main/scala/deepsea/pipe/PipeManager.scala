@@ -107,10 +107,10 @@ class PipeManager extends Actor with Codecs with PipeHelper {
         case _ => "NO DESCR"
       }
       if (bySpool == "1"){
-        genSpoolsListEnPDF(docNumber, systemDescr, revision, pipeSegs)
+        sender() ! genSpoolsListEnPDF(docNumber, systemDescr, revision, pipeSegs)
       }
       else{
-        genSpoolsListEnPDFAll(docNumber, systemDescr, revision, pipeSegs)
+        sender() ! genSpoolsListEnPDFAll(docNumber, systemDescr, revision, pipeSegs)
       }
     case _ => None
 
