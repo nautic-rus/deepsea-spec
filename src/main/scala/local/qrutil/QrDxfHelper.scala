@@ -11,7 +11,10 @@ import java.util
 trait QrDxfHelper {
 
 
-  def url2qrDXF(targetUrl: String, width: Int, height: Int):String={
+  def url2qrDXF(targetUrl: String): String = {
+    val width: Int = 10
+    val height: Int = 10
+
     val dxfDocument: DXFDocument = new DXFDocument("QR")
     val graphics: DXFGraphics = dxfDocument.getGraphics
 

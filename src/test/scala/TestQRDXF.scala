@@ -5,7 +5,7 @@ import java.io.FileWriter
 
 class TestQRDXF extends AnyFunSuite with QrDxfHelper {
 
-  val str: String = url2qrDXF("https://en.wikipedia.org/wiki/QR_code", 200, 200)
+  val str: String = url2qrDXF("https://en.wikipedia.org/wiki/QR_code")
 
 
   val fileWriter = new FileWriter("c:\\34\\qr.dxf")
