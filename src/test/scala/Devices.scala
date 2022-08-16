@@ -12,7 +12,7 @@ class Devices extends AnyFunSuite with DeviceHelper{
 
 
 
-  val docNumber = "200101-304-0003"
+  val docNumber = "200101-304-0001"
   val rev = "0"
   val docName: String = getSystemName(docNumber)
   val devices: List[Device] = getDevices(docNumber)
