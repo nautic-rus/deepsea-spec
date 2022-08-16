@@ -19,6 +19,7 @@ object ActorManager {
   var elec: ActorRef = _
   var files: ActorRef = _
   var pipe: ActorRef = _
+  var devices: ActorRef = _
 
   def init(): Unit ={
     system = ActorSystem()

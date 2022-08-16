@@ -18,6 +18,7 @@ import deepsea.spec.SpecManager._
 import org.apache.log4j.{LogManager, Logger}
 import play.api.libs.json.{JsValue, Json}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
+import deepsea.devices.DeviceManager.GetDevices
 import deepsea.pipe.PipeManager.{GetPipeESP, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSystems, GetZones, SetSpoolLock}
 
 import java.util.concurrent.TimeUnit
@@ -178,6 +179,12 @@ class HTTPManager extends Actor {
       },
       (get & path("pipeEspFiles") & parameter("docNumber") & parameter("revision") & parameter("bySpool")) { (docNumber, revision, bySpool) =>
         askFor(ActorManager.pipe, GetPipeESP(docNumber, revision, bySpool))
+      },
+
+
+      //DEVICES
+      (get & path("devices") & parameter("docNumber")) { (docNumber) =>
+        askFor(ActorManager.devices, GetDevices(docNumber))
       },
     )
   }

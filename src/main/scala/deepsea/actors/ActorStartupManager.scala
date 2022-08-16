@@ -5,6 +5,7 @@ import akka.routing.RoundRobinPool
 import deepsea.actors.ActorManager.system
 import deepsea.actors.ActorStartupManager.{DatabaseManagerStarted, HTTPManagerStarted, Start}
 import deepsea.database.DatabaseManager
+import deepsea.devices.DeviceManager
 import deepsea.elec.ElecManager
 import deepsea.files.FileManager
 import deepsea.http.HTTPManager
@@ -31,5 +32,6 @@ class ActorStartupManager extends Actor{
       ActorManager.elec = system.actorOf(RoundRobinPool(10).props(Props[ElecManager]))
       ActorManager.files = system.actorOf(RoundRobinPool(3).props(Props[FileManager]))
       ActorManager.pipe = system.actorOf(RoundRobinPool(1).props(Props[PipeManager]))
+      ActorManager.devices = system.actorOf(RoundRobinPool(1).props(Props[DeviceManager]))
   }
 }
