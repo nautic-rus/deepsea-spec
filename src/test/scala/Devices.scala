@@ -5,12 +5,6 @@ import deepsea.devices.DeviceManager.Device
 import deepsea.devices.{DeviceHelper, DeviceManager}
 import org.mongodb.scala.MongoDatabase
 import org.scalatest.funsuite.AnyFunSuite
-import io.circe.{Decoder, Encoder}
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.syntax.EncoderOps
-import local.common.Codecs
-import org.mongodb.scala.model.Filters
-import io.circe.parser.decode
 
 class Devices extends AnyFunSuite with DeviceHelper{
 
@@ -18,10 +12,12 @@ class Devices extends AnyFunSuite with DeviceHelper{
 
 
 
-  val docNumber = "200101-304-0001"
+  val docNumber = "200101-304-0003"
   val rev = "0"
   val docName: String = getSystemName(docNumber)
   val devices: List[Device] = getDevices(docNumber)
+
+  val jk = devices
 
   //todo createDevicesPDF(docNumber, docName, rev, devices)
   //todo метод для генерации PDF, входные параметры я тебе передам, параметры для теста выше
