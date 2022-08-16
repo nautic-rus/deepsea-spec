@@ -85,35 +85,37 @@ trait DeviceHelper{
           case _ => List.empty[Device]
         }
         devicesAux.filter(_.longDescr.contains("|")).foreach(d => {
-          val split = d.longDescr.split('|')
-          devices.find(x => x.id == d.elem && x.fromAux == 0) match {
-            case Some(deviceBase) =>
-              if (split.length == 4){
-                devices += Device(
-                  deviceBase.project,
-                  d.elem,
-                  deviceBase.comp,
-                  split(0),
-                  deviceBase.system,
-                  deviceBase.zone,
-                  deviceBase.elemType,
-                  deviceBase.compAbbrev,
-                  deviceBase.weight,
-                  split(1),
-                  deviceBase.elemClass,
-                  "",
-                  "",
-                  materials.find(_.code == split(1)) match {
-                    case Some(value) => value
-                    case _ => Material()
-                  },
-                  split(2),
-                  split(3).toDoubleOption.getOrElse(0),
-                  1
-                )
-              }
-            case _ => None
-          }
+          d.longDescr.split('\n').toList.foreach(l => {
+            val split = l.split('|')
+            devices.find(x => x.id == d.elem && x.fromAux == 0) match {
+              case Some(deviceBase) =>
+                if (split.length == 4){
+                  devices += Device(
+                    deviceBase.project,
+                    d.elem,
+                    deviceBase.comp,
+                    split(0),
+                    deviceBase.system,
+                    deviceBase.zone,
+                    deviceBase.elemType,
+                    deviceBase.compAbbrev,
+                    deviceBase.weight,
+                    split(1),
+                    deviceBase.elemClass,
+                    "",
+                    "",
+                    materials.find(_.code == split(1)) match {
+                      case Some(value) => value
+                      case _ => Material()
+                    },
+                    split(2),
+                    split(3).toDoubleOption.getOrElse(0),
+                    1
+                  )
+                }
+              case _ => None
+            }
+          })
         })
       case _ => List.empty[Device]
     }
