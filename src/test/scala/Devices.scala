@@ -21,5 +21,6 @@ class Devices extends AnyFunSuite with DeviceHelper{
 
   //todo createDevicesPDF(docNumber, docName, rev, devices)
   //todo метод для генерации PDF, входные параметры я тебе передам, параметры для теста выше
+  //todo userId это номер позиции, в коллекцию devices уже включеные элементы из описаний формата "304.001|NR....|796|1", они определяются по параметру fromAux = 1
 
 }
