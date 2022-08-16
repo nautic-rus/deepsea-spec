@@ -2,7 +2,7 @@ package deepsea.devices
 
 import deepsea.database.DBManager
 import deepsea.database.DatabaseManager.GetOracleConnection
-import deepsea.devices.DeviceManager.{Device, DeviceAux}
+import deepsea.devices.DeviceManager.{Accommodation, AccommodationAux}
 import deepsea.pipe.PipeManager.{Material, PipeSeg, ProjectName, SystemDef}
 import org.mongodb.scala.MongoCollection
 import org.mongodb.scala.model.Filters.{and, equal, notEqual}
@@ -13,9 +13,9 @@ import scala.concurrent.duration.{Duration, SECONDS}
 
 trait DeviceHelper{
 
-  def getDevices(docNumber: String): List[Device] ={
-    val devices = ListBuffer.empty[Device]
-    val devicesAux = ListBuffer.empty[DeviceAux]
+  def getAccommodations(docNumber: String): List[Accommodation] ={
+    val devices = ListBuffer.empty[Accommodation]
+    val devicesAux = ListBuffer.empty[AccommodationAux]
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
         val materialsNCollectionName = "materials-n"
@@ -46,7 +46,7 @@ trait DeviceHelper{
             val query = s"select * from v_element_desc where syst_userid = '$system'"
             val rs = s.executeQuery(query)
             while (rs.next()) {
-              devices += Device(
+              devices += Accommodation(
                 foranProject,
                 Option(rs.getInt("OID")).getOrElse(-1),
                 Option(rs.getInt("COMP")).getOrElse(-1),
@@ -67,7 +67,7 @@ trait DeviceHelper{
             }
             s.close()
             oracle.close()
-          case _ => List.empty[Device]
+          case _ => List.empty[Accommodation]
         }
         DBManager.GetOracleConnection(foranProject) match {
           case Some(oracle) =>
@@ -75,14 +75,14 @@ trait DeviceHelper{
             val query = s"select elem, long_descr from element_lang where elem in (select oid from v_element_desc where syst_userid = '$system') and lang = -1 and long_descr is not null"
             val rs = s.executeQuery(query)
             while (rs.next()) {
-              devicesAux += DeviceAux(
+              devicesAux += AccommodationAux(
                 Option(rs.getInt("ELEM")).getOrElse(-1),
                 Option(rs.getString("LONG_DESCR")).getOrElse(""),
               )
             }
             s.close()
             oracle.close()
-          case _ => List.empty[Device]
+          case _ => List.empty[Accommodation]
         }
         devicesAux.filter(_.longDescr.contains("|")).foreach(d => {
           d.longDescr.split('\n').toList.foreach(l => {
@@ -90,7 +90,7 @@ trait DeviceHelper{
             devices.find(x => x.id == d.elem && x.fromAux == 0) match {
               case Some(deviceBase) =>
                 if (split.length == 4){
-                  devices += Device(
+                  devices += Accommodation(
                     deviceBase.project,
                     d.elem,
                     deviceBase.comp,
@@ -117,7 +117,7 @@ trait DeviceHelper{
             }
           })
         })
-      case _ => List.empty[Device]
+      case _ => List.empty[Accommodation]
     }
     devices.toList
   }
