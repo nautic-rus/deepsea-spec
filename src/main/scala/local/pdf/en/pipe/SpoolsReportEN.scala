@@ -430,7 +430,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
 
     def setLastPage(): Unit = {
       while (currentRow != maxRow) {
-        (1 to 10).foreach(i => {
+        (1 to pointColumnWidths.length).foreach(i => {
           bodyGrid.addCell(generateDummyCell())
         })
         currentRow = currentRow + 1

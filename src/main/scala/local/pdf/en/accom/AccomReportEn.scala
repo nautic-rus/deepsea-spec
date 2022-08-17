@@ -32,7 +32,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
   )
 
   def genAccomListEnPDF(docNumber: String, docName: String, rev: String, rawData: List[Accommodation]): String = {
-    val filePath: String = Files.createTempDirectory("spoolPdf").toAbsolutePath.toString + File.separator + docNumber + "_rev" + rev + ".pdf"
+    val filePath: String = Files.createTempDirectory("accomPdf").toAbsolutePath.toString + File.separator + docNumber + "_rev" + rev + ".pdf"
     val rows: List[Item11ColumnsEN] = genRows(rawData, docNumber, rev)
     val totalRows: List[Item11ColumnsEN] = genTotalRows(rawData, docNumber, rev)
 
@@ -474,7 +474,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
 
     def setLastPage(): Unit = {
       while (currentRow != maxRow) {
-        (1 to 10).foreach(i => {
+        (1 to pointColumnWidths.length).foreach(i => {
           bodyGrid.addCell(generateDummyCell())
         })
         currentRow = currentRow + 1
@@ -532,9 +532,30 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
       if (l.nonEmpty) l.head else DrawingChess()
     }
 
-    val rows: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
 
-    rawData.foreach(row => {
+    val rowsGrouped: List[Accommodation] = {
+      val step1: ListBuffer[Accommodation] = ListBuffer.empty[Accommodation]
+      rawData.foreach(s => {
+        if (s.userId.contains("#")) {
+          val nuid = s.userId.split("#").head
+          step1 += s.copy(userId = nuid, zone = "")
+        } else {
+          step1 += s
+        }
+      })
+
+      val step2: ListBuffer[Accommodation] = ListBuffer.empty[Accommodation]
+      step1.toList.groupBy(s => s.userId).foreach(gr => {
+        var acc = 0.0
+        gr._2.foreach(item => acc = acc + item.count)
+        step2 += gr._2.head.copy(count = acc)
+      })
+
+      step2.toList
+    }
+
+    val rows: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
+    rowsGrouped.foreach(row => {
       val id = row.userId
       val mat = row.material.name
       val matDescr = row.material.description
@@ -547,7 +568,6 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
       rows += Item11ColumnsEN(A1 = id, A2 = mat, A3 = unit, A4 = qty, A5 = weight, A6 = matDescr, A7 = room, A8 = drPos, A12 = row.material.code)
 
     })
-
     rows.sortBy(s => s.A1).toList
   }
 
