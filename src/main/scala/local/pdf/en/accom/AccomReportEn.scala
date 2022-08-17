@@ -531,8 +531,6 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
       val l = findChess(docNumber, rev)
       if (l.nonEmpty) l.head else DrawingChess()
     }
-
-
     val rowsGrouped: List[Accommodation] = {
       val step1: ListBuffer[Accommodation] = ListBuffer.empty[Accommodation]
       rawData.foreach(s => {
@@ -553,7 +551,6 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
 
       step2.toList
     }
-
     val rows: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
     rowsGrouped.foreach(row => {
       val id = row.userId
