@@ -1,5 +1,6 @@
 package local.pdf.en.common
 
+import com.itextpdf.io.font.PdfEncodings
 import com.itextpdf.io.font.constants.StandardFonts
 import com.itextpdf.io.image.{ImageData, ImageDataFactory}
 import com.itextpdf.kernel.font.{PdfFont, PdfFontFactory}
@@ -9,21 +10,40 @@ import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.{Cell, Div, Image, Paragraph, Table, Text}
 import com.itextpdf.layout.properties.{HorizontalAlignment, TextAlignment, VerticalAlignment}
 import local.pdf.UtilsPDF
-import local.pdf.en.prd.PrdPartsReportEN.{dateNow, mmToPt}
 import local.pdf.ru.common.ReportCommon.gostFont
 
+import java.io.InputStream
 import scala.collection.mutable.ListBuffer
-import scala.jdk.CollectionConverters.CollectionHasAsScala
+
 
 object ReportCommonEN extends UtilsPDF {
   case class DocNameEN(code: String = "XXXXX", num: String = "210101-101-0103", name: String = "BLOCK 104. PART LIST.", lastRev: String = "0")
+
   case class Item11ColumnsEN(isHeader: Boolean = false, A1: String, A2: String = "", A3: String = "", A4: String = "", A5: String = "", A6: String = "", A7: String = "", A8: String = "", A9: String = "", A10: String = "", A11: String = "", project: String = "", A12: String = "")
 
   val defaultFontSize: Float = mmToPt(3.5)
 
-  def fontHELVETICA: PdfFont = PdfFontFactory.createFont(StandardFonts.HELVETICA)
 
-  def fontCOURIER_BOLD: PdfFont = PdfFontFactory.createFont(StandardFonts.COURIER_BOLD)
+
+  val helveticaBytes: Array[Byte] ={
+    val fontURL = this.getClass.getResource("/fonts/helveticaC.ttf");
+    val fontStream: InputStream = fontURL.openStream()
+    val b: Array[Byte] = fontStream.readAllBytes()
+    fontStream.close()
+    b
+  }
+
+  val courierCBytes: Array[Byte] = {
+    val fontURL = this.getClass.getResource("/fonts/courierC.ttf");
+    val fontStream: InputStream = fontURL.openStream()
+    val b: Array[Byte] = fontStream.readAllBytes()
+    fontStream.close()
+    b
+  }
+
+  def fontHELVETICA: PdfFont = PdfFontFactory.createFont(helveticaBytes, "Cp1251") // PdfEncodings.WINANSI)
+
+  def fontCOURIER_BOLD: PdfFont = PdfFontFactory.createFont(courierCBytes, "Cp1251") // PdfEncodings.WINANSI)
 
   def getNnauticLigoEN: Image = {
     val imageData: ImageData = ImageDataFactory.create("src/main/resources/pict/nrlogo.png")
@@ -122,8 +142,8 @@ object ReportCommonEN extends UtilsPDF {
 
 
     cellBuff.foreach(cell => {
-/*      cell.getChildren.asScala.head.asInstanceOf[Paragraph].getChildren.asScala.head.asInstanceOf[Text]
-        .setText(cellBuff.indexOf(cell).toString)*/
+      /*      cell.getChildren.asScala.head.asInstanceOf[Paragraph].getChildren.asScala.head.asInstanceOf[Text]
+              .setText(cellBuff.indexOf(cell).toString)*/
       table.addCell(cell)
     })
 
@@ -131,7 +151,7 @@ object ReportCommonEN extends UtilsPDF {
     table
   }
 
-  def fillStamp(doc: Document,docNameEN: DocNameEN, date: String = dateNow): Unit ={
+  def fillStamp(doc: Document, docNameEN: DocNameEN, date: String = dateNow): Unit = {
     doc.add(genTextFixPos("SFI-DRAWING NO.", fontHELVETICA, 3.0f, 72f, 14f, 50f))
     doc.add(genTextFixPos("REV.", fontHELVETICA, 3.0f, 187.5f, 14f, 10f))
     doc.add(genTextFixPos("SHEET", fontHELVETICA, 3.0f, 196.5f, 14f, 10f))

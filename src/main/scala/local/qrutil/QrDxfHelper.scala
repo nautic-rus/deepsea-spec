@@ -14,7 +14,6 @@ trait QrDxfHelper {
   def url2qrDXF(targetUrl: String): String = {
     val width: Int = 10
     val height: Int = 10
-
     val dxfDocument: DXFDocument = new DXFDocument("QR")
     val graphics: DXFGraphics = dxfDocument.getGraphics
 
@@ -24,6 +23,7 @@ trait QrDxfHelper {
 
     val byteMatrix: BitMatrix = qrCodeWriter.encode(targetUrl, BarcodeFormat.QR_CODE, width, height, hintMap)
     val CrunchifyWidth = byteMatrix.getWidth
+
     (0 until CrunchifyWidth).foreach(i => {
       (0 until CrunchifyWidth).foreach(j => {
         if (byteMatrix.get(i, j)) {
