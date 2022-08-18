@@ -179,6 +179,10 @@ class CNCTest extends AnyFunSuite {
     "U0105-38",
     "U0105-39",
     "U0105-40",
+    "U0104_25",
+    "U0104_33",
+
+
 
 
   )
@@ -192,7 +196,7 @@ class CNCTest extends AnyFunSuite {
 
   //c:\27\104\U0104_25_0.txt
 
-  val src: BufferedSource = Source.fromFile("c:\\27\\104\\U0104_33_0.txt")
+/*  val src: BufferedSource = Source.fromFile("c:\\27\\104\\U0104_33_0.txt")
   val lines: List[String] = src.getLines.toList
   src.close()
   val retStar: List[String] = doEssiCNC(lines, "Misha")
@@ -200,7 +204,7 @@ class CNCTest extends AnyFunSuite {
   retStar.foreach(line => pw.println(line))
   pw.close()
 
-  val h=0
+  val h=0*/
 
 
   listIn.foreach(f => {

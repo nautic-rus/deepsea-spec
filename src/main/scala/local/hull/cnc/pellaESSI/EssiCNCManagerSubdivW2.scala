@@ -5,13 +5,13 @@ import breeze.linalg.{DenseVector, norm}
 import scala.Double.NaN
 import scala.collection.mutable.ListBuffer
 
-object EssiCNCManagerSubdiv {
+object EssiCNCManagerSubdivW2 {
 
-  private val startOffset: Double = 8.0 // 60.0
+  private val startOffset: Double = 6.0 // 60.0
 
   private val minArcBugle: Double = 16 //14
 
-  private val minLineLen: Double = 7.8
+  private val minLineLen: Double = 5.5
 
 
   private val commands: List[String] = List[String]("CUTH", "CUT")
@@ -451,28 +451,12 @@ object EssiCNCManagerSubdiv {
           case Left(p: Point) => {
             val dx = p.x - currPos.x
             val dy = p.y - currPos.y
+            val len = norm(DenseVector[Double](dx, dy))
 
-
-   /*         if (len > minLineLen && contour.name.equals("CUTH")) {
+            if (len > minLineLen) {
               buff += Point(dx, dy).toESSI
               currPos = p
-            }*/
-
-            contour.name match {
-              case "CUTH"=>{
-                val len = norm(DenseVector[Double](dx, dy))
-                if (len > minLineLen) {
-                  buff += Point(dx, dy).toESSI
-                  currPos = p
-                }
-              }
-              case "CUT"=>{
-                buff += Point(dx, dy).toESSI
-                currPos = p
-              }
-              case _=>None
             }
-
           }
         }
       })
