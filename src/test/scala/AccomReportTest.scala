@@ -8,8 +8,8 @@ import org.scalatest.funsuite.AnyFunSuite
 class AccomReportTest extends AnyFunSuite with DeviceHelper {
 
 
-  val cess: List[DrawingChess] =findChess("200101-304-001","0")
-  val docNumber = "200101-304-0001"
+  val cess: List[DrawingChess] =findChess("200101-304-0003","0")
+  val docNumber = "200101-304-0003"
   val rev = "0"
   val docName: String=getSystemName(docNumber)
   val accoms: List[Accommodation] = getAccommodations(docNumber)

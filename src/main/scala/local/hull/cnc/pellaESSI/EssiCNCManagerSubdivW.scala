@@ -5,7 +5,7 @@ import breeze.linalg.{DenseVector, norm}
 import scala.Double.NaN
 import scala.collection.mutable.ListBuffer
 
-object EssiCNCManagerSubdiv {
+object EssiCNCManagerSubdivW {
 
   private val startOffset: Double =6.0// 60.0
 
@@ -260,7 +260,7 @@ object EssiCNCManagerSubdiv {
 
 
       //buffer += Point(in(i) * 10, in(i + 1) * 10, offset.x * 10, offset.y * 10)
-      buffer += Point(x-ox, y-oy, ox, oy)
+      buffer += Point(x, y, ox, oy)
     })
     buffer.toList
   }
