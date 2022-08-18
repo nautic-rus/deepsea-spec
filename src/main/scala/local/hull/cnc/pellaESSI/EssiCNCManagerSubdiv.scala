@@ -453,24 +453,26 @@ object EssiCNCManagerSubdiv {
             val dy = p.y - currPos.y
 
 
-   /*         if (len > minLineLen && contour.name.equals("CUTH")) {
-              buff += Point(dx, dy).toESSI
-              currPos = p
-            }*/
-
+            /*         if (len > minLineLen && contour.name.equals("CUTH")) {
+                       buff += Point(dx, dy).toESSI
+                       currPos = p
+                     }*/
+            val len = norm(DenseVector[Double](dx, dy))
             contour.name match {
-              case "CUTH"=>{
-                val len = norm(DenseVector[Double](dx, dy))
+              case "CUTH" => {
+
                 if (len > minLineLen) {
                   buff += Point(dx, dy).toESSI
                   currPos = p
                 }
               }
-              case "CUT"=>{
-                buff += Point(dx, dy).toESSI
-                currPos = p
+              case "CUT" => {
+                if(len>minLineLen/2.0){
+                  buff += Point(dx, dy).toESSI
+                  currPos = p
+                }
               }
-              case _=>None
+              case _ => None
             }
 
           }
@@ -478,13 +480,13 @@ object EssiCNCManagerSubdiv {
       })
 
 
-/*      val dxLst = freeMovePoint.x - currPos.x
+      val dxLst = freeMovePoint.x - currPos.x
       val dyLst = freeMovePoint.y - currPos.y
       val len = norm(DenseVector[Double](dxLst, dyLst))
       if (len > 2.0) {
         buff += Point(dxLst, dyLst).toESSI
         currPos = freeMovePoint
-      }*/
+      }
 
       buff += "8"
 
