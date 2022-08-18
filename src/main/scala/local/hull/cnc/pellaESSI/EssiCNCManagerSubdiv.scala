@@ -477,15 +477,14 @@ object EssiCNCManagerSubdiv {
         }
       })
 
-      // check closed contour
-      val dxLst = freeMovePoint.x - currPos.x
+
+/*      val dxLst = freeMovePoint.x - currPos.x
       val dyLst = freeMovePoint.y - currPos.y
       val len = norm(DenseVector[Double](dxLst, dyLst))
-      //println(len)
       if (len > 2.0) {
         buff += Point(dxLst, dyLst).toESSI
         currPos = freeMovePoint
-      }
+      }*/
 
       buff += "8"
 
