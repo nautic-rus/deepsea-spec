@@ -11,7 +11,7 @@ import deepsea.pipe.PipeManager.Material
 import local.common.DBRequests.findChess
 import local.domain.CommonTypes.DrawingChess
 import local.pdf.UtilsPDF
-import local.pdf.en.common.ReportCommonEN.{DocNameEN, Item11ColumnsEN, border5mm, defaultFontSize, fillStamp, fontHELVETICA, getNnauticLigoEN, stampEN}
+import local.pdf.en.common.ReportCommonEN.{DocNameEN, Item11ColumnsEN, addZeros, border5mm, defaultFontSize, fillStamp, fontHELVETICA, getNnauticLigoEN, stampEN}
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, OutputStream}
 import java.nio.file.Files
@@ -552,7 +552,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
     }
     val rows: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
     rowsGrouped.foreach(row => {
-      val id = row.userId
+      val id =addZeros(row.userId)
       val mat = row.material.name(lang)
       val matDescr = row.material.description(lang)
 

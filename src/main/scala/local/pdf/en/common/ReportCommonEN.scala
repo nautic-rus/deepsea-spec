@@ -26,7 +26,7 @@ object ReportCommonEN extends UtilsPDF {
 
 
   val helveticaBytes: Array[Byte] ={
-    val fontURL = this.getClass.getResource("/fonts/helveticaC.ttf");
+    val fontURL = this.getClass.getResource("/fonts/ArialCyr.ttf");
     val fontStream: InputStream = fontURL.openStream()
     val b: Array[Byte] = fontStream.readAllBytes()
     fontStream.close()
@@ -168,6 +168,26 @@ object ReportCommonEN extends UtilsPDF {
     div.add(new Paragraph(txt))
     div.setFixedPosition(mmToPt(lMM), mmToPt(bMM), mmToPt(wMM))
     div
+  }
+
+  def addZeros(in: String): String = {
+    if (in.contains(".")) {
+      val splited = in.split("\\.")
+      splited.head.length match {
+        case 1 => "00" + in
+        case 2 => "0" + in
+        //case 3 => "0" + in
+        case _ => in
+      }
+
+    } else {
+      in.length match {
+        case 1 => "00" + in
+        case 2 => "0" + in
+        //case 3 => "0" + in
+        case _ => in
+      }
+    }
   }
 
 }
