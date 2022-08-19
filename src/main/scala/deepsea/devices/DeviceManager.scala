@@ -23,7 +23,7 @@ object DeviceManager{
   case class AccommodationAux(elem: Int, longDescr: String)
 
   case class GetDevices(docNumber: String)
-  case class GetDevicesESP(docNumber: String, revision: String)
+  case class GetDevicesESP(docNumber: String, revision: String, lang: String = "en")
 }
 class DeviceManager extends Actor with DeviceHelper with Codecs{
 
@@ -32,10 +32,10 @@ class DeviceManager extends Actor with DeviceHelper with Codecs{
   override def receive: Receive = {
     case GetDevices(docNumber) =>
       sender() ! getAccommodations(docNumber).asJson.noSpaces
-    case GetDevicesESP(docNumber, revision) =>
+    case GetDevicesESP(docNumber, revision, lang) =>
       val docName: String = getSystemName(docNumber)
       val devices: List[Accommodation] = getAccommodations(docNumber)
-      val file = genAccomListEnPDF(docNumber, docName, revision, devices)
+      val file = genAccomListEnPDF(docNumber, docName, revision, devices, lang)
       Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
         case url: String => sender() ! url.asJson.noSpaces
         case _ => sender() ! "error".asJson.noSpaces

@@ -186,8 +186,8 @@ class HTTPManager extends Actor {
       (get & path("devices") & parameter("docNumber")) { (docNumber) =>
         askFor(ActorManager.devices, GetDevices(docNumber))
       },
-      (get & path("devicesEspFiles") & parameter("docNumber") & parameter("revision")) { (docNumber, revision) =>
-        askFor(ActorManager.devices, GetDevicesESP(docNumber, revision))
+      (get & path("devicesEspFiles") & parameter("docNumber") & parameter("revision") & parameter("lang")) { (docNumber, revision, lang) =>
+        askFor(ActorManager.devices, GetDevicesESP(docNumber, revision, lang))
       },
     )
   }
