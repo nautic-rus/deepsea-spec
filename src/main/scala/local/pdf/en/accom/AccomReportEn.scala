@@ -37,14 +37,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
     val filePath: String = Files.createTempDirectory("accomPdf").toAbsolutePath.toString + File.separator + docNumber + "_rev" + rev + ".pdf"
     val rows: List[Item11ColumnsEN] = genRows(rawData, docNumber, rev,lang)
     val totalRows: List[Item11ColumnsEN] = genTotalRows(rawData, lang)
-
-    //todo replace name and descr according to lang
-    val name = rawData.head.material.name(lang)
-    val descr = rawData.head.material.description(lang)
-    //todo replace name and descr according to lang
-
     val dn = DocNameEN(num = docNumber, name = docName, lastRev = if (rev != "") rev else "0")
-
     processPDF(dn, filePath, rows, totalRows)
     filePath
   }
