@@ -45,7 +45,24 @@ object PipeManager{
                        note: String = "",
                        comment: String = "",
                        coefficient: Double = 1,
-                       id: String = UUID.randomUUID().toString)
+                       id: String = UUID.randomUUID().toString,
+                       translations: List[MaterialTranslation] = List.empty[MaterialTranslation],
+                       itt: Int = 0,
+                       approved: Int = 0){
+    def name(lang: String = "en"): String ={
+      translations.find(_.lang == lang) match {
+        case Some(translation) => translation.name
+        case _ => name
+      }
+    }
+    def description(lang: String = "en"): String ={
+      translations.find(_.lang == lang) match {
+        case Some(translation) => translation.description
+        case _ => description
+      }
+    }
+  }
+  case class MaterialTranslation(lang: String, name: String, description: String)
   case class ProjectName(id: String, rkd: String, pdsp: String, foran: String)
   case class SystemDef(project: String, name: String, descr: String)
   case class SpoolLock(issueId: Int, docNumber: String, spool: String, var lock: Int, user: String, var date: Long)

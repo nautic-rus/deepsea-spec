@@ -75,6 +75,9 @@ trait Codecs {
   implicit val DeviceDecoder: Decoder[Accommodation] = deriveDecoder[Accommodation]
   implicit val DeviceEncoder: Encoder[Accommodation] = deriveEncoder[Accommodation]
 
+  implicit val MaterialTranslationDecoder: Decoder[MaterialTranslation] = deriveDecoder[MaterialTranslation]
+  implicit val MaterialTranslationEncoder: Encoder[MaterialTranslation] = deriveEncoder[MaterialTranslation]
+
 
   //KOKOVIN
 
@@ -171,6 +174,7 @@ trait Codecs {
     classOf[PipeSegBilling],
     classOf[SpoolLock],
     classOf[Accommodation],
+    classOf[MaterialTranslation],
 
     //KOKOVIN
     classOf[EleComplect],
