@@ -13,7 +13,7 @@ class AccomReportTest extends AnyFunSuite with DeviceHelper {
   val rev = "0"
   val docName: String=getSystemName(docNumber)
   val accoms: List[Accommodation] = getAccommodations(docNumber)
-  val ret: String =genAccomListEnPDF(docNumber,docName,rev,accoms)
+  val ret: String =genAccomListEnPDF(docNumber,docName,rev,accoms,"ru")
   println(ret)
 
 

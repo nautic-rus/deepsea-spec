@@ -12,6 +12,7 @@ import local.common.DBRequests.findChess
 import local.domain.CommonTypes.DrawingChess
 import local.pdf.UtilsPDF
 import local.pdf.en.common.ReportCommonEN.{DocNameEN, Item11ColumnsEN, border5mm, defaultFontSize, fillStamp, fontHELVETICA, getNnauticLigoEN, stampEN}
+
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, OutputStream}
 import java.nio.file.Files
 import scala.collection.mutable.ListBuffer
@@ -31,10 +32,11 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
     mmToPt(11) + 0 //207
   )
 
-  def genAccomListEnPDF(docNumber: String, docName: String, rev: String, rawData: List[Accommodation], lang: String): String = {
+
+  def genAccomListEnPDF(docNumber: String, docName: String, rev: String, rawData: List[Accommodation], lang: String ): String = {
     val filePath: String = Files.createTempDirectory("accomPdf").toAbsolutePath.toString + File.separator + docNumber + "_rev" + rev + ".pdf"
-    val rows: List[Item11ColumnsEN] = genRows(rawData, docNumber, rev)
-    val totalRows: List[Item11ColumnsEN] = genTotalRows(rawData, docNumber, rev)
+    val rows: List[Item11ColumnsEN] = genRows(rawData, docNumber, rev,lang)
+    val totalRows: List[Item11ColumnsEN] = genTotalRows(rawData, lang)
 
     //todo replace name and descr according to lang
     val name = rawData.head.material.name(lang)
@@ -530,7 +532,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
 
   }
 
-  private def genRows(rawData: List[Accommodation], docNumber: String, rev: String): List[Item11ColumnsEN] = {
+  private def genRows(rawData: List[Accommodation], docNumber: String, rev: String, lang:String): List[Item11ColumnsEN] = {
     val chess: DrawingChess = {
       val l = findChess(docNumber, rev)
       if (l.nonEmpty) l.head else DrawingChess()
@@ -558,8 +560,8 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
     val rows: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
     rowsGrouped.foreach(row => {
       val id = row.userId
-      val mat = row.material.name
-      val matDescr = row.material.description
+      val mat = row.material.name(lang)
+      val matDescr = row.material.description(lang)
 
       val unit = formatUnits(row.material)
       val qty = if (unit.equals("pcs")) row.count.toInt.toString else String.format("%.2f", row.count)
@@ -572,7 +574,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
     rows.sortBy(s => s.A1).toList
   }
 
-  private def genTotalRows(rawData: List[Accommodation], docNumber: String, rev: String): List[Item11ColumnsEN] = {
+  private def genTotalRows(rawData: List[Accommodation], lang:String): List[Item11ColumnsEN] = {
     val rows: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
     rawData.groupBy(p => (p.units, p.material.code)).foreach(gr => {
       val row = gr._2.head
@@ -580,8 +582,9 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
       val qtyA = gr._2.map(_.count).sum
       val qty = if (unit.equals("pcs")) qtyA.toInt.toString else String.format("%.2f", qtyA)
       val weight = formatWGTDouble(row.material.singleWeight * qtyA)
-      val matDescr = row.material.description
-      rows += Item11ColumnsEN(A1 = "", A2 = row.material.name, A3 = unit, A4 = qty, A5 = weight, A6 = matDescr, A12 = row.material.code)
+      val mat=row.material.name(lang)
+      val matDescr = row.material.description(lang)
+      rows += Item11ColumnsEN(A1 = "", A2 = mat, A3 = unit, A4 = qty, A5 = weight, A6 = matDescr, A12 = row.material.code)
     })
     rows.sortBy(s => s.A1).toList
   }
