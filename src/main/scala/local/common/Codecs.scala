@@ -2,7 +2,7 @@ package local.common
 
 import deepsea.devices.DeviceManager.Accommodation
 import deepsea.hull.HullManager._
-import deepsea.pipe.PipeManager.{Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SpoolLock, SystemDef}
+import deepsea.pipe.PipeManager.{Material, MaterialTranslation, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SpoolLock, SystemDef}
 import io.circe.{Decoder, Encoder}
 import io.circe.parser._
 import io.circe.{Decoder, Encoder}

@@ -10,8 +10,6 @@ class Accomodation extends AnyFunSuite with DeviceHelper{
 
   val mongo: Option[MongoDatabase] = DBManager.GetMongoConnection() //todo need for testing
 
-
-
   val docNumber = "200101-304-0001"
   val rev = "0"
   val docName: String = getSystemName(docNumber)
