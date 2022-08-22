@@ -110,7 +110,7 @@ trait DeviceHelper{
                     deviceBase.project,
                     d.id,
                     deviceBase.comp,
-                    split(0),
+                    deviceBase.userId + '.' + split(0),
                     deviceBase.system,
                     deviceBase.zone,
                     deviceBase.elemType,
