@@ -1,6 +1,6 @@
 package local.common
 
-import deepsea.devices.DeviceManager.Accommodation
+import deepsea.devices.DeviceManager.{ Device, DeviceAux}
 import deepsea.hull.HullManager._
 import deepsea.pipe.PipeManager.{Material, MaterialTranslation, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SpoolLock, SystemDef}
 import io.circe.{Decoder, Encoder}
@@ -72,8 +72,8 @@ trait Codecs {
   implicit val SpoolLockDecoder: Decoder[SpoolLock] = deriveDecoder[SpoolLock]
   implicit val SpoolLockEncoder: Encoder[SpoolLock] = deriveEncoder[SpoolLock]
 
-  implicit val DeviceDecoder: Decoder[Accommodation] = deriveDecoder[Accommodation]
-  implicit val DeviceEncoder: Encoder[Accommodation] = deriveEncoder[Accommodation]
+  implicit val DeviceDecoder: Decoder[Device] = deriveDecoder[Device]
+  implicit val DeviceEncoder: Encoder[Device] = deriveEncoder[Device]
 
   implicit val MaterialTranslationDecoder: Decoder[MaterialTranslation] = deriveDecoder[MaterialTranslation]
   implicit val MaterialTranslationEncoder: Encoder[MaterialTranslation] = deriveEncoder[MaterialTranslation]
@@ -173,7 +173,7 @@ trait Codecs {
     classOf[SystemDef],
     classOf[PipeSegBilling],
     classOf[SpoolLock],
-    classOf[Accommodation],
+    classOf[Device],
     classOf[MaterialTranslation],
 
     //KOKOVIN

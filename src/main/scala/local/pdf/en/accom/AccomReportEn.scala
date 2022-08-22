@@ -6,7 +6,7 @@ import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.{Cell, Paragraph, Table, Text}
 import com.itextpdf.layout.properties.{HorizontalAlignment, TextAlignment, VerticalAlignment}
 import deepsea.devices.DeviceHelper
-import deepsea.devices.DeviceManager.Accommodation
+import deepsea.devices.DeviceManager.Device
 import deepsea.pipe.PipeManager.Material
 import local.common.DBRequests.findChess
 import local.domain.CommonTypes.DrawingChess
@@ -33,7 +33,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
   )
 
 
-  def genAccomListEnPDF(docNumber: String, docName: String, rev: String, rawData: List[Accommodation], lang: String ): String = {
+  def genAccomListEnPDF(docNumber: String, docName: String, rev: String, rawData: List[Device], lang: String ): String = {
     val filePath: String = Files.createTempDirectory("accomPdf").toAbsolutePath.toString + File.separator + docNumber + "_rev" + rev + ".pdf"
     val rows: List[Item11ColumnsEN] = genRows(rawData, docNumber, rev,lang)
     val totalRows: List[Item11ColumnsEN] = genTotalRows(rawData, lang)
@@ -525,13 +525,13 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
 
   }
 
-  private def genRows(rawData: List[Accommodation], docNumber: String, rev: String, lang:String): List[Item11ColumnsEN] = {
+  private def genRows(rawData: List[Device], docNumber: String, rev: String, lang:String): List[Item11ColumnsEN] = {
     val chess: DrawingChess = {
       val l = findChess(docNumber, rev)
       if (l.nonEmpty) l.head else DrawingChess()
     }
-    val rowsGrouped: List[Accommodation] = {
-      val step1: ListBuffer[Accommodation] = ListBuffer.empty[Accommodation]
+    val rowsGrouped: List[Device] = {
+      val step1: ListBuffer[Device] = ListBuffer.empty[Device]
       rawData.foreach(s => {
         if (s.userId.contains("#")) {
           val nuid = s.userId.split("#").head
@@ -541,7 +541,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
         }
       })
 
-      val step2: ListBuffer[Accommodation] = ListBuffer.empty[Accommodation]
+      val step2: ListBuffer[Device] = ListBuffer.empty[Device]
       step1.toList.groupBy(s => s.userId).foreach(gr => {
         var acc = 0.0
         gr._2.foreach(item => acc = acc + item.count)
@@ -567,7 +567,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
     rows.sortBy(s => s.A1).toList
   }
 
-  private def genTotalRows(rawData: List[Accommodation], lang:String): List[Item11ColumnsEN] = {
+  private def genTotalRows(rawData: List[Device], lang:String): List[Item11ColumnsEN] = {
     val rows: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
     rawData.groupBy(p => (p.units, p.material.code)).foreach(gr => {
       val row = gr._2.head
@@ -590,7 +590,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
     }
   }
 
-  private def formatWGT(ps: Accommodation): String = {
+  private def formatWGT(ps: Device): String = {
     val qty = if (ps.count == 0.0) 1 else ps.count
     val w = ps.material.singleWeight //* qty
     if (w < 0.01) " 0.01" else String.format("%.2f", w)

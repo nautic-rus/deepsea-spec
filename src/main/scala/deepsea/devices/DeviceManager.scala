@@ -4,7 +4,7 @@ import akka.actor.Actor
 import akka.pattern.ask
 import akka.util.Timeout
 import deepsea.actors.ActorManager
-import deepsea.devices.DeviceManager.{Accommodation, GetDevices, GetDevicesESP}
+import deepsea.devices.DeviceManager.{AddDeviceToSystem, Device, GetDevices, GetDevicesESP}
 import deepsea.files.FileManager.GenerateUrl
 import deepsea.pipe.PipeManager.Material
 import io.circe.{Decoder, Encoder}
@@ -19,11 +19,12 @@ import java.util.concurrent.TimeUnit
 import scala.concurrent.Await
 
 object DeviceManager{
-  case class Accommodation(project: String, id: Int, comp: Int, userId: String, system: String, zone: String, elemType: String, compAbbrev: String, weight: Double, stock: String, elemClass: Int, desc1: String, desc2: String, var material: Material = Material(), units: String = "796", count: Double = 1, fromAux: Int = 0)
-  case class AccommodationAux(elem: Int, longDescr: String)
+  case class Device(project: String, id: Int, comp: Int, userId: String, system: String, zone: String, elemType: String, compAbbrev: String, weight: Double, stock: String, elemClass: Int, desc1: String, desc2: String, var material: Material = Material(), units: String = "796", count: Double = 1, fromAux: Int = 0)
+  case class DeviceAux(id: Int, descr: String)
 
   case class GetDevices(docNumber: String)
   case class GetDevicesESP(docNumber: String, revision: String, lang: String = "en")
+  case class AddDeviceToSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String = "")
 }
 class DeviceManager extends Actor with DeviceHelper with Codecs{
 
@@ -31,15 +32,17 @@ class DeviceManager extends Actor with DeviceHelper with Codecs{
 
   override def receive: Receive = {
     case GetDevices(docNumber) =>
-      sender() ! getAccommodations(docNumber).asJson.noSpaces
+      sender() ! getDevices(docNumber).asJson.noSpaces
     case GetDevicesESP(docNumber, revision, lang) =>
       val docName: String = getSystemName(docNumber)
-      val devices: List[Accommodation] = getAccommodations(docNumber)
+      val devices: List[Device] = getDevices(docNumber)
       val file = genAccomListEnPDF(docNumber, docName, revision, devices, lang)
       Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
         case url: String => sender() ! url.asJson.noSpaces
         case _ => sender() ! "error".asJson.noSpaces
       }
+    case AddDeviceToSystem(docNumber, stock, units, count, label, forLabel) =>
+
     case _ => None
   }
 }
