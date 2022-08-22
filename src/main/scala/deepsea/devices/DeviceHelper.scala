@@ -88,7 +88,7 @@ trait DeviceHelper{
         DBManager.GetOracleConnection(foranProject) match {
           case Some(oracle) =>
             val s = oracle.createStatement()
-            val query = s"select long_descr from systems_lang where system in (select oid from systems where name = '$system')"
+            val query = s"select system, descr from systems_lang where system in (select oid from systems where name = '$system'"
             val rs = s.executeQuery(query)
             while (rs.next()) {
               devicesAux += DeviceAux(
