@@ -46,4 +46,11 @@ class DeviceManager extends Actor with DeviceHelper with Codecs{
       sender() ! "success".asJson.noSpaces
     case _ => None
   }
+  def removeLeftZeros(input: String): String ={
+    var res = input
+    while (res != "" && res.head == '0'){
+      res = res.substring(1, res.length)
+    }
+    res
+  }
 }
