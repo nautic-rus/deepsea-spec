@@ -64,7 +64,9 @@ trait DeviceHelper{
                 materials.find(_.code == Option(rs.getString("STOCK_CODE")).getOrElse("")) match {
                   case Some(value) => value
                   case _ => Material()
-                })
+                },
+                Option(rs.getString("USERID")).getOrElse(""),
+                "")
             }
             s.close()
             oracle.close()
@@ -124,9 +126,11 @@ trait DeviceHelper{
                       case Some(value) => value
                       case _ => Material()
                     },
+                    split(0),
+                    deviceBase.userId,
                     split(2),
                     split(3).toDoubleOption.getOrElse(0),
-                    1
+                    1,
                   )
                 }
               case _ => None
@@ -155,6 +159,8 @@ trait DeviceHelper{
                   case Some(value) => value
                   case _ => Material()
                 },
+                split(0),
+                "",
                 split(2),
                 split(3).toDoubleOption.getOrElse(0),
                 1

@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit
 import scala.concurrent.Await
 
 object DeviceManager{
-  case class Device(project: String, id: Int, comp: Int, userId: String, system: String, zone: String, elemType: String, compAbbrev: String, weight: Double, stock: String, elemClass: Int, desc1: String, desc2: String, var material: Material = Material(), units: String = "796", count: Double = 1, fromAux: Int = 0)
+  case class Device(project: String, id: Int, comp: Int, userId: String, system: String, zone: String, elemType: String, compAbbrev: String, weight: Double, stock: String, elemClass: Int, desc1: String, desc2: String, var material: Material = Material(), baseUserId: String, parentUserId: String, units: String = "796", count: Double = 1, fromAux: Int = 0)
   case class DeviceAux(id: Int, descr: String)
 
   case class GetDevices(docNumber: String)
