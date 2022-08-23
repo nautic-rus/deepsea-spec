@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit
 import scala.concurrent.Await
 
 object DeviceManager{
-  case class Device(project: String, id: Int, comp: Int, userId: String, system: String, zone: String, elemType: String, compAbbrev: String, weight: Double, stock: String, elemClass: Int, desc1: String, desc2: String, var material: Material = Material(), origUserId: String, parentUserId: String, units: String = "796", count: Double = 1, fromAux: Int = 0)
+  case class Device(project: String, id: Int, comp: Int, var userId: String, system: String, zone: String, elemType: String, compAbbrev: String, weight: Double, stock: String, elemClass: Int, desc1: String, desc2: String, var material: Material = Material(), origUserId: String, parentUserId: String, units: String = "796", count: Double = 1, fromAux: Int = 0)
   case class DeviceAux(id: Int, descr: String)
 
   case class GetDevices(docNumber: String)
@@ -35,7 +35,7 @@ class DeviceManager extends Actor with DeviceHelper with Codecs{
       sender() ! getDevices(docNumber).asJson.noSpaces
     case GetDevicesESP(docNumber, revision, lang) =>
       val docName: String = getSystemName(docNumber)
-      val devices: List[Device] = getDevices(docNumber)
+      val devices: List[Device] = getDevices(docNumber).tapEach(x => x.userId = x.origUserId)
       val file = genAccomListEnPDF(docNumber, docName, revision, devices, lang)
       Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
         case url: String => sender() ! url.asJson.noSpaces
