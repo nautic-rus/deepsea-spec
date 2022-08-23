@@ -42,7 +42,8 @@ class DeviceManager extends Actor with DeviceHelper with Codecs{
         case _ => sender() ! "error".asJson.noSpaces
       }
     case AddDeviceToSystem(docNumber, stock, units, count, label, forLabel) =>
-
+      addDeviceToSystem(docNumber, stock, units, count, label, forLabel)
+      sender() ! "success".asJson.noSpaces
     case _ => None
   }
 }
