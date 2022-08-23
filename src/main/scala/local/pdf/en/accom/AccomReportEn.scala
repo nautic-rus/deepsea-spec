@@ -552,7 +552,8 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
     }
     val rows: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
     rowsGrouped.foreach(row => {
-      val id =addZeros(row.userId)
+      //val id =addZeros(row.userId)
+      val id =(row.userId)
       val mat = row.material.name(lang)
       val matDescr = row.material.description(lang)
 
