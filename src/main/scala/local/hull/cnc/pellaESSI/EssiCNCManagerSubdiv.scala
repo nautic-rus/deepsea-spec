@@ -487,7 +487,7 @@ object EssiCNCManagerSubdiv {
       val dxLst = freeMovePoint.x - currPos.x
       val dyLst = freeMovePoint.y - currPos.y
       val len = norm(DenseVector[Double](dxLst, dyLst))
-      if (len > 2.0 && len < 50.0) {
+      if (len > 2.0 && len < 50.1) {
         buff += Point(dxLst, dyLst).toESSI
         currPos = freeMovePoint
       }
