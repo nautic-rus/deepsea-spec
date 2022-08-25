@@ -416,12 +416,16 @@ object EssiCNCManagerSubdiv {
       val dx = pOffset.x - currPos.x
       val dy = pOffset.y - currPos.y
 
+
       if ((Math.abs(dx) + Math.abs(dy)) / 2 > 1) {
-        buff += Point(dx - .5, dy - .5).toESSI
+        buff += Point(dx, dy).toESSI
         currPos = pOffset
       }
-
-      buff += "+5+5"
+      /*      if ((Math.abs(dx) + Math.abs(dy)) / 2 > 1) {
+              buff += Point(dx - .5, dy - .5).toESSI
+              currPos = pOffset
+            }
+            buff += "+5+5"*/
       buff += "6"
       buff += "7"
       buff += "29" //left compensation 30//rightcompensation
@@ -467,7 +471,7 @@ object EssiCNCManagerSubdiv {
                 }
               }
               case "CUT" => {
-                if(len>minLineLen/2.0){
+                if (len > minLineLen / 2.0) {
                   buff += Point(dx, dy).toESSI
                   currPos = p
                 }
@@ -483,7 +487,7 @@ object EssiCNCManagerSubdiv {
       val dxLst = freeMovePoint.x - currPos.x
       val dyLst = freeMovePoint.y - currPos.y
       val len = norm(DenseVector[Double](dxLst, dyLst))
-      if (len > 2.0) {
+      if (len > 2.0 && len < 50.0) {
         buff += Point(dxLst, dyLst).toESSI
         currPos = freeMovePoint
       }
