@@ -23,8 +23,8 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
 
   private val pointColumnWidths = Array(
     mmToPt(15),
-    mmToPt(100),
-    mmToPt(24),
+    mmToPt(90),
+    mmToPt(34),
     mmToPt(10),
     mmToPt(15),
     mmToPt(20),
