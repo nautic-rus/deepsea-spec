@@ -1,4 +1,4 @@
-import deepsea.devices.DeviceManager.Accommodation
+
 import deepsea.devices.{DeviceHelper}
 import local.common.DBRequests.findChess
 import local.domain.CommonTypes.DrawingChess
@@ -12,9 +12,9 @@ class AccomReportTest extends AnyFunSuite with DeviceHelper {
   val docNumber = "200101-304-0001"
   val rev = "0"
   val docName: String=getSystemName(docNumber)
-  val accoms: List[Accommodation] = getAccommodations(docNumber)
-  val ret: String =genAccomListEnPDF(docNumber,docName,rev,accoms,"ru")
-  println(ret)
+  //val accoms: List[Accommodation] = getAccommodations(docNumber)
+  //val ret: String =genAccomListEnPDF(docNumber,docName,rev,accoms,"ru")
+  //println(ret)
 
 
 
