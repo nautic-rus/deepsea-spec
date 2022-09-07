@@ -182,10 +182,8 @@ class CNCTest extends AnyFunSuite {
 
 
 
-    "U0104-26",
-    "U0104-29",
-    "U0104-30",
-    "U0104-33",
+
+    "U0104-19"
 
 
 

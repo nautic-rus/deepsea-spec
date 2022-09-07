@@ -22,7 +22,8 @@ object BillManager extends BillHelper with Codecs {
                               profileForecast: Int = 0,
                               partsweight: Double = 0.0,
                               isDisabled: Boolean = true,
-                              stock: Int = 0
+                              stock: Int = 0,
+                              stockCode: String = ""
                             )
 
   case class PlateAnalitic(
@@ -40,7 +41,8 @@ object BillManager extends BillHelper with Codecs {
                             isDisabled: Boolean = true,
                             oneSheetWeight: Int = 0,
                             wastages: Double = 0.0,
-                            wastagesTotal: List[ForanScrap] = List.empty[ForanScrap]
+                            wastagesTotal: List[ForanScrap] = List.empty[ForanScrap],
+                            stockCode: String = ""
                           )
 
   case class ProfileNestBill(
@@ -65,7 +67,8 @@ object BillManager extends BillHelper with Codecs {
                               BLOCK_OID: Int = 0,
                               TOTAL_BL_SCRAP: Double = 0.0,
                               TOTAL_KSE_SCRAP: Double = 0.0,
-                              STOCK: Int = 0
+                              STOCK: Int = 0,
+                              STOCK_CODE: String = ""
                             )
 
   case class PlateNestBill(
@@ -155,6 +158,14 @@ object BillManager extends BillHelper with Codecs {
         val mat = nestGRO.KQ
         val stock = nestGRO.STOCK
 
+        //modification by Bogdan
+        val stockCode = nest.find(_.KSE == realPart.KSE) match {
+          case Some(value) => value.STOCK_CODE
+          case _ => ""
+        }
+        //modification by Bogdan
+
+
         val isDisabled = isMatDisabled(mat, mats)
         val section = nests.head.TP
         val scantling = genScantling(nestGRO.WH, nestGRO.WT, nestGRO.FH, nestGRO.FT)
@@ -169,7 +180,7 @@ object BillManager extends BillHelper with Codecs {
         }
 
 
-        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght, realPart.GROWWEIGHT, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT, isDisabled, stock)
+        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght, realPart.GROWWEIGHT, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT, isDisabled, stock, stockCode)
       } else {
         val kse = realPart.KSE
         val mat = realPart.MATERIAL
@@ -180,6 +191,15 @@ object BillManager extends BillHelper with Codecs {
         val grossLenght = realPart.GROWLEN
         val count = 0
         val scrap = 0
+
+        //modification by Bogdan
+        val stockCode = nest.find(_.KSE == realPart.KSE) match {
+          case Some(value) => value.STOCK_CODE
+          case _ => ""
+        }
+        //modification by Bogdan
+
+
         val profileForecast: Int = {
 
           if (realPart.GROWLEN <= 0.0d) {
@@ -189,7 +209,7 @@ object BillManager extends BillHelper with Codecs {
           }
         }
 
-        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght * 1000, realPart.GROWWEIGHT, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT, isDisabled, stock)
+        buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght * 1000, realPart.GROWWEIGHT, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT, isDisabled, stock, stockCode)
       }
     })
     buff.sortBy(s => (s.mat, s.section, s.scantling)).toList
@@ -228,6 +248,12 @@ object BillManager extends BillHelper with Codecs {
         val wastagesWeight: Double = wastagesToatal.map(_.WEIGHT).sum
         val scrap = calculatePlateScraps(nestsByMat, foranScraps, oneSheetWeight, globNest)
 
+        //modification by Bogdan
+        val stdPlate = findSuitableStdPlate(mat, realPrat.THICKNESS, stdPlates, mats)
+        val stockCode = stdPlate.STORAGE_CODE
+        //modification by Bogdan
+
+
         val plateForecas: Int = {
           val partsToNestWeight: Double = {
             val v: Double = realPrat.WEIGHT - nestedPartsWeight
@@ -238,7 +264,7 @@ object BillManager extends BillHelper with Codecs {
           ret
         }
         val wastages = wastagesWeight / oneSheetWeight
-        buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedParts, nestedPartsWeight, realPartsCount, realWeight, plateForecas, stock, isDisabled, oneSheetWeight, wastages, wastagesToatal)
+        buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedParts, nestedPartsWeight, realPartsCount, realWeight, plateForecas, stock, isDisabled, oneSheetWeight, wastages, wastagesToatal, stockCode)
 
       } else {
         val mat = realPrat.MAT
@@ -259,7 +285,12 @@ object BillManager extends BillHelper with Codecs {
         val nestedPatrs = 0
         val nestedPartsWeight: Double = 0.0
         val stock = stdPlate.STOCK
-        buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedPatrs, nestedPartsWeight, realPartsCount, realWeight, plateForecas, stock, isDisabled, oneSheetWeight)
+
+        //modification by Bogdan
+        val stockCode = stdPlate.STORAGE_CODE
+        //modification by Bogdan
+
+        buff += PlateAnalitic(KPL, mat, scantling, count, scrap, nestedPatrs, nestedPartsWeight, realPartsCount, realWeight, plateForecas, stock, isDisabled, oneSheetWeight, 0, List.empty[ForanScrap], stockCode)
       }
 
     })

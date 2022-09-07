@@ -2,7 +2,7 @@ package deepsea.devices
 
 import deepsea.database.DBManager
 import deepsea.database.DatabaseManager.GetOracleConnection
-import deepsea.devices.DeviceManager.{Accommodation, AccommodationAux}
+import deepsea.devices.DeviceManager.{Device, DeviceAux}
 import deepsea.pipe.PipeManager.{Material, PipeSeg, ProjectName, SystemDef}
 import org.mongodb.scala.MongoCollection
 import org.mongodb.scala.model.Filters.{and, equal, notEqual}
@@ -13,9 +13,10 @@ import scala.concurrent.duration.{Duration, SECONDS}
 
 trait DeviceHelper{
 
-  def getAccommodations(docNumber: String): List[Accommodation] ={
-    val devices = ListBuffer.empty[Accommodation]
-    val devicesAux = ListBuffer.empty[AccommodationAux]
+  def getDevices(docNumber: String): List[Device] ={
+    val devices = ListBuffer.empty[Device]
+    val devicesAux = ListBuffer.empty[DeviceAux]
+    val devicesAuxFromSystem = ListBuffer.empty[DeviceAux]
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
         val materialsNCollectionName = "materials-n"
@@ -46,7 +47,7 @@ trait DeviceHelper{
             val query = s"select * from v_element_desc where syst_userid = '$system'"
             val rs = s.executeQuery(query)
             while (rs.next()) {
-              devices += Accommodation(
+              devices += Device(
                 foranProject,
                 Option(rs.getInt("OID")).getOrElse(-1),
                 Option(rs.getInt("COMP")).getOrElse(-1),
@@ -63,11 +64,13 @@ trait DeviceHelper{
                 materials.find(_.code == Option(rs.getString("STOCK_CODE")).getOrElse("")) match {
                   case Some(value) => value
                   case _ => Material()
-                })
+                },
+                Option(rs.getString("USERID")).getOrElse(""),
+                "")
             }
             s.close()
             oracle.close()
-          case _ => List.empty[Accommodation]
+          case _ => List.empty[Device]
         }
         DBManager.GetOracleConnection(foranProject) match {
           case Some(oracle) =>
@@ -75,26 +78,41 @@ trait DeviceHelper{
             val query = s"select elem, long_descr from element_lang where elem in (select oid from v_element_desc where syst_userid = '$system') and lang = -1 and long_descr is not null"
             val rs = s.executeQuery(query)
             while (rs.next()) {
-              devicesAux += AccommodationAux(
+              devicesAux += DeviceAux(
                 Option(rs.getInt("ELEM")).getOrElse(-1),
                 Option(rs.getString("LONG_DESCR")).getOrElse(""),
               )
             }
             s.close()
             oracle.close()
-          case _ => List.empty[Accommodation]
+          case _ => List.empty[Device]
         }
-        devicesAux.filter(_.longDescr.contains("|")).foreach(d => {
-          d.longDescr.split('\n').toList.foreach(l => {
+        DBManager.GetOracleConnection(foranProject) match {
+          case Some(oracle) =>
+            val s = oracle.createStatement()
+            val query = s"select system, descr from systems_lang where system in (select oid from systems where name = '$system')"
+            val rs = s.executeQuery(query)
+            while (rs.next()) {
+              devicesAux += DeviceAux(
+                Option(rs.getInt("SYSTEM")).getOrElse(-1),
+                Option(rs.getString("DESCR")).getOrElse(""),
+              )
+            }
+            s.close()
+            oracle.close()
+          case _ => List.empty[Device]
+        }
+        devicesAux.filter(_.descr.contains("|")).foreach(d => {
+          d.descr.split('\n').toList.foreach(l => {
             val split = l.split('|')
-            devices.find(x => x.id == d.elem && x.fromAux == 0) match {
+            devices.find(x => x.id == d.id && x.fromAux == 0) match {
               case Some(deviceBase) =>
                 if (split.length == 4){
-                  devices += Accommodation(
+                  devices += Device(
                     deviceBase.project,
-                    d.elem,
+                    d.id,
                     deviceBase.comp,
-                    split(0),
+                    deviceBase.userId + '.' + split(0),
                     deviceBase.system,
                     deviceBase.zone,
                     deviceBase.elemType,
@@ -108,18 +126,96 @@ trait DeviceHelper{
                       case Some(value) => value
                       case _ => Material()
                     },
+                    split(0),
+                    deviceBase.userId,
                     split(2),
                     split(3).toDoubleOption.getOrElse(0),
-                    1
+                    1,
                   )
                 }
               case _ => None
             }
           })
         })
-      case _ => List.empty[Accommodation]
+        devicesAuxFromSystem.filter(_.descr.contains("|")).foreach(d => {
+          d.descr.split('\n').toList.foreach(l => {
+            val split = l.split('|')
+            if (split.length == 4){
+              devices += Device(
+                rkdProject,
+                d.id,
+                0,
+                split(0),
+                system,
+                "",
+                "",
+                "",
+                0,
+                split(1),
+                0,
+                "",
+                "",
+                materials.find(_.code == split(1)) match {
+                  case Some(value) => value
+                  case _ => Material()
+                },
+                split(0),
+                "",
+                split(2),
+                split(3).toDoubleOption.getOrElse(0),
+                1
+              )
+            }
+          })
+        })
+      case _ => List.empty[Device]
     }
     devices.toList
+  }
+  def addDeviceToSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String = ""): Unit ={
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val projectNamesCollection: MongoCollection[ProjectName] = mongo.getCollection("project-names")
+        val projectNames = Await.result(projectNamesCollection.find().toFuture(), Duration(30, SECONDS)) match {
+          case values: Seq[ProjectName] => values.toList
+          case _ => List.empty[ProjectName]
+        }
+        val rkdProject = if (docNumber.contains('-')) docNumber.split('-').head else ""
+        val foranProject = projectNames.find(_.rkd == rkdProject) match {
+          case Some(value) => value.foran
+          case _ => ""
+        }
+        val systemDefs = getSystemDefs(foranProject)
+        val system = systemDefs.find(_.descr.contains(docNumber)) match {
+          case Some(value) =>
+            value.name
+          case _ => ""
+        }
+        val newLabel = List(label, stock, units, count).mkString("|")
+        if (forLabel == ""){
+          DBManager.GetOracleConnection(foranProject) match {
+            case Some(oracle) =>
+              val s = oracle.createStatement()
+              val query = s"update systems_lang set long_descr = concat(long_descr, chr(10) || '$newLabel') where system in (select oid from systems where name = '$system')"
+              s.execute(query)
+              s.close()
+              oracle.close()
+            case _ =>
+          }
+        }
+        else{
+          DBManager.GetOracleConnection(foranProject) match {
+            case Some(oracle) =>
+              val s = oracle.createStatement()
+              val query = s"update element_lang set long_descr = concat(long_descr, chr(10) || '$newLabel') where elem in (select oid from v_element_desc where userid = '$forLabel') and lang = -1"
+              s.execute(query)
+              s.close()
+              oracle.close()
+            case _ =>
+          }
+        }
+      case _ =>
+    }
   }
   def getSystemName(docNumber: String): String ={
     DBManager.GetMongoConnection() match {
