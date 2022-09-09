@@ -1,0 +1,36 @@
+SELECT
+    MOD_OID,
+    AS_OID,
+    WEIGHT,
+    SURFACE,
+    USERID,
+    (SELECT MATQ FROM AS_SPE_GEO_BASIC WHERE OID = MOD_OID) AS MATERIAL,
+    (SELECT DESCR FROM MATERIAL_QUALITY WHERE CODE IN (SELECT MATQ FROM AS_SPE_GEO_BASIC WHERE OID = MOD_OID)) AS MATERIAL_DESCRIPTION,
+    (SELECT WEIGHT FROM BS_DESIGN_ATOM WHERE BS_DESIGN_NODE_OID IN (SELECT OID FROM BS_DESIGN_NODE WHERE MODEL_OID = MOD_OID)) AS BS_WEIGHT,
+    (SELECT NAME FROM ZONE WHERE OID IN (SELECT ZONE_OID FROM BS_DESIGN_ATOM WHERE BS_DESIGN_NODE_OID IN (SELECT OID FROM BS_DESIGN_NODE WHERE MODEL_OID = MOD_OID))) AS ZONE
+FROM(
+        SELECT
+            OID AS MOD_OID,
+            AS_OID,
+            WEIGHT,
+            SURFACE,
+            USERID
+        FROM
+            AS_ELEM
+        WHERE
+                OID IN (
+                SELECT
+                    MODEL_OID
+                FROM
+                    BS_DESIGN_NODE BSN
+                WHERE OID IN (
+                    SELECT
+                        BS_DESIGN_NODE_OID
+                    FROM
+                        BS_DESIGN_ATOM BSA
+                    WHERE
+                            BSA.BLOCK_OID IN (SELECT OID FROM BLOCK WHERE CODE IN (SELECT BLOCK FROM AS_LIST WHERE USERID = &docNumber)) AND
+                            BSA.ZONE_OID IN (SELECT OID FROM ZONE WHERE NAME IN (SELECT ZONE FROM AS_LIST WHERE USERID = &docNumber))
+                )
+            )
+    )
