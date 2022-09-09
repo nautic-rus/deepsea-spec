@@ -221,7 +221,7 @@ object BillManager extends BillHelper with Codecs {
     val mats: List[ForanMaterial] = genForanMaterials(project)
     val stdPlates: List[StdPlate] = genForanStdPlates(project)
 
-    val stdPlatesInStocks: List[StdPlate] = genForanStdPlates(project).filter(s=>s.STOCK>0)
+    val stdPlatesInStocks: List[StdPlate] = genForanStdPlates(project).filter(s=>s.STOCK>0 && s.KPL.toString.length<4)
     val foranScraps: List[ForanScrap] = genPlateForanScrap(project)
     val buff = ListBuffer.empty[PlateAnalitic]
 
