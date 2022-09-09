@@ -147,9 +147,7 @@ object BillManager extends BillHelper with Codecs {
     val buff = ListBuffer.empty[ProfileAnalitic]
     val nest: List[ProfileNestBill] = genProfileNestBill(project).sortBy(s => s.KSE)
     val real: List[ProfileMaterial] = genTotProfiles(project).sortBy(s => s.KSE)
-
     val profInStock: List[ProfileMaterial] =genSTDprofiles(project).filter(s=>s.STOCK>0)
-
     val mats: List[ForanMaterial] = genForanMaterials(project)
 
     real.foreach(realPart => {

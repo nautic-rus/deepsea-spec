@@ -8,8 +8,7 @@ import scala.collection.mutable.ListBuffer
 
 trait BillHelper {
 
-  private def genSTDProfileslSql(): String = "select \n     KSE,\n     DECODE (SECTION,\n                     -1, '',\n                     0, 'FS',\n                     1, 'AS',\n                     2, 'IS',\n                     3, 'TS',\n                     4, 'US',\n                     5, 'BS',\n                     6, 'ST',\n                     7, 'AT',\n                     8, 'OS',\n                     9, 'PS',\n                     10, 'RS',\n                     11, 'MC',\n                     12, 'DB',\n                     13, 'SR',\n                     14, 'HR',\n                     15, 'LI',\n                     16, 'ZL',\n                     17, 'TL',\n                     18, 'AI',\n                     19, 'BL',\n                     20, 'LA',\n                     21, 'TA',\n                     '') as PRF_SECTION,\n     (select CODE from MATERIAL where OID=MATERIAL_OID) as MATERIAL,\n     WEB_HEIGHT as WEB_H,\n     WEB_THICKNESS as WEB_T,\n     FLANGE_HEIGHT as FLANGE_H,\n     FLANGE_THICKNESS as FLANGE_T,\n     STOCK_DEFINED0 as STOCK,\n    0,\n    0,\n    LENGTH0/1000  as GROWLEN ,\n    0.0,\n    (LENGTH0/1000*area*(select DENSITY from MATERIAL where OID=MATERIAL_OID)/100) as GROWWEIGHT,\n    STOCK_CODE0 as STOCK_CODE\nfrom STD_PROFILE\nwhere SECTION <> 0"
-
+  private def genSTDProfileslSql(): String = "select \n     KSE,\n     DECODE (SECTION,\n                     -1, '',\n                     0, 'FS',\n                     1, 'AS',\n                     2, 'IS',\n                     3, 'TS',\n                     4, 'US',\n                     5, 'BS',\n                     6, 'ST',\n                     7, 'AT',\n                     8, 'OS',\n                     9, 'PS',\n                     10, 'RS',\n                     11, 'MC',\n                     12, 'DB',\n                     13, 'SR',\n                     14, 'HR',\n                     15, 'LI',\n                     16, 'ZL',\n                     17, 'TL',\n                     18, 'AI',\n                     19, 'BL',\n                     20, 'LA',\n                     21, 'TA',\n                     '') as PRF_SECTION,\n     (select CODE from MATERIAL where OID=MATERIAL_OID) as MATERIAL,\n     WEB_HEIGHT as WEB_H,\n     WEB_THICKNESS as WEB_T,\n     FLANGE_HEIGHT as FLANGE_H,\n     FLANGE_THICKNESS as FLANGE_T,\n     STOCK_DEFINED0 as STOCK,\n    0 as PARTS,\n    0 as LENGHT,\n    LENGTH0/1000  as GROWLEN ,\n    0.0 as PARTSWEIGHT,\n    (LENGTH0/1000*area*(select DENSITY from MATERIAL where OID=MATERIAL_OID)/100) as GROWWEIGHT,\n    STOCK_CODE0 as STOCK_CODE\nfrom STD_PROFILE\nwhere SECTION <> 0"
 
   //not IN(0,1,2,3,6,7,16,17,19,21,24,34,35,36,37) IN( 8,9,10,11,12,13,14,15,18,20,22,23,25,26,31)
 
@@ -205,7 +204,6 @@ trait BillHelper {
   }
 
   def genSTDprofiles(project: String): List[ProfileMaterial] = {
-
     ConnectionManager.connectionByProject(project) match {
       case Some(connection) => {
         try {
@@ -244,8 +242,6 @@ trait BillHelper {
       }
       case None => List.empty[ProfileMaterial]
     }
-
-
   }
 
   def genTotProfiles(project: String): List[ProfileMaterial] = {
