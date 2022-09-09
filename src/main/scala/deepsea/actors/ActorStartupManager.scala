@@ -2,6 +2,8 @@ package deepsea.actors
 
 import akka.actor.{Actor, Props}
 import akka.routing.RoundRobinPool
+import deepsea.accomodations.AccommodationManager
+import deepsea.accomodations.AccommodationManager.Accommodation
 import deepsea.actors.ActorManager.system
 import deepsea.actors.ActorStartupManager.{DatabaseManagerStarted, HTTPManagerStarted, Start}
 import deepsea.database.DatabaseManager
@@ -33,5 +35,6 @@ class ActorStartupManager extends Actor{
       ActorManager.files = system.actorOf(RoundRobinPool(3).props(Props[FileManager]))
       ActorManager.pipe = system.actorOf(RoundRobinPool(1).props(Props[PipeManager]))
       ActorManager.devices = system.actorOf(RoundRobinPool(1).props(Props[DeviceManager]))
+      ActorManager.accommodations = system.actorOf(RoundRobinPool(1).props(Props[AccommodationManager]))
   }
 }

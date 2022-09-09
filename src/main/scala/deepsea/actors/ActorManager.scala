@@ -20,6 +20,7 @@ object ActorManager {
   var files: ActorRef = _
   var pipe: ActorRef = _
   var devices: ActorRef = _
+  var accommodations: ActorRef = _
 
   def init(): Unit ={
     system = ActorSystem()
