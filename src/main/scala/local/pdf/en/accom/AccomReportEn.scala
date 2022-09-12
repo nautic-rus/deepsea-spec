@@ -12,6 +12,7 @@ import local.common.DBRequests.findChess
 import local.domain.CommonTypes.DrawingChess
 import local.pdf.UtilsPDF
 import local.pdf.en.common.ReportCommonEN.{DocNameEN, Item11ColumnsEN, addZeros, border5mm, defaultFontSize, fillStamp, fontHELVETICA, getNnauticLigoEN, stampEN}
+import org.davidmoten.text.utils.WordWrap
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, OutputStream}
 import java.nio.file.Files
@@ -108,6 +109,34 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
   }
 
   private def generatePartListPages(docNameEN: DocNameEN, items: List[Item11ColumnsEN], header: String): List[PdfDocument] = {
+    val pages: ListBuffer[PartListBodyPage] = ListBuffer.empty[PartListBodyPage]
+    pages += new PartListBodyPage(docNameEN)
+
+    pages.last.insertRow(Item11ColumnsEN(true, A1 = header))
+
+    var currPage = 1
+    items.foreach(row => {
+      val wrappedRows: List[Item11ColumnsEN] = generateWrappedRows(row)
+      if (!pages.last.hasRoom(wrappedRows.length + 2)) {
+        pages += new PartListBodyPage(docNameEN)
+        currPage = currPage + 1
+      }
+      pages.last.insertRows(wrappedRows)
+    })
+    pages.last.setLastPage()
+
+    val retBuff = ListBuffer.empty[PdfDocument]
+    pages.foreach(p => {
+      p.doc.close()
+      p.os.flush()
+      p.os.close()
+      val ba = new ByteArrayInputStream(p.os.asInstanceOf[ByteArrayOutputStream].toByteArray)
+      retBuff += new PdfDocument(new PdfReader(ba))
+    })
+    retBuff.toList
+  }
+
+  private def generatePartListPagesOld(docNameEN: DocNameEN, items: List[Item11ColumnsEN], header: String): List[PdfDocument] = {
     val pages: ListBuffer[PartListBodyPage] = ListBuffer.empty[PartListBodyPage]
     pages += new PartListBodyPage(docNameEN)
 
@@ -523,6 +552,24 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
       currentRow = currentRow + 1
     }
 
+    def insertRows(items: List[Item11ColumnsEN]): Unit = {
+      items.foreach(item=>{
+        if (!item.isHeader) {
+          bodyGrid.addCell(generateCellDiffSize(item.A1, 3))
+          bodyGrid.addCell(generateCellLeftAlign(item.A2))
+          bodyGrid.addCell(generateCellLeftAlign(item.A6))
+          bodyGrid.addCell(generateCell(item.A3))
+          bodyGrid.addCell(generateCell(item.A4))
+          bodyGrid.addCell(generateCell(item.A5))
+          bodyGrid.addCell(generateCell(item.A7))
+          bodyGrid.addCell(generateCell(item.A8))
+        }
+        else {
+          bodyGrid.addCell(generateSpannedCellBold(item.A1))
+        }
+        currentRow = currentRow + 1
+      })
+    }
   }
 
   private def genRows(rawData: List[Device], docNumber: String, rev: String, lang:String): List[Item11ColumnsEN] = {
@@ -598,6 +645,69 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
   }
 
   private def formatWGTDouble(ps: Double): String = if (ps < 0.01) " 0.01" else String.format("%.2f", ps)
+
+  private def generateWrappedRows(item: Item11ColumnsEN): List[Item11ColumnsEN] = {
+    val A1count = 8
+    val A2count = 47
+    val A3count = 25
+    val A4count = 20
+    val A5count = 16
+    val A6count = 7
+    val A7count = 7
+    val A8count = 10
+    val A9count = 10
+    val A10count = 26
+    val A11count = 26
+    val buff = ListBuffer.empty[Item11ColumnsEN]
+    if (item.isHeader) {
+      buff += item
+    } else {
+      val A1 = WordWrap.from(item.A1).newLine("$").insertHyphens(false).maxWidth(A1count).wrap().split('$')
+      val A2 = WordWrap.from(item.A2).newLine("$").insertHyphens(false).maxWidth(A2count).wrap().split('$')
+      val A3 = WordWrap.from(item.A3).newLine("$").insertHyphens(false).maxWidth(A3count).wrap().split('$')
+      val A4 = WordWrap.from(item.A4).newLine("$").insertHyphens(false).maxWidth(A4count).wrap().split('$')
+      val A5 = WordWrap.from(item.A5).newLine("$").insertHyphens(false).maxWidth(A5count).wrap().split('$')
+      val A6 = WordWrap.from(item.A6).newLine("$").insertHyphens(false).maxWidth(A6count).wrap().split('$')
+      val A7 = WordWrap.from(item.A7).newLine("$").insertHyphens(false).maxWidth(A7count).wrap().split('$')
+      val A8 = WordWrap.from(item.A8).newLine("$").insertHyphens(false).maxWidth(A8count).wrap().split('$')
+      val A9 = WordWrap.from(item.A9).newLine("$").insertHyphens(false).maxWidth(A9count).wrap().split('$')
+      val A10 = WordWrap.from(item.A10).newLine("$").insertHyphens(false).maxWidth(A10count).wrap().split('$')
+      val A11 = WordWrap.from(item.A11).newLine("$").insertHyphens(false).maxWidth(A11count).wrap().split('$')
+
+      val maxRows: Int = {
+        var count = 1
+        if (A1.length > count) count = A1.length
+        if (A2.length > count) count = A2.length
+        if (A3.length > count) count = A3.length
+        if (A4.length > count) count = A4.length
+        if (A5.length > count) count = A5.length
+        if (A6.length > count) count = A6.length
+        if (A7.length > count) count = A7.length
+        if (A8.length > count) count = A8.length
+        if (A9.length > count) count = A9.length
+        if (A10.length > count) count = A10.length
+        if (A11.length > count) count = A11.length
+        count
+      }
+      (0 until maxRows).foreach(i => {
+        buff += new Item11ColumnsEN(
+          isHeader = false,
+          A1.lift(i).getOrElse(""),
+          A2.lift(i).getOrElse(""),
+          A3.lift(i).getOrElse(""),
+          A4.lift(i).getOrElse(""),
+          A5.lift(i).getOrElse(""),
+          A6.lift(i).getOrElse(""),
+          A7.lift(i).getOrElse(""),
+          A8.lift(i).getOrElse(""),
+          A9.lift(i).getOrElse(""),
+          A10.lift(i).getOrElse(""),
+          A11.lift(i).getOrElse(""),
+        )
+      })
+    }
+    buff.toList
+  }
 
 
 }
