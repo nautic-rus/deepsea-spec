@@ -5,9 +5,10 @@ import com.itextpdf.kernel.pdf.{PdfDocument, PdfReader, PdfWriter, WriterPropert
 import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.{Cell, Paragraph, Table, Text}
 import com.itextpdf.layout.properties.{HorizontalAlignment, TextAlignment, VerticalAlignment}
+import deepsea.accomodations.AccommodationHelper
 import deepsea.devices.DeviceHelper
 import deepsea.devices.DeviceManager.Device
-import deepsea.pipe.PipeManager.Material
+import deepsea.pipe.PipeManager.{Material, Units}
 import local.common.DBRequests.findChess
 import local.domain.CommonTypes.DrawingChess
 import local.pdf.UtilsPDF
@@ -32,8 +33,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
     mmToPt(11),
     mmToPt(11) + 0 //207
   )
-
-
+  val units: List[Units] =getUnits
   def genAccomListEnPDF(docNumber: String, docName: String, rev: String, rawData: List[Device], lang: String ): String = {
     val filePath: String = Files.createTempDirectory("accomPdf").toAbsolutePath.toString + File.separator + docNumber + "_rev" + rev + ".pdf"
     val rows: List[Item11ColumnsEN] = genRows(rawData, docNumber, rev,lang)
@@ -617,11 +617,17 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
 
   private def genTotalRows(rawData: List[Device], lang:String): List[Item11ColumnsEN] = {
     val rows: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
+   val pcs: String = units.find(s => s.code.equals("796")) match {
+      case Some(value) => value.thumb
+      case None => ""
+    }
+
+
     rawData.groupBy(p => (p.units, p.material.code)).foreach(gr => {
       val row = gr._2.head
       val unit = formatUnits(row.material)
       val qtyA = gr._2.map(_.count).sum
-      val qty = if (unit.equals("pcs")) qtyA.toInt.toString else String.format("%.2f", qtyA)
+      val qty = if (unit.equals(pcs)) qtyA.toInt.toString else String.format("%.2f", qtyA)
       val weight = formatWGTDouble(row.material.singleWeight * qtyA)
       val mat=row.material.name(lang)
       val matDescr = row.material.description(lang)
@@ -631,10 +637,9 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
   }
 
   private def formatUnits(mat: Material): String = {
-    mat.units match {
-      case "006" => "m"
-      case "796" => "pcs"
-      case _ => "NA"
+    units.find(p => p.code.equals(mat.units)) match {
+      case Some(value) => value.thumb
+      case None => "NA"
     }
   }
 
