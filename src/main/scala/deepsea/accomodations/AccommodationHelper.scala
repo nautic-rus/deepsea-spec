@@ -166,4 +166,40 @@ trait AccommodationHelper {
     }
     systemDefs.toList
   }
+  def getASName(docNumber: String): String ={
+    var res = ""
+    val docNumberSuffix = docNumber.split('-').drop(1).mkString("-")
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val projectNamesCollection: MongoCollection[ProjectName] = mongo.getCollection("project-names")
+        val projectNames = Await.result(projectNamesCollection.find().toFuture(), Duration(30, SECONDS)) match {
+          case values: Seq[ProjectName] => values.toList
+          case _ => List.empty[ProjectName]
+        }
+        val rkdProject = if (docNumber.contains('-')) docNumber.split('-').head else ""
+        val foranProject = projectNames.find(_.rkd == rkdProject) match {
+          case Some(value) => value.foran
+          case _ => ""
+        }
+        DBManager.GetOracleConnection(foranProject) match {
+          case Some(oracleConnection) =>
+            val stmt = oracleConnection.createStatement()
+            val query = s"SELECT DESCR FROM AS_LANG WHERE OID IN (SELECT OID FROM AS_LIST WHERE USERID = '$docNumberSuffix') AND DESCR IS NOT NULL AND ROWNUM = 1"
+            val rs = stmt.executeQuery(query)
+            if (rs.next()){
+             res = rs.getString("DESCR") match {
+                case value: String => value
+                case _ => ""
+              }
+            }
+            stmt.close()
+            rs.close()
+            oracleConnection.close()
+            res
+          case _ => res
+        }
+
+      case _ => res
+    }
+  }
 }
