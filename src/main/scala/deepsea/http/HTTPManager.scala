@@ -18,6 +18,7 @@ import deepsea.spec.SpecManager._
 import org.apache.log4j.{LogManager, Logger}
 import play.api.libs.json.{JsValue, Json}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
+import deepsea.accomodations.AccommodationManager.GetAccommodations
 import deepsea.devices.DeviceManager.{AddDeviceToSystem, GetDevices, GetDevicesESP}
 import deepsea.pipe.PipeManager.{GetPipeESP, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSystems, GetZones, SetSpoolLock}
 
@@ -195,7 +196,7 @@ class HTTPManager extends Actor {
 
       //ACCOMMODATIONS
       (get & path("accommodations") & parameter("docNumber")) { (docNumber) =>
-        askFor(ActorManager.accommodations, GetDevices(docNumber))
+        askFor(ActorManager.accommodations, GetAccommodations(docNumber))
       },
     )
   }

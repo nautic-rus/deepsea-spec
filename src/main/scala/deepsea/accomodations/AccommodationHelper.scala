@@ -14,9 +14,9 @@ import scala.io.Source
 
 trait AccommodationHelper {
   def getAccommodations(docNumber: String): List[Accommodation] ={
-    val devices = ListBuffer.empty[Accommodation]
-    val devicesAux = ListBuffer.empty[AccommodationAux]
-    val devicesAuxFromSystem = ListBuffer.empty[AccommodationAux]
+    val accommodations = ListBuffer.empty[Accommodation]
+    //val devicesAux = ListBuffer.empty[AccommodationAux]
+    //val devicesAuxFromSystem = ListBuffer.empty[AccommodationAux]
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
         val materialsNCollectionName = "materials-n"
@@ -42,7 +42,7 @@ trait AccommodationHelper {
             val query = Source.fromResource("queries/accommodations.sql").mkString.replaceAll("&docNumberSuffix", docNumberSuffix)
             val rs = s.executeQuery(query)
             while (rs.next()) {
-              devices += Accommodation(
+              accommodations += Accommodation(
                 foranProject,
                 Option(rs.getInt("MOD_OID")).getOrElse(-1),
                 Option(rs.getInt("AS_OID")).getOrElse(-1),
@@ -70,11 +70,11 @@ trait AccommodationHelper {
             }
             s.close()
             oracle.close()
-          case _ => List.empty[Device]
+          case _ => List.empty[Accommodation]
         }
-      case _ => List.empty[Device]
+      case _ => List.empty[Accommodation]
     }
-    devices.toList
+    accommodations.toList
   }
   def addAccommodationToSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String = ""): Unit ={
     DBManager.GetMongoConnection() match {
