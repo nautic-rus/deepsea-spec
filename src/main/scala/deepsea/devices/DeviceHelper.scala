@@ -3,7 +3,7 @@ package deepsea.devices
 import deepsea.database.DBManager
 import deepsea.database.DatabaseManager.GetOracleConnection
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
-import deepsea.pipe.PipeManager.{Material, PipeSeg, ProjectName, SystemDef}
+import deepsea.pipe.PipeManager.{Material, PipeSeg, ProjectName, SystemDef, Units}
 import org.mongodb.scala.MongoCollection
 import org.mongodb.scala.model.Filters.{and, equal, notEqual}
 
@@ -262,5 +262,16 @@ trait DeviceHelper{
     }
     systemDefs.toList
   }
-
+  def getUnits: List[Units] ={
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val units: MongoCollection[Units] = mongo.getCollection("materials-n-units")
+        Await.result(units.find().toFuture(), Duration(30, SECONDS)) match {
+          case values: Seq[Units] =>
+            values.toList
+          case _ => List.empty[Units]
+        }
+      case _ => List.empty[Units]
+    }
+  }
 }
