@@ -106,8 +106,6 @@ trait PipeHelper extends Codecs {
               case values: Seq[PipeSegActual] =>
                 Await.result(mongo.getCollection[PipeSeg](values.last.name).find(and(equal("project", project), if (system != "") equal("system", system) else notEqual("system", system), if (sqInSystem != -1) equal("sqInSystem", sqInSystem) else notEqual("sqInSystem", sqInSystem))).toFuture(), Duration(300, SECONDS)) match {
                   case pipeSegs: Seq[PipeSeg] =>
-                    val jk = pipeSegs
-                    val jkk = jk
                     pipeSegs.foreach(x => x.material = materials.find(_.code == x.stock) match {
                       case Some(value) => value
                       case _ => Material()
@@ -139,6 +137,15 @@ trait PipeHelper extends Codecs {
                 }
               case _ =>
             }
+
+            val find = res.filter(_.spool == "3076")
+            val jk = find
+            res.groupBy(_.spool).foreach(group => {
+              if (group._2.exists(_.compType == "FWT0")){
+                group._2.filter(_.compType == "BOLT").foreach(x => x.length = x.length / 2d)
+                group._2.filter(_.compType == "NUT").foreach(x => x.length = x.length / 2d)
+              }
+            })
 
             res.toList
 
