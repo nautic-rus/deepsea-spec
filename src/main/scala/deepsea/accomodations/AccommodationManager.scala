@@ -14,7 +14,7 @@ object AccommodationManager{
 }
 class AccommodationManager extends Actor with AccommodationHelper with Codecs {
   override def receive: Receive = {
-    case GetAccommodations(docNumber) => getAccommodations(docNumber).asJson.noSpaces
+    case GetAccommodations(docNumber) => sender() ! getAccommodations(docNumber).filter(_.material.code != "").asJson.noSpaces
     case _ => None
   }
 }
