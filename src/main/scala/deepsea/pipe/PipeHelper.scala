@@ -138,10 +138,8 @@ trait PipeHelper extends Codecs {
               case _ =>
             }
 
-            val find = res.filter(_.spool == "3076")
-            val jk = find
             res.groupBy(_.spool).foreach(group => {
-              if (group._2.exists(_.compType == "FWT0")){
+              if (group._2.exists(_.fcon3 == "FWT0")){
                 group._2.filter(_.compType == "BOLT").foreach(x => x.length = x.length / 2d)
                 group._2.filter(_.compType == "NUT").foreach(x => x.length = x.length / 2d)
               }
