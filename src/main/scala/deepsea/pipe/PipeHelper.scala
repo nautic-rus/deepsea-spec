@@ -1,7 +1,6 @@
 package deepsea.pipe
 
-import deepsea.database.DatabaseManager
-import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection, OracleConnection}
+import deepsea.database.DatabaseManager._
 import deepsea.pipe.PipeManager.{GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SetSpoolLock, SpoolLock, SystemDef, Units, UpdatePipeComp, UpdatePipeJoints}
 import org.mongodb.scala.{Document, MongoClient, MongoCollection, MongoDatabase, bson}
 import org.mongodb.scala.model.Filters.{and, equal, notEqual}
@@ -400,17 +399,5 @@ trait PipeHelper extends Codecs {
     rs.close()
     oracleConnection.close()
     systemDefs.toList
-  }
-  def getUnits: List[Units] ={
-    DatabaseManager.GetMongoConnection() match {
-      case Some(mongo) =>
-        val units: MongoCollection[Units] = mongo.getCollection("materials-n-units")
-        Await.result(units.find().toFuture(), Duration(30, SECONDS)) match {
-          case values: Seq[Units] =>
-            values.toList
-          case _ => List.empty[Units]
-        }
-      case _ => List.empty[Units]
-    }
   }
 }
