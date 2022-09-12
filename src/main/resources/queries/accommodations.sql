@@ -29,8 +29,8 @@ FROM(
                     FROM
                         BS_DESIGN_ATOM BSA
                     WHERE
-                            BSA.BLOCK_OID IN (SELECT OID FROM BLOCK WHERE CODE IN (SELECT BLOCK FROM AS_LIST WHERE USERID = &docNumber)) AND
-                            BSA.ZONE_OID IN (SELECT OID FROM ZONE WHERE NAME IN (SELECT ZONE FROM AS_LIST WHERE USERID = &docNumber))
+                            BSA.BLOCK_OID IN (SELECT OID FROM BLOCK WHERE CODE IN (SELECT BLOCK FROM AS_LIST WHERE USERID = '&docNumberSuffix')) AND
+                            BSA.ZONE_OID IN (SELECT OID FROM ZONE WHERE NAME IN (SELECT ZONE FROM AS_LIST WHERE USERID = '&docNumberSuffix'))
                 )
             )
     )

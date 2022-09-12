@@ -14,9 +14,9 @@ import scala.io.Source
 
 trait AccommodationHelper {
   def getAccommodations(docNumber: String): List[Accommodation] ={
-    val devices = ListBuffer.empty[Accommodation]
-    val devicesAux = ListBuffer.empty[AccommodationAux]
-    val devicesAuxFromSystem = ListBuffer.empty[AccommodationAux]
+    val accommodations = ListBuffer.empty[Accommodation]
+    //val devicesAux = ListBuffer.empty[AccommodationAux]
+    //val devicesAuxFromSystem = ListBuffer.empty[AccommodationAux]
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
         val materialsNCollectionName = "materials-n"
@@ -42,7 +42,7 @@ trait AccommodationHelper {
             val query = Source.fromResource("queries/accommodations.sql").mkString.replaceAll("&docNumberSuffix", docNumberSuffix)
             val rs = s.executeQuery(query)
             while (rs.next()) {
-              devices += Accommodation(
+              accommodations += Accommodation(
                 foranProject,
                 Option(rs.getInt("MOD_OID")).getOrElse(-1),
                 Option(rs.getInt("AS_OID")).getOrElse(-1),
@@ -70,11 +70,11 @@ trait AccommodationHelper {
             }
             s.close()
             oracle.close()
-          case _ => List.empty[Device]
+          case _ => List.empty[Accommodation]
         }
-      case _ => List.empty[Device]
+      case _ => List.empty[Accommodation]
     }
-    devices.toList
+    accommodations.toList
   }
   def addAccommodationToSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String = ""): Unit ={
     DBManager.GetMongoConnection() match {
@@ -165,5 +165,41 @@ trait AccommodationHelper {
       case _ =>
     }
     systemDefs.toList
+  }
+  def getASName(docNumber: String): String ={
+    var res = ""
+    val docNumberSuffix = docNumber.split('-').drop(1).mkString("-")
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val projectNamesCollection: MongoCollection[ProjectName] = mongo.getCollection("project-names")
+        val projectNames = Await.result(projectNamesCollection.find().toFuture(), Duration(30, SECONDS)) match {
+          case values: Seq[ProjectName] => values.toList
+          case _ => List.empty[ProjectName]
+        }
+        val rkdProject = if (docNumber.contains('-')) docNumber.split('-').head else ""
+        val foranProject = projectNames.find(_.rkd == rkdProject) match {
+          case Some(value) => value.foran
+          case _ => ""
+        }
+        DBManager.GetOracleConnection(foranProject) match {
+          case Some(oracleConnection) =>
+            val stmt = oracleConnection.createStatement()
+            val query = s"SELECT DESCR FROM AS_LANG WHERE OID IN (SELECT OID FROM AS_LIST WHERE USERID = '$docNumberSuffix') AND DESCR IS NOT NULL AND ROWNUM = 1"
+            val rs = stmt.executeQuery(query)
+            if (rs.next()){
+             res = rs.getString("DESCR") match {
+                case value: String => value
+                case _ => ""
+              }
+            }
+            stmt.close()
+            rs.close()
+            oracleConnection.close()
+            res
+          case _ => res
+        }
+
+      case _ => res
+    }
   }
 }
