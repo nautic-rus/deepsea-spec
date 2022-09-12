@@ -652,7 +652,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
     val A3count = 25
     val A4count = 20
     val A5count = 16
-    val A6count = 7
+    val A6count = 20
     val A7count = 7
     val A8count = 10
     val A9count = 10
