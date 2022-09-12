@@ -8,14 +8,15 @@ import scala.collection.mutable.ListBuffer
 
 trait BillHelper {
 
+  private def genSTDProfileslSql(): String = "select \n     KSE,\n     DECODE (SECTION,\n                     -1, '',\n                     0, 'FS',\n                     1, 'AS',\n                     2, 'IS',\n                     3, 'TS',\n                     4, 'US',\n                     5, 'BS',\n                     6, 'ST',\n                     7, 'AT',\n                     8, 'OS',\n                     9, 'PS',\n                     10, 'RS',\n                     11, 'MC',\n                     12, 'DB',\n                     13, 'SR',\n                     14, 'HR',\n                     15, 'LI',\n                     16, 'ZL',\n                     17, 'TL',\n                     18, 'AI',\n                     19, 'BL',\n                     20, 'LA',\n                     21, 'TA',\n                     '') as PRF_SECTION,\n     (select CODE from MATERIAL where OID=MATERIAL_OID) as MATERIAL,\n     WEB_HEIGHT as WEB_H,\n     WEB_THICKNESS as WEB_T,\n     FLANGE_HEIGHT as FLANGE_H,\n     FLANGE_THICKNESS as FLANGE_T,\n     STOCK_DEFINED0 as STOCK,\n    0 as PARTS,\n    0 as LENGHT,\n    LENGTH0/1000  as GROWLEN ,\n    0.0 as PARTSWEIGHT,\n    (LENGTH0/1000*area*(select DENSITY from MATERIAL where OID=MATERIAL_OID)/100) as GROWWEIGHT,\n    STOCK_CODE0 as STOCK_CODE\nfrom STD_PROFILE\nwhere SECTION <> 0"
+
   //not IN(0,1,2,3,6,7,16,17,19,21,24,34,35,36,37) IN( 8,9,10,11,12,13,14,15,18,20,22,23,25,26,31)
 
   //private def genProfileNestBillSql(): String = "select \n    KSE,\n    KQ,\n    TP,\n    WH,\n    WT,\n    FH,\n    FT,\n    NESTID,\n    NP,\n    NGB,\n    NETLEN,\n    GROLEN,\n    TONETLEN,\n    TOGROLEN,\n    TONETWGT,\n    TOGROWGT,\n    SCRAP,\n    BLOCK,\n    BLOCK_OID,\n    TOTAL_BL_SCRAP,\n    TOTAL_KSE_SCRAP\n    from V_PRD_PRF_MAT"
 
 
-//  private def genProfileNestBillSql(): String = "select \n    PPM.KSE,\n    PPM.KQ,\n    PPM.TP,\n    PPM.WH,\n    PPM.WT,\n    PPM.FH,\n    PPM.FT,\n    PPM.NESTID,\n    PPM.NP,\n    PPM.NGB,\n    PPM.NETLEN,\n    PPM.GROLEN,\n    PPM.TONETLEN,\n    PPM.TOGROLEN,\n    PPM.TONETWGT,\n    PPM.TOGROWGT,\n    PPM.SCRAP,\n    PPM.BLOCK,\n    PPM.BLOCK_OID,\n    PPM.TOTAL_BL_SCRAP,\n    PPM.TOTAL_KSE_SCRAP,\n    (select STOCK_DEFINED0 from std_profile where KSE= PPM.KSE) as STOCK\n    from V_PRD_PRF_MAT PPM"
+  //  private def genProfileNestBillSql(): String = "select \n    PPM.KSE,\n    PPM.KQ,\n    PPM.TP,\n    PPM.WH,\n    PPM.WT,\n    PPM.FH,\n    PPM.FT,\n    PPM.NESTID,\n    PPM.NP,\n    PPM.NGB,\n    PPM.NETLEN,\n    PPM.GROLEN,\n    PPM.TONETLEN,\n    PPM.TOGROLEN,\n    PPM.TONETWGT,\n    PPM.TOGROWGT,\n    PPM.SCRAP,\n    PPM.BLOCK,\n    PPM.BLOCK_OID,\n    PPM.TOTAL_BL_SCRAP,\n    PPM.TOTAL_KSE_SCRAP,\n    (select STOCK_DEFINED0 from std_profile where KSE= PPM.KSE) as STOCK\n    from V_PRD_PRF_MAT PPM"
   private def genProfileNestBillSql(): String = "select \n    PPM.KSE,\n    PPM.KQ,\n    PPM.TP,\n    PPM.WH,\n    PPM.WT,\n    PPM.FH,\n    PPM.FT,\n    PPM.NESTID,\n    PPM.NP,\n    PPM.NGB,\n    PPM.NETLEN,\n    PPM.GROLEN,\n    PPM.TONETLEN,\n    PPM.TOGROLEN,\n    PPM.TONETWGT,\n    PPM.TOGROWGT,\n    PPM.SCRAP,\n    PPM.BLOCK,\n    PPM.BLOCK_OID,\n    PPM.TOTAL_BL_SCRAP,\n    PPM.TOTAL_KSE_SCRAP,\n    (select STOCK_DEFINED0 from std_profile where KSE= PPM.KSE) as STOCK,\n    (select STOCK_CODE0 from std_profile where KSE= PPM.KSE) as STOCK_CODE\n    from V_PRD_PRF_MAT PPM"
-
 
 
   //private def genPlateNestBillSql(): String = "select\n    KPL,\n    KQ,\n    L,\n    W,\n    T,\n    NESTID,\n    NP,\n    NGP,\n    TONETWGT,\n    TOGROWGT,\n    SCRAP,\n    BLOCK,\n    BLOCK_OID,\n    TOTAL_BL_SCRAP,\n    TOTAL_KPL_SCRAP,\n    ENCLOS_TYPE,\n    ASPECT_RATIO\n    from\n    V_PRD_PLATE_MAT"
@@ -30,6 +31,7 @@ trait BillHelper {
   //private def genTotalProfilesMateriallSql(): String = "select \n     KSE,\n     PRF_SECTION,\n     MATERIAL,\n     WEB_H,\n     WEB_T,\n     FLANGE_H,\n     FLANGE_T,\n    PARTS,\n    LENGHT,\n    (LENGHT*area*density/100) as PARTSWEIGHT\nfrom(\nselect\n     VPB.KSE,\n     VPB.PRF_SECTION,\n     VPB.MATERIAL,\n     VPB.WEB_H,\n     VPB.WEB_T,\n     VPB.FLANGE_H,\n     VPB.FLANGE_T,\n     s.area,\n     m.density,\n    sum( VPB.PART_NUM) as PARTS,\n    sum( VPB.TOTAL_LEN) as LENGHT\nfrom\n(      SELECT STD_KSE as KSE,\n             DECODE (STD_SECTION,\n                     -1, '',\n                     0, 'FS',\n                     1, 'AS',\n                     2, 'IS',\n                     3, 'TS',\n                     4, 'US',\n                     5, 'BS',\n                     6, 'ST',\n                     7, 'AT',\n                     8, 'OS',\n                     9, 'PS',\n                     10, 'RS',\n                     11, 'MC',\n                     12, 'DB',\n                     13, 'SR',\n                     14, 'HR',\n                     15, 'LI',\n                     16, 'ZL',\n                     17, 'TL',\n                     18, 'AI',\n                     19, 'BL',\n                     20, 'LA',\n                     21, 'TA',\n                     '') as PRF_SECTION,\n             MAT_CODE as MATERIAL,\n             STD_WEB_HEIGHT as WEB_H,\n             STD_WEB_THICKNESS as WEB_T,\n             STD_FLANGE_HEIGHT as FLANGE_H,\n             STD_FLANGE_THICKNESS as FLANGE_T,\n             COUNT (PART_OID) as PART_NUM,\n             SUM (PRF_LENGTH) as TOTAL_LEN\n        FROM V_RPT_ALL_PROF_DATA\n         where BL_OID not in (select OID from BLOCK where code like 'L%')\n    GROUP BY STD_OID,\n             STD_KSE,\n             STD_SECTION,\n             STD_WEB_HEIGHT,\n             STD_WEB_THICKNESS,\n             STD_FLANGE_HEIGHT,\n             STD_FLANGE_THICKNESS,\n             MAT_CODE) VPB, std_profile s, material m\nwhere  \ns.KSE=VPB.KSE AND m.CODE=VPB.MATERIAL AND\n     VPB.PRF_SECTION <>'FS'   group by  VPB.KSE,\n     VPB.PRF_SECTION,\n     VPB.MATERIAL,\n     VPB.WEB_H,\n     VPB.WEB_T,\n     VPB.FLANGE_H,\n     VPB.FLANGE_T,\n     s.area,\n     m.density\n    order by  VPB.KSE)"
   //private def genTotalProfilesMateriallSql(): String = "select \n     KSE,\n     PRF_SECTION,\n     MATERIAL,\n     WEB_H,\n     WEB_T,\n     FLANGE_H,\n     FLANGE_T,\n     STOCK,\n    PARTS,\n    LENGHT,\n    (LENGHT*area*density/100) as PARTSWEIGHT\nfrom(\n\nselect\n     VPB.KSE,\n     VPB.PRF_SECTION,\n     VPB.MATERIAL,\n     VPB.WEB_H,\n     VPB.WEB_T,\n     VPB.FLANGE_H,\n     VPB.FLANGE_T,\n     s.area,\n     m.density,\n     s.STOCK_DEFINED0 as STOCK,\n    sum( VPB.PART_NUM) as PARTS,\n    sum( VPB.TOTAL_LEN) as LENGHT\nfrom\n(      SELECT STD_KSE as KSE,\n             DECODE (STD_SECTION,\n                     -1, '',\n                     0, 'FS',\n                     1, 'AS',\n                     2, 'IS',\n                     3, 'TS',\n                     4, 'US',\n                     5, 'BS',\n                     6, 'ST',\n                     7, 'AT',\n                     8, 'OS',\n                     9, 'PS',\n                     10, 'RS',\n                     11, 'MC',\n                     12, 'DB',\n                     13, 'SR',\n                     14, 'HR',\n                     15, 'LI',\n                     16, 'ZL',\n                     17, 'TL',\n                     18, 'AI',\n                     19, 'BL',\n                     20, 'LA',\n                     21, 'TA',\n                     '') as PRF_SECTION,\n             MAT_CODE as MATERIAL,\n             STD_WEB_HEIGHT as WEB_H,\n             STD_WEB_THICKNESS as WEB_T,\n             STD_FLANGE_HEIGHT as FLANGE_H,\n             STD_FLANGE_THICKNESS as FLANGE_T,\n             COUNT (PART_OID) as PART_NUM,\n             SUM (PRF_LENGTH) as TOTAL_LEN\n           \n        FROM V_RPT_ALL_PROF_DATA\n         where BL_OID not in (select OID from BLOCK where code like 'L%')\n    GROUP BY STD_OID,\n             STD_KSE,\n             STD_SECTION,\n             STD_WEB_HEIGHT,\n             STD_WEB_THICKNESS,\n             STD_FLANGE_HEIGHT,\n             STD_FLANGE_THICKNESS,\n             MAT_CODE) VPB, std_profile s, material m\nwhere  \ns.KSE=VPB.KSE AND m.CODE=VPB.MATERIAL AND\n     VPB.PRF_SECTION <>'FS'   \n     \n     group by  \n     VPB.KSE,\n     VPB.PRF_SECTION,\n     VPB.MATERIAL,\n     VPB.WEB_H,\n     VPB.WEB_T,\n     VPB.FLANGE_H,\n     VPB.FLANGE_T,\n     s.area,\n     m.density,\n     s.STOCK_DEFINED0\n    order by  VPB.KSE\n    )"
   private def genTotalProfilesMateriallSql(): String = "select \n     KSE,\n     PRF_SECTION,\n     MATERIAL,\n     WEB_H,\n     WEB_T,\n     FLANGE_H,\n     FLANGE_T,\n     STOCK,\n    PARTS,\n    LENGHT,\n    GROWLEN/1000  as GROWLEN ,\n    (LENGHT*area*density/100) as PARTSWEIGHT,\n    (GROWLEN/1000*area*density/100) as GROWWEIGHT\n    \nfrom(\n\nselect\n     VPB.KSE,\n     VPB.PRF_SECTION,\n     VPB.MATERIAL,\n     VPB.WEB_H,\n     VPB.WEB_T,\n     VPB.FLANGE_H,\n     VPB.FLANGE_T,\n     s.area,\n     m.density,\n     s.STOCK_DEFINED0 as STOCK,\n     s.LENGTH0 as GROWLEN,\n    sum( VPB.PART_NUM) as PARTS,\n    sum( VPB.TOTAL_LEN) as LENGHT\nfrom\n(      SELECT STD_KSE as KSE,\n             DECODE (STD_SECTION,\n                     -1, '',\n                     0, 'FS',\n                     1, 'AS',\n                     2, 'IS',\n                     3, 'TS',\n                     4, 'US',\n                     5, 'BS',\n                     6, 'ST',\n                     7, 'AT',\n                     8, 'OS',\n                     9, 'PS',\n                     10, 'RS',\n                     11, 'MC',\n                     12, 'DB',\n                     13, 'SR',\n                     14, 'HR',\n                     15, 'LI',\n                     16, 'ZL',\n                     17, 'TL',\n                     18, 'AI',\n                     19, 'BL',\n                     20, 'LA',\n                     21, 'TA',\n                     '') as PRF_SECTION,\n             MAT_CODE as MATERIAL,\n             STD_WEB_HEIGHT as WEB_H,\n             STD_WEB_THICKNESS as WEB_T,\n             STD_FLANGE_HEIGHT as FLANGE_H,\n             STD_FLANGE_THICKNESS as FLANGE_T,\n             COUNT (PART_OID) as PART_NUM,\n             SUM (PRF_LENGTH) as TOTAL_LEN\n           \n        FROM V_RPT_ALL_PROF_DATA\n         where BL_OID not in (select OID from BLOCK where code like 'L%')\n    GROUP BY STD_OID,\n             STD_KSE,\n             STD_SECTION,\n             STD_WEB_HEIGHT,\n             STD_WEB_THICKNESS,\n             STD_FLANGE_HEIGHT,\n             STD_FLANGE_THICKNESS,\n             MAT_CODE) VPB, std_profile s, material m\nwhere  \ns.KSE=VPB.KSE AND m.CODE=VPB.MATERIAL AND\n     VPB.PRF_SECTION <>'FS'   \n     \n     group by  \n     VPB.KSE,\n     VPB.PRF_SECTION,\n     VPB.MATERIAL,\n     VPB.WEB_H,\n     VPB.WEB_T,\n     VPB.FLANGE_H,\n     VPB.FLANGE_T,\n     s.area,\n     m.density,\n     s.STOCK_DEFINED0,\n     s.LENGTH0\n    order by  VPB.KSE\n    )"
+
   private def genForanScrapSQL() = "select \nENCL.OID,\nENCL.STD_PLATE_OID as STDPLATEOID,\nSTD.KPL,\nSTD2.KPL as PARENTKPL,\nGET_NEST_ID( \n(select OID from PRD_NEST_GEN where COD_PLT=(select OID from STD_PLATE where KPL=STD.KPL)),\n(select ID_SEQ_BLOCK from PRD_NEST_GEN where COD_PLT=(select OID from STD_PLATE where KPL=STD.KPL))\n) as NESTID,\nGET_NEST_ID(ENCL.FROM_NEST_OID, N.ID_SEQ_BLOCK) PARENTNESTID,\nENCL.TYPE,\nENCL.SLENGTH,\nENCL.SWIDTH,\nSTD.THICKNESS,\nMAT.DENSITY,\nENCL.AREA_M2 as AREAM2,\n(STD.THICKNESS/10*ENCL.AREA_M2*10000*MAT.DENSITY)/1000 as WEIGHT\n\nfrom PRD_STD_PLT_ENCLOS ENCL, STD_PLATE STD, MATERIAL MAT, PRD_NEST_GEN N, STD_PLATE STD2\nwhere \nENCL.STD_PROFILE_OID is NULL AND\nSTD.OID=ENCL.STD_PLATE_OID AND\nMAT.OID=STD.MATERIAL_OID AND\nN.OID=ENCL.FROM_NEST_OID AND\nSTD2.OID=N.COD_PLT"
 
   def genProfileNestBill(project: String): List[ProfileNestBill] = {
@@ -198,6 +200,47 @@ trait BillHelper {
         }
       }
       case None => List.empty[PlateMaterial]
+    }
+  }
+
+  def genSTDprofiles(project: String): List[ProfileMaterial] = {
+    ConnectionManager.connectionByProject(project) match {
+      case Some(connection) => {
+        try {
+          connection.setAutoCommit(false)
+          val stmt: Statement = connection.createStatement()
+          val sql = genSTDProfileslSql()
+          val rs: ResultSet = stmt.executeQuery(sql)
+          val ret = ListBuffer.empty[ProfileMaterial]
+          while (rs.next()) {
+            ret += ProfileMaterial(
+              Option(rs.getInt("KSE")).getOrElse(0),
+              Option(rs.getString("PRF_SECTION")).getOrElse(""),
+              Option(rs.getString("MATERIAL")).getOrElse(""),
+              Option(rs.getDouble("WEB_H")).getOrElse(0.0),
+              Option(rs.getDouble("WEB_T")).getOrElse(0.0),
+              Option(rs.getDouble("FLANGE_H")).getOrElse(0.0),
+              Option(rs.getDouble("FLANGE_T")).getOrElse(0.0),
+              Option(rs.getInt("PARTS")).getOrElse(0),
+              Option(rs.getDouble("LENGHT")).getOrElse(0.0),
+              Option(rs.getDouble("PARTSWEIGHT")).getOrElse(0.0),
+              Math.ceil(Option(rs.getDouble("STOCK")).getOrElse(0.0)).toInt,
+              Option(rs.getDouble("GROWLEN")).getOrElse(0.0),
+              Option(rs.getDouble("GROWWEIGHT")).getOrElse(0.0),
+              Option(rs.getString("STOCK_CODE")).getOrElse("")
+            )
+          }
+          stmt.close()
+          connection.close()
+          ret.toList
+        }
+        catch {
+          case _: Throwable =>
+            connection.close()
+            List.empty[ProfileMaterial]
+        }
+      }
+      case None => List.empty[ProfileMaterial]
     }
   }
 

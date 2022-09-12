@@ -117,7 +117,8 @@ object BillManager extends BillHelper with Codecs {
                               PARTSWEIGHT: Double = 0.0,
                               STOCK: Int = 0,
                               GROWLEN: Double = 0.0,
-                              GROWWEIGHT: Double = 0.0
+                              GROWWEIGHT: Double = 0.0,
+                              STORAGE_CODE: String = ""
                             )
 
   case class ForanScrap(
@@ -146,6 +147,7 @@ object BillManager extends BillHelper with Codecs {
     val buff = ListBuffer.empty[ProfileAnalitic]
     val nest: List[ProfileNestBill] = genProfileNestBill(project).sortBy(s => s.KSE)
     val real: List[ProfileMaterial] = genTotProfiles(project).sortBy(s => s.KSE)
+    val profInStock: List[ProfileMaterial] =genSTDprofiles(project).filter(s=>s.STOCK>0)
     val mats: List[ForanMaterial] = genForanMaterials(project)
 
     real.foreach(realPart => {
@@ -212,6 +214,18 @@ object BillManager extends BillHelper with Codecs {
         buff += ProfileAnalitic(kse, mat, section, scantling, grossLenght * 1000, realPart.GROWWEIGHT, count, scrap, realPartsCpunt, realPart.LENGHT, profileForecast, realPart.PARTSWEIGHT, isDisabled, stock, stockCode)
       }
     })
+
+    profInStock.foreach(prof=>{
+      buff.find(s => s.KSE == prof.KSE) match {
+        case Some(value) =>
+        case None => {
+          val isDisabled = isMatDisabled(prof.MATERIAL, mats)
+          val scantling = genScantling(prof.WEB_H, prof.WEB_T, prof.FLANGE_H, prof.FLANGE_T)
+          buff += ProfileAnalitic(prof.KSE, prof.MATERIAL, prof.PRF_SECTION, scantling,prof.GROWLEN  * 1000, prof.GROWWEIGHT,0, 0.0, 0, 0.0, 0, 0.0, isDisabled, prof.STOCK, prof.STORAGE_CODE)
+        }
+      }
+    })
+
     buff.sortBy(s => (s.mat, s.section, s.scantling)).toList
   }
 
@@ -220,6 +234,8 @@ object BillManager extends BillHelper with Codecs {
     val nests = genPlateNestBill(project)
     val mats: List[ForanMaterial] = genForanMaterials(project)
     val stdPlates: List[StdPlate] = genForanStdPlates(project)
+
+    val stdPlatesInStocks: List[StdPlate] = genForanStdPlates(project).filter(s=>s.STOCK>0 && s.KPL.toString.length<4)
     val foranScraps: List[ForanScrap] = genPlateForanScrap(project)
     val buff = ListBuffer.empty[PlateAnalitic]
 
@@ -276,7 +292,7 @@ object BillManager extends BillHelper with Codecs {
         val oneSheetWeight = Math.ceil(stdPlate.WIDTH / 1000 * stdPlate.LENGTH / 1000 * (stdPlate.THICKNESS / 1000) * density * 1000).toInt
         val KPL = stdPlate.KPL
         val isDisabled = isMatDisabled(mat, mats)
-        val scantling = genScantling(realPrat.THICKNESS, stdPlate.LENGTH / 1000, stdPlate.WIDTH / 1000)
+        val scantling: String = genScantling(realPrat.THICKNESS, stdPlate.LENGTH / 1000, stdPlate.WIDTH / 1000)
         val count = 0
         val scrap = 0.0
         val realPartsCount = realPrat.COUNT
@@ -294,6 +310,25 @@ object BillManager extends BillHelper with Codecs {
       }
 
     })
+
+    stdPlatesInStocks.foreach(stdP=>{
+      buff.find(s => s.KPL == stdP.KPL) match {
+        case Some(value) => None
+        case None => {
+          mats.find(m => m.OID == stdP.MATERIAL_OID) match {
+            case Some(mat) =>{
+              val isDisabled = isMatDisabled(mat.CODE, mats)
+              val scantling: String = genScantling(stdP.THICKNESS, stdP.LENGTH / 1000, stdP.WIDTH / 1000)
+              val oneSheetWeight = Math.ceil(stdP.WIDTH / 1000 * stdP.LENGTH / 1000 * (stdP.THICKNESS / 1000) * mat.DENSITY * 1000).toInt
+              buff+=PlateAnalitic(stdP.KPL, mat.CODE, scantling, 0, 0.0, 0, 0.0, 0, 0.0, 0, stdP.STOCK, isDisabled, oneSheetWeight, 0.0, List.empty[ForanScrap], stdP.STORAGE_CODE)
+            }
+            case None => None
+          }
+        }
+      }
+    })
+
+
     buff.sortBy(s => (s.mat, s.scantling)).toList
   }
 
