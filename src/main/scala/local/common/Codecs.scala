@@ -3,7 +3,7 @@ package local.common
 import deepsea.accomodations.AccommodationManager.Accommodation
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
 import deepsea.hull.HullManager._
-import deepsea.pipe.PipeManager.{Material, MaterialTranslation, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SpoolLock, SystemDef}
+import deepsea.pipe.PipeManager.{Material, MaterialTranslation, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SpoolLock, SystemDef, UnitTranslation, Units}
 import io.circe.{Decoder, Encoder}
 import io.circe.parser._
 import io.circe.{Decoder, Encoder}
@@ -81,6 +81,12 @@ trait Codecs {
 
   implicit val AccommodationDecoder: Decoder[Accommodation] = deriveDecoder[Accommodation]
   implicit val AccommodationEncoder: Encoder[Accommodation] = deriveEncoder[Accommodation]
+
+  implicit val UnitsDecoder: Decoder[Units] = deriveDecoder[Units]
+  implicit val UnitsEncoder: Encoder[Units] = deriveEncoder[Units]
+
+  implicit val UnitTranslationDecoder: Decoder[UnitTranslation] = deriveDecoder[UnitTranslation]
+  implicit val UnitTranslationEncoder: Encoder[UnitTranslation] = deriveEncoder[UnitTranslation]
 
 
   //KOKOVIN
@@ -180,6 +186,8 @@ trait Codecs {
     classOf[Device],
     classOf[MaterialTranslation],
     classOf[Accommodation],
+    classOf[Units],
+    classOf[UnitTranslation],
 
     //KOKOVIN
     classOf[EleComplect],

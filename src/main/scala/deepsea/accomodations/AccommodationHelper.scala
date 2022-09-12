@@ -1,9 +1,9 @@
 package deepsea.accomodations
 
 import deepsea.accomodations.AccommodationManager.{Accommodation, AccommodationAux}
-import deepsea.database.DBManager
+import deepsea.database.{DBManager, DatabaseManager}
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
-import deepsea.pipe.PipeManager.{Material, ProjectName, SystemDef}
+import deepsea.pipe.PipeManager.{Material, ProjectName, SystemDef, Units}
 import org.mongodb.scala.{MongoCollection, classTagToClassOf}
 import org.mongodb.scala.model.Filters.equal
 
@@ -200,6 +200,18 @@ trait AccommodationHelper {
         }
 
       case _ => res
+    }
+  }
+  def getUnits: List[Units] ={
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val units: MongoCollection[Units] = mongo.getCollection("materials-n-units")
+        Await.result(units.find().toFuture(), Duration(30, SECONDS)) match {
+          case values: Seq[Units] =>
+            values.toList
+          case _ => List.empty[Units]
+        }
+      case _ => List.empty[Units]
     }
   }
 }

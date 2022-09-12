@@ -2,7 +2,7 @@ package deepsea.pipe
 
 import deepsea.database.DatabaseManager
 import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection, OracleConnection}
-import deepsea.pipe.PipeManager.{Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SpoolLock, SystemDef}
+import deepsea.pipe.PipeManager.{GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SetSpoolLock, SpoolLock, SystemDef, Units, UpdatePipeComp, UpdatePipeJoints}
 import org.mongodb.scala.{Document, MongoClient, MongoCollection, MongoDatabase, bson}
 import org.mongodb.scala.model.Filters.{and, equal, notEqual}
 import akka.http.scaladsl.{Http, HttpExt}
@@ -12,7 +12,6 @@ import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import deepsea.actors.ActorManager
 import deepsea.database.DatabaseManager
 import deepsea.files.FileManager.GenerateUrl
-import deepsea.pipe.PipeManager.{GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SetSpoolLock, SpoolLock, SystemDef, UpdatePipeComp, UpdatePipeJoints}
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.Filters.{all, and, equal, in, notEqual}
 import io.circe.{Decoder, Encoder}
@@ -401,5 +400,17 @@ trait PipeHelper extends Codecs {
     rs.close()
     oracleConnection.close()
     systemDefs.toList
+  }
+  def getUnits: List[Units] ={
+    DatabaseManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val units: MongoCollection[Units] = mongo.getCollection("materials-n-units")
+        Await.result(units.find().toFuture(), Duration(30, SECONDS)) match {
+          case values: Seq[Units] =>
+            values.toList
+          case _ => List.empty[Units]
+        }
+      case _ => List.empty[Units]
+    }
   }
 }

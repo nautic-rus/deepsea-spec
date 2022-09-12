@@ -62,7 +62,22 @@ object PipeManager{
       }
     }
   }
+  case class Units(code: String, name: String, thumb: String, translations: List[UnitTranslation] = List.empty[UnitTranslation]){
+    def name(lang: String = "en"): String ={
+      translations.find(_.lang == lang) match {
+        case Some(translation) => translation.name
+        case _ => name
+      }
+    }
+    def thumb(lang: String = "en"): String ={
+      translations.find(_.lang == lang) match {
+        case Some(translation) => translation.thumb
+        case _ => thumb
+      }
+    }
+  }
   case class MaterialTranslation(lang: String, name: String, description: String)
+  case class UnitTranslation(lang: String, name: String, thumb: String)
   case class ProjectName(id: String, rkd: String, pdsp: String, foran: String, cloud: String)
   case class SystemDef(project: String, name: String, descr: String)
   case class SpoolLock(issueId: Int, docNumber: String, spool: String, var lock: Int, user: String, var date: Long)
@@ -94,7 +109,6 @@ class PipeManager extends Actor with Codecs with PipeHelper {
     self ! UpdatePipeJoints()
     system.scheduler.scheduleWithFixedDelay(0.seconds, 3.minutes, self, UpdatePipeComp())
     system.scheduler.scheduleWithFixedDelay(0.seconds, 3.minutes, self, UpdatePipeJoints())
-    self ! GetPipeSegs("N004", "800-01")
   }
 
   override def receive: Receive = {
