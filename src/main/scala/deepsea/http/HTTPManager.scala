@@ -199,7 +199,7 @@ class HTTPManager extends Actor {
         askFor(ActorManager.accommodations, GetAccommodations(docNumber))
       },
       (get & path("accommodationsEspFiles") & parameter("docNumber") & parameter("revision") & parameter("lang")) { (docNumber, revision, lang) =>
-        askFor(ActorManager.devices, GetAccommodationsESP(docNumber, revision, lang))
+        askFor(ActorManager.accommodations, GetAccommodationsESP(docNumber, revision, lang))
       },
     )
   }
