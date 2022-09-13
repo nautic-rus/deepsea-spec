@@ -167,7 +167,6 @@ trait AccommodationHelper {
     systemDefs.toList
   }
   def getASName(docNumber: String): String ={
-    var res = ""
     val docNumberSuffix = docNumber.split('-').drop(1).mkString("-")
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
@@ -186,20 +185,22 @@ trait AccommodationHelper {
             val stmt = oracleConnection.createStatement()
             val query = s"SELECT DESCR FROM AS_LANG WHERE OID IN (SELECT OID FROM AS_LIST WHERE USERID = '$docNumberSuffix') AND DESCR IS NOT NULL AND ROWNUM = 1"
             val rs = stmt.executeQuery(query)
-            if (rs.next()){
-             res = rs.getString("DESCR") match {
+            val descr = if (rs.next()){
+             rs.getString("DESCR") match {
                 case value: String => value
                 case _ => ""
               }
             }
+            else{
+              ""
+            }
             stmt.close()
             rs.close()
             oracleConnection.close()
-            res
-          case _ => res
+            descr
+          case _ => ""
         }
-
-      case _ => res
+      case _ => ""
     }
   }
   def getUnits: List[Units] ={
