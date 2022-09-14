@@ -244,12 +244,12 @@ trait AccommodationHelper {
           Zone(
             Option(rs.getString("NAME")).getOrElse(""),
             BBox(
-              Option(rs.getDouble("X_MIN")).getOrElse(0),
-              Option(rs.getDouble("Y_MIN")).getOrElse(0),
-              Option(rs.getDouble("Z_MIN")).getOrElse(0),
-              Option(rs.getDouble("X_MAX")).getOrElse(0),
-              Option(rs.getDouble("Y_MAX")).getOrElse(0),
-              Option(rs.getDouble("Z_MAX")).getOrElse(0)
+              Option(rs.getDouble("XMIN")).getOrElse(0),
+              Option(rs.getDouble("YMIN")).getOrElse(0),
+              Option(rs.getDouble("ZMIN")).getOrElse(0),
+              Option(rs.getDouble("XMAX")).getOrElse(0),
+              Option(rs.getDouble("YMAX")).getOrElse(0),
+              Option(rs.getDouble("ZMAX")).getOrElse(0)
             )
           )
         }).toList
