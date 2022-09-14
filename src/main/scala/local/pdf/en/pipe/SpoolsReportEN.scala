@@ -508,9 +508,9 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
     ps.material.units match {
       case "006" => {
         if (ps.typeCode.equals("PIPE")) {
-          if (ps.length < 0.1) "0.1" else String.format("%.1f", ps.length / 1000.0)
+          if (ps.length < 0.1) "0.1" else String.format("%.2f", ps.length / 1000.0)
         } else {
-          if (ps.length < 0.1) "0.1" else String.format("%.1f", ps.length)
+          if (ps.length < 0.1) "0.1" else String.format("%.2f", ps.length)
         }
 
       }

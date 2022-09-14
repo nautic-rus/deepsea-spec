@@ -1,6 +1,6 @@
 package local.common
 
-import deepsea.accomodations.AccommodationManager.Accommodation
+import deepsea.accomodations.AccommodationManager.{Accommodation, BBox}
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
 import deepsea.hull.HullManager._
 import deepsea.pipe.PipeManager.{Material, MaterialTranslation, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SpoolLock, SystemDef, UnitTranslation, Units}
@@ -87,6 +87,9 @@ trait Codecs {
 
   implicit val UnitTranslationDecoder: Decoder[UnitTranslation] = deriveDecoder[UnitTranslation]
   implicit val UnitTranslationEncoder: Encoder[UnitTranslation] = deriveEncoder[UnitTranslation]
+
+  implicit val BBoxDecoder: Decoder[BBox] = deriveDecoder[BBox]
+  implicit val BBoxEncoder: Encoder[BBox] = deriveEncoder[BBox]
 
 
   //KOKOVIN
@@ -188,6 +191,7 @@ trait Codecs {
     classOf[Accommodation],
     classOf[Units],
     classOf[UnitTranslation],
+    classOf[BBox],
 
     //KOKOVIN
     classOf[EleComplect],

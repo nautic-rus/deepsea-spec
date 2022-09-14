@@ -1,6 +1,7 @@
 package deepsea.accomodations
 
-import deepsea.accomodations.AccommodationManager.{Accommodation, AccommodationAux}
+import deepsea.accomodations.AccommodationManager.{Accommodation, AccommodationAux, BBox, Zone}
+import deepsea.database.DatabaseManager.RsIterator
 import deepsea.database.{DBManager, DatabaseManager}
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
 import deepsea.pipe.PipeManager.{Material, ProjectName, SystemDef, Units}
@@ -36,12 +37,22 @@ trait AccommodationHelper {
           case _ => List.empty[Material]
         }
         val docNumberSuffix = docNumber.split('-').drop(1).mkString("-")
+        val zones = getZones(foranProject)
         DBManager.GetOracleConnection(foranProject) match {
           case Some(oracle) =>
             val s = oracle.createStatement()
             val query = Source.fromResource("queries/accommodations.sql").mkString.replaceAll("&docNumberSuffix", docNumberSuffix)
             val rs = s.executeQuery(query)
             while (rs.next()) {
+              val zone = Option(rs.getString("ZONE")).getOrElse("")
+              val bBox = BBox(
+                Option(rs.getDouble("X_MIN")).getOrElse(0),
+                Option(rs.getDouble("Y_MIN")).getOrElse(0),
+                Option(rs.getDouble("Z_MIN")).getOrElse(0),
+                Option(rs.getDouble("X_MAX")).getOrElse(0),
+                Option(rs.getDouble("Y_MAX")).getOrElse(0),
+                Option(rs.getDouble("Z_MAX")).getOrElse(0)
+              )
               accommodations += Accommodation(
                 foranProject,
                 Option(rs.getInt("MOD_OID")).getOrElse(-1),
@@ -52,7 +63,7 @@ trait AccommodationHelper {
                 Option(rs.getString("MATERIAL")).getOrElse(""),
                 Option(rs.getString("MATERIAL_DESCRIPTION")).getOrElse(""),
                 Option(rs.getDouble("BS_WEIGHT")).getOrElse(0),
-                Option(rs.getString("ZONE")).getOrElse(""),
+                zones.filter(x => bBoxIntersects(x.BBox, bBox)).map(_.name).mkString(","),
                 Option(rs.getString("MATERIAL_DESCRIPTION")) match {
                   case Some(descr) =>
                     if (descr.contains("#")){
@@ -76,98 +87,7 @@ trait AccommodationHelper {
     }
     accommodations.toList
   }
-  def addAccommodationToSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String = ""): Unit ={
-    DBManager.GetMongoConnection() match {
-      case Some(mongo) =>
-        val projectNamesCollection: MongoCollection[ProjectName] = mongo.getCollection("project-names")
-        val projectNames = Await.result(projectNamesCollection.find().toFuture(), Duration(30, SECONDS)) match {
-          case values: Seq[ProjectName] => values.toList
-          case _ => List.empty[ProjectName]
-        }
-        val rkdProject = if (docNumber.contains('-')) docNumber.split('-').head else ""
-        val foranProject = projectNames.find(_.rkd == rkdProject) match {
-          case Some(value) => value.foran
-          case _ => ""
-        }
-        val systemDefs = getSystemDefs(foranProject)
-        val system = systemDefs.find(_.descr.contains(docNumber)) match {
-          case Some(value) =>
-            value.name
-          case _ => ""
-        }
-        val newLabel = List(label, stock, units, count).mkString("|")
-        if (forLabel == ""){
-          DBManager.GetOracleConnection(foranProject) match {
-            case Some(oracle) =>
-              val s = oracle.createStatement()
-              val query = s"update systems_lang set long_descr = concat(long_descr, chr(10) || '$newLabel') where system in (select oid from systems where name = '$system')"
-              s.execute(query)
-              s.close()
-              oracle.close()
-            case _ =>
-          }
-        }
-        else{
-          DBManager.GetOracleConnection(foranProject) match {
-            case Some(oracle) =>
-              val s = oracle.createStatement()
-              val query = s"update element_lang set long_descr = concat(long_descr, chr(10) || '$newLabel') where elem in (select oid from v_element_desc where userid = '$forLabel') and lang = -1"
-              s.execute(query)
-              s.close()
-              oracle.close()
-            case _ =>
-          }
-        }
-      case _ =>
-    }
-  }
-  def getSystemName(docNumber: String): String ={
-    DBManager.GetMongoConnection() match {
-      case Some(mongo) =>
-        val projectNamesCollection: MongoCollection[ProjectName] = mongo.getCollection("project-names")
-        val projectNames = Await.result(projectNamesCollection.find().toFuture(), Duration(30, SECONDS)) match {
-          case values: Seq[ProjectName] => values.toList
-          case _ => List.empty[ProjectName]
-        }
-        val rkdProject = if (docNumber.contains('-')) docNumber.split('-').head else ""
-        val foranProject = projectNames.find(_.rkd == rkdProject) match {
-          case Some(value) => value.foran
-          case _ => ""
-        }
-        val systemDefs = getSystemDefs(foranProject)
-        systemDefs.find(_.descr.contains(docNumber)) match {
-          case Some(value) =>
-            value.descr.replace(docNumber, "").trim
-          case _ => ""
-        }
-      case _ =>  ""
-    }
-  }
-  def getSystemDefs(project: String): List[SystemDef] ={
-    val systemDefs = ListBuffer.empty[SystemDef]
-    DBManager.GetOracleConnection(project) match {
-      case Some(oracleConnection) =>
-        val stmt = oracleConnection.createStatement()
-        val query = "SELECT S.NAME AS NAME, L.DESCR AS DESCR FROM SYSTEMS S, SYSTEMS_LANG L WHERE S.OID = L.SYSTEM AND L.LANG = -2"
-        val rs = stmt.executeQuery(query)
-        while (rs.next()){
-          systemDefs += SystemDef(project, rs.getString("NAME") match {
-            case value: String => value
-            case _ => ""
-          }, rs.getString("DESCR") match {
-            case value: String => value
-            case _ => ""
-          })
-        }
-        stmt.close()
-        rs.close()
-        oracleConnection.close()
-      case _ =>
-    }
-    systemDefs.toList
-  }
   def getASName(docNumber: String): String ={
-    var res = ""
     val docNumberSuffix = docNumber.split('-').drop(1).mkString("-")
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
@@ -186,32 +106,56 @@ trait AccommodationHelper {
             val stmt = oracleConnection.createStatement()
             val query = s"SELECT DESCR FROM AS_LANG WHERE OID IN (SELECT OID FROM AS_LIST WHERE USERID = '$docNumberSuffix') AND DESCR IS NOT NULL AND ROWNUM = 1"
             val rs = stmt.executeQuery(query)
-            if (rs.next()){
-             res = rs.getString("DESCR") match {
+            val descr = if (rs.next()){
+             rs.getString("DESCR") match {
                 case value: String => value
                 case _ => ""
               }
             }
+            else{
+              ""
+            }
             stmt.close()
             rs.close()
             oracleConnection.close()
-            res
-          case _ => res
+            descr
+          case _ => ""
         }
-
-      case _ => res
+      case _ => ""
     }
   }
-  def getUnits: List[Units] ={
-    DBManager.GetMongoConnection() match {
-      case Some(mongo) =>
-        val units: MongoCollection[Units] = mongo.getCollection("materials-n-units")
-        Await.result(units.find().toFuture(), Duration(30, SECONDS)) match {
-          case values: Seq[Units] =>
-            values.toList
-          case _ => List.empty[Units]
-        }
-      case _ => List.empty[Units]
+  def bBoxIntersects(a: BBox, b: BBox): Boolean = {
+      a.xMin <= b.xMax &&
+      a.xMax >= b.xMin &&
+      a.yMin <= b.yMax &&
+      a.yMax >= b.yMin &&
+      a.zMin <= b.zMax &&
+      a.zMax >= b.zMin
+  }
+  def getZones(foranProject: String): List[Zone] ={
+    DBManager.GetOracleConnection(foranProject) match {
+      case Some(oracleConnection) =>
+        val stmt = oracleConnection.createStatement()
+        val query = s"SELECT * FROM ZONE"
+        val rSet = stmt.executeQuery(query)
+        val zones = RsIterator(rSet).map(rs => {
+          Zone(
+            Option(rs.getString("NAME")).getOrElse(""),
+            BBox(
+              Option(rs.getDouble("XMIN")).getOrElse(0),
+              Option(rs.getDouble("YMIN")).getOrElse(0),
+              Option(rs.getDouble("ZMIN")).getOrElse(0),
+              Option(rs.getDouble("XMAX")).getOrElse(0),
+              Option(rs.getDouble("YMAX")).getOrElse(0),
+              Option(rs.getDouble("ZMAX")).getOrElse(0)
+            )
+          )
+        }).toList
+        stmt.close()
+        rSet.close()
+        oracleConnection.close()
+        zones
+      case _ => List.empty[Zone]
     }
   }
 }

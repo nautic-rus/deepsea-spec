@@ -17,7 +17,7 @@ import org.scalatest.funsuite.AnyFunSuite
 
 import scala.collection.mutable.ListBuffer
 
-class AccommodationsTest extends AnyFunSuite with AccommodationHelper {
+class AccommodationsTest extends AnyFunSuite with DeviceHelper with AccommodationHelper {
 
   val mongo: Option[MongoDatabase] = DBManager.GetMongoConnection() //todo need for testing
 
