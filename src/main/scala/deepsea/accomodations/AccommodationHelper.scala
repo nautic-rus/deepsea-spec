@@ -124,18 +124,6 @@ trait AccommodationHelper {
       case _ => ""
     }
   }
-  def getUnits: List[Units] ={
-    DBManager.GetMongoConnection() match {
-      case Some(mongo) =>
-        val units: MongoCollection[Units] = mongo.getCollection("materials-n-units")
-        Await.result(units.find().toFuture(), Duration(30, SECONDS)) match {
-          case values: Seq[Units] =>
-            values.toList
-          case _ => List.empty[Units]
-        }
-      case _ => List.empty[Units]
-    }
-  }
   def bBoxIntersects(a: BBox, b: BBox): Boolean = {
       a.xMin <= b.xMax &&
       a.xMax >= b.xMin &&
