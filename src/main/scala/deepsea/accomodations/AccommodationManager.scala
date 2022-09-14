@@ -18,6 +18,8 @@ import scala.concurrent.Await
 object AccommodationManager{
   case class GetAccommodations(docNumber: String)
   case class GetAccommodationsESP(docNumber: String, revision: String, lang: String = "en")
+  case class BBox(xMin: Double, yMin: Double, zMin: Double, xMax: Double, yMax: Double, zMax: Double)
+  case class Zone(name: String, BBox: BBox)
 
   case class Accommodation(project: String, modelOid: Int, asOid: Int, weight: Double, surface: Double, userId: String, materialCode: String, materialDescription: String, bsWeight: Double, zone: String, var material: Material = Material()){
     def asDevice: Device ={

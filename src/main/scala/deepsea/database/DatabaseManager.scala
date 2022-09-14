@@ -10,7 +10,7 @@ import deepsea.database.DatabaseManager.{GetConnectionFromPool, GetMongoCacheCon
 import local.common.Codecs
 import org.mongodb.scala.{MongoClient, MongoDatabase}
 
-import java.sql.Connection
+import java.sql.{Connection, ResultSet}
 import java.util.concurrent.TimeUnit
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Await
@@ -23,6 +23,10 @@ object DatabaseManager{
   case class GetMongoConnectionFromPool()
   case class GetMongoCacheConnectionFromPool()
   case class GetConnectionFromPool()
+  case class RsIterator(rs: ResultSet) extends Iterator[ResultSet] {
+    def hasNext: Boolean = rs.next()
+    def next(): ResultSet = rs
+  }
 
   def GetConnection(): Option[Connection] ={
     try{

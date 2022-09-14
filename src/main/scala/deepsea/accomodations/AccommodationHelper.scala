@@ -1,6 +1,7 @@
 package deepsea.accomodations
 
-import deepsea.accomodations.AccommodationManager.{Accommodation, AccommodationAux}
+import deepsea.accomodations.AccommodationManager.{Accommodation, AccommodationAux, BBox, Zone}
+import deepsea.database.DatabaseManager.RsIterator
 import deepsea.database.{DBManager, DatabaseManager}
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
 import deepsea.pipe.PipeManager.{Material, ProjectName, SystemDef, Units}
@@ -36,12 +37,22 @@ trait AccommodationHelper {
           case _ => List.empty[Material]
         }
         val docNumberSuffix = docNumber.split('-').drop(1).mkString("-")
+        val zones = getZones(foranProject)
         DBManager.GetOracleConnection(foranProject) match {
           case Some(oracle) =>
             val s = oracle.createStatement()
             val query = Source.fromResource("queries/accommodations.sql").mkString.replaceAll("&docNumberSuffix", docNumberSuffix)
             val rs = s.executeQuery(query)
             while (rs.next()) {
+              val zone = Option(rs.getString("ZONE")).getOrElse("")
+              val bBox = BBox(
+                Option(rs.getDouble("X_MIN")).getOrElse(0),
+                Option(rs.getDouble("Y_MIN")).getOrElse(0),
+                Option(rs.getDouble("Z_MIN")).getOrElse(0),
+                Option(rs.getDouble("X_MAX")).getOrElse(0),
+                Option(rs.getDouble("Y_MAX")).getOrElse(0),
+                Option(rs.getDouble("Z_MAX")).getOrElse(0)
+              )
               accommodations += Accommodation(
                 foranProject,
                 Option(rs.getInt("MOD_OID")).getOrElse(-1),
@@ -52,7 +63,7 @@ trait AccommodationHelper {
                 Option(rs.getString("MATERIAL")).getOrElse(""),
                 Option(rs.getString("MATERIAL_DESCRIPTION")).getOrElse(""),
                 Option(rs.getDouble("BS_WEIGHT")).getOrElse(0),
-                Option(rs.getString("ZONE")).getOrElse(""),
+                zones.filter(x => bBoxIntersects(x.BBox, bBox)).map(_.name).mkString(","),
                 Option(rs.getString("MATERIAL_DESCRIPTION")) match {
                   case Some(descr) =>
                     if (descr.contains("#")){
@@ -213,6 +224,40 @@ trait AccommodationHelper {
           case _ => List.empty[Units]
         }
       case _ => List.empty[Units]
+    }
+  }
+  def bBoxIntersects(a: BBox, b: BBox): Boolean = {
+      a.xMin <= b.xMax &&
+      a.xMax >= b.xMin &&
+      a.yMin <= b.yMax &&
+      a.yMax >= b.yMin &&
+      a.zMin <= b.zMax &&
+      a.zMax >= b.zMin
+  }
+  def getZones(foranProject: String): List[Zone] ={
+    DBManager.GetOracleConnection(foranProject) match {
+      case Some(oracleConnection) =>
+        val stmt = oracleConnection.createStatement()
+        val query = s"SELECT * FROM ZONE"
+        val rSet = stmt.executeQuery(query)
+        val zones = RsIterator(rSet).map(rs => {
+          Zone(
+            Option(rs.getString("NAME")).getOrElse(""),
+            BBox(
+              Option(rs.getDouble("X_MIN")).getOrElse(0),
+              Option(rs.getDouble("Y_MIN")).getOrElse(0),
+              Option(rs.getDouble("Z_MIN")).getOrElse(0),
+              Option(rs.getDouble("X_MAX")).getOrElse(0),
+              Option(rs.getDouble("Y_MAX")).getOrElse(0),
+              Option(rs.getDouble("Z_MAX")).getOrElse(0)
+            )
+          )
+        }).toList
+        stmt.close()
+        rSet.close()
+        oracleConnection.close()
+        zones
+      case _ => List.empty[Zone]
     }
   }
 }
