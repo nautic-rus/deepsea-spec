@@ -652,7 +652,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
   private def formatWGTDouble(ps: Double): String = if (ps < 0.01) " 0.01" else String.format("%.2f", ps)
 
   private def generateWrappedRows(item: Item11ColumnsEN): List[Item11ColumnsEN] = {
-    val A1count = 8
+    val A1count = 12
     val A2count = 47
     val A3count = 25
     val A4count = 20
