@@ -3,6 +3,7 @@ package deepsea.devices
 import akka.actor.Actor
 import akka.pattern.ask
 import akka.util.Timeout
+import deepsea.accomodations.AccommodationHelper
 import deepsea.actors.ActorManager
 import deepsea.devices.DeviceManager.{AddDeviceToSystem, Device, GetDevices, GetDevicesESP}
 import deepsea.files.FileManager.GenerateUrl
@@ -26,13 +27,13 @@ object DeviceManager{
   case class GetDevicesESP(docNumber: String, revision: String, lang: String = "en")
   case class AddDeviceToSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String = "")
 }
-class DeviceManager extends Actor with DeviceHelper with Codecs{
+class DeviceManager extends Actor with DeviceHelper with AccommodationHelper with Codecs{
 
   implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
 
   override def receive: Receive = {
     case GetDevices(docNumber) =>
-      sender() ! getDevices(docNumber).asJson.noSpaces
+      sender() ! (getDevices(docNumber) ++ getAccommodations(docNumber).filter(_.material.code != "").map(_.asDevice)).asJson.noSpaces
     case GetDevicesESP(docNumber, revision, lang) =>
       val docName: String = getSystemName(docNumber)
       val devices: List[Device] = getDevices(docNumber).tapEach(x => x.userId = removeLeftZeros(x.origUserId))
