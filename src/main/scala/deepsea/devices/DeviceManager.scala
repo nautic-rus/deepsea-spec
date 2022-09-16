@@ -33,7 +33,7 @@ class DeviceManager extends Actor with DeviceHelper with AccommodationHelper wit
 
   override def receive: Receive = {
     case GetDevices(docNumber) =>
-      sender() ! (getDevices(docNumber) ++ getAccommodations(docNumber).filter(_.material.code != "").map(_.asDevice).tapEach(_.zone = "*")).asJson.noSpaces
+      sender() ! (getDevices(docNumber) ++ getAccommodations(docNumber).filter(_.material.code != "").map(_.asDevice)).asJson.noSpaces
     case GetDevicesESP(docNumber, revision, lang) =>
       val docName: String = getSystemName(docNumber)
       val devices: List[Device] = getDevices(docNumber).tapEach(x => x.userId = removeLeftZeros(x.origUserId)) ++ getAccommodations(docNumber).filter(_.material.code != "").map(_.asDevice).tapEach(_.zone = "*")
