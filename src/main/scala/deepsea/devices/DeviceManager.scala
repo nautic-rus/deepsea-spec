@@ -37,7 +37,8 @@ class DeviceManager extends Actor with DeviceHelper with AccommodationHelper wit
     case GetDevicesESP(docNumber, revision, lang) =>
       val docName: String = getSystemName(docNumber)
       val devices: List[Device] = getDevices(docNumber).tapEach(x => x.userId = removeLeftZeros(x.origUserId)) ++ getAccommodations(docNumber).filter(_.material.code != "").map(_.asDevice).tapEach(_.zone = "*")
-      val file = genAccomListEnPDF(docNumber, docName, revision, devices, lang)
+      val rev = if (revision == "NO REV")  "" else revision
+      val file = genAccomListEnPDF(docNumber, docName, rev, devices, lang)
       Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
         case url: String => sender() ! url.asJson.noSpaces
         case _ => sender() ! "error".asJson.noSpaces
