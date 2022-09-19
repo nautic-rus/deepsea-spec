@@ -65,14 +65,14 @@ trait AccommodationHelper {
                 Option(rs.getString("USERID")).getOrElse(""),
                 Option(rs.getString("MATERIAL")).getOrElse(""),
                 Option(rs.getString("MATERIAL_DESCRIPTION")).getOrElse(""),
-                surface,
+                bsWeight,
                 zones.filter(x => bBoxIntersects(x.BBox, bBox)).map(_.name).mkString(","),
                 Option(rs.getString("MATERIAL_DESCRIPTION")) match {
                   case Some(descr) =>
                     if (descr.contains("#")){
                       val code = descr.split("#").last
                       materials.find(_.code == code) match {
-                        case Some(value) => value.copy(singleWeight = bsWeight)
+                        case Some(value) => value
                         case _ => Material()
                       }
                     }
