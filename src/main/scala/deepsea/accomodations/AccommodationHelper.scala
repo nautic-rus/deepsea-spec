@@ -71,7 +71,7 @@ trait AccommodationHelper {
                     if (descr.contains("#")){
                       val code = descr.split("#").last
                       materials.find(_.code == code) match {
-                        case Some(value) => value.copy(singleWeight = weight)
+                        case Some(value) => value
                         case _ => Material()
                       }
                     }
