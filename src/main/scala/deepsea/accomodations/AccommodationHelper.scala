@@ -44,9 +44,9 @@ trait AccommodationHelper {
             val query = Source.fromResource("queries/accommodations.sql").mkString.replaceAll("&docNumberSuffix", docNumberSuffix)
             val rs = s.executeQuery(query)
             while (rs.next()) {
-              val zone = Option(rs.getString("ZONE")).getOrElse("")
-              val weight = Option(rs.getDouble("WEIGHT")).getOrElse(0)
-              val surface = Option(rs.getDouble("SURFACE")).getOrElse(0)
+              val zone: String = Option(rs.getString("ZONE")).getOrElse("")
+              val weight: Double = Option(rs.getDouble("WEIGHT")).getOrElse(0)
+              val surface: Double = Option(rs.getDouble("SURFACE")).getOrElse(0)
               val bBox = BBox(
                 Option(rs.getDouble("X_MIN")).getOrElse(0),
                 Option(rs.getDouble("Y_MIN")).getOrElse(0),
