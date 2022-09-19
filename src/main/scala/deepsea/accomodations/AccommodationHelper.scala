@@ -48,6 +48,7 @@ trait AccommodationHelper {
               val weight: Double = Option(rs.getDouble("WEIGHT")).getOrElse(0)
               val surface: Double = Option(rs.getDouble("SURFACE")).getOrElse(0)
               val bsWeight: Double = Option(rs.getDouble("BS_WEIGHT")).getOrElse(0)
+              val userId: String = Option(rs.getString("USERID")).getOrElse("")
               val bBox = BBox(
                 Option(rs.getDouble("X_MIN")).getOrElse(0),
                 Option(rs.getDouble("Y_MIN")).getOrElse(0),
@@ -62,7 +63,7 @@ trait AccommodationHelper {
                 Option(rs.getInt("AS_OID")).getOrElse(-1),
                 weight,
                 surface,
-                Option(rs.getString("USERID")).getOrElse(""),
+                (accommodations.length + 1).toString,
                 Option(rs.getString("MATERIAL")).getOrElse(""),
                 Option(rs.getString("MATERIAL_DESCRIPTION")).getOrElse(""),
                 bsWeight,
