@@ -59,7 +59,7 @@ trait AccommodationHelper {
                 foranProject,
                 Option(rs.getInt("MOD_OID")).getOrElse(-1),
                 Option(rs.getInt("AS_OID")).getOrElse(-1),
-                weight,
+                surface,
                 surface,
                 Option(rs.getString("USERID")).getOrElse(""),
                 Option(rs.getString("MATERIAL")).getOrElse(""),
@@ -71,7 +71,7 @@ trait AccommodationHelper {
                     if (descr.contains("#")){
                       val code = descr.split("#").last
                       materials.find(_.code == code) match {
-                        case Some(value) => value
+                        case Some(value) => value.copy(singleWeight = weight)
                         case _ => Material()
                       }
                     }
