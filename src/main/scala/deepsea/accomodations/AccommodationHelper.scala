@@ -45,6 +45,8 @@ trait AccommodationHelper {
             val rs = s.executeQuery(query)
             while (rs.next()) {
               val zone = Option(rs.getString("ZONE")).getOrElse("")
+              val weight = Option(rs.getDouble("WEIGHT")).getOrElse(0)
+              val surface = Option(rs.getDouble("SURFACE")).getOrElse(0)
               val bBox = BBox(
                 Option(rs.getDouble("X_MIN")).getOrElse(0),
                 Option(rs.getDouble("Y_MIN")).getOrElse(0),
@@ -57,8 +59,8 @@ trait AccommodationHelper {
                 foranProject,
                 Option(rs.getInt("MOD_OID")).getOrElse(-1),
                 Option(rs.getInt("AS_OID")).getOrElse(-1),
-                Option(rs.getDouble("WEIGHT")).getOrElse(0),
-                Option(rs.getDouble("SURFACE")).getOrElse(0),
+                surface,
+                weight,
                 Option(rs.getString("USERID")).getOrElse(""),
                 Option(rs.getString("MATERIAL")).getOrElse(""),
                 Option(rs.getString("MATERIAL_DESCRIPTION")).getOrElse(""),
@@ -69,7 +71,7 @@ trait AccommodationHelper {
                     if (descr.contains("#")){
                       val code = descr.split("#").last
                       materials.find(_.code == code) match {
-                        case Some(value) => value
+                        case Some(value) => value.copy(singleWeight = weight)
                         case _ => Material()
                       }
                     }
