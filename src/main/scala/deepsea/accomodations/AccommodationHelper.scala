@@ -113,6 +113,7 @@ trait AccommodationHelper {
         }
         val docNumberSuffix = docNumber.split('-').drop(1).mkString("-")
         val zones = getZones(foranProject)
+        var counter = 0
         DBManager.GetOracleConnection(foranProject) match {
           case Some(oracle) =>
             val s = oracle.createStatement()
@@ -132,13 +133,14 @@ trait AccommodationHelper {
                 Option(rs.getDouble("Y_MAX")).getOrElse(0),
                 Option(rs.getDouble("Z_MAX")).getOrElse(0)
               )
+              counter += 1
               accommodations += Accommodation(
                 foranProject,
                 Option(rs.getInt("MOD_OID")).getOrElse(-1),
                 Option(rs.getInt("AS_OID")).getOrElse(-1),
                 weight,
                 surface,
-                (accommodations.length + 1).toString,
+                (counter).toString,
                 Option(rs.getString("MATERIAL")).getOrElse(""),
                 Option(rs.getString("MATERIAL_DESCRIPTION")).getOrElse(""),
                 bsWeight,
