@@ -91,6 +91,83 @@ trait AccommodationHelper {
     }
     accommodations.toList
   }
+  def getAccommodationsAsDevices(docNumber: String): List[Device] ={
+    val accommodations = ListBuffer.empty[Accommodation]
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val materialsNCollectionName = "materials-n"
+        val materialsCollection: MongoCollection[Material] = mongo.getCollection(materialsNCollectionName)
+        val projectNamesCollection: MongoCollection[ProjectName] = mongo.getCollection("project-names")
+        val projectNames = Await.result(projectNamesCollection.find().toFuture(), Duration(30, SECONDS)) match {
+          case values: Seq[ProjectName] => values.toList
+          case _ => List.empty[ProjectName]
+        }
+        val rkdProject = if (docNumber.contains('-')) docNumber.split('-').head else ""
+        val foranProject = projectNames.find(_.rkd == rkdProject) match {
+          case Some(value) => value.foran
+          case _ => ""
+        }
+        val materials = Await.result(materialsCollection.find(equal("projects", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
+          case values: Seq[Material] => values.toList
+          case _ => List.empty[Material]
+        }
+        val docNumberSuffix = docNumber.split('-').drop(1).mkString("-")
+        val zones = getZones(foranProject)
+        DBManager.GetOracleConnection(foranProject) match {
+          case Some(oracle) =>
+            val s = oracle.createStatement()
+            val query = Source.fromResource("queries/accommodations.sql").mkString.replaceAll("&docNumberSuffix", docNumberSuffix)
+            val rs = s.executeQuery(query)
+            while (rs.next()) {
+              val zone: String = Option(rs.getString("ZONE")).getOrElse("")
+              val weight: Double = Option(rs.getDouble("WEIGHT")).getOrElse(0)
+              val surface: Double = Option(rs.getDouble("SURFACE")).getOrElse(0)
+              val bsWeight: Double = Option(rs.getDouble("BS_WEIGHT")).getOrElse(0)
+              val userId: String = Option(rs.getString("USERID")).getOrElse("")
+              val bBox = BBox(
+                Option(rs.getDouble("X_MIN")).getOrElse(0),
+                Option(rs.getDouble("Y_MIN")).getOrElse(0),
+                Option(rs.getDouble("Z_MIN")).getOrElse(0),
+                Option(rs.getDouble("X_MAX")).getOrElse(0),
+                Option(rs.getDouble("Y_MAX")).getOrElse(0),
+                Option(rs.getDouble("Z_MAX")).getOrElse(0)
+              )
+              accommodations += Accommodation(
+                foranProject,
+                Option(rs.getInt("MOD_OID")).getOrElse(-1),
+                Option(rs.getInt("AS_OID")).getOrElse(-1),
+                weight,
+                surface,
+                (accommodations.length + 1).toString,
+                Option(rs.getString("MATERIAL")).getOrElse(""),
+                Option(rs.getString("MATERIAL_DESCRIPTION")).getOrElse(""),
+                bsWeight,
+                zones.filter(x => bBoxIntersects(x.BBox, bBox)).map(_.name).mkString(","),
+                Option(rs.getString("MATERIAL_DESCRIPTION")) match {
+                  case Some(descr) =>
+                    if (descr.contains("#")){
+                      val code = descr.split("#").last
+                      materials.find(_.code == code) match {
+                        case Some(value) => value
+                        case _ => Material()
+                      }
+                    }
+                    else {
+                      Material()
+                    }
+                  case _ => Material()
+                })
+            }
+            s.close()
+            oracle.close()
+          case _ => List.empty[Accommodation]
+        }
+      case _ => List.empty[Accommodation]
+    }
+    accommodations.map(_.asDevice).filter(_.material.code != "").groupBy(_.material.code).map(acc => {
+      acc._2.head.copy(count = acc._2.map(_.count).sum, weight = acc._2.map(_.weight).sum)
+    }).toList
+  }
   def getASName(docNumber: String): String ={
     val docNumberSuffix = docNumber.split('-').drop(1).mkString("-")
     DBManager.GetMongoConnection() match {

@@ -33,10 +33,10 @@ class DeviceManager extends Actor with DeviceHelper with AccommodationHelper wit
 
   override def receive: Receive = {
     case GetDevices(docNumber) =>
-      sender() ! (getDevices(docNumber) ++ getAccommodations(docNumber).filter(_.material.code != "").map(_.asDevice)).asJson.noSpaces
+      sender() ! (getDevices(docNumber) ++ getAccommodationsAsDevices(docNumber)).asJson.noSpaces
     case GetDevicesESP(docNumber, revision, lang) =>
       val docName: String = getSystemName(docNumber)
-      val devices: List[Device] = getDevices(docNumber).tapEach(x => x.userId = removeLeftZeros(x.origUserId)) ++ getAccommodations(docNumber).filter(_.material.code != "").map(_.asDevice).tapEach(_.zone = "*")
+      val devices: List[Device] = getDevices(docNumber).tapEach(x => x.userId = removeLeftZeros(x.origUserId)) ++ getAccommodationsAsDevices(docNumber).tapEach(_.zone = "*")
       val rev = if (revision == "NO REV")  "" else revision
       val file = genAccomListEnPDF(docNumber, docName, rev, devices, lang)
       Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
