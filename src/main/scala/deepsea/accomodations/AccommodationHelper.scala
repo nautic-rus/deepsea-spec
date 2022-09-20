@@ -133,14 +133,13 @@ trait AccommodationHelper {
                 Option(rs.getDouble("Y_MAX")).getOrElse(0),
                 Option(rs.getDouble("Z_MAX")).getOrElse(0)
               )
-              counter += 1
               accommodations += Accommodation(
                 foranProject,
                 Option(rs.getInt("MOD_OID")).getOrElse(-1),
                 Option(rs.getInt("AS_OID")).getOrElse(-1),
                 weight,
                 surface,
-                (counter).toString,
+                (accommodations.length + 1).toString,
                 Option(rs.getString("MATERIAL")).getOrElse(""),
                 Option(rs.getString("MATERIAL_DESCRIPTION")).getOrElse(""),
                 bsWeight,
@@ -166,8 +165,8 @@ trait AccommodationHelper {
         }
       case _ => List.empty[Accommodation]
     }
-    accommodations.map(_.asDevice).filter(_.material.code != "").groupBy(_.material.code).map(acc => {
-      acc._2.head.copy(count = acc._2.map(_.count).sum)
+    accommodations.map(_.asDevice).filter(_.material.code != "").groupBy(_.material.code).zipWithIndex.map(acc => {
+      acc._1._2.head.copy(count = acc._1._2.map(_.count).sum, userId = acc._2.toString())
     }).toList
   }
   def getASName(docNumber: String): String ={
