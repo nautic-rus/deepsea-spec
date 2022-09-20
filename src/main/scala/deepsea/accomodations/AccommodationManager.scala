@@ -41,7 +41,7 @@ object AccommodationManager{
         "",
         "",
         material.units,
-        surface
+        surface / 2
       )
     }
     private def removeLeftZeros(input: String): String ={
