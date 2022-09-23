@@ -165,7 +165,10 @@ trait AccommodationHelper {
                       }
                     }
                     else {
-                      Material()
+                      materials.find(x => x.code == profileStock || x.code == plateStock) match {
+                        case Some(value) => value
+                        case _ => Material()
+                      }
                     }
                   case _ => Material()
                 })
