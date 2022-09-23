@@ -24,7 +24,7 @@ class AccommodationsTest extends AnyFunSuite with DeviceHelper with Accommodatio
   val docNumber = "200101-522-002"
   val revision = "0"
   val docName: String = getASName(docNumber)
-  val accommodations: List[Device] = getAccommodations(docNumber).filter(_.material.code != "").map(_.asDevice)
+  val accommodations: List[Device] = getAccommodationsAsDevices(docNumber)
   val lang = "en"
   val ret: String = genAccomListEnPDF(docNumber, docName, revision, accommodations, "ru")
 
