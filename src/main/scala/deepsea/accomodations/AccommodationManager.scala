@@ -21,7 +21,7 @@ object AccommodationManager{
   case class BBox(xMin: Double, yMin: Double, zMin: Double, xMax: Double, yMax: Double, zMax: Double)
   case class Zone(name: String, BBox: BBox)
 
-  case class Accommodation(project: String, modelOid: Int, asOid: Int, weight: Double, surface: Double, userId: String, materialCode: String, materialDescription: String, bsWeight: Double, zone: String, var material: Material = Material()){
+  case class Accommodation(project: String, modelOid: Int, asOid: Int, weight: Double, surface: Double, userId: String, materialCode: String, materialDescription: String, bsWeight: Double, zone: String, profileStock: String, plateStock: String, var material: Material = Material()){
     def asDevice: Device ={
       Device(
         project,
