@@ -132,6 +132,8 @@ trait AccommodationHelper {
               val surface: Double = Option(rs.getDouble("SURFACE")).getOrElse(0)
               val bsWeight: Double = Option(rs.getDouble("BS_WEIGHT")).getOrElse(0)
               val userId: String = Option(rs.getString("USERID")).getOrElse("")
+              val profileStock: String = Option(rs.getString("PROFILE_STOCK")).getOrElse("")
+              val plateStock: String = Option(rs.getString("PLATE_STOCK")).getOrElse("")
               val bBox = BBox(
                 Option(rs.getDouble("X_MIN")).getOrElse(0),
                 Option(rs.getDouble("Y_MIN")).getOrElse(0),
@@ -151,6 +153,8 @@ trait AccommodationHelper {
                 Option(rs.getString("MATERIAL_DESCRIPTION")).getOrElse(""),
                 bsWeight,
                 zones.filter(x => bBoxIntersects(x.BBox, bBox)).map(_.name).mkString(","),
+                profileStock,
+                plateStock,
                 Option(rs.getString("MATERIAL_DESCRIPTION")) match {
                   case Some(descr) =>
                     if (descr.contains("#")){
