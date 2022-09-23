@@ -32,7 +32,7 @@ object AccommodationManager{
         zone,
         "accommodation",
         "",
-        bsWeight,
+        weight,
         material.code,
         0,
         "",
