@@ -24,6 +24,7 @@ trait ForanFileUtil {
     val OE: DenseVector[Double] = DenseVector[Double](vecEx, vecEy)
     val angle: Double = Math.toDegrees(Math.acos(Math.max(Math.min((OS dot OE) / (norm(OS) * norm(OE)), 1), -1)))
     if (Math.abs(angle) < 3.0 || radius < 4.0) {
+      //println(radius+" "+angle)
       false
     } else {
       true
@@ -204,6 +205,7 @@ trait ForanFileUtil {
         if (checkArc(arc)) {
           buf += MachineItem(Right(arc))
         } else {
+          buf += MachineItem(Left(arc.sp))
           buf += MachineItem(Left(arc.ep))
         }
       })
