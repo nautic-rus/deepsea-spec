@@ -146,6 +146,9 @@ class HTTPManager extends Actor {
       (post & path("createESSI") & entity(as[String]) & parameter("user")) { (lines, user) =>
         askFor(ActorManager.spec, CreateESSI(lines, user))
       },
+      (post & path("createTAP") & entity(as[String]) & parameter("user")) { (lines, user) =>
+        askFor(ActorManager.spec, CreateTAP(lines, user))
+      },
       (get & path("removeParts") & parameter("project") & parameter("block") & parameter("parts") & parameter("user")){ (project, block, parts, user) =>
         askFor(ActorManager.hullManager, RemoveParts(project, block, parts, user))
       },
