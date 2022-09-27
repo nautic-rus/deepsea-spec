@@ -279,7 +279,7 @@ class HullManager extends Actor with Codecs{
 
       sender() ! "success"
     case GetHullEspFiles(project, docNumber, docName, revision) =>
-      val rev = if (revision == "Без ревизии")  "" else revision
+      val rev = if (revision == "NO REV")  "" else revision
       val file: String = Files.createTempDirectory("hullPdf").toAbsolutePath.toString + "/" + docNumber + "_rev" + rev + ".pdf"
       genHullPartListEnPDF(project, docNumber, docName, rev, file)
       Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
