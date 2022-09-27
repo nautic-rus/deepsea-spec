@@ -46,6 +46,7 @@ object SpecManager {
 
   case class CreateCNC(lines: String, user: String)
   case class CreateESSI(lines: String, user: String)
+  case class CreateTAP(lines: String, user: String)
   case class InsertNestLock(project: String, nestId: String, user: String)
 
   case class PartDef(name: String, section: String, description: String)
@@ -91,10 +92,13 @@ class SpecManager extends Actor with BStree {
       sender() ! genWastsgeByParentKplJson(project, kpl.toIntOption.getOrElse(0))
 
     case CreateCNC(lines, user) =>
-      val res = doCNCStrings(Json.parse(lines).asOpt[List[String]].getOrElse(List.empty[String]), user)
+      val res = local.hull.cnc.hyprethermGcode.CNCManager.doCNCStrings(Json.parse(lines).asOpt[List[String]].getOrElse(List.empty[String]), user)
       sender() ! Json.toJson(res)
     case CreateESSI(lines, user) =>
       val res = doEssiCNC(Json.parse(lines).asOpt[List[String]].getOrElse(List.empty[String]), user)
+      sender() ! Json.toJson(res)
+    case CreateTAP(lines, user) =>
+      val res = local.hull.cnc.gcodePella.CNCManager.doCNCStrings(Json.parse(lines).asOpt[List[String]].getOrElse(List.empty[String]), user)
       sender() ! Json.toJson(res)
     case InsertNestLock(project, nestId, user) =>
       insertLock(project, nestId, user)
