@@ -181,7 +181,7 @@ trait AccommodationHelper {
       case _ => List.empty[Accommodation]
     }
     accommodations.map(_.asDevice).filter(_.material.code != "").groupBy(_.material.code).zipWithIndex.map(acc => {
-      acc._1._2.head.copy(count = acc._1._2.map(_.count).sum, userId = (acc._2 + 1).toString)
+      acc._1._2.head.copy(weight = acc._1._2.map(_.weight).sum, count = acc._1._2.map(_.count).sum, userId = (acc._2 + 1).toString)
     }).toList
   }
   def getASName(docNumber: String): String ={
