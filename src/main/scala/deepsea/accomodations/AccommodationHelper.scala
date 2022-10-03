@@ -1,10 +1,11 @@
 package deepsea.accomodations
 
-import deepsea.accomodations.AccommodationManager.{Accommodation, AccommodationAux, BBox, Zone}
+import deepsea.accomodations.AccommodationManager.{Accommodation, AccommodationAux, AccommodationGroup, BBox, Zone}
 import deepsea.database.DatabaseManager.RsIterator
 import deepsea.database.{DBManager, DatabaseManager}
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
 import deepsea.pipe.PipeManager.{Material, ProjectName, SystemDef, Units}
+import local.pdf.en.accom.AccomReportEn.getSystemDefs
 import org.mongodb.scala.{MongoCollection, classTagToClassOf}
 import org.mongodb.scala.model.Filters.equal
 
@@ -100,6 +101,7 @@ trait AccommodationHelper {
   }
   def getAccommodationsAsDevices(docNumber: String): List[Device] ={
     val accommodations = ListBuffer.empty[Accommodation]
+    val groups = ListBuffer.empty[AccommodationGroup]
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
         val materialsNCollectionName = "materials-n"
@@ -121,6 +123,37 @@ trait AccommodationHelper {
         val docNumberSuffix = docNumber.split('-').drop(1).mkString("-")
         val zones = getZones(foranProject)
         var counter = 0
+
+        val systemDefs = getSystemDefs(foranProject)
+        val system = systemDefs.find(_.descr.contains(docNumber)) match {
+          case Some(value) =>
+            value.name
+          case _ => ""
+        }
+
+        DBManager.GetOracleConnection(foranProject) match {
+          case Some(oracle) =>
+            val s = oracle.createStatement()
+            val query = s"select system, long_descr from systems_lang where system in (select oid from systems where name = '$system')"
+            val rs = s.executeQuery(query)
+            while (rs.next()) {
+              val descr = Option(rs.getString("LONG_DESCR")).getOrElse("")
+              if (descr.contains("|")){
+                descr.split('\n').foreach(l => {
+                  if (l.contains('@')){
+                    val split = l.replace("@", "").split('|')
+                    if (split.length > 1){
+                      groups += AccommodationGroup(split.head, split.last)
+                    }
+                  }
+                })
+              }
+            }
+            s.close()
+            oracle.close()
+          case _ => List.empty[Device]
+        }
+
         DBManager.GetOracleConnection(foranProject) match {
           case Some(oracle) =>
             val s = oracle.createStatement()
@@ -180,9 +213,12 @@ trait AccommodationHelper {
         }
       case _ => List.empty[Accommodation]
     }
-    //accommodations.map(_.asDevice).filter(_.material.code != "").toList
-    accommodations.map(_.asDevice).filter(_.material.code != "").groupBy(_.material.code).zipWithIndex.map(acc => {
-      acc._1._2.head.copy(weight = acc._1._2.map(_.weight).sum, count = acc._1._2.map(_.count).sum, userId = (acc._2 + 1).toString)
+    accommodations.map(_.asDevice).filter(m => m.material.code != "" && !groups.map(_.code).contains(m.material.code)).toList ++
+    accommodations.map(_.asDevice).filter(m => m.material.code != "" && groups.map(_.code).contains(m.material.code)).groupBy(_.material.code).map(acc => {
+      acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.map(_.count).sum, userId = groups.find(_.code == acc._1) match {
+        case Some(group) => group.userId
+        case _ => "NoUserId"
+      })
     }).toList
   }
   def getASName(docNumber: String): String ={
@@ -254,6 +290,38 @@ trait AccommodationHelper {
         oracleConnection.close()
         zones
       case _ => List.empty[Zone]
+    }
+  }
+  def addGroupToSystem(docNumber: String, stock: String, userId: String): Unit ={
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val projectNamesCollection: MongoCollection[ProjectName] = mongo.getCollection("project-names")
+        val projectNames = Await.result(projectNamesCollection.find().toFuture(), Duration(30, SECONDS)) match {
+          case values: Seq[ProjectName] => values.toList
+          case _ => List.empty[ProjectName]
+        }
+        val rkdProject = if (docNumber.contains('-')) docNumber.split('-').head else ""
+        val foranProject = projectNames.find(_.rkd == rkdProject) match {
+          case Some(value) => value.foran
+          case _ => ""
+        }
+        val systemDefs = getSystemDefs(foranProject)
+        val system = systemDefs.find(_.descr.contains(docNumber)) match {
+          case Some(value) =>
+            value.name
+          case _ => ""
+        }
+        val newLabel = '@' + List(userId, stock).mkString("|")
+        DBManager.GetOracleConnection(foranProject) match {
+          case Some(oracle) =>
+            val s = oracle.createStatement()
+            val query = s"update element_lang set long_descr = concat(long_descr, chr(10) || '$newLabel') where elem in (select oid from v_element_desc where userid = '$forLabel') and lang = -1"
+            s.execute(query)
+            s.close()
+            oracle.close()
+          case _ =>
+        }
+      case _ =>
     }
   }
 }

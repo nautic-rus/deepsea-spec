@@ -3,7 +3,7 @@ package deepsea.accomodations
 import akka.actor.Actor
 import akka.pattern.ask
 import akka.util.Timeout
-import deepsea.accomodations.AccommodationManager.{GetAccommodations, GetAccommodationsESP}
+import deepsea.accomodations.AccommodationManager.{AddAccommodationGroup, GetAccommodations, GetAccommodationsESP}
 import deepsea.actors.ActorManager
 import deepsea.devices.DeviceManager.{Device, GetDevicesESP}
 import deepsea.files.FileManager.GenerateUrl
@@ -20,7 +20,9 @@ object AccommodationManager{
   case class GetAccommodationsESP(docNumber: String, revision: String, lang: String = "en")
   case class BBox(xMin: Double, yMin: Double, zMin: Double, xMax: Double, yMax: Double, zMax: Double)
   case class Zone(name: String, BBox: BBox)
+  case class AddAccommodationGroup(docNumber: String, stock: String, userId: String)
 
+  case class AccommodationGroup(userId: String, code: String)
   case class Accommodation(project: String, modelOid: Int, asOid: Int, weight: Double, surface: Double, userId: String, materialCode: String, materialDescription: String, bsWeight: Double, zone: String, profileStock: String, plateStock: String, var material: Material = Material()){
     def asDevice: Device ={
       Device(
@@ -68,6 +70,9 @@ class AccommodationManager extends Actor with AccommodationHelper with Codecs {
         case url: String => sender() ! url.asJson.noSpaces
         case _ => sender() ! "error".asJson.noSpaces
       }
+    case AddAccommodationGroup(docNumber, stock, userId) =>
+      addGroupToSystem(docNumber, stock, userId)
+      sender() ! "success"
     case _ => None
   }
 }
