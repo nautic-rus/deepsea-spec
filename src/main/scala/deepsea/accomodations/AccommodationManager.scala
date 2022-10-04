@@ -72,7 +72,7 @@ class AccommodationManager extends Actor with AccommodationHelper with Codecs {
       }
     case AddAccommodationGroup(docNumber, stock, userId) =>
       addGroupToSystem(docNumber, stock, userId)
-      sender() ! "success"
+      sender() ! "success".asJson.noSpaces
     case _ => None
   }
 }
