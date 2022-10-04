@@ -315,7 +315,7 @@ trait AccommodationHelper {
         DBManager.GetOracleConnection(foranProject) match {
           case Some(oracle) =>
             val s = oracle.createStatement()
-            val query = s"update element_lang set long_descr = concat(long_descr, chr(10) || '$newLabel') where elem in (select oid from v_element_desc where userid = '$forLabel') and lang = -1"
+            val query = s"update systems_lang set long_descr = concat(long_descr, chr(10) || '$newLabel') where system in (select oid from systems where name = '$system')"
             s.execute(query)
             s.close()
             oracle.close()
