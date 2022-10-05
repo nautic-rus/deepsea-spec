@@ -278,6 +278,74 @@ trait DeviceHelper{
       case _ =>
     }
   }
+  def removeDeviceFromSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String = ""): Unit ={
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val projectNamesCollection: MongoCollection[ProjectName] = mongo.getCollection("project-names")
+        val projectNames = Await.result(projectNamesCollection.find().toFuture(), Duration(30, SECONDS)) match {
+          case values: Seq[ProjectName] => values.toList
+          case _ => List.empty[ProjectName]
+        }
+        val rkdProject = if (docNumber.contains('-')) docNumber.split('-').head else ""
+        val foranProject = projectNames.find(_.rkd == rkdProject) match {
+          case Some(value) => value.foran
+          case _ => ""
+        }
+        val systemDefs = getSystemDefs(foranProject)
+        val system = systemDefs.find(_.descr.contains(docNumber)) match {
+          case Some(value) =>
+            value.name
+          case _ => ""
+        }
+        val descrs = ListBuffer.empty[SystemLang]
+        val newLabel = List(label, stock, units, count).mkString("|")
+        if (forLabel == ""){
+          DBManager.GetOracleConnection(foranProject) match {
+            case Some(oracle) =>
+              val s = oracle.createStatement()
+              val query = s"select * from systems_lang where system in (select oid from systems where name = '$system')"
+              val rs = s.executeQuery(query)
+              while (rs.next()){
+                descrs +=
+                  SystemLang(
+                    rs.getInt("system"),
+                    rs.getInt("lang"),
+                    rs.getString("descr"),
+                    rs.getString("long_descr")
+                  )
+              }
+              s.close()
+              oracle.close()
+            case _ =>
+          }
+
+          descrs.foreach(d => {
+            DBManager.GetOracleConnection(foranProject) match {
+              case Some(oracle) =>
+                val s = oracle.createStatement()
+                val query = s"update systems_lang set long_descr = replace(long_descr, '$newLabel', '') where system = ${d.systemId} and lang = ${d.lang}"
+                s.execute(query)
+                s.close()
+                oracle.close()
+              case _ =>
+            }
+          })
+
+        }
+        else{
+          DBManager.GetOracleConnection(foranProject) match {
+            case Some(oracle) =>
+              val s = oracle.createStatement()
+              val query = s"update element_lang set long_descr = replace(long_descr, '$newLabel', '') where elem in (select oid from v_element_desc where userid = '$forLabel') and lang = -1"
+              s.execute(query)
+              s.close()
+              oracle.close()
+            case _ =>
+          }
+        }
+      case _ =>
+    }
+  }
   def getSystemName(docNumber: String): String ={
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>

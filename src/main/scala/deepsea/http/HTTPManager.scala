@@ -196,6 +196,9 @@ class HTTPManager extends Actor {
       (get & path("addDeviceToSystem") & parameter("docNumber") & parameter("stock") & parameter("units") & parameter("count") & parameter("label") & parameter("forLabel")) { (docNumber, stock, units, count, label, forLabel) =>
         askFor(ActorManager.devices, AddDeviceToSystem(docNumber, stock, units, count, label, forLabel))
       },
+      (get & path("removeDeviceToSystem") & parameter("docNumber") & parameter("stock") & parameter("units") & parameter("count") & parameter("label") & parameter("forLabel")) { (docNumber, stock, units, count, label, forLabel) =>
+        askFor(ActorManager.devices, RemoveDeviceFromSystem(docNumber, stock, units, count, label, forLabel))
+      },
 
       //ACCOMMODATIONS
       (get & path("accommodations") & parameter("docNumber")) { (docNumber) =>

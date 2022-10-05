@@ -5,7 +5,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import deepsea.accomodations.AccommodationHelper
 import deepsea.actors.ActorManager
-import deepsea.devices.DeviceManager.{AddDeviceToSystem, Device, GetDevices, GetDevicesESP}
+import deepsea.devices.DeviceManager.{AddDeviceToSystem, Device, GetDevices, GetDevicesESP, RemoveDeviceFromSystem}
 import deepsea.files.FileManager.GenerateUrl
 import deepsea.pipe.PipeManager.Material
 import io.circe.{Decoder, Encoder}
@@ -27,6 +27,7 @@ object DeviceManager{
   case class GetDevices(docNumber: String)
   case class GetDevicesESP(docNumber: String, revision: String, lang: String = "en")
   case class AddDeviceToSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String = "")
+  case class RemoveDeviceFromSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String = "")
 }
 class DeviceManager extends Actor with DeviceHelper with AccommodationHelper with Codecs{
 
@@ -46,6 +47,9 @@ class DeviceManager extends Actor with DeviceHelper with AccommodationHelper wit
       }
     case AddDeviceToSystem(docNumber, stock, units, count, label, forLabel) =>
       addDeviceToSystem(docNumber, stock, units, count, label, forLabel)
+      sender() ! "success".asJson.noSpaces
+    case RemoveDeviceFromSystem(docNumber, stock, units, count, label, forLabel) =>
+      removeDeviceFromSystem(docNumber, stock, units, count, label, forLabel)
       sender() ! "success".asJson.noSpaces
     case _ => None
   }
