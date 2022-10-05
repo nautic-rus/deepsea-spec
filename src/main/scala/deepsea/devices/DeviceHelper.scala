@@ -2,7 +2,7 @@ package deepsea.devices
 
 import deepsea.database.DBManager
 import deepsea.database.DatabaseManager.GetOracleConnection
-import deepsea.devices.DeviceManager.{Device, DeviceAux}
+import deepsea.devices.DeviceManager.{Device, DeviceAux, SystemLang}
 import deepsea.pipe.PipeManager.{Material, PipeSeg, ProjectName, SystemDef, Units}
 import org.mongodb.scala.MongoCollection
 import org.mongodb.scala.model.Filters.{and, equal, notEqual}
@@ -191,17 +191,78 @@ trait DeviceHelper{
             value.name
           case _ => ""
         }
+        val descrs = ListBuffer.empty[SystemLang]
         val newLabel = List(label, stock, units, count).mkString("|")
         if (forLabel == ""){
           DBManager.GetOracleConnection(foranProject) match {
             case Some(oracle) =>
               val s = oracle.createStatement()
-              val query = s"update systems_lang set long_descr = concat(long_descr, chr(10) || '$newLabel') where system in (select oid from systems where name = '$system')"
+              val query = s"select * from systems_lang where system in (select oid from systems where name = '$system')"
+              val rs = s.executeQuery(query)
+              while (rs.next()){
+                descrs +=
+                  SystemLang(
+                    rs.getInt("system"),
+                    rs.getInt("lang"),
+                    rs.getString("descr"),
+                    rs.getString("long_descr")
+                  )
+              }
+              s.close()
+              oracle.close()
+            case _ =>
+          }
+
+          val longDescr = descrs.find(_.long_descr.length < 900) match {
+            case Some(value) => value
+            case _ =>
+              val nrDescrs = descrs.filter(_.lang > 10).sortBy(_.lang)
+              val newNrDescr = if (nrDescrs.nonEmpty){
+                SystemLang(nrDescrs.last.systemId, nrDescrs.last.lang + 1, nrDescrs.last.descr, "")
+              }
+              else{
+                SystemLang(descrs.head.systemId, 11, descrs.head.descr, "")
+              }
+              DBManager.GetOracleConnection(foranProject) match {
+                case Some(oracle) =>
+                  val s = oracle.createStatement()
+                  val query = s"select count(*) as count from foran_language where oid = ${newNrDescr.lang}"
+                  val rs = s.executeQuery(query)
+                  if (rs.next()){
+                    val count = Option(rs.getInt("count")).getOrElse(0)
+                    if (count == 0){
+                      val oid = newNrDescr.lang
+                      val abbrev = "NR" + (oid - 10).toString
+                      s.execute(s"insert into foran_language values ($oid, '$abbrev', '$abbrev')")
+                    }
+                  }
+                  s.close()
+                  oracle.close()
+                case _ =>
+              }
+              DBManager.GetOracleConnection(foranProject) match {
+                case Some(oracle) =>
+                  val s = oracle.createStatement()
+                  val query = s"insert into systems_lang values (${newNrDescr.systemId}, ${newNrDescr.lang}, '${newNrDescr.descr}', '${newNrDescr.long_descr}')"
+                  s.execute(query)
+                  s.close()
+                  oracle.close()
+                case _ =>
+              }
+              newNrDescr
+          }
+
+          DBManager.GetOracleConnection(foranProject) match {
+            case Some(oracle) =>
+              val s = oracle.createStatement()
+              val query = s"update systems_lang set long_descr = concat(long_descr, chr(10) || '$newLabel') where system = ${longDescr.systemId} and lang = ${longDescr.lang}"
               s.execute(query)
               s.close()
               oracle.close()
             case _ =>
           }
+
+
         }
         else{
           DBManager.GetOracleConnection(foranProject) match {
