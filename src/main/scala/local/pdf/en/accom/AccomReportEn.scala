@@ -612,16 +612,9 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
       rows += Item11ColumnsEN(A1 = id, A2 = mat, A3 = unit, A4 = qty, A5 = weight, A6 = matDescr, A7 = room, A8 = drPos, A12 = row.material.code)
 
     })
-    rows.sortBy(s => s.A1).toList.sortBy(s => if (s.A1.contains(".")) s.A1.split("\\.").map(addLeftZeros(_)).mkString(".") else s.A1)
+    rows.sortBy(s => s.A1).toList.sortBy(s => if (s.A1.contains(".")) s.A1.split("\\.").map(s => s.padTo(10 - s.length, '0')).mkString(".") else s.A1)
   }
 
-  private def addLeftZeros(input: String, length: Int = 10): String = {
-    var res = input
-    while (res.length < length) {
-      res = '0' + res
-    }
-    res
-  }
   private def genTotalRows(rawData: List[Device], lang:String): List[Item11ColumnsEN] = {
     val rows: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
    val pcs: String = units.find(s => s.code.equals("796")) match {
