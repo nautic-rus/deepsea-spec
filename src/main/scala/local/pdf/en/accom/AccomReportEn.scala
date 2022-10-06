@@ -612,13 +612,13 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
       rows += Item11ColumnsEN(A1 = id, A2 = mat, A3 = unit, A4 = qty, A5 = weight, A6 = matDescr, A7 = room, A8 = drPos, A12 = row.material.code)
 
     })
-    rows.sortBy(s => s.A1).toList.sortBy(s => s.A1.split("\\.").map(addLeftZeros(_)).mkString("."))
+    rows.sortBy(s => s.A1).toList.sortBy(s => if (s.A1.contains(".")) s.A1.split("\\.").map(addLeftZeros(_)).mkString(".") else s.A1)
   }
 
   private def addLeftZeros(input: String, length: Int = 10): String = {
     var res = input
     while (res.length < length) {
-      res = '0' + input
+      res = '0' + res
     }
     res
   }
