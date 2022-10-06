@@ -9,7 +9,7 @@ import deepsea.accomodations.AccommodationHelper
 import deepsea.devices.DeviceHelper
 import deepsea.devices.DeviceManager.Device
 import deepsea.pipe.PipeManager.{Material, Units}
-import local.common.DBRequests.findChess
+import local.common.DBRequests.{findChess, retrieveZoneAndSystems}
 import local.domain.CommonTypes.DrawingChess
 import local.pdf.UtilsPDF
 import local.pdf.en.common.ReportCommonEN.{DocNameEN, Item11ColumnsEN, addZeros, border5mm, defaultFontSize, fillStamp, fontHELVETICA, getNnauticLigoEN, stampEN}
@@ -612,9 +612,16 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
       rows += Item11ColumnsEN(A1 = id, A2 = mat, A3 = unit, A4 = qty, A5 = weight, A6 = matDescr, A7 = room, A8 = drPos, A12 = row.material.code)
 
     })
-    rows.sortBy(s => s.A1).toList
+    rows.sortBy(s => s.A1).toList.sortBy(s => s.A1.split("\\.").map(addLeftZeros(_)).mkString("."))
   }
 
+  private def addLeftZeros(input: String, length: Int = 10): String = {
+    var res = input
+    while (res.length < length) {
+      res = '0' + input
+    }
+    res
+  }
   private def genTotalRows(rawData: List[Device], lang:String): List[Item11ColumnsEN] = {
     val rows: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
    val pcs: String = units.find(s => s.code.equals("796")) match {
