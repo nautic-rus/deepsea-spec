@@ -612,7 +612,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
       rows += Item11ColumnsEN(A1 = id, A2 = mat, A3 = unit, A4 = qty, A5 = weight, A6 = matDescr, A7 = room, A8 = drPos, A12 = row.material.code)
 
     })
-    rows.sortBy(s => s.A1).toList.sortBy(s => if (s.A1.contains(".")) s.A1.split("\\.").map(s => s.reverse.padTo(10 - s.length, '0').reverse).mkString("") else s.A1.reverse.padTo(10 - s1.A1.length, '0').reverse)
+    rows.sortBy(s => s.A1).toList.sortBy(s => if (s.A1.contains(".")) s.A1.split("\\.").map(s => s.reverse.padTo(10 - s.length, '0').reverse).mkString("") else s.A1.reverse.padTo(10 - s.A1.length, '0').reverse)
   }
 
   private def genTotalRows(rawData: List[Device], lang:String): List[Item11ColumnsEN] = {
