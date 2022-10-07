@@ -117,7 +117,10 @@ trait DeviceHelper{
                     deviceBase.zone,
                     deviceBase.elemType,
                     deviceBase.compAbbrev,
-                    deviceBase.weight,
+                    materials.find(_.code == split(1)) match {
+                      case Some(value) => value.singleWeight
+                      case _ => 0
+                    },
                     split(1),
                     deviceBase.elemClass,
                     "",
