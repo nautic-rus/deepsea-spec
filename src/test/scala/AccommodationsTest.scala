@@ -35,6 +35,7 @@ class AccommodationsTest extends AnyFunSuite with DeviceHelper with Accommodatio
   val lang = "en"
   val ret: String = genAccomListEnPDF(docNumber, docName, revision, accommodations, lang)
 
+  println(ret)
   val jk = 0
 
 }

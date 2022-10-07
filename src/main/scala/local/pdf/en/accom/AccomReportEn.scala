@@ -608,8 +608,8 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
       val mat = row.material.name(lang)
       val matDescr = row.material.description(lang)
 
-      val unit = formatUnits(row.material)
-      val qty = if (unit.equals("pcs")) row.count.toInt.toString else String.format("%.2f", row.count)
+      val unit = formatUnitsStr(row.units)
+      val qty = if (unit.equals("pcs.")) row.count.toInt.toString else String.format("%.2f", row.count)
       val weight: String = formatWGT(row)
       val room = row.zone
       val drPos = findChessPos(id, chess)
@@ -628,37 +628,32 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
     }
 
 
-
     rawData.groupBy(p => (p.units, p.material.code)).foreach(gr => {
 
 
       val row = gr._2.head
-      val unit = formatUnits(row.material)
+      //val unit = formatUnits(row.material)
       val qtyA = gr._2.map(_.count).sum
       val w = row.material.singleWeight * qtyA
       val qtySubs: MaterialReplacement = materials.find(s => s.code.equals(row.material.code)) match {
         case Some(m) => {
           if (!row.units.equals(m.units)) {
             row.units + m.units match {
-
-              case "796055" =>MaterialReplacement(m.units, w / m.singleWeight)
-
-              case _ => MaterialReplacement(unit, qtyA)
+              case "796055" => MaterialReplacement(m.units, w / m.singleWeight)
+              case _ => MaterialReplacement(row.material.units, qtyA)
             }
-
-
           } else {
-            MaterialReplacement(unit, qtyA)
+            MaterialReplacement(row.material.units, qtyA)
           }
         }
-        case None => MaterialReplacement(unit, qtyA)
+        case None => MaterialReplacement(row.material.units, qtyA)
       }
       val weight: String = formatWGTDouble(w)
 
-      val qty = if (qtySubs.unit.equals(pcs)) qtySubs.newQty.toInt.toString else String.format("%.2f", qtySubs.newQty)
+      val qty = if (qtySubs.unit.equals("pcs.")||qtySubs.unit.equals("796")) qtySubs.newQty.toInt.toString else String.format("%.2f", qtySubs.newQty)
       val mat = row.material.name(lang)
       val matDescr = row.material.description(lang)
-      rows += Item11ColumnsEN(A1 = "", A2 = mat, A3 =formatUnitsStr(qtySubs.unit) , A4 = qty, A5 = weight, A6 = matDescr, A12 = row.material.code)
+      rows += Item11ColumnsEN(A1 = "", A2 = mat, A3 = formatUnitsStr(qtySubs.unit), A4 = qty, A5 = weight, A6 = matDescr, A12 = row.material.code)
     })
 
 
