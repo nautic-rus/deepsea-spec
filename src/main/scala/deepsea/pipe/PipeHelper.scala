@@ -344,7 +344,7 @@ trait PipeHelper extends Codecs {
           case values: Seq[ProjectName] => values.toList
           case _ => List.empty[ProjectName]
         }
-        """\d{6}(?=-\d{3}-\d{4})""".r.findFirstIn(docNumber) match {
+        """\d{6}(?=-\d{3}\w{0,1}-\d{4})""".r.findFirstIn(docNumber) match {
           case Some(rkdProject) =>
             projectNames.find(_.rkd == rkdProject) match {
               case Some(project) =>
@@ -366,7 +366,7 @@ trait PipeHelper extends Codecs {
       case values: Seq[ProjectName] => values.toList
       case _ => List.empty[ProjectName]
     }
-    """\d{6}(?=-\d{3}-\d{4})""".r.findFirstIn(docNumber) match {
+    """\d{6}(?=-\d{3}\w{0,1}-\d{4})""".r.findFirstIn(docNumber) match {
       case Some(rkdProject) =>
         projectNames.find(_.rkd == rkdProject) match {
           case Some(project) =>
