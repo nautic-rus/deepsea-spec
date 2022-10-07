@@ -677,6 +677,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
   private def formatWGT(ps: Device): String = {
     val qty = if (ps.count == 0.0) 1 else ps.count
     val w = ps.weight * qty
+
     if (w < 0.01) " 0.01" else String.format("%.2f", w)
   }
 
