@@ -150,7 +150,10 @@ trait DeviceHelper{
                 "",
                 "",
                 "",
-                0,
+                materials.find(_.code == split(1)) match {
+                  case Some(value) => value.singleWeight
+                  case _ => 0
+                },
                 split(1),
                 0,
                 "",
