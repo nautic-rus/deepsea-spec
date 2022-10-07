@@ -634,7 +634,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
       val row = gr._2.head
       //val unit = formatUnits(row.material)
       val qtyA = gr._2.map(_.count).sum
-      val w = row.material.singleWeight * qtyA
+      val w = row.weight * qtyA
       val qtySubs: MaterialReplacement = materials.find(s => s.code.equals(row.material.code)) match {
         case Some(m) => {
           if (!row.units.equals(m.units)) {
@@ -676,7 +676,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
 
   private def formatWGT(ps: Device): String = {
     val qty = if (ps.count == 0.0) 1 else ps.count
-    val w = ps.material.singleWeight //* qty
+    val w = ps.weight * qty
     if (w < 0.01) " 0.01" else String.format("%.2f", w)
   }
 
