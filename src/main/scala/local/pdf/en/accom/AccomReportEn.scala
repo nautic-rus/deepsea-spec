@@ -8,6 +8,7 @@ import com.itextpdf.layout.properties.{HorizontalAlignment, TextAlignment, Verti
 import deepsea.accomodations.AccommodationHelper
 import deepsea.devices.DeviceHelper
 import deepsea.devices.DeviceManager.Device
+import deepsea.materials.MaterialsHelper
 import deepsea.pipe.PipeManager.{Material, Units}
 import local.common.DBRequests.{findChess, retrieveZoneAndSystems}
 import local.domain.CommonTypes.DrawingChess
@@ -17,10 +18,11 @@ import org.davidmoten.text.utils.WordWrap
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, OutputStream}
 import java.nio.file.Files
+import scala.collection.immutable.List
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
-object AccomReportEn extends UtilsPDF with DeviceHelper {
+object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
   private val pageSize: PageSize = PageSize.A4
 
   private val pointColumnWidths = Array(
@@ -33,11 +35,13 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
     mmToPt(11),
     mmToPt(11) + 0 //207
   )
-  val units: List[Units] =getUnits
-  def genAccomListEnPDF(docNumber: String, docName: String, rev: String, rawData: List[Device], lang: String ): String = {
+  val units: List[Units] = getUnits
+
+  def genAccomListEnPDF(docNumber: String, docName: String, rev: String, rawData: List[Device], lang: String): String = {
+    val materials: List[Material] = getMaterials
     val filePath: String = Files.createTempDirectory("accomPdf").toAbsolutePath.toString + File.separator + docNumber + "_rev" + rev + ".pdf"
-    val rows: List[Item11ColumnsEN] = genRows(rawData, docNumber, rev,lang)
-    val totalRows: List[Item11ColumnsEN] = genTotalRows(rawData, lang)
+    val rows: List[Item11ColumnsEN] = genRows(rawData, docNumber, rev, lang)
+    val totalRows: List[Item11ColumnsEN] = genTotalRows(rawData, lang, materials)
     val dn = DocNameEN(num = docNumber, name = docName, lastRev = if (rev != "") rev else "0")
     processPDF(dn, filePath, rows, totalRows)
     filePath
@@ -553,7 +557,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
     }
 
     def insertRows(items: List[Item11ColumnsEN]): Unit = {
-      items.foreach(item=>{
+      items.foreach(item => {
         if (!item.isHeader) {
           bodyGrid.addCell(generateCellDiffSize(item.A1, 3))
           bodyGrid.addCell(generateCellLeftAlign(item.A2))
@@ -572,7 +576,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
     }
   }
 
-  private def genRows(rawData: List[Device], docNumber: String, rev: String, lang:String): List[Item11ColumnsEN] = {
+  private def genRows(rawData: List[Device], docNumber: String, rev: String, lang: String): List[Item11ColumnsEN] = {
     val chess: DrawingChess = {
       val l = findChess(docNumber, rev)
       if (l.nonEmpty) l.head else DrawingChess()
@@ -600,7 +604,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
     val rows: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
     rowsGrouped.foreach(row => {
       //val id =addZeros(row.userId)
-      val id =(row.userId)
+      val id = (row.userId)
       val mat = row.material.name(lang)
       val matDescr = row.material.description(lang)
 
@@ -615,29 +619,61 @@ object AccomReportEn extends UtilsPDF with DeviceHelper {
     rows.sortBy(s => s.A1).toList.sortBy(s => if (s.A1.contains(".")) s.A1.split("\\.").map(s => s.reverse.padTo(10 - s.length, '0').reverse).mkString("") else s.A1.reverse.padTo(10 - s.A1.length, '0').reverse)
   }
 
-  private def genTotalRows(rawData: List[Device], lang:String): List[Item11ColumnsEN] = {
+  private def genTotalRows(rawData: List[Device], lang: String, materials: List[Material]): List[Item11ColumnsEN] = {
+    case class MaterialReplacement(unit: String, newQty: Double)
     val rows: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
-   val pcs: String = units.find(s => s.code.equals("796")) match {
+    val pcs: String = units.find(s => s.code.equals("796")) match {
       case Some(value) => value.thumb
       case None => ""
     }
 
 
+
     rawData.groupBy(p => (p.units, p.material.code)).foreach(gr => {
+
+
       val row = gr._2.head
       val unit = formatUnits(row.material)
       val qtyA = gr._2.map(_.count).sum
-      val qty = if (unit.equals(pcs)) qtyA.toInt.toString else String.format("%.2f", qtyA)
-      val weight = formatWGTDouble(row.material.singleWeight * qtyA)
-      val mat=row.material.name(lang)
+      val w = row.material.singleWeight * qtyA
+      val qtySubs: MaterialReplacement = materials.find(s => s.code.equals(row.material.code)) match {
+        case Some(m) => {
+          if (!row.units.equals(m.units)) {
+            row.units + m.units match {
+
+              case "796055" =>MaterialReplacement(m.units, w / m.singleWeight)
+
+              case _ => MaterialReplacement(unit, qtyA)
+            }
+
+
+          } else {
+            MaterialReplacement(unit, qtyA)
+          }
+        }
+        case None => MaterialReplacement(unit, qtyA)
+      }
+      val weight: String = formatWGTDouble(w)
+
+      val qty = if (qtySubs.unit.equals(pcs)) qtySubs.newQty.toInt.toString else String.format("%.2f", qtySubs.newQty)
+      val mat = row.material.name(lang)
       val matDescr = row.material.description(lang)
-      rows += Item11ColumnsEN(A1 = "", A2 = mat, A3 = unit, A4 = qty, A5 = weight, A6 = matDescr, A12 = row.material.code)
+      rows += Item11ColumnsEN(A1 = "", A2 = mat, A3 =formatUnitsStr(qtySubs.unit) , A4 = qty, A5 = weight, A6 = matDescr, A12 = row.material.code)
     })
+
+
     rows.sortBy(s => s.A1).toList
   }
 
   private def formatUnits(mat: Material): String = {
     units.find(p => p.code.equals(mat.units)) match {
+      case Some(value) => value.thumb
+      case None => "NA"
+    }
+  }
+
+  private def formatUnitsStr(unit: String): String = {
+    units.find(p => p.code.equals(unit)) match {
       case Some(value) => value.thumb
       case None => "NA"
     }
