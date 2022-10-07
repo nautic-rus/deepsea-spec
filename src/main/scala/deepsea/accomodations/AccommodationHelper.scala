@@ -216,6 +216,9 @@ trait AccommodationHelper {
     accommodations.map(_.asDevice).filter(m => m.material.code != "" && !groups.map(_.code).contains(m.material.code)).tapEach(x => {
       x.units = "796"
       x.count = 1
+      if (x.units == x.material.units){
+        x.weight = x.material.singleWeight
+      }
     }).toList ++
     accommodations.map(_.asDevice).filter(m => m.material.code != "" && groups.map(_.code).contains(m.material.code)).groupBy(_.material.code).map(acc => {
       acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.map(_.count).sum, userId = groups.find(_.code == acc._1) match {
