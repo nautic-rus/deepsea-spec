@@ -65,7 +65,8 @@ object Cases {
 
   val markToolOp: String ="M06"// "M11"
 
-  val cutToolOp: String ="M00\nM06" //"M12"
+  //val cutToolOp: String ="M00\nM06" //"M12"  G40\nG00X0.00 Y0.00\nG40
+  val cutToolOp: String ="G00X0.00Y0.00\nG40\nM00\nM06"
 
   val finishOp: String = "M30"
 

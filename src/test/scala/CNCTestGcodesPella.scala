@@ -6,31 +6,50 @@ import scala.io.{BufferedSource, Source}
 
 class CNCTestGcodesPella extends AnyFunSuite{
   val listIn: List[String] = List(
-/*    "U102-01",
-    "U102-02",
-    "U102-03",
-    "U102-04",
-    "U102-05",
-    "U102-06",
+    "U0103-01",
+    "U0103-02",
+    "U0103-03",
+    "U0103-04",
+    "U0103-05",
+    "U0103-06",
+    "U0103-07",
+    "U0103-08",
+    "U0103-09",
+    "U0103-10",
 
-    "U102-08",
-    "U102-09",
-    "U102-10",
-    "U102-11",*/
-    "U0104-07",
+    "U0103-21",
+    "U0103-22",
+    "U0103-23",
+    "U0103-24",
+    "U0103-25",
+    "U0103-26",
+    "U0103-27",
+    "U0103-28",
+    "U0103-29",
+    "U0103-30",
+
+    "U0103-31",
+    "U0103-32",
+    "U0103-33",
+    "U0103-34",
+    "U0103-35",
+    "U0103-36",
+    "U0103-37",
+
+
 
   )
 
 
 
   listIn.foreach(f=> {
-    val src: BufferedSource = Source.fromFile("c:\\40\\"+f+".txt")
+    val src: BufferedSource = Source.fromFile("c:\\16\\"+f+".txt")
     //val src: BufferedSource = Source.fromFile("c:\\32\\U306_11_0.txt")
     val lines: List[String] = src.getLines.toList
     src.close()
     //val ret: String = doCNC(lines, "c:\\26\\C-N004-ULTT-01"+f+".mpg", "Misha")
     val retStar = doCNCStrings(lines, "Misha")
-    val pw = new PrintWriter(new File("c:\\40\\C-"+f+".TAP"))
+    val pw = new PrintWriter(new File("c:\\17\\"+f+".TAP"))
     retStar.foreach(line => pw.println(line))
     pw.close()
   })

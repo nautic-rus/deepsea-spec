@@ -30,6 +30,8 @@ class AccommodationsTest extends AnyFunSuite with DeviceHelper with Accommodatio
   val docName: String = getASName(docNumber)
   val accommodations: List[Device] = getDevices(docNumber) ++ getAccommodationsAsDevices(docNumber).tapEach(_.zone = "")
 
+  val ad=accommodations.filter(s=>s.userId.equals("304.001.3"))
+
   //val devices: List[Device] = getDevices(docNumber)
 
   val lang = "en"
