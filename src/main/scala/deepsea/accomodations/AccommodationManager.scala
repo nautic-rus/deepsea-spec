@@ -12,6 +12,7 @@ import io.circe.syntax.EncoderOps
 import local.common.Codecs
 import local.pdf.en.accom.AccomReportEn.genAccomListEnPDF
 
+import java.text.DecimalFormat
 import java.util.concurrent.TimeUnit
 import scala.concurrent.Await
 
@@ -40,10 +41,10 @@ object AccommodationManager{
         "",
         "",
         if (objType == 67){
-          material.copy(name = material.name + ", " + pars.take(4).takeRight(3).map(x => Math.round(x * 1000 * 10) / 10.toDouble).mkString("x"))
+          material.copy(name = material.name + ", " + pars.take(4).takeRight(3).map(x => new DecimalFormat("0.#").format(Math.round(x * 1000 * 10) / 10.toDouble)).mkString("x"))
         }
         else if (List(23, 68, 69).contains(objType) && pars.length > 4){
-          material.copy(name = material.name + ", " + pars.take(5).takeRight(4).map(x => Math.round(x * 1000 * 10) / 10.toDouble).mkString("x"))
+          material.copy(name = material.name + ", " + pars.take(5).takeRight(4).map(x => new DecimalFormat("0.#").format(Math.round(x * 1000 * 10) / 10.toDouble)).mkString("x"))
         } else{
           material
         },
