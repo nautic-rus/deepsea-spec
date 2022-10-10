@@ -39,8 +39,11 @@ object AccommodationManager{
         0,
         "",
         "",
-        if (List(23, 67, 68, 69).contains(objType) && pars.length > 4){
-          material.copy(name = material.name + ", " + pars.take(5).takeRight(4).map(x => Math.round(x * 1000)).mkString("x"))
+        if (objType == 67){
+          material.copy(name = material.name + ", " + pars.take(4).takeRight(3).map(x => Math.round(x * 1000 * 10) / 10).mkString("x"))
+        }
+        else if (List(23, 68, 69).contains(objType) && pars.length > 4){
+          material.copy(name = material.name + ", " + pars.take(5).takeRight(4).map(x => Math.round(x * 1000 * 10) / 10).mkString("x"))
         } else{
           material
         },
