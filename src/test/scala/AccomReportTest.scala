@@ -18,8 +18,8 @@ class AccomReportTest extends AnyFunSuite with DeviceHelper {
   println(ret)*/
 
 
-  val cess: List[DrawingChess] = findChess("200101-435-001", "0")
-  val docNumber = "200101-435-001" //00101-304-0001
+  val cess: List[DrawingChess] = findChess("200101-511-311", "0")
+  val docNumber = "200101-511-311" //00101-304-0001
   val rev = "0"
   val docName: String = getSystemName(docNumber)
   val accoms: List[Device] = getDevices(docNumber)

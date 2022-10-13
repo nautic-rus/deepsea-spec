@@ -609,8 +609,22 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
       val matDescr = row.material.description(lang)
 
       val unit = formatUnitsStr(row.units)
-      val qty = if (unit.equals("pcs.")) row.count.toInt.toString else String.format("%.2f", row.count)
+
       val weight: String = formatWGT(row)
+
+      val qty = {
+        row.units match {
+          case "pcs." => row.count.toInt.toString
+
+          case "796" => row.count.toInt.toString
+
+          case "166" => weight
+
+          case _ => String.format("%.2f", row.count)
+        }
+
+      }
+
       val room = row.zone
       val drPos = findChessPos(id, chess)
       rows += Item11ColumnsEN(A1 = id, A2 = mat, A3 = unit, A4 = qty, A5 = weight, A6 = matDescr, A7 = room, A8 = drPos, A12 = row.material.code)
@@ -634,7 +648,14 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
       val row = gr._2.head
       //val unit = formatUnits(row.material)
       val qtyA = gr._2.map(_.count).sum
-      val w = row.weight * qtyA
+      val w ={
+        if(row.units.equals("796")){
+          row.weight * qtyA
+        }else{
+          row.weight
+        }
+      }
+
       val qtySubs: MaterialReplacement = materials.find(s => s.code.equals(row.material.code)) match {
         case Some(m) => {
           if (!row.units.equals(m.units)) {
@@ -650,7 +671,19 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
       }
       val weight: String = formatWGTDouble(w)
 
-      val qty = if (qtySubs.unit.equals("pcs.")||qtySubs.unit.equals("796")) qtySubs.newQty.toInt.toString else String.format("%.2f", qtySubs.newQty)
+      val qty: String ={
+        qtySubs.unit match {
+          case "pcs."=>qtySubs.newQty.toInt.toString
+
+          case "796"=>qtySubs.newQty.toInt.toString
+
+          case "166"=>weight
+
+          case _=> String.format("%.2f", qtySubs.newQty)
+        }
+
+      }
+
       val mat = row.material.name(lang)
       val matDescr = row.material.description(lang)
       rows += Item11ColumnsEN(A1 = "", A2 = mat, A3 = formatUnitsStr(qtySubs.unit), A4 = qty, A5 = weight, A6 = matDescr, A12 = row.material.code)
@@ -676,7 +709,14 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
 
   private def formatWGT(ps: Device): String = {
     val qty = if (ps.count == 0.0) 1 else ps.count
-    val w = ps.weight * qty
+
+    val w: Double = {
+      if (ps.units.equals("796")) {
+        ps.weight * qty
+      } else{
+        ps.weight
+      }
+    }
 
     if (w < 0.01) " 0.01" else String.format("%.2f", w)
   }
@@ -685,7 +725,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
 
   private def generateWrappedRows(item: Item11ColumnsEN): List[Item11ColumnsEN] = {
     val A1count = 12
-    val A2count = 47
+    val A2count = 60
     val A3count = 25
     val A4count = 20
     val A5count = 16
