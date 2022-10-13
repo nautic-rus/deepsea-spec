@@ -20,7 +20,9 @@ import local.pdf.ru.ele.EleEqTrayESKDReport.{generatePdfToFileNoRev, generatePdf
 import akka.pattern.ask
 import local.hull.bill.BillManager.{genAnalyticPlateDataJson, genAnalyticProfileDataJson, genProfileNestBillJson, genWastsgeByParentKplJson}
 import local.hull.cnc.pellaESSI.EssiCNCManagerSubdiv.doEssiCNC
+import local.qrutil.QrDxfHelper
 
+import java.io.{File, FileWriter}
 import java.nio.file.Files
 import scala.concurrent.Await
 
@@ -49,11 +51,13 @@ object SpecManager {
   case class CreateTAP(lines: String, user: String)
   case class InsertNestLock(project: String, nestId: String, user: String)
 
+  case class GenerateQRCode(url: String)
+
   case class PartDef(name: String, section: String, description: String)
   implicit val writesPartDef: OWrites[PartDef] = Json.writes[PartDef]
 }
 
-class SpecManager extends Actor with BStree {
+class SpecManager extends Actor with BStree with QrDxfHelper{
   implicit val timeout: Timeout = Timeout(30, TimeUnit.SECONDS)
   implicit val nestMaterialDecoder: Decoder[NestMaterial] = deriveDecoder[NestMaterial]
 
@@ -103,6 +107,15 @@ class SpecManager extends Actor with BStree {
     case InsertNestLock(project, nestId, user) =>
       insertLock(project, nestId, user)
       sender() ! Json.toJson("success")
+
+    case GenerateQRCode(url) =>
+      val str: String = url2qrDXF(url)
+      val file = File.createTempFile("qr-code", ".dwg")
+      val fileWriter = new FileWriter(file)
+      fileWriter.write(str)
+      fileWriter.flush()
+      fileWriter.close()
+      sender() ! file
 
     case _ => None
   }
