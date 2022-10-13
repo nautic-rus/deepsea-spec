@@ -12,6 +12,7 @@ import io.circe.syntax.EncoderOps
 import local.common.Codecs
 import local.pdf.en.accom.AccomReportEn.genAccomListEnPDF
 
+import java.text.DecimalFormat
 import java.util.concurrent.TimeUnit
 import scala.concurrent.Await
 
@@ -23,7 +24,7 @@ object AccommodationManager{
   case class AddAccommodationGroup(docNumber: String, stock: String, userId: String)
 
   case class AccommodationGroup(userId: String, code: String)
-  case class Accommodation(project: String, modelOid: Int, asOid: Int, weight: Double, surface: Double, userId: String, materialCode: String, materialDescription: String, bsWeight: Double, zone: String, profileStock: String, plateStock: String, var material: Material = Material()){
+  case class Accommodation(project: String, modelOid: Int, asOid: Int, weight: Double, surface: Double, userId: String, materialCode: String, materialDescription: String, objType: Int, pars: List[Double], bsWeight: Double, zone: String, profileStock: String, plateStock: String, var material: Material = Material()){
     def asDevice: Device ={
       Device(
         project,
@@ -39,7 +40,14 @@ object AccommodationManager{
         0,
         "",
         "",
-        material,
+        if (objType == 67){
+          material.copy(name = material.name + ", " + pars.take(4).takeRight(3).map(x => new DecimalFormat("0.#").format(Math.round(x * 1000 * 10) / 10.toDouble)).mkString("x"))
+        }
+        else if (List(23, 68, 69).contains(objType) && pars.length > 4){
+          material.copy(name = material.name + ", " + pars.take(5).takeRight(4).map(x => new DecimalFormat("0.#").format(Math.round(x * 1000 * 10) / 10.toDouble)).mkString("x"))
+        } else{
+          material
+        },
         "",
         "",
         material.units,
@@ -61,10 +69,10 @@ class AccommodationManager extends Actor with AccommodationHelper with Codecs {
   implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
 
   override def receive: Receive = {
-    case GetAccommodations(docNumber) => sender() ! getAccommodations(docNumber).filter(_.material.code != "").asJson.noSpaces
+    //case GetAccommodations(docNumber) => sender() ! getAccommodations(docNumber).filter(_.material.code != "").asJson.noSpaces
     case GetAccommodationsESP(docNumber, revision, lang) =>
       val docName: String = getASName(docNumber)
-      val devices: List[Device] = getAccommodations(docNumber).filter(_.material.code != "").map(_.asDevice)
+      val devices: List[Device] = getAccommodationsAsDevices(docNumber)
       val file = genAccomListEnPDF(docNumber, docName, revision, devices, lang)
       Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
         case url: String => sender() ! url.asJson.noSpaces
