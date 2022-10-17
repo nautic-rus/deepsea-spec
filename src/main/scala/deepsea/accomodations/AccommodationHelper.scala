@@ -236,7 +236,7 @@ trait AccommodationHelper {
 //        case Some(group) => group.userId
 //        case _ => "NoUserId"
 //      })
-      acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.map(_.count).sum, userId = groups.find(_.code == acc._1) match {
+      acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.map(_.count).sum, userId = groups.find(x => acc._1.startsWith(x.code)) match {
         case Some(group) => group.userId
         case _ => "NoUserId"
       })
