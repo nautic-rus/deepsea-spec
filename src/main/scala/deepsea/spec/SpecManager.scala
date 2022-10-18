@@ -18,6 +18,8 @@ import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import local.hull.cnc.hyprethermGcode.CNCManager.{doCNC, doCNCStrings}
 import local.pdf.ru.ele.EleEqTrayESKDReport.{generatePdfToFileNoRev, generatePdfToFileWithRev}
 import akka.pattern.ask
+import io.circe.syntax.EncoderOps
+import local.eqmount.EqFoundationManager.foranFoudationsAndEqsJson
 import local.hull.bill.BillManager.{genAnalyticPlateDataJson, genAnalyticProfileDataJson, genProfileNestBillJson, genWastsgeByParentKplJson}
 import local.hull.cnc.pellaESSI.EssiCNCManagerSubdiv.doEssiCNC
 import local.qrutil.QrDxfHelper
@@ -52,6 +54,7 @@ object SpecManager {
   case class InsertNestLock(project: String, nestId: String, user: String)
 
   case class GenerateQRCode(url: String)
+  case class GetEqFoundations(project: String)
 
   case class PartDef(name: String, section: String, description: String)
   implicit val writesPartDef: OWrites[PartDef] = Json.writes[PartDef]
@@ -107,6 +110,8 @@ class SpecManager extends Actor with BStree with QrDxfHelper{
     case InsertNestLock(project, nestId, user) =>
       insertLock(project, nestId, user)
       sender() ! Json.toJson("success")
+    case GetEqFoundations(project) =>
+      sender() ! foranFoudationsAndEqsJson(project).asJson.noSpaces
 
     case GenerateQRCode(url) =>
       val str: String = url2qrDXF(url)

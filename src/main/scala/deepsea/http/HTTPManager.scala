@@ -216,6 +216,9 @@ class HTTPManager extends Actor {
       (get & path("qrCode") & parameter("url")) { (url) =>
         askFor(ActorManager.spec, GenerateQRCode(url))
       },
+      (get & path("eqFoundations") & parameter("project")) { (project) =>
+        askFor(ActorManager.spec, GetEqFoundations(project))
+      },
     )
   }
 
