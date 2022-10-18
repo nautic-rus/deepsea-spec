@@ -22,6 +22,7 @@ import local.ele.cb.CableBoxManager.ForanCableBox
 import local.ele.cbfill.models.{AnkerPlate, CableBoxModule, CompressionBlock, SealModule}
 import local.ele.trays.TrayManager.{ForanTray, Tray, TrayMountData, TrayMountRules}
 import local.ele.eq.EleEqManager.EleEq
+import local.eqmount.EqFoundationManager.EqFoundation
 import local.hull.BStree.{Block, BsTreeItem, HullPL, Room}
 import local.hull.PartManager.PrdPart
 import local.hull.bill.BillManager.{ForanScrap, PlateAnalitic, ProfileAnalitic, ProfileNestBill}
@@ -169,6 +170,9 @@ trait Codecs {
 
   implicit val ProfileNestBillDecoder: Decoder[ProfileNestBill] = deriveDecoder[ProfileNestBill]
   implicit val ProfileNestBillEncoder: Encoder[ProfileNestBill] = deriveEncoder[ProfileNestBill]
+
+  implicit val EqFoundationDecoder: Decoder[EqFoundation] = deriveDecoder[EqFoundation]
+  implicit val EqFoundationEncoder: Encoder[EqFoundation] = deriveEncoder[EqFoundation]
 
   val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
     //BOGDAN
