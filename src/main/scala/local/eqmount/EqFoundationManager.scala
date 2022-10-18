@@ -105,7 +105,7 @@ object EqFoundationManager  extends Codecs {
           }
           stmt.close()
           connection.close()
-          ret.toList
+          ret.sortBy(f=>f.BSFOUNDATION).toList
         }
         catch {
           case e: Throwable =>
