@@ -111,7 +111,7 @@ class SpecManager extends Actor with BStree with QrDxfHelper{
       insertLock(project, nestId, user)
       sender() ! Json.toJson("success")
     case GetEqFoundations(project) =>
-      sender() ! foranFoudationsAndEqsJson(project).asJson.noSpaces
+      sender() ! foranFoudationsAndEqsJson(project)
 
     case GenerateQRCode(url) =>
       val str: String = url2qrDXF(url)
