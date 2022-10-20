@@ -507,7 +507,7 @@ object EssiCNCManagerSubdiv {
     val spY: Double = sp.y
     val epX: Double = ep.x
     val epY: Double = ep.y
-    val dist = startOffset
+    val dist: Double = startOffset
     val vX = epX - spX
     val vY = epY - spY
     val v: DenseVector[Double] = DenseVector[Double](vX, vY)
