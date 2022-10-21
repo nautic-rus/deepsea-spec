@@ -7,8 +7,8 @@ import scala.io.{BufferedSource, Source}
 class CNCTestGcodesPella extends AnyFunSuite{
   val listIn: List[String] = List(
     //"U0103-01",
-    "U0103-02",
-    "U0103-03",
+    "U501-12",
+
    /* "U0103-04",
     "U0103-05",
     "U0103-06",
