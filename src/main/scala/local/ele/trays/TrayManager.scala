@@ -220,23 +220,26 @@ object TrayManager extends TrayHelper with Codecs {
         } else {
           MountItem()
         }
+        val item5 = mountData.find(s => s.label.equals("4026")).getOrElse(TrayMountData(label = "4026"))
+        buffMounts += MountItem(findWorkshopMaterial(item5.trmCode, materials), TrayMountData(item5.label, item5.trmCode).label, "796", trayLenght / 0.5, false)
+
 
         val item6 = mountData.find(s => s.label.equals("7700")).getOrElse(TrayMountData(label = "7700"))
-        buffMounts += MountItem(findWorkshopMaterial(item6.trmCode, materials), TrayMountData(item6.label, item6.trmCode).label, "166", trayLenght / 0.5, false)
+        buffMounts += MountItem(findWorkshopMaterial(item6.trmCode, materials), TrayMountData(item6.label, item6.trmCode).label, "166", trayLenght / 10.0, false)
 
         val item7 = mountData.find(s => s.label.equals("4024")).getOrElse(TrayMountData(label = "4024"))
-        buffMounts += MountItem(findWorkshopMaterial(item7.trmCode, materials), TrayMountData(item7.label, item7.trmCode).label, "006", trayLenght / 0.5, false)
+        buffMounts += MountItem(findWorkshopMaterial(item7.trmCode, materials), TrayMountData(item7.label, item7.trmCode).label, "006", trayLenght / 20.0, false)
 
         val item8 = mountData.find(s => s.label.equals("4025")).getOrElse(TrayMountData(label = "4025"))
-        buffMounts += MountItem(findWorkshopMaterial(item8.trmCode, materials), TrayMountData(item8.label, item8.trmCode).label, "796", trayLenght / 0.5, false)
+        buffMounts += MountItem(findWorkshopMaterial(item8.trmCode, materials), TrayMountData(item8.label, item8.trmCode).label, "796", trayLenght / 1.0, false)
       }
       else
       {
         val item4 = mountData.find(s => s.label.equals("4024")).getOrElse(TrayMountData(label = "4024"))
-        buffMounts += MountItem(findWorkshopMaterial(item4.trmCode, materials), TrayMountData(item4.label, item4.trmCode).label, "006", trayLenght / 0.25, false)
+        buffMounts += MountItem(findWorkshopMaterial(item4.trmCode, materials), TrayMountData(item4.label, item4.trmCode).label, "006", trayLenght / 5.0, false)
 
         val item5 = mountData.find(s => s.label.equals("4025")).getOrElse(TrayMountData(label = "4025"))
-        buffMounts += MountItem(findWorkshopMaterial(item5.trmCode, materials), TrayMountData(item5.label, item5.trmCode).label, "796", trayLenght / 0.25, false)
+        buffMounts += MountItem(findWorkshopMaterial(item5.trmCode, materials), TrayMountData(item5.label, item5.trmCode).label, "796", trayLenght / 0.5, false)
 
       }
     }
