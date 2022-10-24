@@ -115,10 +115,10 @@ class SpecManager extends Actor with BStree with QrDxfHelper{
     case GetEqFoundations(project) =>
       sender() ! foranFoudationsAndEqsJson(project)
     case UpdateStatusEqFoundations(project, id, user) =>
-      sender() ! EqFoundationManager.updateStatusSQL(project, id.toIntOption.getOrElse(0), user) match {
+      sender() ! (EqFoundationManager.updateStatusSQL(project, id.toIntOption.getOrElse(0), user) match {
         case 1 => "success".asJson.noSpaces
         case _ => "error".asJson.noSpaces
-      }
+      })
 
     case GenerateQRCode(url) =>
       val str: String = url2qrDXF(url)
