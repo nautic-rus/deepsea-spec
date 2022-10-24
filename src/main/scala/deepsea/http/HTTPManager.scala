@@ -219,6 +219,10 @@ class HTTPManager extends Actor {
       (get & path("eqFoundations") & parameter("project")) { (project) =>
         askFor(ActorManager.spec, GetEqFoundations(project))
       },
+
+      (get & path("eqFoundationsUpdateStatus") & parameter("project") & parameter("id") & parameter("user")) { (project, id, user) =>
+        askFor(ActorManager.spec, UpdateStatusEqFoundations(project, id, user))
+      },
     )
   }
 
