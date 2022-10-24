@@ -79,7 +79,7 @@ object PipeManager{
   }
   case class MaterialTranslation(lang: String, name: String, description: String)
   case class UnitTranslation(lang: String, name: String, thumb: String)
-  case class ProjectName(id: String, rkd: String, pdsp: String, foran: String, cloud: String)
+  case class ProjectName(id: String, rkd: String, pdsp: String, foran: String, cloud: String, cloudRkd: String)
   case class SystemDef(project: String, name: String, descr: String)
   case class SpoolLock(issueId: Int, docNumber: String, spool: String, var lock: Int, user: String, var date: Long)
 
