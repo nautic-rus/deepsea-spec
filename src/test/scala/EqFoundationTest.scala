@@ -1,7 +1,9 @@
-import local.eqmount.EqFoundationManager.{foranFoudationsAndEqs, foranFoudationsAndEqsJson}
+import local.eqmount.EqFoundationManager
+import local.eqmount.EqFoundationManager.{foranFoudationsAndEqs, foranFoudationsAndEqsJson, updateStatusSQL}
 import org.scalatest.funsuite.AnyFunSuite
 
 class EqFoundationTest extends AnyFunSuite{
-  val rets=foranFoudationsAndEqsJson("N004")
-  val jjh=0
+  val rets=foranFoudationsAndEqs("N004")
+  //val a=updateStatusSQL("N004",3401387,"Golenishev")
+
 }
