@@ -170,7 +170,7 @@ object EqFoundationManager extends Codecs {
 
           val ret3 = ListBuffer.empty[EqFoundation]
 
-          ret2.toList.groupBy(s => s.HULLBLOCK).foreach(gr => {
+          ret2.toList.groupBy(s => s.BSFOUNDATION).foreach(gr => {
             gr._2.find(s => s.eqStatus == 0) match {
               case Some(value) => {
                 ret3 ++= gr._2
