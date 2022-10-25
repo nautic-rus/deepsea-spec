@@ -181,7 +181,7 @@ trait AccommodationHelper {
                 Option(rs.getInt("AS_OID")).getOrElse(-1),
                 weight,
                 surface,
-                (accommodations.length + 1).toString,
+                userId,
                 Option(rs.getString("MATERIAL")).getOrElse("") + Option(rs.getString("PROFILE_MATERIAL")).getOrElse("") + Option(rs.getString("PLATE_MATERIAL")).getOrElse(""),
                 Option(rs.getString("MATERIAL_DESCRIPTION")).getOrElse(""),
                 Option(rs.getInt("OBJ_TYPE")).getOrElse(-1),
@@ -224,6 +224,7 @@ trait AccommodationHelper {
         }
       case _ => List.empty[Accommodation]
     }
+
     accommodations.map(_.asDevice).filter(m => m.material.code != "" && !groups.map(_.code).contains(m.material.code)).tapEach(x => {
       x.units = "796"
       x.count = 1
