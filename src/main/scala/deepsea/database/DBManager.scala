@@ -22,6 +22,14 @@ object DBManager extends Codecs{
     oracleConnections += OracleConnection(project, new HikariDataSource(configOracle))
   })
 
+  private val configPG = new HikariConfig()
+  configPG.setDriverClassName("org.postgresql.Driver")
+  configPG.setJdbcUrl("jdbc:postgresql://192.168.1.26/deepsea")
+  configPG.setUsername("deepsea")
+  configPG.setPassword("Ship1234")
+  configPG.setMaximumPoolSize(10)
+  val dsPG = new HikariDataSource(configPG)
+
   def GetOracleConnection(project: String): Option[Connection] ={
     oracleConnections.find(_.project == project) match {
       case Some(connection) => Option(connection.ds.getConnection)
@@ -33,5 +41,8 @@ object DBManager extends Codecs{
   }
   def GetMongoCacheConnection(): Option[MongoDatabase] = {
     Option(mongoClient.getDatabase("cache").withCodecRegistry(codecRegistry))
+  }
+  def GetPGConnection(): Option[Connection] = {
+    Option(dsPG.getConnection)
   }
 }

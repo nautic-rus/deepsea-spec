@@ -9,7 +9,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import deepsea.actors.ActorManager
-import deepsea.database.DatabaseManager
+import deepsea.database.{DBManager, DatabaseManager}
 import deepsea.files.FileManager.GenerateUrl
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.Filters.{all, and, equal, in, notEqual}
@@ -20,11 +20,17 @@ import local.common.Codecs
 import org.mongodb.scala.model.Filters
 import io.circe.parser.decode
 
+import java.io.{File, FileInputStream, FileOutputStream}
+import java.net.{URL, URLEncoder}
+import java.nio.file.{Files, StandardCopyOption}
 import java.sql.Connection
 import java.util.Date
+import java.util.zip.{ZipEntry, ZipFile, ZipOutputStream}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, SECONDS}
+import scala.jdk.CollectionConverters.EnumerationHasAsScala
+import scala.reflect.io.Directory
 
 trait PipeHelper extends Codecs {
   def getSystems(project: String): List[SystemDef] = {
@@ -399,5 +405,68 @@ trait PipeHelper extends Codecs {
     rs.close()
     oracleConnection.close()
     systemDefs.toList
+  }
+  def getSpoolModel(docNumber: String, spool: String, isom: Int = 0): File ={
+    val res = ListBuffer.empty[String]
+    DBManager.GetPGConnection() match {
+      case Some(c) =>
+        val s = c.createStatement()
+        val rs = s.executeQuery(s"select file_url from revision_files where removed = 0 and issue_id in (select id from issue where doc_number = '${docNumber}' and issue_type = 'RKD') and group_name = 'Spool Models'")
+        while (rs.next()){
+          res += rs.getString("file_url")
+        }
+        rs.close()
+        s.close()
+        c.close()
+      case _ =>
+    }
+    res.find(_.contains("obj")) match {
+      case Some(zipUrl) =>
+        val spCloud = "/"
+        val name = zipUrl.split(spCloud).last
+        val enc = zipUrl.replace(zipUrl.split(spCloud).takeRight(1).head, "") + URLEncoder.encode(zipUrl.split(spCloud).takeRight(1).head, "UTF-8")
+        val file = File.createTempFile("obj", ".zip")
+        val directory = Files.createTempDirectory("obj")
+        val url = new URL(enc)
+        val stream = url.openStream()
+        Files.copy(stream, file.toPath, StandardCopyOption.REPLACE_EXISTING)
+        val zipFile = new ZipFile(file)
+        for (entry <- zipFile.entries.asScala) {
+          if (!entry.isDirectory) {
+            Files.copy(zipFile.getInputStream(entry), new File(directory + "/" + entry.getName).toPath, StandardCopyOption.REPLACE_EXISTING)
+          }
+        }
+
+        val files = directory.toFile.listFiles().toList.filter(_.isFile)
+
+        val projectSystem = getSystemAndProjectFromDocNumber(docNumber)
+        val pipeSegs = getPipeSegs(projectSystem._1, projectSystem._2)
+        val spoolSegs = pipeSegs.filter(x => if (isom == 0) x.spool == spool else x.isom == spool)
+
+        val spoolFiles = files.filter(x => spoolSegs.exists(y => x.getName.contains("-" + y.sqInSystem.toString)))
+
+
+        if (spoolFiles.nonEmpty){
+          val zipOut = File.createTempFile("obj", ".zip")
+          val zip = new ZipOutputStream(new FileOutputStream(zipOut))
+          spoolFiles.foreach(sFile => {
+            zip.putNextEntry(new ZipEntry(sFile.getName))
+            zip.write(new FileInputStream(sFile).readAllBytes())
+            zip.closeEntry()
+          })
+          zip.close()
+          zipOut
+        }
+        else{
+          val error = File.createTempFile("error, no spool files", ".txt")
+          new FileOutputStream(error).write("error".getBytes())
+          error
+        }
+
+      case _ =>
+        val error = File.createTempFile("error, no model files for document", ".txt")
+        new FileOutputStream(error).write("error".getBytes())
+        error
+    }
   }
 }
