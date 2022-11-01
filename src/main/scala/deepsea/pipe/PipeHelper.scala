@@ -458,14 +458,14 @@ trait PipeHelper extends Codecs {
           zipOut
         }
         else{
-          val error = File.createTempFile("error, no spool files", ".txt")
-          new FileOutputStream(error).write("error".getBytes())
+          val error = File.createTempFile("error", ".txt")
+          new FileOutputStream(error).write("error, no spool files".getBytes())
           error
         }
 
       case _ =>
-        val error = File.createTempFile("error, no model files for document", ".txt")
-        new FileOutputStream(error).write("error".getBytes())
+        val error = File.createTempFile("error", ".txt")
+        new FileOutputStream(error).write("error, no model files for document".getBytes())
         error
     }
   }
