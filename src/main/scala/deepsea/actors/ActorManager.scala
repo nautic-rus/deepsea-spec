@@ -19,6 +19,7 @@ object ActorManager {
   var elec: ActorRef = _
   var files: ActorRef = _
   var pipe: ActorRef = _
+  var pipeCache: ActorRef = _
   var devices: ActorRef = _
   var accommodations: ActorRef = _
 
