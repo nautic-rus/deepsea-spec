@@ -595,72 +595,6 @@ object CNCManager extends ForanFileUtil {
           if (!buff.last.equals(stopMark)) buff += stopMark
         }
 
-        case "CUTHA" => {
-          if (!currentTool.equals(cutToolOp)) {
-            currentTool = cutToolOp
-            buff += (cutToolOp)
-          }
-
-          val freeMovePoint: Point = {
-            op.ops.head.pointOrArc match {
-              case Right(value: Arc) => value.sp
-              case Left(value: Point) => value
-            }
-          }
-          val freeMovePointEP: Point = {
-            op.ops.head.pointOrArc match {
-              case Right(value: Arc) => value.ep
-              case Left(value: Point) => {
-                op.ops(1).pointOrArc match {
-                  case Right(value: Arc) => value.sp
-                  case Left(value: Point) => value
-                }
-              }
-            }
-          }
-          val pOffset: Point = cutOffseCalc(freeMovePoint, freeMovePointEP)
-
-         // val m1 = (toGcode(move, MachineItem(Left(pOffset)), offsetCorrection))
-          //if (!buff.last.equals(m1)) buff += m1
-
-          val m1 = (toGcode(move, MachineItem(Left(pOffset)), offsetCorrection))
-          if (!buff.last.equals(m1)) buff += m1
-
-          lastOpPoint = getStartPos(op.ops.head)
-
-
-          if (!buff.last.equals(startCutHoles)) buff += startCutHoles
-
-          op.ops.foreach(c => {
-            c.pointOrArc match {
-              case Right(value: Arc) => {
-                if (!pointsEquals(value.sp, lastOpPoint)) {
-                  val m1 = (toGcode(stright, MachineItem(Left(value.sp)), offsetCorrection))
-                  if (!buff.last.equals(m1)) buff += m1
-                }
-                if (isClockWise(value)) {
-                  val m1 = (toGcode(arcCW, c, offsetCorrection))
-                  if (!buff.last.equals(m1)) buff += m1
-                  lastOpPoint = getLastPos(c)
-                } else {
-                  val m1 = (toGcode(arcACW, c, offsetCorrection))
-                  if (!buff.last.equals(m1)) buff += m1
-                  lastOpPoint = getLastPos(c)
-                }
-              }
-              case Left(value: Point) => {
-                if (!pointsEquals(value, lastOpPoint)) {
-                  val m1 = (toGcode(stright, MachineItem(Left(value)), offsetCorrection))
-                  if (!buff.last.equals(m1)) buff += m1
-                }
-                val m1 = (toGcode(stright, c, offsetCorrection))
-                if (!buff.last.equals(m1)) buff += m1
-                lastOpPoint = getLastPos(c)
-              }
-            }
-          })
-          if (!buff.last.equals(stopCut)) buff += stopCut
-        }
 
         case "CUTH" => {
           if (!currentTool.equals(cutToolOp)) {
@@ -702,7 +636,6 @@ object CNCManager extends ForanFileUtil {
           if (!buff.last.equals(stopCut)) buff += stopCut
         }
 
-
         case "CUT" => {
           if (!currentTool.equals(cutToolOp)) {
             currentTool = cutToolOp
@@ -712,7 +645,7 @@ object CNCManager extends ForanFileUtil {
           if (!buff.last.equals(m1)) buff += m1
           lastOpPoint = getStartPos(op.ops.head)
           if (!buff.last.equals(startCutOuter)) buff += startCutOuter
-          op.ops.tail.foreach(c => {
+          op.ops.foreach(c => {
             c.pointOrArc match {
               case Right(value: Arc) => {
                 if (!pointsEquals(value.sp, lastOpPoint)) {
