@@ -31,7 +31,7 @@ trait DeviceHelper{
           case Some(value) => value.foran
           case _ => ""
         }
-        val materials = Await.result(materialsCollection.find(equal("projects", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
+        val materials = Await.result(materialsCollection.find(equal("project", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
           case values: Seq[Material] => values.toList
           case _ => List.empty[Material]
         }

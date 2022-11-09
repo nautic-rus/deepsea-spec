@@ -97,7 +97,7 @@ trait PipeHelper extends Codecs {
               case _ => ""
             }
 
-            val materials = Await.result(materialsCollection.find(equal("projects", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
+            val materials = Await.result(materialsCollection.find(equal("project", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
               case values: Seq[Material] => values.toList
               case _ => List.empty[Material]
             }
@@ -192,7 +192,7 @@ trait PipeHelper extends Codecs {
       case Some(value) => value.rkd
       case _ => ""
     }
-    val materials = Await.result(materialsCollection.find(equal("projects", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
+    val materials = Await.result(materialsCollection.find(equal("project", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
       case values: Seq[Material] => values.toList
       case _ => List.empty[Material]
     }
@@ -258,7 +258,7 @@ trait PipeHelper extends Codecs {
               case Some(value) => value.rkd
               case _ => ""
             }
-            val materials = Await.result(materialsCollection.find(equal("projects", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
+            val materials = Await.result(materialsCollection.find(equal("project", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
               case values: Seq[Material] => values.toList
               case _ => List.empty[Material]
             }

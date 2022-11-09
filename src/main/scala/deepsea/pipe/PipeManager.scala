@@ -39,7 +39,7 @@ object PipeManager{
                        code: String = "",
                        units: String = "",
                        singleWeight: Double = 0,
-                       projects: List[String] = List.empty[String],
+                       project: String = "",
                        document: String = "",
                        provider: String = "",
                        note: String = "",
