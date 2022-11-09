@@ -595,39 +595,16 @@ object CNCManager extends ForanFileUtil {
           if (!buff.last.equals(stopMark)) buff += stopMark
         }
 
+
         case "CUTH" => {
           if (!currentTool.equals(cutToolOp)) {
             currentTool = cutToolOp
             buff += (cutToolOp)
           }
-
-          val freeMovePoint: Point = {
-            op.ops.head.pointOrArc match {
-              case Right(value: Arc) => value.sp
-              case Left(value: Point) => value
-            }
-          }
-          val freeMovePointEP: Point = {
-            op.ops.head.pointOrArc match {
-              case Right(value: Arc) => value.ep
-              case Left(value: Point) => {
-                op.ops(1).pointOrArc match {
-                  case Right(value: Arc) => value.sp
-                  case Left(value: Point) => value
-                }
-              }
-            }
-          }
-          val pOffset: Point = cutOffseCalc(freeMovePoint, freeMovePointEP)
-
-          val m1 = (toGcode(move, MachineItem(Left(pOffset)), offsetCorrection))
+          val m1 = (toGcode(move, MachineItem(Left(getStartPos(op.ops.head))), offsetCorrection))
           if (!buff.last.equals(m1)) buff += m1
           lastOpPoint = getStartPos(op.ops.head)
-
-
-
-
-          if (!buff.last.equals(startCutHoles)) buff += startCutHoles
+          if (!buff.last.equals(startCutOuter)) buff += startCutOuter
           op.ops.foreach(c => {
             c.pointOrArc match {
               case Right(value: Arc) => {
@@ -658,6 +635,7 @@ object CNCManager extends ForanFileUtil {
           })
           if (!buff.last.equals(stopCut)) buff += stopCut
         }
+
         case "CUT" => {
           if (!currentTool.equals(cutToolOp)) {
             currentTool = cutToolOp
@@ -667,7 +645,7 @@ object CNCManager extends ForanFileUtil {
           if (!buff.last.equals(m1)) buff += m1
           lastOpPoint = getStartPos(op.ops.head)
           if (!buff.last.equals(startCutOuter)) buff += startCutOuter
-          op.ops.tail.foreach(c => {
+          op.ops.foreach(c => {
             c.pointOrArc match {
               case Right(value: Arc) => {
                 if (!pointsEquals(value.sp, lastOpPoint)) {
@@ -697,6 +675,7 @@ object CNCManager extends ForanFileUtil {
           })
           if (!buff.last.equals(stopCut)) buff += stopCut
         }
+
         case _ => None
       }
     })
