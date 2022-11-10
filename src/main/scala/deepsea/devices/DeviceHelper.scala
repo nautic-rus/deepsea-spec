@@ -17,6 +17,7 @@ trait DeviceHelper{
     val devices = ListBuffer.empty[Device]
     val devicesAux = ListBuffer.empty[DeviceAux]
     val devicesAuxFromSystem = ListBuffer.empty[DeviceAux]
+    val devicesAuxFromComp = ListBuffer.empty[Device]
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
         val materialsNCollectionName = "materials-n"
@@ -182,7 +183,7 @@ trait DeviceHelper{
           if (d.longDesc.contains("|")){
             d.longDesc.split('\n').toList.foreach(l => {
               val split = l.split('|')
-              devices += Device(
+              devicesAuxFromComp += Device(
                 d.project,
                 d.id,
                 d.comp,
@@ -214,6 +215,7 @@ trait DeviceHelper{
         })
       case _ => List.empty[Device]
     }
+    devices ++= devicesAuxFromComp.toList
     devices.toList
   }
   def addDeviceToSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String = ""): Unit ={
