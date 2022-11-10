@@ -187,7 +187,7 @@ trait DeviceHelper{
                 d.project,
                 d.id,
                 d.comp,
-                split(0),
+                d.userId + "." + split(0),
                 d.system,
                 d.zone,
                 d.elemType,
@@ -205,7 +205,7 @@ trait DeviceHelper{
                   case Some(value) => value
                   case _ => Material()
                 },
-                split(0),
+                d.userId + "." + split(0),
                 d.userId + "." + split(0),
                 split(2),
                 split(3).toDoubleOption.getOrElse(0),
