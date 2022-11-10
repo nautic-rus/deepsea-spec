@@ -40,6 +40,7 @@ object AccommodationManager{
         0,
         "",
         "",
+        "",
         if (objType == 67){
           material.copy(name = material.name + ", " + pars.take(4).takeRight(3).map(x => new DecimalFormat("0.#").format(Math.round(x * 1000 * 10) / 10.toDouble)).mkString("x"))
         }
