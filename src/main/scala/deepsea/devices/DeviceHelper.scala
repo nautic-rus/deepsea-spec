@@ -216,7 +216,7 @@ trait DeviceHelper{
       case _ => List.empty[Device]
     }
     devices ++= devicesAuxFromComp.toList
-    devices.toList
+    devices.filter(_.material.code != "").toList
   }
   def addDeviceToSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String = ""): Unit ={
     DBManager.GetMongoConnection() match {
