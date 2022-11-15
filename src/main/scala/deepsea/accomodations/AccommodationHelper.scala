@@ -346,4 +346,32 @@ trait AccommodationHelper {
       case _ =>
     }
   }
+
+  def setAccommodationLabel(docNumber: String, label: String, oid: Int): String = {
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val projectNamesCollection: MongoCollection[ProjectName] = mongo.getCollection("project-names")
+        val projectNames = Await.result(projectNamesCollection.find().toFuture(), Duration(30, SECONDS)) match {
+          case values: Seq[ProjectName] => values.toList
+          case _ => List.empty[ProjectName]
+        }
+        val rkdProject = if (docNumber.contains('-')) docNumber.split('-').head else ""
+        val foranProject = projectNames.find(_.rkd == rkdProject) match {
+          case Some(value) => value.foran
+          case _ => ""
+        }
+        DBManager.GetOracleConnection(foranProject) match {
+          case Some(oracle) =>
+            val s = oracle.createStatement()
+            val query = s"update as_elem set userid = '$label' where oid = $oid"
+            s.execute(query)
+            s.close()
+            oracle.close()
+          case _ =>
+        }
+      case _ =>
+    }
+    "success"
+  }
+
 }

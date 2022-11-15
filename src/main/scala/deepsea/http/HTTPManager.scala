@@ -18,7 +18,7 @@ import deepsea.spec.SpecManager._
 import org.apache.log4j.{LogManager, Logger}
 import play.api.libs.json.{JsValue, Json}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
-import deepsea.accomodations.AccommodationManager.{AddAccommodationGroup, GetAccommodations, GetAccommodationsESP}
+import deepsea.accomodations.AccommodationManager.{AddAccommodationGroup, GetAccommodations, GetAccommodationsESP, SetAccommodationLabel}
 import deepsea.devices.DeviceManager.{AddDeviceToSystem, GetDevices, GetDevicesESP, RemoveDeviceFromSystem}
 import deepsea.pipe.PipeManager.{GetPipeESP, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSpoolModel, GetSystems, GetZones, SetSpoolLock}
 
@@ -213,7 +213,9 @@ class HTTPManager extends Actor {
       (get & path("addGroupToSystem") & parameter("docNumber") & parameter("stock") & parameter("userId")) { (docNumber, stock, userId) =>
         askFor(ActorManager.accommodations, AddAccommodationGroup(docNumber, stock, userId))
       },
-
+      (get & path("setAccommodationLabel") & parameter("docNumber") & parameter("userId") & parameter("oid")) { (docNumber, userId, oid) =>
+        askFor(ActorManager.accommodations, SetAccommodationLabel(docNumber, userId, oid))
+      },
 
       (get & path("qrCode") & parameter("url")) { (url) =>
         askFor(ActorManager.spec, GenerateQRCode(url))
