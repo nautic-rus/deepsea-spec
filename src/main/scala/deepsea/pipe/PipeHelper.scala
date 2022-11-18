@@ -441,7 +441,7 @@ trait PipeHelper extends Codecs {
 
         val projectSystem = getSystemAndProjectFromDocNumber(docNumber)
         val pipeSegs = getPipeSegs(projectSystem._1, projectSystem._2)
-        val spoolSegs = pipeSegs.filter(x => if (isom == 0) x.spool == spool else x.isom == spool).filter(_.sqInSystem != 0)
+        val spoolSegs = pipeSegs.filter(x => (if (isom == 0) x.spool == spool else x.isom == spool) || spool == "full").filter(_.sqInSystem != 0)
 
         val spoolFiles = files.filter(x => spoolSegs.exists(y => x.getName.contains("-" + y.sqInSystem.toString)))
 
