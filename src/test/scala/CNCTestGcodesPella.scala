@@ -7,7 +7,7 @@ import scala.io.{BufferedSource, Source}
 class CNCTestGcodesPella extends AnyFunSuite{
   val listIn: List[String] = List(
     /*"U0201_42_0_OLD",*/
-    "U0201_42_0_NEW"
+    "BS05_28_0"
 
 /*    "C-N002-BS02-13",
     "C-N002-BS02-41",*/

@@ -38,7 +38,7 @@ class CNCTestGcodes extends AnyFunSuite {
 
 
   val listIn: List[String] = List(
-    "U406-14"
+    "U406-25"
   )
 
   listIn.foreach(f=>{
