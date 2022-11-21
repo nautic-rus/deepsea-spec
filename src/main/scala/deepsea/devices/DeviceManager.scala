@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit
 import scala.concurrent.Await
 
 object DeviceManager{
-  case class Device(project: String, id: Int, comp: Int, var userId: String, system: String, var zone: String, elemType: String, compAbbrev: String, var weight: Double, stock: String, elemClass: Int, desc1: String, desc2: String, var material: Material = Material(), origUserId: String, parentUserId: String, var units: String = "796", var count: Double = 1, fromAux: Int = 0)
+  case class Device(project: String, id: Int, comp: Int, var userId: String, system: String, var zone: String, elemType: String, compAbbrev: String, var weight: Double, stock: String, elemClass: Int, desc1: String, desc2: String, longDesc: String, var material: Material = Material(), origUserId: String, parentUserId: String, var units: String = "796", var count: Double = 1, fromAux: Int = 0)
   case class DeviceAux(id: Int, descr: String)
   case class SystemLang(systemId: Int, lang: Int, descr: String, long_descr: String)
 
@@ -38,7 +38,7 @@ class DeviceManager extends Actor with DeviceHelper with AccommodationHelper wit
       sender() ! (getDevices(docNumber) ++ getAccommodationsAsDevices(docNumber)).asJson.noSpaces
     case GetDevicesESP(docNumber, revision, lang) =>
       val docName: String = getSystemName(docNumber)
-      val devices: List[Device] = getDevices(docNumber).tapEach(x => x.userId = removeLeftZeros(x.origUserId)) ++ getAccommodationsAsDevices(docNumber).tapEach(_.zone = "")
+      val devices: List[Device] = getDevices(docNumber).tapEach(x => x.userId = removeLeftZeros(x.origUserId)) ++ getAccommodationsAsDevices(docNumber)
       val rev = if (revision == "NO REV")  "" else revision
       val file = genAccomListEnPDF(docNumber, docName, rev, devices, lang)
       Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {

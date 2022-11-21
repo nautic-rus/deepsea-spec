@@ -17,6 +17,7 @@ trait DeviceHelper{
     val devices = ListBuffer.empty[Device]
     val devicesAux = ListBuffer.empty[DeviceAux]
     val devicesAuxFromSystem = ListBuffer.empty[DeviceAux]
+    val devicesAuxFromComp = ListBuffer.empty[Device]
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
         val materialsNCollectionName = "materials-n"
@@ -31,7 +32,7 @@ trait DeviceHelper{
           case Some(value) => value.foran
           case _ => ""
         }
-        val materials = Await.result(materialsCollection.find(equal("projects", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
+        val materials = Await.result(materialsCollection.find(equal("project", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
           case values: Seq[Material] => values.toList
           case _ => List.empty[Material]
         }
@@ -44,7 +45,8 @@ trait DeviceHelper{
         DBManager.GetOracleConnection(foranProject) match {
           case Some(oracle) =>
             val s = oracle.createStatement()
-            val query = s"select * from v_element_desc where syst_userid = '$system'"
+            //val query = s"select * from v_element_desc where syst_userid = '$system'"
+            val query = s"select \n    oid, \n    comp, \n    userid, \n    syst_userid, \n    zone_userid, \n    type, \n    comp_abbrev, \n    weight, \n    stock_code, \n    elem_class,\n    elem_desc1, \n    elem_desc2, \n    stock_code, \n    (select long_descr from COMPONENT_LANG cl where lang = -2 and cl.comp = elemdesc.comp and rownum = 1) as long_desc\nfrom \n    v_element_desc  elemdesc\nwhere \n    syst_userid = '$system'"
             val rs = s.executeQuery(query)
             while (rs.next()) {
               devices += Device(
@@ -61,6 +63,7 @@ trait DeviceHelper{
                 Option(rs.getInt("ELEM_CLASS")).getOrElse(-1),
                 Option(rs.getString("ELEM_DESC1")).getOrElse(""),
                 Option(rs.getString("ELEM_DESC2")).getOrElse(""),
+                Option(rs.getString("LONG_DESC")).getOrElse(""),
                 materials.find(_.code == Option(rs.getString("STOCK_CODE")).getOrElse("")) match {
                   case Some(value) => value
                   case _ => Material()
@@ -125,6 +128,7 @@ trait DeviceHelper{
                     deviceBase.elemClass,
                     "",
                     "",
+                    "",
                     materials.find(_.code == split(1)) match {
                       case Some(value) => value
                       case _ => Material()
@@ -161,6 +165,7 @@ trait DeviceHelper{
                 0,
                 "",
                 "",
+                "",
                 materials.find(_.code == split(1)) match {
                   case Some(value) => value
                   case _ => Material()
@@ -174,9 +179,44 @@ trait DeviceHelper{
             }
           })
         })
+        devices.foreach(d => {
+          if (d.longDesc.contains("|")){
+            d.longDesc.split('\n').toList.foreach(l => {
+              val split = l.split('|')
+              devicesAuxFromComp += Device(
+                d.project,
+                d.id,
+                d.comp,
+                d.userId + "." + split(0),
+                d.system,
+                d.zone,
+                d.elemType,
+                d.compAbbrev,
+                materials.find(_.code == split(1)) match {
+                  case Some(value) => value.singleWeight
+                  case _ => 0
+                },
+                split(1),
+                d.elemClass,
+                "",
+                "",
+                "",
+                materials.find(_.code == split(1)) match {
+                  case Some(value) => value
+                  case _ => Material()
+                },
+                d.userId + "." + split(0),
+                d.userId + "." + split(0),
+                split(2),
+                split(3).toDoubleOption.getOrElse(0),
+                1)
+            })
+          }
+        })
       case _ => List.empty[Device]
     }
-    devices.toList
+    devices ++= devicesAuxFromComp.toList
+    devices.filter(_.material.code != "").toList
   }
   def addDeviceToSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String = ""): Unit ={
     DBManager.GetMongoConnection() match {

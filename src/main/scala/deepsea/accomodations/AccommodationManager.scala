@@ -3,7 +3,7 @@ package deepsea.accomodations
 import akka.actor.Actor
 import akka.pattern.ask
 import akka.util.Timeout
-import deepsea.accomodations.AccommodationManager.{AddAccommodationGroup, GetAccommodations, GetAccommodationsESP}
+import deepsea.accomodations.AccommodationManager.{AddAccommodationGroup, GetAccommodations, GetAccommodationsESP, SetAccommodationLabel}
 import deepsea.actors.ActorManager
 import deepsea.devices.DeviceManager.{Device, GetDevicesESP}
 import deepsea.files.FileManager.GenerateUrl
@@ -22,6 +22,7 @@ object AccommodationManager{
   case class BBox(xMin: Double, yMin: Double, zMin: Double, xMax: Double, yMax: Double, zMax: Double)
   case class Zone(name: String, BBox: BBox)
   case class AddAccommodationGroup(docNumber: String, stock: String, userId: String)
+  case class SetAccommodationLabel(docNumber: String, userId: String, oid: String)
 
   case class AccommodationGroup(userId: String, code: String)
   case class Accommodation(project: String, modelOid: Int, asOid: Int, weight: Double, surface: Double, userId: String, materialCode: String, materialDescription: String, objType: Int, pars: List[Double], bsWeight: Double, zone: String, profileStock: String, plateStock: String, var material: Material = Material()){
@@ -38,6 +39,7 @@ object AccommodationManager{
         if (weight != 0) weight else bsWeight,
         material.code,
         0,
+        "",
         "",
         "",
         if (objType == 67){
@@ -81,6 +83,8 @@ class AccommodationManager extends Actor with AccommodationHelper with Codecs {
     case AddAccommodationGroup(docNumber, stock, userId) =>
       addGroupToSystem(docNumber, stock, userId)
       sender() ! "success".asJson.noSpaces
+    case SetAccommodationLabel(docNumber, userId, oid) =>
+      sender() ! setAccommodationLabel(docNumber, userId, oid.toIntOption.getOrElse(0)).asJson.noSpaces
     case _ => None
   }
 }

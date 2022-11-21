@@ -39,7 +39,7 @@ object PipeManager{
                        code: String = "",
                        units: String = "",
                        singleWeight: Double = 0,
-                       projects: List[String] = List.empty[String],
+                       project: String = "",
                        document: String = "",
                        provider: String = "",
                        note: String = "",
@@ -102,6 +102,10 @@ class PipeManager extends Actor with Codecs with PipeHelper {
 
 
   implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
+
+  override def preStart(): Unit ={
+    //self ! GetSpoolModel("210101-545-0001", "032", "0")
+  }
 
   override def receive: Receive = {
     case GetSystems(project) => sender() ! getSystems(project).asJson.noSpaces

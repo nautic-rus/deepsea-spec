@@ -97,7 +97,7 @@ trait PipeHelper extends Codecs {
               case _ => ""
             }
 
-            val materials = Await.result(materialsCollection.find(equal("projects", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
+            val materials = Await.result(materialsCollection.find(equal("project", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
               case values: Seq[Material] => values.toList
               case _ => List.empty[Material]
             }
@@ -192,7 +192,7 @@ trait PipeHelper extends Codecs {
       case Some(value) => value.rkd
       case _ => ""
     }
-    val materials = Await.result(materialsCollection.find(equal("projects", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
+    val materials = Await.result(materialsCollection.find(equal("project", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
       case values: Seq[Material] => values.toList
       case _ => List.empty[Material]
     }
@@ -258,7 +258,7 @@ trait PipeHelper extends Codecs {
               case Some(value) => value.rkd
               case _ => ""
             }
-            val materials = Await.result(materialsCollection.find(equal("projects", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
+            val materials = Await.result(materialsCollection.find(equal("project", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
               case values: Seq[Material] => values.toList
               case _ => List.empty[Material]
             }
@@ -441,7 +441,7 @@ trait PipeHelper extends Codecs {
 
         val projectSystem = getSystemAndProjectFromDocNumber(docNumber)
         val pipeSegs = getPipeSegs(projectSystem._1, projectSystem._2)
-        val spoolSegs = pipeSegs.filter(x => if (isom == 0) x.spool == spool else x.isom == spool)
+        val spoolSegs = pipeSegs.filter(x => (if (isom == 0) x.spool == spool else x.isom == spool) || spool == "full").filter(_.sqInSystem != 0)
 
         val spoolFiles = files.filter(x => spoolSegs.exists(y => x.getName.contains("-" + y.sqInSystem.toString)))
 
