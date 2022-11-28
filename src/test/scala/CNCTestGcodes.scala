@@ -38,7 +38,7 @@ class CNCTestGcodes extends AnyFunSuite {
 
 
   val listIn: List[String] = List(
-    "U406-25"
+    "U703-13"
   )
 
   listIn.foreach(f=>{
@@ -48,7 +48,7 @@ class CNCTestGcodes extends AnyFunSuite {
   src.close()
   //val ret: String = doCNC(lines, "c:\\26\\C-N004-ULTT-01"+f+".mpg", "Misha")
   val retStar = doCNCStrings(lines, "Misha")
-  val pw = new PrintWriter(new File("c:\\35\\A\\"+f+".mpg"))
+  val pw = new PrintWriter(new File("c:\\35\\"+f+".mpg"))
   retStar.foreach(line => pw.println(line))
   pw.close()
 

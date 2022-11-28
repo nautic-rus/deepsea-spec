@@ -558,14 +558,7 @@ object CNCManager extends ForanFileUtil {
           if (!buff.last.equals(m1)) buff += m1
           lastOpPoint = getStartPos(op.ops.head)
           if (!buff.last.equals(startMark)) buff += startMark
-          val arrayOps: List[MachineItem] ={
-            if (op.ops.length == 1) {
-              op.ops
-            } else {
-              op.ops.tail
-            }
-          }
-          arrayOps.foreach(c => {
+          op.ops.foreach(c => {
             c.pointOrArc match {
               case Right(value: Arc) => {
                 if (!pointsEquals(value.sp, lastOpPoint)) {
