@@ -37,7 +37,7 @@ trait ForanFileUtil {
     }*/
 
 
-    if (Math.abs(angle) < 6.0 || (radius < 4.0)) {
+    if (Math.abs(angle) < 2.0 || (radius < 4.0)) {
       //println(radius+" "+angle)
       false
     } else {
