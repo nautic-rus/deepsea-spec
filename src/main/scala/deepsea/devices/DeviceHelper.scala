@@ -377,6 +377,55 @@ trait DeviceHelper{
             }
           })
 
+          var removeOid = 0
+          val devices = ListBuffer.empty[Device]
+          DBManager.GetOracleConnection(foranProject) match {
+            case Some(oracle) =>
+              val s = oracle.createStatement()
+              //val query = s"select * from v_element_desc where syst_userid = '$system'"
+              val query = s"select \n    oid, \n    comp, \n    userid, \n    syst_userid, \n    zone_userid, \n    type, \n    comp_abbrev, \n    weight, \n    stock_code, \n    elem_class,\n    elem_desc1, \n    elem_desc2, \n    stock_code, \n    (select long_descr from COMPONENT_LANG cl where lang = -2 and cl.comp = elemdesc.comp and rownum = 1) as long_desc\nfrom \n    v_element_desc  elemdesc\nwhere \n    syst_userid = '$system'"
+              val rs = s.executeQuery(query)
+              while (rs.next()) {
+                devices += Device(
+                  foranProject,
+                  Option(rs.getInt("OID")).getOrElse(-1),
+                  Option(rs.getInt("COMP")).getOrElse(-1),
+                  Option(rs.getString("USERID")).getOrElse(""),
+                  Option(rs.getString("SYST_USERID")).getOrElse(""),
+                  Option(rs.getString("ZONE_USERID")).getOrElse(""),
+                  Option(rs.getString("TYPE")).getOrElse(""),
+                  Option(rs.getString("COMP_ABBREV")).getOrElse(""),
+                  Option(rs.getDouble("WEIGHT")).getOrElse(-1),
+                  Option(rs.getString("STOCK_CODE")).getOrElse(""),
+                  Option(rs.getInt("ELEM_CLASS")).getOrElse(-1),
+                  Option(rs.getString("ELEM_DESC1")).getOrElse(""),
+                  Option(rs.getString("ELEM_DESC2")).getOrElse(""),
+                  Option(rs.getString("LONG_DESC")).getOrElse(""),
+                  Material(),
+                  Option(rs.getString("USERID")).getOrElse(""),
+                  "")
+              }
+              s.close()
+              oracle.close()
+            case _ => List.empty[Device]
+          }
+          devices.foreach(d => {
+            d.longDesc.split('\n').foreach(l => {
+              if (system + '.' + l == newLabel){
+                removeOid = d.comp
+              }
+            })
+          })
+
+          DBManager.GetOracleConnection(foranProject) match {
+            case Some(oracle) =>
+              val s = oracle.createStatement()
+              val query = s"update component_lang set long_descr = replace(long_descr, '${newLabel.replace(system + ".", "")}', '') where comp = $removeOid and lang = -2"
+              s.execute(query)
+              s.close()
+              oracle.close()
+            case _ =>
+          }
         }
         else{
           DBManager.GetOracleConnection(foranProject) match {

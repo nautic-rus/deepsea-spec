@@ -20,7 +20,7 @@ class TestCreateSP extends AnyFunSuite with BStree {
 
   //val testChess: List[CommonTypes.DrawingChess] =findChess("docNumber","2")
   //val ret: List[PartManager.PrdPart] =ForanPartsByDrawingNum("N002", "200101-222-0105")
-  genHullPartListEnPDF("N002","200101-222-0105", "200101-222-0105","0","c:\\14\\BB.pdf")
+  genHullPartListEnPDF("SC01","300000-222-0105", "300000-222-0105","0","c:\\1\\1.pdf")
   val jj = 0
 
 
