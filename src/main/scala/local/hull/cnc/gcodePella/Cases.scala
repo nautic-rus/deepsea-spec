@@ -78,9 +78,9 @@ object Cases {
 
   val stopMark: String = "M08\nG40"
 
-  val startCutHoles: String = "G42\nM07"
+  val startCutHoles: String = "G41\nM07"
 
-  val startCutOuter: String = "G42\nM07"
+  val startCutOuter: String = "G41\nM07"
 
   val stopCut: String = "M08\nG40"
 

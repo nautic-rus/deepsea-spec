@@ -7,7 +7,7 @@ import scala.io.{BufferedSource, Source}
 class CNCTestGcodesPella extends AnyFunSuite{
   val listIn: List[String] = List(
     /*"U0201_42_0_OLD",*/
-    "U0201_42_0_NEW"
+    "U0700_27_0"
 
 /*    "C-N002-BS02-13",
     "C-N002-BS02-41",*/
@@ -45,13 +45,13 @@ class CNCTestGcodesPella extends AnyFunSuite{
 
 
   listIn.foreach(f=> {
-    val src: BufferedSource = Source.fromFile("c:\\1\\"+f+".txt")
+    val src: BufferedSource = Source.fromFile("c:\\35\\"+f+".txt")
     //val src: BufferedSource = Source.fromFile("c:\\32\\U306_11_0.txt")
     val lines: List[String] = src.getLines.toList
     src.close()
     //val ret: String = doCNC(lines, "c:\\26\\C-N004-ULTT-01"+f+".mpg", "Misha")
     val retStar = doCNCStrings(lines, "Misha")
-    val pw = new PrintWriter(new File("c:\\1\\"+f+".TAP"))
+    val pw = new PrintWriter(new File("c:\\35\\"+f+".TAP"))
     retStar.foreach(line => pw.println(line))
     pw.close()
   })

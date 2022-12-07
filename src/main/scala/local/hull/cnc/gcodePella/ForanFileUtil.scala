@@ -23,20 +23,21 @@ trait ForanFileUtil {
     val vecSEx=a.ep.x -a.sp.x
     val vecSEy=a.ep.y -a.sp.y
     val len: Double =norm(DenseVector[Double](vecSEx, vecSEy))
-    println(len)
+    //println(len)
     val OS: DenseVector[Double] = DenseVector[Double](vesSx, vecSy)
     val OE: DenseVector[Double] = DenseVector[Double](vecEx, vecEy)
     val angle: Double = Math.toDegrees(Math.acos(Math.max(Math.min((OS dot OE) / (norm(OS) * norm(OE)), 1), -1)))
-   if ( Math.abs(angle) > 6.0 && Math.abs(angle) < 10.0) {
-      //println(angle+" "+ radius)
+
+/*    if ( Math.abs(angle) > 6.0 && Math.abs(angle) < 10.0) {
+      println(angle+" "+ radius)
     }
 
     if (Math.abs(radius) > 6.0 && Math.abs(radius) < 10.0) {
-      //println(angle+" "+ radius)
-    }
+      println(angle+" "+ radius)
+    }*/
 
-      //TODO FIX MAXIMUM RADIUS
-    if (Math.abs(angle) < 6.0 || (radius < 4.0 || radius > 150000.0)) {
+
+    if (Math.abs(angle) < 2.0 || (radius < 4.0)) {
       //println(radius+" "+angle)
       false
     } else {
