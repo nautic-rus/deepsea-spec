@@ -380,7 +380,7 @@ trait DeviceHelper{
           DBManager.GetOracleConnection(foranProject) match {
             case Some(oracle) =>
               val s = oracle.createStatement()
-              val query = s"update element_lang set long_descr = replace(long_descr, '${newLabel}', '') where elem in (select oid from v_element_desc where syst_userid = $system) and lang = -1"
+              val query = s"update element_lang set long_descr = replace(long_descr, '${newLabel}', '') where elem in (select oid from v_element_desc where syst_userid = '$system') and lang = -1"
               s.execute(query)
               s.close()
               oracle.close()
