@@ -93,7 +93,7 @@ object PipeManager{
   case class GetZones(project: String)
   case class GetSpoolLocks(docNumber: String)
   case class SetSpoolLock(jsValue: String)
-  case class GetPipeESP(docNumber: String, revision: String, bySpool: String)
+  case class GetPipeESP(docNumber: String, revision: String, bySpool: String, lang: String)
   case class GetSpoolModel(docNumber: String, spool: String, isom: String)
 
 
@@ -121,7 +121,7 @@ class PipeManager extends Actor with Codecs with PipeHelper {
       sender() ! "success".asJson.noSpaces
     case GetSpoolLocks(docNumber) =>
       sender() ! getSpoolLocks(docNumber).asJson.noSpaces
-    case GetPipeESP(docNumber: String, revision: String, bySpool: String) =>
+    case GetPipeESP(docNumber: String, revision: String, bySpool: String, lang: String) =>
       val projectSystem = getSystemAndProjectFromDocNumber(docNumber)
       val pipeSegs = getPipeSegs(projectSystem._1, projectSystem._2)
       val systemDefs = getSystemDefs(projectSystem._1)
@@ -130,7 +130,7 @@ class PipeManager extends Actor with Codecs with PipeHelper {
         case _ => "NO DESCR"
       }
       val rev = if (revision == "NO REV")  "" else revision
-      val file = if (bySpool == "1") genSpoolsListEnPDF(docNumber, systemDescr, rev, pipeSegs) else genSpoolsListEnPDFAll(docNumber, systemDescr, revision, pipeSegs)
+      val file = if (bySpool == "1") genSpoolsListEnPDF(docNumber, systemDescr, rev, pipeSegs, lang) else genSpoolsListEnPDFAll(docNumber, systemDescr, revision, pipeSegs, lang)
       Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
         case url: String => sender() ! url.asJson.noSpaces
         case _ => sender() ! "error".asJson.noSpaces

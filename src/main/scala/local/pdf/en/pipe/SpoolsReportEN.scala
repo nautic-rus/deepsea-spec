@@ -28,9 +28,9 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
   )
 
 
-  def genSpoolsListEnPDF(docNumber: String, docName: String, rev: String, rawData: List[PipeSeg]): String = {
+  def genSpoolsListEnPDF(docNumber: String, docName: String, rev: String, rawData: List[PipeSeg], lang: String): String = {
     val filePath: String = Files.createTempDirectory("spoolPdf").toAbsolutePath.toString + File.separator + docNumber + "ML_rev" + rev + ".pdf"
-    val rows: List[Item11ColumnsEN] = genRows(rawData)
+    val rows: List[Item11ColumnsEN] = genRows(rawData, lang)
     val totalRows: List[Item11ColumnsEN] = genTotal(rows)
     val dn = DocNameEN(num=docNumber, name=docName, lastRev = if (rev != "") rev else "0")
     processPDF(dn, filePath, rows, totalRows)
@@ -38,9 +38,9 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
     filePath
   }
 
-  def genSpoolsListEnPDFAll(docNumber: String, docName: String, rev: String, rawData: List[PipeSeg]): String = {
+  def genSpoolsListEnPDFAll(docNumber: String, docName: String, rev: String, rawData: List[PipeSeg], lang: String): String = {
     val filePath: String = Files.createTempDirectory("spoolPdf").toAbsolutePath.toString + File.separator + docNumber + "ML_rev" + rev + ".pdf"
-    val rows: List[Item11ColumnsEN] = genRows(rawData)
+    val rows: List[Item11ColumnsEN] = genRows(rawData, lang)
     val totalRows: List[Item11ColumnsEN] = genTotal(rows)
     val dn = DocNameEN(num=docNumber, name=docName, lastRev = if (rev != "") rev else "0")
     processPDF(dn, filePath, rows, totalRows, genAll = true)
@@ -479,12 +479,12 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
 
   }
 
-  private def genRows(rawData: List[PipeSeg]): List[Item11ColumnsEN] = {
+  private def genRows(rawData: List[PipeSeg], lang: String): List[Item11ColumnsEN] = {
     val rows: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
     rawData.foreach(row => {
       val id = formatSpoolId(row.spool, row.spPieceId.toString)
       //val mat = row.material.code+ " "+ row.material.name
-      val mat = row.material.name
+      val mat = row.material.name(lang)
       val qty = formatQTY(row)
       val unit = formatUnits(row.material)
       val weight: String = formatWGT(row)

@@ -182,8 +182,8 @@ class HTTPManager extends Actor {
       (post & path("setSpoolLock") & entity(as[String])) { (jsValue) =>
         askFor(ActorManager.pipe, SetSpoolLock(jsValue))
       },
-      (get & path("pipeEspFiles") & parameter("docNumber") & parameter("revision") & parameter("bySpool")) { (docNumber, revision, bySpool) =>
-        askFor(ActorManager.pipe, GetPipeESP(docNumber, revision, bySpool))
+      (get & path("pipeEspFiles") & parameter("docNumber") & parameter("revision") & parameter("bySpool") & parameter("lang")) { (docNumber, revision, bySpool, lang) =>
+        askFor(ActorManager.pipe, GetPipeESP(docNumber, revision, bySpool, lang))
       },
       (get & path("spoolFiles") & parameter("docNumber") & parameter("spool") & parameter("isom")) { (docNumber, spool, isom) =>
         askFor(ActorManager.pipe, GetSpoolModel(docNumber, spool, isom))
