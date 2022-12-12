@@ -156,12 +156,12 @@ trait PipeHelper extends Codecs {
 
     }
   }
-  def getPipeSegsFromMongo(docNumber: String): List[PipeSeg] ={
+  def getPipeSegsFromMongo(project: String, docNumber: String): List[PipeSeg] ={
 
     val configOracle = new HikariConfig()
     configOracle.setDriverClassName("oracle.jdbc.driver.OracleDriver")
     configOracle.setJdbcUrl("jdbc:oracle:thin:@office.nautic-rus.ru:1521:ORA3DB")
-    configOracle.setUsername("C" + "N004")
+    configOracle.setUsername("C" + project)
     configOracle.setPassword("Whatab0utus")
     configOracle.setMaximumPoolSize(5)
     val ds = new HikariDataSource(configOracle)
@@ -169,7 +169,6 @@ trait PipeHelper extends Codecs {
     val projectSystem: (String, String) = getSystemAndProjectFromDocNumber(docNumber, mongoClient.getDatabase("3degdatabase").withCodecRegistry(codecRegistry), ds.getConnection)
     val mongo = mongoClient.getDatabase("cache").withCodecRegistry(codecRegistry)
     val mongoData = mongoClient.getDatabase("3degdatabase").withCodecRegistry(codecRegistry)
-    val project = projectSystem._1
     val system = projectSystem._2
 
 
