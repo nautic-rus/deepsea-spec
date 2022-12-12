@@ -651,6 +651,8 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
       val w ={
         if(row.units.equals("796")){
           row.weight * qtyA
+        }else if(row.units.equals("166")){
+          gr._2.map(_.weight).sum
         }else{
           row.weight
         }
