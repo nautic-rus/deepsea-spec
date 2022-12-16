@@ -17,7 +17,7 @@ class CableListTest extends AnyFunSuite {
 
   //val cablesByRoom: String =cablesByRoomJson("P701","7302")
  //val ret=cablesByComplectJson("P701","170701-884-5007")
-  //val ret2= cablesByComplectMagistralVariantJson("P701","170701-884-5007")
+  val ret2= cablesByComplectMagistralVariantJson("P701","170701-884-5007")
   val hh=0
 
 }

@@ -128,7 +128,6 @@ object PrdPartsReportEN extends UtilsPDF {
     doc.close()
   }
 
-
   private def genTitulA4(docNameEN: DocNameEN, date: String = dateNow): PdfDocument = {
     val os: OutputStream = new ByteArrayOutputStream()
     val pdfWriter = new PdfWriter(os)
@@ -138,7 +137,7 @@ object PrdPartsReportEN extends UtilsPDF {
     }
     val width: Float = doc.getPdfDocument.getDefaultPageSize.getWidth
     val height: Float = doc.getPdfDocument.getDefaultPageSize.getHeight
-    val logo = getNnauticLigoEN.scaleToFit(82, 30).setFixedPosition(mmToPt(23), mmToPt(10))
+    val logo = getNnauticLigoEN.scaleToFit(72, 20).setFixedPosition(mmToPt(9), mmToPt(8))
     doc.add(logo)
     border5mm(pdfDoc.getPage(1))
     val stamp: Table = stampEN()
@@ -149,7 +148,6 @@ object PrdPartsReportEN extends UtilsPDF {
     os.close()
     new PdfDocument(new PdfReader(new ByteArrayInputStream(os.asInstanceOf[ByteArrayOutputStream].toByteArray)))
   }
-
 
   private def generatePartListPages(docNameEN: DocNameEN, items: List[Item11ColumnsEN]): List[PdfDocument] = {
     val pages: ListBuffer[PartListBodyPage] = ListBuffer.empty[PartListBodyPage]
@@ -191,7 +189,7 @@ object PrdPartsReportEN extends UtilsPDF {
     }
     val width: Float = doc.getPdfDocument.getDefaultPageSize.getWidth
     val height: Float = doc.getPdfDocument.getDefaultPageSize.getHeight
-    val logo = getNnauticLigoEN.scaleToFit(82, 30).setFixedPosition(mmToPt(23), mmToPt(10))
+    val logo = getNnauticLigoEN.scaleToFit(72, 20).setFixedPosition(mmToPt(9), mmToPt(8))
     doc.add(logo)
 
     val stamp: Table = stampEN()

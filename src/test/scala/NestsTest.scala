@@ -24,9 +24,9 @@ class NestsTest  extends AnyFunSuite with Codecs with NestHelper{
   //val d4=plateNestByMaterialsAndDims("N004",ggs)
   //val jdj=0
 
-  val ret=genAllPlateNest2Json("N004")
+  //val ret=genAllPlateNest2Json("N004")
 
-  val blocks: List[String] =genBlocks("N004")
+  val blocks: List[String] =genBlocks("N002")
   val ds=0;
 
   //insertLock("N004","MU10305","DEMO")
