@@ -608,7 +608,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
       val mat = row.material.name(lang)
       val matDescr = row.material.description(lang)
 
-      val unit = formatUnitsStr(row.units)
+      val unit = formatUnitsStr(row.units, lang)
 
       val weight: String = formatWGT(row)
 
@@ -637,7 +637,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
     case class MaterialReplacement(unit: String, newQty: Double)
     val rows: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
     val pcs: String = units.find(s => s.code.equals("796")) match {
-      case Some(value) => value.thumb
+      case Some(value) => value.thumb(lang)
       case None => ""
     }
 
@@ -688,7 +688,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
 
       val mat = row.material.name(lang)
       val matDescr = row.material.description(lang)
-      rows += Item11ColumnsEN(A1 = "", A2 = mat, A3 = formatUnitsStr(qtySubs.unit), A4 = qty, A5 = weight, A6 = matDescr, A12 = row.material.code)
+      rows += Item11ColumnsEN(A1 = "", A2 = mat, A3 = formatUnitsStr(qtySubs.unit, lang), A4 = qty, A5 = weight, A6 = matDescr, A12 = row.material.code)
     })
 
 
@@ -702,9 +702,9 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
     }
   }
 
-  private def formatUnitsStr(unit: String): String = {
+  private def formatUnitsStr(unit: String, lang: String): String = {
     units.find(p => p.code.equals(unit)) match {
-      case Some(value) => value.thumb
+      case Some(value) => value.thumb(lang)
       case None => "NA"
     }
   }
