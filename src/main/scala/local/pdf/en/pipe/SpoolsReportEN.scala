@@ -96,7 +96,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
     }
     val width: Float = doc.getPdfDocument.getDefaultPageSize.getWidth
     val height: Float = doc.getPdfDocument.getDefaultPageSize.getHeight
-    val logo = getNnauticLigoEN.scaleToFit(82, 30).setFixedPosition(mmToPt(23), mmToPt(10))
+    val logo = getNnauticLigoEN.scaleToFit(72, 20).setFixedPosition(mmToPt(9), mmToPt(8))
     doc.add(logo)
     border5mm(pdfDoc.getPage(1))
     val stamp: Table = stampEN()
@@ -148,7 +148,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
     }
     val width: Float = doc.getPdfDocument.getDefaultPageSize.getWidth
     val height: Float = doc.getPdfDocument.getDefaultPageSize.getHeight
-    val logo = getNnauticLigoEN.scaleToFit(82, 30).setFixedPosition(mmToPt(23), mmToPt(10))
+    val logo = getNnauticLigoEN.scaleToFit(72, 20).setFixedPosition(mmToPt(9), mmToPt(8))
     doc.add(logo)
 
     val stamp: Table = stampEN()

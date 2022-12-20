@@ -56,7 +56,7 @@ object ReportCommonEN extends UtilsPDF {
     canvas.stroke()
   }
 
-  def stampEN(): Table = {
+  def stampENOld(): Table = {
     val cellBuff = ListBuffer.empty[Cell]
     val pointColumnWidths = Array(mmToPt(65), mmToPt(113), mmToPt(11), mmToPt(11))
     val table = new Table(pointColumnWidths)
@@ -151,7 +151,7 @@ object ReportCommonEN extends UtilsPDF {
     table
   }
 
-  def fillStamp(doc: Document, docNameEN: DocNameEN, date: String = dateNow): Unit = {
+  def fillStampOld(doc: Document, docNameEN: DocNameEN, date: String = dateNow): Unit = {
     doc.add(genTextFixPos("SFI-DRAWING NO.", fontHELVETICA, 3.0f, 72f, 14f, 50f))
     doc.add(genTextFixPos("REV.", fontHELVETICA, 3.0f, 187.5f, 14f, 10f))
     doc.add(genTextFixPos("SHEET", fontHELVETICA, 3.0f, 196.5f, 14f, 10f))
@@ -161,6 +161,133 @@ object ReportCommonEN extends UtilsPDF {
     doc.add(genTextFixPos(docNameEN.num, fontCOURIER_BOLD, 12.0f, 74.5f, 1.5f, 150f))
     doc.add(genTextFixPos(docNameEN.name, fontCOURIER_BOLD, 6f, 74.5f, 17.0f, 150f))
   }
+
+  def stampEN(): Table = {
+    val cellBuff = ListBuffer.empty[Cell]
+    val pointColumnWidths = Array(mmToPt(27), mmToPt(151), mmToPt(11), mmToPt(11))
+    val table = new Table(pointColumnWidths)
+    val tableWidthPt = mmToPt(200)
+    val tableHeightPt = mmToPt(21)
+    table.setWidth(tableWidthPt)
+    table.setHeight(tableHeightPt)
+    table.setHorizontalAlignment(HorizontalAlignment.CENTER)
+    table.setVerticalAlignment(VerticalAlignment.MIDDLE)
+
+    cellBuff += {
+      new Cell(0, 2)
+        .setVerticalAlignment(VerticalAlignment.MIDDLE)
+        .setHorizontalAlignment(HorizontalAlignment.CENTER)
+        .add(new Paragraph("")
+          .setTextAlignment(TextAlignment.CENTER)
+          .setFontSize(defaultFontSize)
+          .setFont(gostFont)
+        )
+        .setPadding(0).setMargin(0)
+        .setHeight(mmToPt(7))
+    }
+    cellBuff += {
+      new Cell(0, 2)
+        .setVerticalAlignment(VerticalAlignment.MIDDLE)
+        .setHorizontalAlignment(HorizontalAlignment.CENTER)
+        .add(new Paragraph("")
+          .setTextAlignment(TextAlignment.CENTER)
+          .setFontSize(defaultFontSize)
+          .setFont(gostFont)
+        )
+        .setPadding(0).setMargin(0)
+        .setHeight(mmToPt(7))
+    }
+    cellBuff += {
+      new Cell(2, 0)
+        .setVerticalAlignment(VerticalAlignment.MIDDLE)
+        .setHorizontalAlignment(HorizontalAlignment.CENTER)
+        .add(new Paragraph("")
+          .setTextAlignment(TextAlignment.CENTER)
+          .setFontSize(defaultFontSize)
+          .setFont(gostFont)
+        )
+        .setPadding(0).setMargin(0)
+        .setHeight(mmToPt(14))
+    }
+    cellBuff += {
+      new Cell(2, 0)
+        .setVerticalAlignment(VerticalAlignment.MIDDLE)
+        .setHorizontalAlignment(HorizontalAlignment.CENTER)
+        .add(new Paragraph("")
+          .setTextAlignment(TextAlignment.CENTER)
+          .setFontSize(defaultFontSize)
+          .setFont(gostFont)
+        )
+        .setPadding(0).setMargin(0)
+        .setHeight(mmToPt(14))
+    }
+    cellBuff += {
+      new Cell(0, 0)
+        .setVerticalAlignment(VerticalAlignment.MIDDLE)
+        .setHorizontalAlignment(HorizontalAlignment.CENTER)
+        .add(new Paragraph("")
+          .setTextAlignment(TextAlignment.CENTER)
+          .setFontSize(defaultFontSize)
+          .setFont(gostFont)
+        )
+        .setPadding(0).setMargin(0)
+        .setHeight(mmToPt(5))
+    }
+    cellBuff += {
+      new Cell(0, 0)
+        .setVerticalAlignment(VerticalAlignment.MIDDLE)
+        .setHorizontalAlignment(HorizontalAlignment.CENTER)
+        .add(new Paragraph("")
+          .setTextAlignment(TextAlignment.CENTER)
+          .setFontSize(defaultFontSize)
+          .setFont(gostFont)
+        )
+        .setPadding(0).setMargin(0)
+        .setHeight(mmToPt(5))
+    }
+    cellBuff += {
+      new Cell(0, 0)
+        .setVerticalAlignment(VerticalAlignment.MIDDLE)
+        .setHorizontalAlignment(HorizontalAlignment.CENTER)
+        .add(new Paragraph("")
+          .setTextAlignment(TextAlignment.CENTER)
+          .setFontSize(defaultFontSize)
+          .setFont(gostFont)
+        )
+        .setPadding(0).setMargin(0)
+        .setHeight(mmToPt(9))
+    }
+    cellBuff += {
+      new Cell(0, 0)
+        .setVerticalAlignment(VerticalAlignment.MIDDLE)
+        .setHorizontalAlignment(HorizontalAlignment.CENTER)
+        .add(new Paragraph("")
+          .setTextAlignment(TextAlignment.CENTER)
+          .setFontSize(defaultFontSize)
+          .setFont(gostFont)
+        )
+        .setPadding(0).setMargin(0)
+        .setHeight(mmToPt(9))
+    }
+
+    cellBuff.foreach(cell => {
+      table.addCell(cell)
+    })
+
+    table.setFixedPosition(1, mmToPt(5), mmToPt(5), table.getWidth.getValue + 4)
+    table
+  }
+  def fillStamp(doc: Document, docNameEN: DocNameEN, date: String = dateNow): Unit = {
+    doc.add(genTextFixPos("SFI-DRAWING NO.", fontHELVETICA, 3.0f, 35f, 14f, 50f))
+    doc.add(genTextFixPos("REV.", fontHELVETICA, 3.0f, 187.5f, 14f, 10f))
+    doc.add(genTextFixPos("SHEET", fontHELVETICA, 3.0f, 196.5f, 14f, 10f))
+    doc.add(genTextFixPos("DATE", fontHELVETICA, 2.5f, 185.5f, 21.0f, 10f))
+    doc.add(genTextFixPos(date, fontHELVETICA, 4.0f, 188.0f, 17.0f, 20f))
+    doc.add(genTextFixPos(docNameEN.lastRev, fontHELVETICA, 5.0f, 188.5f, 7f, 10f))
+    doc.add(genTextFixPos(docNameEN.num, fontCOURIER_BOLD, 12.0f, 32.5f, 0.5f, 150f))
+    doc.add(genTextFixPos(docNameEN.name, fontCOURIER_BOLD, 4f, 6.0f, 18.0f, 150f))
+  }
+
 
   def genTextFixPos(content: String, font: PdfFont, fontSizeMM: Float, lMM: Float, bMM: Float, wMM: Float): Div = {
     val div = new Div().setMargin(0).setPadding(0).setKeepTogether(true)
