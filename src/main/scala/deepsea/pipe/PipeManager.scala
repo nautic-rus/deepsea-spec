@@ -123,7 +123,7 @@ class PipeManager extends Actor with Codecs with PipeHelper {
       sender() ! getSpoolLocks(docNumber).asJson.noSpaces
     case GetPipeESP(docNumber: String, revision: String, bySpool: String, lang: String) =>
       val projectSystem = getSystemAndProjectFromDocNumber(docNumber)
-      val pipeSegs = getPipeSegs(projectSystem._1, projectSystem._2)
+      val pipeSegs = getPipeSegs(projectSystem._1, projectSystem._2).filter(_.spool != "")
       val systemDefs = getSystemDefs(projectSystem._1)
       val systemDescr = systemDefs.find(_.name == projectSystem._2) match {
         case Some(value) => value.descr.replace(docNumber, "").trim
