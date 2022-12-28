@@ -253,9 +253,7 @@ trait AccommodationHelper {
 //        case _ => "NoUserId"
 //      })
     }).tapEach(x => x.units = x.material.units).filter(_.material.code != "").toList
-    accommodations.foreach(a => {
 
-    })
   }
   def getASName(docNumber: String): String ={
     val docNumberSuffix = docNumber.split('-').drop(1).mkString("-")
