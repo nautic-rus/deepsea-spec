@@ -197,7 +197,8 @@ trait AccommodationHelper {
                   Option(rs.getDouble("PAR8")).getOrElse(0),
                 ),
                 bsWeight,
-                zones.filter(x => bBoxIntersects(x.BBox, bBox)).map(_.name).mkString(","),
+                zone,
+//                zones.filter(x => bBoxIntersects(x.BBox, bBox)).map(_.name).mkString(","),
                 profileStock,
                 plateStock,
                 Option(rs.getString("MATERIAL_DESCRIPTION")) match {
