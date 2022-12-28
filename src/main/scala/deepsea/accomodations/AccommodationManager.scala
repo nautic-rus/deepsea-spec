@@ -49,7 +49,7 @@ object AccommodationManager{
           material.copy(name = material.name + ", " + pars.take(5).takeRight(4).map(x => new DecimalFormat("0.#").format(Math.round(x * 1000 * 10) / 10.toDouble)).mkString("x"))
         }
         else if (objType == 0 && profileLength != 0 && profileLength <= 500){
-          material.copy(name = material.name + ", L=" + profileLength, units = "796", singleWeight = weight)
+          material.copy(name = material.name + ", L=" + profileLength)
         }
         else{
           material
