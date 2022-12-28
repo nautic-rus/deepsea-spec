@@ -228,6 +228,7 @@ trait AccommodationHelper {
       case _ => List.empty[Accommodation]
     }
 
+    var posCount = 0
     accommodations.map(_.asDevice).filter(m => m.material.code != "" && !groups.map(_.code).contains(m.material.code)).tapEach(x => {
 //      x.units = "796"
 //      x.count = 1
@@ -241,10 +242,12 @@ trait AccommodationHelper {
 //        case Some(group) => group.userId
 //        case _ => "NoUserId"
 //      })
-      acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.map(_.count).sum, userId = groups.find(x => acc._1.startsWith(x.code)) match {
-        case Some(group) => group.userId
-        case _ => "NoUserId"
-      })
+      posCount += 1
+      acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.map(_.count).sum, userId = posCount.toString)
+//      acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.map(_.count).sum, userId = groups.find(x => acc._1.startsWith(x.code)) match {
+//        case Some(group) => group.userId
+//        case _ => "NoUserId"
+//      })
     }).tapEach(x => x.units = x.material.units).filter(_.material.code != "").toList
   }
   def getASName(docNumber: String): String ={
