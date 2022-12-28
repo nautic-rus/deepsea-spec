@@ -228,32 +228,24 @@ trait AccommodationHelper {
       case _ => List.empty[Accommodation]
     }
 
-    var posCount = 0
     accommodations.map(_.asDevice).filter(m => m.material.code != "" && !groups.map(_.code).contains(m.material.code)).tapEach(x => {
-//      x.units = "796"
-//      x.count = 1
       x.units = x.material.units
       if (x.units == x.material.units && x.units == "796"){
         x.weight = x.material.singleWeight
       }
     }).toList ++
-    accommodations.map(_.asDevice).filter(m => m.material.code != "" && groups.map(_.code).contains(m.material.code)).groupBy(x => x.material.code + x.material.name + x.zone).map(acc => {
-//      acc._2.head.copy(weight = acc._2.map(_.material.singleWeight).head, count = acc._2.map(_.count).sum, userId = groups.find(_.code == acc._1) match {
-//        case Some(group) => group.userId
-//        case _ => "NoUserId"
-//      })
+    accommodations.map(_.asDevice).filter(m => m.material.code != "" && groups.map(x => x.code).contains(m.material.code + m.zone)).groupBy(x => x.material.code + x.material.name + x.zone).map(acc => {
       acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.map(_.count).sum, userId = groups.find(x => acc._1.startsWith(x.code)) match {
-        case Some(group) =>
-          posCount += 1
-          group.userId + "." + posCount.toString
+        case Some(group) => group.userId
         case _ => "NoUserId"
       })
-//      acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.map(_.count).sum, userId = groups.find(x => acc._1.startsWith(x.code)) match {
-//        case Some(group) => group.userId
-//        case _ => "NoUserId"
-//      })
+    })
+    accommodations.map(_.asDevice).filter(m => m.material.code != "" && groups.map(_.code).contains(m.material.code)).groupBy(x => x.material.code + x.material.name + x.zone).map(acc => {
+      acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.map(_.count).sum, userId = groups.find(x => acc._1.startsWith(x.code)) match {
+        case Some(group) => group.userId
+        case _ => "NoUserId"
+      })
     }).tapEach(x => x.units = x.material.units).filter(_.material.code != "").toList
-
   }
   def getASName(docNumber: String): String ={
     val docNumberSuffix = docNumber.split('-').drop(1).mkString("-")
