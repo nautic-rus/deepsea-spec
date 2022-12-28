@@ -242,7 +242,9 @@ trait AccommodationHelper {
 //        case Some(group) => group.userId
 //        case _ => "NoUserId"
 //      })
-      posCount += 1
+      while (accommodations.exists(_.userId == posCount.toString)){
+        posCount += 1
+      }
       acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.map(_.count).sum, userId = posCount.toString)
 //      acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.map(_.count).sum, userId = groups.find(x => acc._1.startsWith(x.code)) match {
 //        case Some(group) => group.userId
