@@ -242,15 +242,20 @@ trait AccommodationHelper {
 //        case Some(group) => group.userId
 //        case _ => "NoUserId"
 //      })
-      while (accommodations.exists(_.userId == posCount.toString)){
-        posCount += 1
-      }
-      acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.map(_.count).sum, userId = posCount.toString)
+      acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.map(_.count).sum, userId = groups.find(x => acc._1.startsWith(x.code)) match {
+        case Some(group) =>
+          posCount += 1
+          group.userId + "." + posCount.toString
+        case _ => "NoUserId"
+      })
 //      acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.map(_.count).sum, userId = groups.find(x => acc._1.startsWith(x.code)) match {
 //        case Some(group) => group.userId
 //        case _ => "NoUserId"
 //      })
     }).tapEach(x => x.units = x.material.units).filter(_.material.code != "").toList
+    accommodations.foreach(a => {
+
+    })
   }
   def getASName(docNumber: String): String ={
     val docNumberSuffix = docNumber.split('-').drop(1).mkString("-")
