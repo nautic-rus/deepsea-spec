@@ -235,7 +235,7 @@ trait AccommodationHelper {
       }
     }).toList ++
     accommodations.map(_.asDevice).filter(m => m.material.code != "" && groups.map(x => x.code).contains(m.material.code + m.zone)).groupBy(x => x.material.code + x.material.name + x.zone).map(acc => {
-      acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.map(_.count).sum, userId = groups.find(x => acc._1.startsWith(x.code)) match {
+      acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.map(_.count).sum, userId = groups.find(x => x.code == acc._2.head.material.code + acc._2.head.zone) match {
         case Some(group) => group.userId
         case _ => "NoUserId"
       })
