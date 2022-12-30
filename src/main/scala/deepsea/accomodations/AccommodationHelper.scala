@@ -240,7 +240,7 @@ trait AccommodationHelper {
         case _ => "NoUserId"
       })
     }).toList ++
-    accommodations.map(_.asDevice).filter(m => m.material.code != "" && groups.map(_.code).contains(m.material.code)).groupBy(x => x.material.code + x.material.name + x.zone).map(acc => {
+    accommodations.map(_.asDevice).filter(m => m.material.code != "" && groups.map(_.code).contains(m.material.code)).groupBy(x => x.material.code + x.material.name).map(acc => {
       acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.map(_.count).sum, userId = groups.find(x => acc._1.startsWith(x.code)) match {
         case Some(group) => group.userId
         case _ => "NoUserId"
