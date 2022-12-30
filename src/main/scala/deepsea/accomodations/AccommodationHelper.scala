@@ -267,7 +267,7 @@ trait AccommodationHelper {
   }
   def addLeftZeros(input: String, length: Int = 5): String ={
     var res = input
-    while (input.length < length){
+    while (res.length < length){
       res = "0" + res
     }
     res
