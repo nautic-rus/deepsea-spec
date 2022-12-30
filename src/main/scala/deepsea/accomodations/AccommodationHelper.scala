@@ -246,10 +246,14 @@ trait AccommodationHelper {
         case _ => "NoUserId"
       })
     })
-
     var prev = ""
     var counter = 0
-    res.foreach(x => {
+    res.sortBy(x => if (x.userId.contains(".")) {
+      addLeftZeros(x.userId.split(".")[0].toString) + addLeftZeros(x.userId.split(".")[1].toString)
+    }
+    else {
+      addLeftZeros(x.userId)
+    }).foreach(x => {
       if (x.userId == prev){
         counter += 1
         x.userId = x.userId + "." + counter
@@ -260,6 +264,13 @@ trait AccommodationHelper {
     })
 
     res.tapEach(x => x.units = x.material.units).filter(_.material.code != "").toList
+  }
+  def addLeftZeros(input: String, length: Int = 5): String ={
+    var res = input
+    while (input.length < length){
+      res = "0" + res
+    }
+    res
   }
   def getASName(docNumber: String): String ={
     val docNumberSuffix = docNumber.split('-').drop(1).mkString("-")
