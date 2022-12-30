@@ -248,6 +248,7 @@ trait AccommodationHelper {
     })
     var prev = ""
     var counter = 0
+    res.foreach(x => if (x.material.name.contains(".")) x.userId = x.userId + ".0")
     res.sortBy(x => if (x.userId.contains(".")) {
       addLeftZeros(x.userId.split(".").head) + addLeftZeros(x.userId.split(".").last)
     }
