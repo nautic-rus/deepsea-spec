@@ -246,24 +246,23 @@ trait AccommodationHelper {
         case _ => "NoUserId"
       })
     })
-    var prev = ""
-    var counter = 0
+
+    val userIds = ListBuffer.empty[String]
     res.sortBy(x =>
-    if (x.material.name.contains("L=")){
-      addLeftZeros(x.userId)
-    }
-    else if (x.userId.contains(".")) {
-      addLeftZeros(x.userId.split("\\.").head) + addLeftZeros(x.userId.split("\\.").last)
-    }
-    else {
-      addLeftZeros(x.userId)
-    }).foreach(x => {
-      val userId = x.userId
-      if (x.userId == prev){
-        counter += 1
-        x.userId = x.userId + "." + counter
+      if (x.material.name.contains("L=")){
+        "B" + addLeftZeros(x.userId)
       }
-      prev = userId
+      else if (x.userId.contains(".")) {
+        "C" + addLeftZeros(x.userId.split("\\.").head) + addLeftZeros(x.userId.split("\\.").last)
+      }
+      else {
+        "A" + addLeftZeros(x.userId)
+      }).foreach(x => {
+      val userId = x.userId
+      if (userIds.contains(x.userId)){
+        x.userId = x.userId + "." + (userIds.count(y => y == x.userId)).toString
+      }
+      userIds += userId
     })
 
     res.tapEach(x => x.units = x.material.units).filter(_.material.code != "").toList
