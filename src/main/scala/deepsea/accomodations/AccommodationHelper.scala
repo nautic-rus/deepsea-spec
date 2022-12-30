@@ -253,7 +253,7 @@ trait AccommodationHelper {
       "A" + x.userId
     }
     else if (x.userId.contains(".")) {
-      addLeftZeros(x.userId.split(".").head) + addLeftZeros(x.userId.split(".").last)
+      "C" + addLeftZeros(x.userId.split(".").head) + addLeftZeros(x.userId.split(".").last)
     }
     else {
       "B" + addLeftZeros(x.userId)
