@@ -250,7 +250,7 @@ trait AccommodationHelper {
     var counter = 0
     res.sortBy(x =>
     if (x.material.name.contains("L=")){
-      "10000000" + x.userId
+      "9999999" + x.userId
     }
     else if (x.userId.contains(".")) {
       addLeftZeros(x.userId.split(".").head) + addLeftZeros(x.userId.split(".").last)
