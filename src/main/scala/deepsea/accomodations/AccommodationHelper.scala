@@ -249,7 +249,7 @@ trait AccommodationHelper {
 
     var prev = ""
     var counter = 0
-    res.sortBy(x => x.userId).foreach(x => {
+    res.foreach(x => {
       if (x.userId == prev){
         counter += 1
         x.userId = x.userId + "." + counter
