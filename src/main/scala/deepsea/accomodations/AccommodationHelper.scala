@@ -250,13 +250,13 @@ trait AccommodationHelper {
     var counter = 0
     res.sortBy(x =>
     if (x.material.name.contains("L=")){
-      "A" + x.userId
+      "B" + x.userId
     }
     else if (x.userId.contains(".")) {
       "C" + addLeftZeros(x.userId.split("\\.").head) + addLeftZeros(x.userId.split("\\.").last)
     }
     else {
-      "B" + addLeftZeros(x.userId)
+      "A" + addLeftZeros(x.userId)
     }).foreach(x => {
       val userId = x.userId
       if (x.userId == prev){
