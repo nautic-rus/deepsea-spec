@@ -249,7 +249,7 @@ trait AccommodationHelper {
     var prev = ""
     var counter = 0
     res.sortBy(x => if (x.userId.contains(".")) {
-      addLeftZeros(x.userId.split(".")[0].toString) + addLeftZeros(x.userId.split(".")[1].toString)
+      addLeftZeros(x.userId.split(".").head) + addLeftZeros(x.userId.split(".").last)
     }
     else {
       addLeftZeros(x.userId)
