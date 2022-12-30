@@ -250,13 +250,13 @@ trait AccommodationHelper {
     var counter = 0
     res.sortBy(x =>
     if (x.material.name.contains("L=")){
-      "9999999" + x.userId
+      "B" + x.userId
     }
     else if (x.userId.contains(".")) {
       addLeftZeros(x.userId.split(".").head) + addLeftZeros(x.userId.split(".").last)
     }
     else {
-      addLeftZeros(x.userId)
+      "A" + addLeftZeros(x.userId)
     }).foreach(x => {
       if (x.userId == prev){
         counter += 1
