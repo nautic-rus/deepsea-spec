@@ -228,7 +228,7 @@ trait AccommodationHelper {
       case _ => List.empty[Accommodation]
     }
 
-    accommodations.map(_.asDevice).filter(m => m.material.code != "" && !groups.map(_.code).contains(m.material.code)).tapEach(x => {
+    val res = accommodations.map(_.asDevice).filter(m => m.material.code != "" && !groups.map(_.code).contains(m.material.code)).tapEach(x => {
       x.units = x.material.units
       if (x.units == x.material.units && x.units == "796"){
         x.weight = x.material.singleWeight
@@ -245,7 +245,21 @@ trait AccommodationHelper {
         case Some(group) => group.userId
         case _ => "NoUserId"
       })
-    }).tapEach(x => x.units = x.material.units).filter(_.material.code != "").toList
+    })
+
+    var prev = ""
+    var counter = 0
+    res.sortBy(x => x.userId).foreach(x => {
+      if (x.userId == prev){
+        counter += 1
+        x.userId = x.userId + "." + counter
+      }
+      else{
+        prev = x.userId
+      }
+    })
+
+    res.tapEach(x => x.units = x.material.units).filter(_.material.code != "").toList
   }
   def getASName(docNumber: String): String ={
     val docNumberSuffix = docNumber.split('-').drop(1).mkString("-")
