@@ -228,7 +228,7 @@ trait AccommodationHelper {
       case _ => List.empty[Accommodation]
     }
 
-    val res = accommodations.map(_.asDevice).filter(m => m.material.code != "" && !groups.map(_.code).contains(m.material.code)).tapEach(x => {
+    val res = accommodations.map(_.asDevice).filter(m => m.material.code != "" && !groups.map(_.code).contains(m.material.code + m.zone) && !groups.map(_.code).contains(m.material.code)).tapEach(x => {
       x.units = x.material.units
       if (x.units == x.material.units && x.units == "796"){
         x.weight = x.material.singleWeight
