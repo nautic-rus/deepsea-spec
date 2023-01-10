@@ -149,6 +149,30 @@ trait PipeHelper extends Codecs {
               }
             })
 
+
+            val sups = ListBuffer.empty[String]
+            DBManager.GetOracleConnection(project) match {
+              case Some(conn) =>
+                val stmt = conn.createStatement()
+                val query = s"SELECT STOCK_CODE FROM AS_SUBAS WHERE AS_OID IN (SELECT OID FROM V_SUPP_LIST WHERE SYSTEM = $system)"
+                val rs = stmt.executeQuery(query)
+                while (rs.next()){
+                  sups += Option(rs.getString("STOCK_CODE")).getOrElse("")
+                }
+                conn.close()
+              case _ => None
+            }
+
+            var spool = 700
+            sups.groupBy(x => x).foreach(gr => {
+              materials.find(_.code == gr._1) match {
+                case Some(material) =>
+                  res += PipeSeg(project, "", system, "", 0, 0, "SUP", "Support", "", "SUP", "", "", 0, 0, 0, "", spool.toString, 0, 0, 0, material.singleWeight, gr._1, "", "", material, system)
+                  spool += 1
+                case _ => None
+              }
+            })
+
             res.toList
 
           case _ => List.empty[PipeSeg]
