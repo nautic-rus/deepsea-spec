@@ -4,7 +4,7 @@ object Cases {
 
   val arcAlgoRadius: Boolean = false
 
-  val commands: List[String] = List[String]("JUMP", "MARK", "CUTH", "CUT", "MKBN")
+  val commands: List[String] = List[String]("JUMP", "MARK", "CUTH", "CUT", "MKBN","CUTX")
   def doubleToStr(in:Double):String={
     val ret= f"$in%.2f"
 
