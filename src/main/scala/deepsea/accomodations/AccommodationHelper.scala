@@ -167,6 +167,7 @@ trait AccommodationHelper {
               val userId: String = Option(rs.getString("USERID")).getOrElse("")
               val profileStock: String = Option(rs.getString("PROFILE_STOCK")).getOrElse("")
               val plateStock: String = Option(rs.getString("PLATE_STOCK")).getOrElse("")
+              val profileLength: Double = Option(rs.getDouble("PROFILE_LENGTH")).getOrElse(0)
               val bBox = BBox(
                 Option(rs.getDouble("X_MIN")).getOrElse(0),
                 Option(rs.getDouble("Y_MIN")).getOrElse(0),
@@ -196,7 +197,8 @@ trait AccommodationHelper {
                   Option(rs.getDouble("PAR8")).getOrElse(0),
                 ),
                 bsWeight,
-                zones.filter(x => bBoxIntersects(x.BBox, bBox)).map(_.name).mkString(","),
+                zone,
+//                zones.filter(x => bBoxIntersects(x.BBox, bBox)).map(_.name).mkString(","),
                 profileStock,
                 plateStock,
                 Option(rs.getString("MATERIAL_DESCRIPTION")) match {
@@ -216,7 +218,8 @@ trait AccommodationHelper {
                       case Some(value) => value
                       case _ => Material()
                     }
-                })
+                },
+                profileLength)
             }
             s.close()
             oracle.close()
@@ -225,24 +228,51 @@ trait AccommodationHelper {
       case _ => List.empty[Accommodation]
     }
 
-    accommodations.map(_.asDevice).filter(m => m.material.code != "" && !groups.map(_.code).contains(m.material.code)).tapEach(x => {
-//      x.units = "796"
-//      x.count = 1
+    val res = accommodations.map(_.asDevice).filter(m => m.material.code != "" && !groups.map(_.code).contains(m.material.code + m.zone) && !groups.map(_.code).contains(m.material.code)).tapEach(x => {
       x.units = x.material.units
       if (x.units == x.material.units && x.units == "796"){
         x.weight = x.material.singleWeight
       }
     }).toList ++
-    accommodations.map(_.asDevice).filter(m => m.material.code != "" && groups.map(_.code).contains(m.material.code)).groupBy(x => x.material.code + x.material.name).map(acc => {
-//      acc._2.head.copy(weight = acc._2.map(_.material.singleWeight).head, count = acc._2.map(_.count).sum, userId = groups.find(_.code == acc._1) match {
-//        case Some(group) => group.userId
-//        case _ => "NoUserId"
-//      })
+    accommodations.map(_.asDevice).filter(m => m.material.code != "" && groups.map(x => x.code).contains(m.material.code + m.zone)).groupBy(x => x.material.code + x.material.name + x.zone).map(acc => {
+      acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.map(_.count).sum, userId = groups.find(x => x.code == acc._2.head.material.code + acc._2.head.zone) match {
+        case Some(group) => group.userId
+        case _ => "NoUserId"
+      })
+    }).toList ++
+    accommodations.map(_.asDevice).filter(m => m.material.code != "" && groups.map(_.code).contains(m.material.code) && !groups.map(_.code).contains(m.material.code + m.zone)).groupBy(x => x.material.code + x.material.name).map(acc => {
       acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.map(_.count).sum, userId = groups.find(x => acc._1.startsWith(x.code)) match {
         case Some(group) => group.userId
         case _ => "NoUserId"
       })
-    }).tapEach(x => x.units = x.material.units).filter(_.material.code != "").toList
+    })
+
+    val userIds = ListBuffer.empty[String]
+    res.sortBy(x =>
+      if (x.material.name.contains("L=")){
+        "B" + addLeftZeros(x.userId)
+      }
+      else if (x.userId.contains(".")) {
+        "C" + addLeftZeros(x.userId.split("\\.").head) + addLeftZeros(x.userId.split("\\.").last)
+      }
+      else {
+        "A" + addLeftZeros(x.userId)
+      }).foreach(x => {
+      val userId = x.userId
+      if (userIds.contains(x.userId)){
+        x.userId = x.userId + "." + (userIds.count(y => y == x.userId)).toString
+      }
+      userIds += userId
+    })
+
+    res.tapEach(x => x.units = x.material.units).filter(_.material.code != "").toList
+  }
+  def addLeftZeros(input: String, length: Int = 5): String ={
+    var res = input
+    while (res.length < length){
+      res = "0" + res
+    }
+    res
   }
   def getASName(docNumber: String): String ={
     val docNumberSuffix = docNumber.split('-').drop(1).mkString("-")
