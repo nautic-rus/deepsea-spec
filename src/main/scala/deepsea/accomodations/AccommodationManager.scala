@@ -48,9 +48,6 @@ object AccommodationManager{
         else if (objType == 6){
           material.copy(name = material.name + ", " + pars.take(3).map(x => new DecimalFormat("0.#").format(Math.round(x * 1000 * 10) / 10.toDouble)).mkString("x"))
         }
-        else if (objType == 92){
-          material.copy(name = material.name + ", " + pars.take(3).map(x => new DecimalFormat("0.#").format(Math.round(x * 1000 * 10) / 10.toDouble)).mkString("x"))
-        }
         else if (List(23, 68, 69).contains(objType) && pars.length > 4){
           material.copy(name = material.name + ", " + pars.take(5).takeRight(4).map(x => new DecimalFormat("0.#").format(Math.round(x * 1000 * 10) / 10.toDouble)).mkString("x"))
         }
