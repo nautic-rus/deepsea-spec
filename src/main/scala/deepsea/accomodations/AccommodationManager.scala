@@ -36,10 +36,7 @@ object AccommodationManager{
         zone,
         "accommodation",
         "",
-        material.units match {
-          case "006" => material.singleWeight
-          case _ => if (weight != 0) weight else bsWeight
-        },
+        if (weight != 0) weight else bsWeight,
         material.code,
         0,
         "",
@@ -63,7 +60,10 @@ object AccommodationManager{
         "",
         "",
         material.units,
-        surface / 2
+        material.units match {
+          case "006" => material.singleWeight
+          case _ => surface / 2
+        }
       )
     }
     private def removeLeftZeros(input: String): String ={
