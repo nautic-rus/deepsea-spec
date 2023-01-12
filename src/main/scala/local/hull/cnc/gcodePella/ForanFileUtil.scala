@@ -151,7 +151,7 @@ trait ForanFileUtil {
       }
 
 
-      case "CUTH" | "CUT" => {
+      case "CUTH" | "CUT" | "CUTX"=> {
         val lb = ListBuffer.empty[CNCcoordsPackage]
         val A = arr(1).toIntOption.getOrElse(0)
         val B = 0

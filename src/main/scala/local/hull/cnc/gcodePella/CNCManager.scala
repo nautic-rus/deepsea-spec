@@ -119,7 +119,7 @@ object CNCManager extends ForanFileUtil {
           })
           if (!buff.last.equals(stopCut)) buff += stopCut
         }
-        case "CUT" => {
+        case "CUT" | "CUTX" => {
           if (!currentTool.equals(cutToolOp)) {
             currentTool = cutToolOp
             buff += (cutToolOp)

@@ -271,7 +271,7 @@ object EssiCNCManagerSubdiv {
 
     val arr = in.split(" ")
     arr.head match {
-      case "CUTH" | "CUT" => {
+      case "CUTH" | "CUT"  | "CUTX" => {
         val lb = ListBuffer.empty[CNCcoordsPackage]
         val A = arr(1).toIntOption.getOrElse(0)
         val B = 0
@@ -470,7 +470,7 @@ object EssiCNCManagerSubdiv {
                   currPos = p
                 }
               }
-              case "CUT" => {
+              case "CUT"|"CUTX" => {
                 if (len > minLineLen / 2.0) {
                   buff += Point(dx, dy).toESSI
                   currPos = p
