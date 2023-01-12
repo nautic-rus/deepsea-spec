@@ -25,7 +25,7 @@ object AccommodationManager{
   case class SetAccommodationLabel(docNumber: String, userId: String, oid: String)
 
   case class AccommodationGroup(userId: String, code: String)
-  case class Accommodation(project: String, modelOid: Int, asOid: Int, weight: Double, surface: Double, userId: String, materialCode: String, materialDescription: String, objType: Int, pars: List[Double], bsWeight: Double, zone: String, profileStock: String, plateStock: String, var material: Material = Material(), profileLength: Double){
+  case class Accommodation(project: String, modelOid: Int, asOid: Int, weight: Double, surface: Double, userId: String, materialCode: String, materialDescription: String, objType: Int, pars: List[Double], bsWeight: Double, zone: String, profileStock: String, plateStock: String, var material: Material = Material(), profileLength: Double, profileSection: Int){
     def asDevice: Device ={
       Device(
         project,
@@ -36,7 +36,10 @@ object AccommodationManager{
         zone,
         "accommodation",
         "",
-        if (weight != 0) weight else bsWeight,
+        material.units match {
+          case "006" => material.singleWeight
+          case _ => if (weight != 0) weight else bsWeight
+        },
         material.code,
         0,
         "",
@@ -51,7 +54,7 @@ object AccommodationManager{
         else if (List(23, 68, 69).contains(objType) && pars.length > 4){
           material.copy(name = material.name + ", " + pars.take(5).takeRight(4).map(x => new DecimalFormat("0.#").format(Math.round(x * 1000 * 10) / 10.toDouble)).mkString("x"))
         }
-        else if (objType == 0 && profileLength != 0 && profileLength <= 500){
+        else if (objType == 0 && profileLength != 0 && profileLength <= 500 && profileSection != 0){
           material.copy(name = material.name + ", L=" + Math.round(profileLength))
         }
         else{

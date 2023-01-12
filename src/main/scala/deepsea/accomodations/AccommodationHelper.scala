@@ -168,6 +168,7 @@ trait AccommodationHelper {
               val profileStock: String = Option(rs.getString("PROFILE_STOCK")).getOrElse("")
               val plateStock: String = Option(rs.getString("PLATE_STOCK")).getOrElse("")
               val profileLength: Double = Option(rs.getDouble("PROFILE_LENGTH")).getOrElse(0)
+              val profileSection: Double = Option(rs.getInt("PROFILE_SECTION")).getOrElse(0)
               val bBox = BBox(
                 Option(rs.getDouble("X_MIN")).getOrElse(0),
                 Option(rs.getDouble("Y_MIN")).getOrElse(0),
