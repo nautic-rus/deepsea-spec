@@ -235,6 +235,9 @@ trait AccommodationHelper {
       if (x.units == x.material.units && x.units == "796"){
         x.weight = x.material.singleWeight
       }
+      else if (x.units == x.material.units && x.units == "055"){
+        x.weight = x.material.singleWeight
+      }
     }).toList ++
     accommodations.map(_.asDevice).filter(m => m.material.code != "" && groups.map(x => x.code).contains(m.material.code + m.zone)).groupBy(x => x.material.code + x.material.name + x.zone).map(acc => {
       acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.head.units match {
