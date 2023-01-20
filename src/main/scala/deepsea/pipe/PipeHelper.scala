@@ -154,7 +154,7 @@ trait PipeHelper extends Codecs {
             DBManager.GetOracleConnection(project) match {
               case Some(conn) =>
                 val stmt = conn.createStatement()
-                val query = s"SELECT STOCK_CODE FROM AS_SUBAS WHERE AS_OID IN (SELECT OID FROM V_SUPP_LIST WHERE SYSTEM = $system)"
+                val query = s"SELECT STOCK_CODE FROM AS_SUBAS WHERE AS_OID IN (SELECT OID FROM V_SUPP_LIST WHERE SYSTEM = '$system')"
                 val rs = stmt.executeQuery(query)
                 while (rs.next()){
                   sups += Option(rs.getString("STOCK_CODE")).getOrElse("")
