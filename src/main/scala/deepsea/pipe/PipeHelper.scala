@@ -258,6 +258,38 @@ trait PipeHelper extends Codecs {
         }
       case _ =>
     }
+
+    res.groupBy(_.spool).foreach(group => {
+      if (group._2.exists(_.fcon3 == "FWT0")){
+        group._2.filter(_.compType == "BOLT").foreach(x => x.length = x.length / 2d)
+        group._2.filter(_.compType == "NUT").foreach(x => x.length = x.length / 2d)
+      }
+    })
+
+
+    val sups = ListBuffer.empty[String]
+    DBManager.GetOracleConnection(project) match {
+      case Some(conn) =>
+        val stmt = conn.createStatement()
+        val query = s"SELECT STOCK_CODE FROM AS_SUBAS WHERE AS_OID IN (SELECT OID FROM V_SUPP_LIST WHERE SYSTEM = '$system')"
+        val rs = stmt.executeQuery(query)
+        while (rs.next()){
+          sups += Option(rs.getString("STOCK_CODE")).getOrElse("")
+        }
+        conn.close()
+      case _ => None
+    }
+
+    var spool = 700
+    sups.groupBy(x => x).foreach(gr => {
+      materials.find(_.code == gr._1) match {
+        case Some(material) =>
+          res += PipeSeg(project, "", system, "", 0, 0, "SUP", "Support", "", "SUP", "", "", 0, 0, 0, "", spool.toString, 0, 0, 0, material.singleWeight, gr._1, "", "", material, system)
+          spool += 1
+        case _ => None
+      }
+    })
+
     res.toList
   }
 
@@ -395,7 +427,7 @@ trait PipeHelper extends Codecs {
       case values: Seq[ProjectName] => values.toList
       case _ => List.empty[ProjectName]
     }
-    """\d{6}(?=-\d{3}\w{0,1}-\d{4})""".r.findFirstIn(docNumber) match {
+    """\d{6}(?=-\d{3}\w{0,1}-\d{3,4})""".r.findFirstIn(docNumber) match {
       case Some(rkdProject) =>
         projectNames.find(_.rkd == rkdProject) match {
           case Some(project) =>
