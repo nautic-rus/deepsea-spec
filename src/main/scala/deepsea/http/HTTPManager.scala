@@ -91,6 +91,9 @@ class HTTPManager extends Actor {
       (get & path("elecHoleLabel") & parameter("project") & parameter("seqId")) { (project, seqId) =>
         askFor(ActorManager.elec, GetHoleLabel(project, seqId))
       },
+      (get & path("elecInfo") & parameter("project")) { (project) =>
+        askFor(ActorManager.elec, GetElecInfo(project))
+      },
       //ELEC TOOLS
       (get & path("trayBundles") & parameter("project")) { (project) =>
         askFor(ActorManager.elec, GetTrayBundles(project))

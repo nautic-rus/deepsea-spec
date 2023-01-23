@@ -2,6 +2,7 @@ package local.common
 
 import deepsea.accomodations.AccommodationManager.{Accommodation, BBox}
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
+import deepsea.elec.ElecManager.ElecCable
 import deepsea.hull.HullManager._
 import deepsea.pipe.PipeManager.{Material, MaterialTranslation, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SpoolLock, SystemDef, UnitTranslation, Units}
 import io.circe.{Decoder, Encoder}
@@ -174,6 +175,9 @@ trait Codecs {
   implicit val EqFoundationDecoder: Decoder[EqFoundation] = deriveDecoder[EqFoundation]
   implicit val EqFoundationEncoder: Encoder[EqFoundation] = deriveEncoder[EqFoundation]
 
+  implicit val ElecCableDecoder: Decoder[ElecCable] = deriveDecoder[ElecCable]
+  implicit val ElecCableEncoder: Encoder[ElecCable] = deriveEncoder[ElecCable]
+
   val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
     //BOGDAN
 
@@ -196,6 +200,7 @@ trait Codecs {
     classOf[Units],
     classOf[UnitTranslation],
     classOf[BBox],
+    classOf[ElecCable],
 
     //KOKOVIN
     classOf[EleComplect],
