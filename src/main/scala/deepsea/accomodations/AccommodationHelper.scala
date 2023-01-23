@@ -277,7 +277,12 @@ trait AccommodationHelper {
       }
       userIds += userId
     })
-
+    res.filter(_.userId.contains(".")).filter(_.zone == "").foreach(x => {
+      res.find(y => y.userId == x.userId.split(".").head) match {
+        case Some(orig) => x.zone = orig.zone
+        case _ => None
+      }
+    })
     res.tapEach(x => x.units = x.material.units).filter(_.material.code != "").toList
   }
   def addLeftZeros(input: String, length: Int = 5): String ={

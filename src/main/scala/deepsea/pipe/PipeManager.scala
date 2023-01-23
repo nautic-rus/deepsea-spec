@@ -77,7 +77,7 @@ object PipeManager{
       }
     }
   }
-  case class MaterialTranslation(lang: String, name: String, description: String)
+  case class MaterialTranslation(lang: String, var name: String, description: String)
   case class UnitTranslation(lang: String, name: String, thumb: String)
   case class ProjectName(id: String, rkd: String, pdsp: String, foran: String, cloud: String, cloudRkd: String)
   case class SystemDef(project: String, name: String, descr: String)
