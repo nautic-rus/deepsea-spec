@@ -1,18 +1,20 @@
 package deepsea.elec
 
 import deepsea.database.DBManager
-import deepsea.database.DBManager.RsIterator
 import deepsea.elec.ElecManager.ElecCable
+
+import scala.collection.mutable.ListBuffer
 
 trait ElecHelper {
   def getCablesInfo(project: String): List[ElecCable] ={
-    val res = DBManager.GetOracleConnection(project) match {
+    val cables = ListBuffer.empty[ElecCable]
+    DBManager.GetOracleConnection(project) match {
       case Some(oracleConnection) =>
         val stmt = oracleConnection.createStatement()
         val query = "SELECT * FROM V_CABLE"
-        val r = RsIterator(stmt.executeQuery(query))
-        val cables = r.map(rs => {
-          ElecCable(
+        val rs = stmt.executeQuery(query)
+        while (rs.next()){
+          cables += ElecCable(
             Option(rs.getString("CABLE_ID")).getOrElse(""),
             Option(rs.getString("FROM_E_ID")).getOrElse(""),
             Option(rs.getString("FROM_E_DESCR")).getOrElse(""),
@@ -26,16 +28,18 @@ trait ElecHelper {
             Option(rs.getString("SYSTEM_DESCR")).getOrElse(""),
             Option(rs.getString("USER_MOD")).getOrElse(""),
             Option(rs.getString("FROM_E_ZONE_NAME")).getOrElse(""),
+            Option(rs.getString("FROM_E_ZONE_DESCR")).getOrElse(""),
             Option(rs.getString("TO_E_ZONE_NAME")).getOrElse(""),
+            Option(rs.getString("TO_E_ZONE_DESCR")).getOrElse(""),
           )
-        })
+        }
         stmt.close()
-        r.rs.close()
+        rs.close()
         oracleConnection.close()
         cables.toList
-      case _ => List.empty[ElecCable]
+      case _ =>
     }
-    res
+    cables.toList
   }
 
 }
