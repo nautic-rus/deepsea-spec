@@ -44,7 +44,7 @@ object ElecManager{
   case class FixTrayBundle(project: String, docNumber: String)
   case class GetElecParts(project: String, bundle: String)
   case class GetElecCables(project: String, bundle: String, magistral: String)
-  case class ElecCable(cableId: String, fromEq: String, fromEqDescr: String, toEq: String, toEqDescr: String, seg: String, sect: String, spec: String, cabType: String, system: String, systemDescr: String, user: String, fromZone: String, fromZoneDescr: String, toZone: String, toZoneDescr: String)
+  case class ElecCable(cableId: String, fromEq: String, fromEqDescr: String, toEq: String, toEqDescr: String, seg: String, sect: String, spec: String, cabType: String, system: String, systemDescr: String, user: String, fromZone: String, fromZoneDescr: String, toZone: String, toZoneDescr: String, fRout: String)
   case class GetElecInfo(project: String)
 }
 class ElecManager extends Actor with ElecHelper {

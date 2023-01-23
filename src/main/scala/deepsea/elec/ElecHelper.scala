@@ -31,6 +31,7 @@ trait ElecHelper {
             Option(rs.getString("FROM_E_ZONE_DESCR")).getOrElse(""),
             Option(rs.getString("TO_E_ZONE_NAME")).getOrElse(""),
             Option(rs.getString("TO_E_ZONE_DESCR")).getOrElse(""),
+            Option(rs.getString("F_ROUT")).getOrElse(""),
           )
         }
         stmt.close()
