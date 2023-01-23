@@ -219,12 +219,6 @@ trait DeviceHelper{
       case _ => List.empty[Device]
     }
     devices ++= devicesAuxFromComp.toList
-    devices.filter(_.userId.contains(".")).filter(x => x.zone == "" || x.zone == "-" || x.zone == "*").foreach(x => {
-      devices.find(y => y.userId == x.userId.split("\\.").head) match {
-        case Some(orig) => x.zone = orig.zone
-        case _ => None
-      }
-    })
     devices.filter(_.material.code != "").toList
   }
   def addDeviceToSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String = ""): Unit ={
