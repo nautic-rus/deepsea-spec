@@ -53,7 +53,7 @@ object AccommodationManager{
         }
         else if (objType == 0 && profileLength != 0 && profileLength <= 400 && profileSection != 0){
           val length = ", L=" + Math.round(profileLength)
-          material.copy(name = material.name + length, translations = material.translations.tapEach(x => x.name = x + length))
+          material.copy(name = material.name + length, translations = material.translations.tapEach(x => x.name = x.name + length))
         }
         else{
           material
