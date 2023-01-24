@@ -25,7 +25,7 @@ class AccommodationsTest extends AnyFunSuite with DeviceHelper with Accommodatio
 
   val materials: List[Material] = getMaterials
 
-  val docNumber = "200101-511-304"
+  val docNumber = "200101-534-001"
   val revision = "0"
   val docName: String = getASName(docNumber)
 
