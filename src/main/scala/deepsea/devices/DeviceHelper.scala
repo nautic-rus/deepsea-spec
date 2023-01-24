@@ -254,7 +254,7 @@ trait DeviceHelper{
                     rs.getInt("system"),
                     rs.getInt("lang"),
                     rs.getString("descr"),
-                    rs.getString("long_descr")
+                    Option(rs.getString("long_descr")).getOrElse("")
                   )
               }
               s.close()
@@ -360,7 +360,7 @@ trait DeviceHelper{
                     rs.getInt("system"),
                     rs.getInt("lang"),
                     rs.getString("descr"),
-                    rs.getString("long_descr")
+                    Option(rs.getString("long_descr")).getOrElse("")
                   )
               }
               s.close()
