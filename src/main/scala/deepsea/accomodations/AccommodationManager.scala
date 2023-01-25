@@ -42,7 +42,11 @@ object AccommodationManager{
         "",
         "",
         "",
-        if (objType == 67){
+        if (material.code == "REQPRTGRDNON0001"){
+          val length = ", L=" + Math.round(profileLength)
+          material.copy(name = material.name + length, translations = material.translations.map(t => t.copy(name = t.name + length)))
+        }
+        else if (objType == 67){
           material.copy(name = material.name + ", " + pars.take(4).takeRight(3).map(x => new DecimalFormat("0.#").format(Math.round(x * 1000 * 10) / 10.toDouble)).mkString("x"))
         }
         else if (objType == 6){
@@ -51,7 +55,7 @@ object AccommodationManager{
         else if (List(23, 68, 69).contains(objType) && pars.length > 4){
           material.copy(name = material.name + ", " + pars.take(5).takeRight(4).map(x => new DecimalFormat("0.#").format(Math.round(x * 1000 * 10) / 10.toDouble)).mkString("x"))
         }
-        else if (objType == 0 && profileLength != 0 && profileLength <= 400 && profileSection != 0 || material.code == "REQPRTGRDNON0001"){
+        else if (objType == 0 && profileLength != 0 && profileLength <= 400 && profileSection != 0){
           val length = ", L=" + Math.round(profileLength)
           material.copy(name = material.name + length, translations = material.translations.map(t => t.copy(name = t.name + length)))
         }
