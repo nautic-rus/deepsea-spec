@@ -235,7 +235,7 @@ trait AccommodationHelper {
       if (x.units == x.material.units && x.units == "796"){
         x.weight = x.material.singleWeight
       }
-      else if (x.units == x.material.units && x.units == "055"){
+      else if (x.material.units == "055"){
         x.weight = x.material.singleWeight
       }
     }).toList ++
