@@ -95,7 +95,7 @@ object PipeManager{
   case class SetSpoolLock(jsValue: String)
   case class GetPipeESP(docNumber: String, revision: String, bySpool: String, lang: String)
   case class GetSpoolModel(docNumber: String, spool: String, isom: String)
-
+  case class PipeSup(code: String, userId: String)
 
 }
 class PipeManager extends Actor with Codecs with PipeHelper {

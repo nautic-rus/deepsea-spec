@@ -1,7 +1,7 @@
 package deepsea.pipe
 
 import deepsea.database.DatabaseManager._
-import deepsea.pipe.PipeManager.{GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SetSpoolLock, SpoolLock, SystemDef, Units, UpdatePipeComp, UpdatePipeJoints}
+import deepsea.pipe.PipeManager.{GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, PipeSup, ProjectName, SetSpoolLock, SpoolLock, SystemDef, Units, UpdatePipeComp, UpdatePipeJoints}
 import org.mongodb.scala.{Document, MongoClient, MongoCollection, MongoDatabase, bson}
 import org.mongodb.scala.model.Filters.{and, equal, notEqual}
 import akka.http.scaladsl.{Http, HttpExt}
@@ -150,14 +150,17 @@ trait PipeHelper extends Codecs {
             })
 
 
-            val sups = ListBuffer.empty[String]
+            val sups = ListBuffer.empty[PipeSup]
             DBManager.GetOracleConnection(project) match {
               case Some(conn) =>
                 val stmt = conn.createStatement()
-                val query = s"SELECT STOCK_CODE FROM AS_SUBAS WHERE AS_OID IN (SELECT OID FROM V_SUPP_LIST WHERE SYSTEM = '$system')"
+                val query = s"SELECT STOCK_CODE, USERID FROM AS_SUBAS WHERE AS_OID IN (SELECT OID FROM V_SUPP_LIST WHERE SYSTEM = '$system')"
                 val rs = stmt.executeQuery(query)
                 while (rs.next()){
-                  sups += Option(rs.getString("STOCK_CODE")).getOrElse("")
+                  sups += PipeSup(
+                    Option(rs.getString("STOCK_CODE")).getOrElse(""),
+                    Option(rs.getString("USERID")).getOrElse("")
+                  )
                 }
                 conn.close()
               case _ => None
@@ -165,9 +168,9 @@ trait PipeHelper extends Codecs {
 
             var spool = 700
             sups.groupBy(x => x).foreach(gr => {
-              materials.find(_.code == gr._1) match {
+              materials.find(_.code == gr._1.code) match {
                 case Some(material) =>
-                  res += PipeSeg(project, "", system, "", 0, 0, "SUP", "Support", "", "SUP", "", "", 0, 0, 0, "", spool.toString, gr._2.length, 0, 0, material.singleWeight, gr._1, "", "", material, system)
+                  res += PipeSeg(project, "", system, "", 0, 0, "SUP", "Support", "", "SUP", gr._2.map(_.userId).mkString(","), "", 0, 0, 0, "", spool.toString, gr._2.length, 0, 0, material.singleWeight, gr._1.code, "", "", material, system)
                   spool += 1
                 case _ => None
               }
