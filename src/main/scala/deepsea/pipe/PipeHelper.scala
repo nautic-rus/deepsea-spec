@@ -170,7 +170,7 @@ trait PipeHelper extends Codecs {
             sups.groupBy(x => x).foreach(gr => {
               materials.find(_.code == gr._1.code) match {
                 case Some(material) =>
-                  res += PipeSeg(project, "", system, "", 0, 0, "SUP", "Support", "", "SUP", gr._2.map(_.userId).mkString(","), "", 0, 0, 0, "", spool.toString, gr._2.length, 0, 0, material.singleWeight, gr._1.code, "", "", material, system)
+                  res += PipeSeg(project, "", system, "", 0, 0, "SUP", "Support", "", "SUP", gr._2.map(_.userId).mkString(","), "", 0, 0, 0, "", "S" + spool.toString, gr._2.length, 0, 0, material.singleWeight, gr._1.code, "", "", material, system)
                   spool += 1
                 case _ => None
               }
