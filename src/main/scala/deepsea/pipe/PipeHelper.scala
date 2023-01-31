@@ -177,9 +177,9 @@ trait PipeHelper extends Codecs {
             })
 
             var counter = 0
-            res.filter(_.typeCode == "SUP").map(s => {
+            res.filter(_.typeCode == "SUP").foreach(s => {
               counter += 1
-              s.copy(spPieceId = counter)
+              s.spPieceId = counter
             })
 
             res.toList

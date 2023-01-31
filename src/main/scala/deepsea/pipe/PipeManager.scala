@@ -29,7 +29,7 @@ import scala.concurrent.duration.{Duration, DurationInt, SECONDS}
 
 object PipeManager{
 
-  case class PipeSeg(project: String, zone: String, system: String, line: String, pls: Int, elem: Int, typeCode: String, typeDesc: String, classAlpha: String, compType: String, compUserId: String, smat: String, sqInSystem: Int, isPieceId: Int, spPieceId: Int, isom: String, spool: String, var length: Double, radius: Double, angle: Double, weight: Double, stock: String, fcon3: String, insul: String, var material: Material = Material(), var systemDescr: String = "")
+  case class PipeSeg(project: String, zone: String, system: String, line: String, pls: Int, elem: Int, typeCode: String, typeDesc: String, classAlpha: String, compType: String, compUserId: String, smat: String, sqInSystem: Int, isPieceId: Int, var spPieceId: Int, isom: String, spool: String, var length: Double, radius: Double, angle: Double, weight: Double, stock: String, fcon3: String, insul: String, var material: Material = Material(), var systemDescr: String = "")
   case class PipeSegBilling(zone: String, system: String, typeCode: String, typeDesc: String, classAlpha: String, compType: String, compUserId: String, smat: String, length: Double, weight: Double, stock: String, insul: String, material: Material = Material(), systemDescr: String = "", count: Int = 1)
   case class PipeSegActual(name: String, date: Long)
   case class Material(
