@@ -27,7 +27,10 @@ import scala.concurrent.Await
 import local.pdf.ru.ele.EleEqTrayESKDReport
 import local.pdf.ru.ele.EleEqTrayESKDReport.{generatePdfToFileNoRev, generatePdfToFileWithRev}
 import local.ele.cl.CableListManager.{cablesByComplectJson, cablesByComplectMagistralVariantJson}
-
+import io.circe._
+import io.circe.generic.auto._
+import io.circe.parser._
+import io.circe.syntax._
 
 object ElecManager{
   case class GetTrayLabels(project: String, seqId: String)
@@ -41,9 +44,10 @@ object ElecManager{
   case class FixTrayBundle(project: String, docNumber: String)
   case class GetElecParts(project: String, bundle: String)
   case class GetElecCables(project: String, bundle: String, magistral: String)
-
+  case class ElecCable(cableId: String, fromEq: String, fromEqDescr: String, toEq: String, toEqDescr: String, seg: String, sect: String, spec: String, cabType: String, system: String, systemDescr: String, user: String, fromZone: String, fromZoneDescr: String, toZone: String, toZoneDescr: String, fRout: String)
+  case class GetElecInfo(project: String)
 }
-class ElecManager extends Actor{
+class ElecManager extends Actor with ElecHelper {
   implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
 
   override def receive: Receive = {
@@ -83,6 +87,8 @@ class ElecManager extends Actor{
         case 0 => cablesByComplectJson(project, bundle)
         case 1 => cablesByComplectMagistralVariantJson(project, bundle)
       })
+    case GetElecInfo(project) =>
+      sender() ! getCablesInfo(project).asJson.noSpaces
 
     case _ => None
   }

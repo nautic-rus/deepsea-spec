@@ -28,12 +28,12 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
   )
 
 
-  def genSpoolsListEnPDF(docNumber: String, docName: String, rev: String, rawData: List[PipeSeg], lang: String): String = {
+  def genSpoolsListEnPDF(docNumber: String, docName: String, rev: String, rawData: List[PipeSeg], lang: String, genAll: Boolean = false): String = {
     val filePath: String = Files.createTempDirectory("spoolPdf").toAbsolutePath.toString + File.separator + docNumber + "ML_rev" + rev + ".pdf"
     val rows: List[Item11ColumnsEN] = genRows(rawData, lang)
     val totalRows: List[Item11ColumnsEN] = genTotal(rows)
     val dn = DocNameEN(num=docNumber, name=docName, lastRev = if (rev != "") rev else "0")
-    processPDF(dn, filePath, rows, totalRows)
+    processPDF(dn, filePath, rows, totalRows, genAll)
 
     filePath
   }

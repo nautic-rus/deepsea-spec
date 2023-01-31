@@ -77,7 +77,7 @@ object PipeManager{
       }
     }
   }
-  case class MaterialTranslation(lang: String, name: String, description: String)
+  case class MaterialTranslation(lang: String, var name: String, description: String)
   case class UnitTranslation(lang: String, name: String, thumb: String)
   case class ProjectName(id: String, rkd: String, pdsp: String, foran: String, cloud: String, cloudRkd: String)
   case class SystemDef(project: String, name: String, descr: String)
@@ -95,7 +95,7 @@ object PipeManager{
   case class SetSpoolLock(jsValue: String)
   case class GetPipeESP(docNumber: String, revision: String, bySpool: String, lang: String)
   case class GetSpoolModel(docNumber: String, spool: String, isom: String)
-
+  case class PipeSup(code: String, userId: String)
 
 }
 class PipeManager extends Actor with Codecs with PipeHelper {
@@ -130,7 +130,7 @@ class PipeManager extends Actor with Codecs with PipeHelper {
         case _ => "NO DESCR"
       }
       val rev = if (revision == "NO REV")  "" else revision
-      val file = if (bySpool == "1") genSpoolsListEnPDF(docNumber, systemDescr, rev, pipeSegs, lang) else genSpoolsListEnPDFAll(docNumber, systemDescr, revision, pipeSegs, lang)
+      val file = if (bySpool == "1") genSpoolsListEnPDF(docNumber, systemDescr, rev, pipeSegs, lang, projectSystem._1 == "N002") else genSpoolsListEnPDFAll(docNumber, systemDescr, revision, pipeSegs, lang)
       Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
         case url: String => sender() ! url.asJson.noSpaces
         case _ => sender() ! "error".asJson.noSpaces

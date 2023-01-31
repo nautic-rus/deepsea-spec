@@ -168,6 +168,7 @@ trait AccommodationHelper {
               val profileStock: String = Option(rs.getString("PROFILE_STOCK")).getOrElse("")
               val plateStock: String = Option(rs.getString("PLATE_STOCK")).getOrElse("")
               val profileLength: Double = Option(rs.getDouble("PROFILE_LENGTH")).getOrElse(0)
+              val profileSection: Int = Option(rs.getInt("PROFILE_SECTION")).getOrElse(0)
               val bBox = BBox(
                 Option(rs.getDouble("X_MIN")).getOrElse(0),
                 Option(rs.getDouble("Y_MIN")).getOrElse(0),
@@ -219,7 +220,8 @@ trait AccommodationHelper {
                       case _ => Material()
                     }
                 },
-                profileLength)
+                profileLength,
+                profileSection)
             }
             s.close()
             oracle.close()
@@ -233,15 +235,26 @@ trait AccommodationHelper {
       if (x.units == x.material.units && x.units == "796"){
         x.weight = x.material.singleWeight
       }
+      else if (x.material.units == "055"){
+
+      }
     }).toList ++
     accommodations.map(_.asDevice).filter(m => m.material.code != "" && groups.map(x => x.code).contains(m.material.code + m.zone)).groupBy(x => x.material.code + x.material.name + x.zone).map(acc => {
-      acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.map(_.count).sum, userId = groups.find(x => x.code == acc._2.head.material.code + acc._2.head.zone) match {
+      acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.head.units match {
+        case "006" => acc._2.head.count
+        case "055" => acc._2.head.material.singleWeight
+        case _ => acc._2.map(_.count).sum
+      }, userId = groups.find(x => x.code == acc._2.head.material.code + acc._2.head.zone) match {
         case Some(group) => group.userId
         case _ => "NoUserId"
       })
     }).toList ++
     accommodations.map(_.asDevice).filter(m => m.material.code != "" && groups.map(_.code).contains(m.material.code) && !groups.map(_.code).contains(m.material.code + m.zone)).groupBy(x => x.material.code + x.material.name).map(acc => {
-      acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.map(_.count).sum, userId = groups.find(x => acc._1.startsWith(x.code)) match {
+      acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.head.units match {
+        case "006" => acc._2.head.count
+        case "055" => acc._2.head.material.singleWeight
+        case _ => acc._2.map(_.count).sum
+      }, userId = groups.find(x => acc._1.startsWith(x.code)) match {
         case Some(group) => group.userId
         case _ => "NoUserId"
       })
@@ -264,7 +277,6 @@ trait AccommodationHelper {
       }
       userIds += userId
     })
-
     res.tapEach(x => x.units = x.material.units).filter(_.material.code != "").toList
   }
   def addLeftZeros(input: String, length: Int = 5): String ={
