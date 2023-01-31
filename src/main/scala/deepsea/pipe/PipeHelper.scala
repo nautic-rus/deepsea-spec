@@ -176,6 +176,12 @@ trait PipeHelper extends Codecs {
               }
             })
 
+            var counter = 0
+            res.filter(_.typeCode == "SUP").map(s => {
+              counter += 1
+              s.copy(spPieceId = counter)
+            })
+
             res.toList
 
           case _ => List.empty[PipeSeg]
