@@ -43,11 +43,42 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
     val rows: List[Item11ColumnsEN] = genRows(rawData, lang)
     val totalRows: List[Item11ColumnsEN] = genTotal(rows)
     val dn = DocNameEN(num=docNumber, name=docName, lastRev = if (rev != "") rev else "0")
-    processPDF(dn, filePath, rows, totalRows, genAll = true)
+    processPDF(dn, filePath, rows, totalRows, genAll = true,lang)
     filePath
   }
 
-  private def processPDF(docNameEN: DocNameEN, path: String, items: List[Item11ColumnsEN], totalItems: List[Item11ColumnsEN], genAll: Boolean = false): Unit = {
+  private def processPDF(docNameEN: DocNameEN, path: String, itemsIN: List[Item11ColumnsEN], totalItemsIN: List[Item11ColumnsEN], genAll: Boolean = false,lang:String="ru"): Unit = {
+    val items: List[Item11ColumnsEN]={
+      val buff=ListBuffer.empty[Item11ColumnsEN]
+      if(lang.equals("ru")){
+        itemsIN.foreach(row=>{
+          if(row.A3.equals("pcs")){
+            buff+=row.copy(A3="шт")
+          }else{
+            buff+=row
+          }
+        })
+        buff.toList
+      }else{
+        itemsIN
+      }
+    }
+    val totalItems: List[Item11ColumnsEN] = {
+      val buff = ListBuffer.empty[Item11ColumnsEN]
+      if (lang.equals("ru")) {
+        totalItemsIN.foreach(row => {
+          if (row.A3.equals("pcs")) {
+            buff += row.copy(A3 = "шт")
+          } else {
+            buff += row
+          }
+        })
+        buff.toList
+      } else {
+        totalItemsIN
+      }
+    }
+
     val pdfWriter: PdfWriter = new PdfWriter(path, new WriterProperties().setFullCompressionMode(true)) {
       setSmartMode(true)
     }
