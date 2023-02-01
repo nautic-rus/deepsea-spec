@@ -32,7 +32,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
     val filePath: String = Files.createTempDirectory("spoolPdf").toAbsolutePath.toString + File.separator + docNumber + "ML_rev" + rev + ".pdf"
     val rows: List[Item11ColumnsEN] = genRows(rawData, lang)
     val totalRows: List[Item11ColumnsEN] = genTotal(rows)
-    val dn = DocNameEN(num=docNumber, name=docName, lastRev = if (rev != "") rev else "0")
+    val dn = DocNameEN(num = docNumber, name = docName, lastRev = if (rev != "") rev else "0")
     processPDF(dn, filePath, rows, totalRows, genAll)
 
     filePath
@@ -42,24 +42,24 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
     val filePath: String = Files.createTempDirectory("spoolPdf").toAbsolutePath.toString + File.separator + docNumber + "ML_rev" + rev + ".pdf"
     val rows: List[Item11ColumnsEN] = genRows(rawData, lang)
     val totalRows: List[Item11ColumnsEN] = genTotal(rows)
-    val dn = DocNameEN(num=docNumber, name=docName, lastRev = if (rev != "") rev else "0")
-    processPDF(dn, filePath, rows, totalRows, genAll = true,lang)
+    val dn = DocNameEN(num = docNumber, name = docName, lastRev = if (rev != "") rev else "0")
+    processPDF(dn, filePath, rows, totalRows, genAll = true, lang)
     filePath
   }
 
-  private def processPDF(docNameEN: DocNameEN, path: String, itemsIN: List[Item11ColumnsEN], totalItemsIN: List[Item11ColumnsEN], genAll: Boolean = false,lang:String="ru"): Unit = {
-    val items: List[Item11ColumnsEN]={
-      val buff=ListBuffer.empty[Item11ColumnsEN]
-      if(lang.equals("ru")){
-        itemsIN.foreach(row=>{
-          if(row.A3.equals("pcs")){
-            buff+=row.copy(A3="шт")
-          }else{
-            buff+=row
+  private def processPDF(docNameEN: DocNameEN, path: String, itemsIN: List[Item11ColumnsEN], totalItemsIN: List[Item11ColumnsEN], genAll: Boolean = false, lang: String = "en"): Unit = {
+    val items: List[Item11ColumnsEN] = {
+      val buff = ListBuffer.empty[Item11ColumnsEN]
+      if (lang.equals("ru")) {
+        itemsIN.foreach(row => {
+          row.A3 match {
+            case "pcs" => buff += row.copy(A3 = "шт")
+            case "m" => buff += row.copy(A3 = "шт")
+            case _ => buff += row
           }
         })
         buff.toList
-      }else{
+      } else {
         itemsIN
       }
     }
@@ -67,10 +67,10 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
       val buff = ListBuffer.empty[Item11ColumnsEN]
       if (lang.equals("ru")) {
         totalItemsIN.foreach(row => {
-          if (row.A3.equals("pcs")) {
-            buff += row.copy(A3 = "шт")
-          } else {
-            buff += row
+          row.A3 match {
+            case "pcs" => buff += row.copy(A3 = "шт")
+            case "m" => buff += row.copy(A3 = "шт")
+            case _ => buff += row
           }
         })
         buff.toList
@@ -90,12 +90,12 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
     val titul: PdfDocument = genTitulA4(docNameEN)
     titul.copyPagesTo(1, 1, pdfDoc)
 
-    generatePartListPages(docNameEN, totalItems).foreach(page => {
+    generatePartListPages(docNameEN, totalItems, lang).foreach(page => {
       page.copyPagesTo(1, 1, pdfDoc)
     })
 
     if (genAll) {
-      generatePartListPages(docNameEN, items).foreach(page => {
+      generatePartListPages(docNameEN, items, lang).foreach(page => {
         page.copyPagesTo(1, 1, pdfDoc)
       })
     }
@@ -139,13 +139,13 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
     new PdfDocument(new PdfReader(new ByteArrayInputStream(os.asInstanceOf[ByteArrayOutputStream].toByteArray)))
   }
 
-  private def generatePartListPages(docNameEN: DocNameEN, items: List[Item11ColumnsEN]): List[PdfDocument] = {
+  private def generatePartListPages(docNameEN: DocNameEN, items: List[Item11ColumnsEN], lang: String = "en"): List[PdfDocument] = {
     val pages: ListBuffer[PartListBodyPage] = ListBuffer.empty[PartListBodyPage]
-    pages += new PartListBodyPage(docNameEN)
+    pages += new PartListBodyPage(docNameEN, lang)
     var currPage = 1
     items.foreach(row => {
       if (!pages.last.hasRoom(2)) {
-        pages += new PartListBodyPage(docNameEN)
+        pages += new PartListBodyPage(docNameEN, lang)
         currPage = currPage + 1
       }
       pages.last.insertRow(row)
@@ -164,7 +164,46 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
   }
 
 
-  private class PartListBodyPage(docNameEN: DocNameEN) {
+  private class PartListBodyPage(docNameEN: DocNameEN, lang: String = "en") {
+
+    private val N = {
+      lang match {
+        case "en" => "N"
+        case "ru" => "№"
+        case _ => "N"
+      }
+    }
+
+    private val MATERIAL = {
+      lang match {
+        case "en" => "MATERIAL"
+        case "ru" => "МАТЕРИАЛ"
+        case _ => "MATERIAL"
+      }
+    }
+    private val UNIT = {
+      lang match {
+        case "en" => "UNIT"
+        case "ru" => "ЕД.ИЗМ."
+        case _ => "UNIT"
+      }
+    }
+
+    private val QTY = {
+      lang match {
+        case "en" => "QTY"
+        case "ru" => "КОЛ-ВО"
+        case _ => "QTY"
+      }
+    }
+
+    private val WGT = {
+      lang match {
+        case "en" => "WGT, kg"
+        case "ru" => "ВЕС, кг"
+        case _ => "WGT, kg"
+      }
+    }
 
     private val maxRow = 52
     private var currentRow = 0
@@ -294,11 +333,11 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
       processStaticText()
 
       def processStaticText(): Unit = {
-        setStampText(cellBuff(0), "N", italic = false, bold = true)
-        setStampText(cellBuff(1), "MATERIAL", italic = false, bold = true)
-        setStampText(cellBuff(2), "UNIT", italic = false, bold = true)
-        setStampText(cellBuff(3), "QTY", italic = false, bold = true)
-        setStampText(cellBuff(4), "WGT, kg", italic = false, bold = true)
+        setStampText(cellBuff(0), N, italic = false, bold = true)
+        setStampText(cellBuff(1), MATERIAL, italic = false, bold = true)
+        setStampText(cellBuff(2), UNIT, italic = false, bold = true)
+        setStampText(cellBuff(3), QTY, italic = false, bold = true)
+        setStampText(cellBuff(4), WGT, italic = false, bold = true)
       }
 
       def setStampText(cell: Cell, text: String,
