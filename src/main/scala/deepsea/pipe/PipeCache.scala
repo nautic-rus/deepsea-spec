@@ -161,9 +161,9 @@ class PipeCache extends Actor{
             val smat = Option(rs.getString("SMAT")).getOrElse("")
             val apClass = Option(rs.getString("APCLASS")).getOrElse("")
 
-            pipeSegs += PipeSeg(proj, zoneName, systemName, "", 0, 0, "JOINT", "", apClass, "GASKET", "", smat, 0, 100, 100, isomUserId, spoolUserId, jointNumber, 0, 0, 0, gasket.trim, "", "")
-            pipeSegs += PipeSeg(proj, zoneName, systemName, "", 0, 0, "JOINT", "", apClass, "BOLT", "", smat, 0, 101, 101, isomUserId, spoolUserId, boltsNumber, 0, 0, 0, bolts.trim, "", "")
-            pipeSegs += PipeSeg(proj, zoneName, systemName, "", 0, 0, "JOINT", "", apClass, "NUT", "", smat, 0, 102, 102, isomUserId, spoolUserId, nutsNumber, 0, 0, 0, nuts.trim, "", "")
+            pipeSegs += PipeSeg(proj, zoneName, systemName, "", 0, 0, "JOINT", "", apClass, "GASKET", "", smat, 0, 90, 90, isomUserId, spoolUserId, jointNumber, 0, 0, 0, gasket.trim, "", "")
+            pipeSegs += PipeSeg(proj, zoneName, systemName, "", 0, 0, "JOINT", "", apClass, "BOLT", "", smat, 0, 91, 91, isomUserId, spoolUserId, boltsNumber, 0, 0, 0, bolts.trim, "", "")
+            pipeSegs += PipeSeg(proj, zoneName, systemName, "", 0, 0, "JOINT", "", apClass, "NUT", "", smat, 0, 92, 92, isomUserId, spoolUserId, nutsNumber, 0, 0, 0, nuts.trim, "", "")
 
           }
           s.close()
