@@ -29,7 +29,7 @@ import scala.concurrent.duration.{Duration, DurationInt, SECONDS}
 
 object PipeManager{
 
-  case class PipeSeg(project: String, zone: String, system: String, line: String, pls: Int, elem: Int, typeCode: String, typeDesc: String, classAlpha: String, compType: String, compUserId: String, smat: String, sqInSystem: Int, isPieceId: Int, spPieceId: Int, isom: String, spool: String, var length: Double, radius: Double, angle: Double, weight: Double, stock: String, fcon3: String, insul: String, var material: Material = Material(), var systemDescr: String = "")
+  case class PipeSeg(project: String, zone: String, system: String, line: String, pls: Int, elem: Int, typeCode: String, typeDesc: String, classAlpha: String, compType: String, compUserId: String, smat: String, sqInSystem: Int, isPieceId: Int, var spPieceId: Int, isom: String, spool: String, var length: Double, radius: Double, angle: Double, weight: Double, stock: String, fcon3: String, insul: String, var material: Material = Material(), var systemDescr: String = "")
   case class PipeSegBilling(zone: String, system: String, typeCode: String, typeDesc: String, classAlpha: String, compType: String, compUserId: String, smat: String, length: Double, weight: Double, stock: String, insul: String, material: Material = Material(), systemDescr: String = "", count: Int = 1)
   case class PipeSegActual(name: String, date: Long)
   case class Material(
@@ -130,7 +130,7 @@ class PipeManager extends Actor with Codecs with PipeHelper {
         case _ => "NO DESCR"
       }
       val rev = if (revision == "NO REV")  "" else revision
-      val file = if (bySpool == "1") genSpoolsListEnPDF(docNumber, systemDescr, rev, pipeSegs, lang, projectSystem._1 == "N002") else genSpoolsListEnPDFAll(docNumber, systemDescr, revision, pipeSegs, lang)
+      val file = if (bySpool == "1") genSpoolsListEnPDF(docNumber, systemDescr, rev, pipeSegs, lang) else genSpoolsListEnPDFAll(docNumber, systemDescr, revision, pipeSegs, lang)
       Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
         case url: String => sender() ! url.asJson.noSpaces
         case _ => sender() ! "error".asJson.noSpaces
