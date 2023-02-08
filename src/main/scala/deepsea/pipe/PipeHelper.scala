@@ -218,6 +218,16 @@ trait PipeHelper extends Codecs {
               })
             })
 
+            var spool = ""
+            var spCounter = 0
+            res.filter(_.compType == "AUX").sortBy(_.spool).foreach(sp => {
+              if (sp.spool != spool){
+                spCounter = 0
+                spool = sp.spool
+              }
+              spCounter = spCounter + 1
+              sp.spPieceId = spCounter
+            })
 
             res.toList
 
