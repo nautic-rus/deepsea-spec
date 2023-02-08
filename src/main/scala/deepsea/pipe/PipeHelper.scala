@@ -202,10 +202,23 @@ trait PipeHelper extends Codecs {
             devicesAuxFromSystem.filter(_.descr.contains("|")).foreach(d => {
               d.descr.split('\n').toList.foreach(l => {
                 val split = l.split('|')
+                val pos = split.head
+                val spoolValue = if (pos.contains("\\.")){
+                  pos.split("\\.").head
+                }
+                else{
+                  pos
+                }
+                val spPieceIdValue = if (pos.contains("\\.")){
+                  pos.split("\\.").last.toIntOption.getOrElse(0)
+                }
+                else{
+                  0
+                }
                 if (split.length == 4){
                   res += PipeSeg(
                     project, "", system, "", 0, 0, "AUX", "", "",
-                    "AUX", "Inserted Manually", "", 0, 0, 0, "", split.head, split.last.toDoubleOption.getOrElse(0),
+                    "AUX", "Inserted Manually", "", 0, spPieceIdValue, spPieceIdValue, spoolValue, spoolValue, split.last.toDoubleOption.getOrElse(0),
                     0, 0,  materials.find(_.code == split(1)) match {
                       case Some(value) => value.singleWeight
                       case _ => 0
@@ -220,7 +233,7 @@ trait PipeHelper extends Codecs {
 
             var spoolValue = ""
             var spCounter = 0
-            res.filter(_.compType == "AUX").sortBy(_.spool).foreach(sp => {
+            res.filter(_.compType == "AUX").filter(_.spPieceId == 0).sortBy(_.spool).foreach(sp => {
               if (sp.spool != spoolValue){
                 spCounter = 0
                 spoolValue = sp.spool
