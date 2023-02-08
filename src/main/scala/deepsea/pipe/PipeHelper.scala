@@ -203,23 +203,11 @@ trait PipeHelper extends Codecs {
               d.descr.split('\n').toList.foreach(l => {
                 val split = l.split('|')
                 val pos = split.head
-                val spoolValue = if (pos.contains("\\.")){
-                  pos.split("\\.").head
-                }
-                else{
-                  pos
-                }
-                val spPieceIdValue = if (pos.contains("\\.")){
-                  pos.split("\\.").last.toIntOption.getOrElse(0)
-                }
-                else{
-                  0
-                }
                 if (split.length == 4){
                   res += PipeSeg(
                     project, "", system, "", 0, 0, "AUX", "", "",
-                    "AUX", "Inserted Manually", "", 0, spPieceIdValue, spPieceIdValue, spoolValue, spoolValue, split.last.toDoubleOption.getOrElse(0),
-                    0, 0,  materials.find(_.code == split(1)) match {
+                    "AUX", "Inserted Manually", "", 0, 0, 0, pos, pos, split.last.toDoubleOption.getOrElse(0),
+                    0, 0, materials.find(_.code == split(1)) match {
                       case Some(value) => value.singleWeight
                       case _ => 0
                     }, split(1), "", "", materials.find(_.code == split(1)) match {
