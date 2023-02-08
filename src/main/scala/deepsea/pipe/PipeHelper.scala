@@ -206,7 +206,10 @@ trait PipeHelper extends Codecs {
                   res += PipeSeg(
                     project, "", system, "", 0, 0, "AUX", "", "",
                     "AUX", "Inserted Manually", "", 0, 0, 0, "", split.head, split.last.toDoubleOption.getOrElse(0),
-                    0, 0, split.last.toDoubleOption.getOrElse(0), split(1), "", "", materials.find(_.code == split(1)) match {
+                    0, 0,  materials.find(_.code == split(1)) match {
+                      case Some(value) => value.singleWeight
+                      case _ => 0
+                    }, split(1), "", "", materials.find(_.code == split(1)) match {
                       case Some(value) => value
                       case _ => Material()
                     }, ""
