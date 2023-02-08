@@ -213,7 +213,7 @@ trait PipeHelper extends Codecs {
                     }, split(1), "", "", materials.find(_.code == split(1)) match {
                       case Some(value) => value
                       case _ => Material()
-                    }, ""
+                    }
                   )
                 }
               })
