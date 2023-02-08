@@ -218,12 +218,12 @@ trait PipeHelper extends Codecs {
               })
             })
 
-            var spool = ""
+            var spoolValue = ""
             var spCounter = 0
             res.filter(_.compType == "AUX").sortBy(_.spool).foreach(sp => {
-              if (sp.spool != spool){
+              if (sp.spool != spoolValue){
                 spCounter = 0
-                spool = sp.spool
+                spoolValue = sp.spool
               }
               spCounter = spCounter + 1
               sp.spPieceId = spCounter
