@@ -10,6 +10,7 @@ import akka.util.Timeout
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import deepsea.actors.ActorManager
 import deepsea.database.{DBManager, DatabaseManager}
+import deepsea.devices.DeviceManager.{Device, DeviceAux}
 import deepsea.files.FileManager.GenerateUrl
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.Filters.{all, and, equal, in, notEqual}
@@ -181,6 +182,39 @@ trait PipeHelper extends Codecs {
               counter += 1
               s.spPieceId = counter
             })
+
+            val devicesAuxFromSystem = ListBuffer.empty[DeviceAux]
+            DBManager.GetOracleConnection(project) match {
+              case Some(oracle) =>
+                val s = oracle.createStatement()
+                val query = s"select system, long_descr from systems_lang where system in (select oid from systems where name = '$system')"
+                val rs = s.executeQuery(query)
+                while (rs.next()) {
+                  devicesAuxFromSystem += DeviceAux(
+                    Option(rs.getInt("SYSTEM")).getOrElse(-1),
+                    Option(rs.getString("LONG_DESCR")).getOrElse(""),
+                  )
+                }
+                s.close()
+                oracle.close()
+              case _ => List.empty[Device]
+            }
+            devicesAuxFromSystem.filter(_.descr.contains("|")).foreach(d => {
+              d.descr.split('\n').toList.foreach(l => {
+                val split = l.split('|')
+                if (split.length == 4){
+                  res += PipeSeg(
+                    project, "", system, "", 0, 0, "AUX", "", "",
+                    "AUX", "Inserted Manually", "", 0, 0, 0, "", split.head, split.last.toDoubleOption.getOrElse(0),
+                    0, 0, split.last.toDoubleOption.getOrElse(0), split(1), "", "", materials.find(_.code == split(1)) match {
+                      case Some(value) => value
+                      case _ => Material()
+                    }, ""
+                  )
+                }
+              })
+            })
+
 
             res.toList
 
