@@ -169,6 +169,9 @@ trait AccommodationHelper {
               val plateStock: String = Option(rs.getString("PLATE_STOCK")).getOrElse("")
               val profileLength: Double = Option(rs.getDouble("PROFILE_LENGTH")).getOrElse(0)
               val profileSection: Int = Option(rs.getInt("PROFILE_SECTION")).getOrElse(0)
+              val norm: String = Option(rs.getString("NORM")).getOrElse("")
+              val normDescr: String = Option(rs.getString("NORM_DESCR")).getOrElse("")
+              val materialDescription: String = Option(rs.getString("MATERIAL_DESCRIPTION")).getOrElse("")
               val bBox = BBox(
                 Option(rs.getDouble("X_MIN")).getOrElse(0),
                 Option(rs.getDouble("Y_MIN")).getOrElse(0),
@@ -202,10 +205,16 @@ trait AccommodationHelper {
 //                zones.filter(x => bBoxIntersects(x.BBox, bBox)).map(_.name).mkString(","),
                 profileStock,
                 plateStock,
-                Option(rs.getString("MATERIAL_DESCRIPTION")) match {
-                  case Some(descr) =>
-                    if (descr.contains("#")){
-                      val code = descr.split("#").last
+                if (normDescr != ""){
+                  materials.find(_.code == normDescr) match {
+                    case Some(value) => value
+                    case _ => Material()
+                  }
+                }
+                else{
+                  if (materialDescription != ""){
+                    if (materialDescription.contains("#")){
+                      val code = materialDescription.split("#").last
                       materials.find(_.code == code) match {
                         case Some(value) => value
                         case _ => Material()
@@ -214,11 +223,13 @@ trait AccommodationHelper {
                     else{
                       Material()
                     }
-                  case _ =>
+                  }
+                  else{
                     materials.find(x => x.code == profileStock || x.code == plateStock) match {
                       case Some(value) => value
                       case _ => Material()
                     }
+                  }
                 },
                 profileLength,
                 profileSection)
