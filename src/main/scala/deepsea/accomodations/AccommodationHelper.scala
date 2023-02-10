@@ -207,7 +207,7 @@ trait AccommodationHelper {
                 plateStock,
                 if (normDescr != ""){
                   materials.find(_.code == normDescr) match {
-                    case Some(value) => value.copy(name = value.name + ", " + value.description)
+                    case Some(value) => value.copy(name = value.name)
                     case _ => Material()
                   }
                 }
