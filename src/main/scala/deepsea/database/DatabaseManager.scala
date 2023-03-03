@@ -93,7 +93,7 @@ class DatabaseManager extends Actor with Codecs {
     config.setPassword("Ship1234")
     ds = new HikariDataSource(config)
 
-    List("P701", "P707", "N002", "N003", "N004", "TEST").foreach(project => {
+    List("P701", "P707", "N002", "N003", "N004", "N005", "TEST").foreach(project => {
       configOracle.setDriverClassName("oracle.jdbc.driver.OracleDriver")
       configOracle.setJdbcUrl("jdbc:oracle:thin:@office.nautic-rus.ru:1521:ORA3DB")
       configOracle.setUsername("C" + project)
