@@ -2,7 +2,7 @@ package local.common
 
 import deepsea.accomodations.AccommodationManager.{Accommodation, BBox}
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
-import deepsea.elec.ElecManager.ElecCable
+import deepsea.elec.ElecManager.{ElecCable, TrayBySystem}
 import deepsea.hull.HullManager._
 import deepsea.pipe.PipeManager.{Material, MaterialTranslation, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SpoolLock, SystemDef, UnitTranslation, Units}
 import io.circe.{Decoder, Encoder}
@@ -177,6 +177,11 @@ trait Codecs {
 
   implicit val ElecCableDecoder: Decoder[ElecCable] = deriveDecoder[ElecCable]
   implicit val ElecCableEncoder: Encoder[ElecCable] = deriveEncoder[ElecCable]
+
+  // MAMONOV
+
+  implicit val TrayBySystemDecoder: Decoder[TrayBySystem] = deriveDecoder[TrayBySystem]
+  implicit val TrayBySystemEncoder: Encoder[TrayBySystem] = deriveEncoder[TrayBySystem]
 
   val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
     //BOGDAN

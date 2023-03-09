@@ -7,6 +7,7 @@ import akka.pattern.ask
 import akka.util.Timeout
 import deepsea.App
 import deepsea.actors.ActorManager
+import deepsea.database.DatabaseManager.GetOracleConnection
 import deepsea.elec.ElecManager._
 import deepsea.files.FileManager.{CloudFile, CreateFile, GenerateUrl}
 import local.ele.CommonEle.{retrieveAllPartsByComplectNameJSON, retrieveEleComplectsJsonString}
@@ -31,37 +32,86 @@ import io.circe._
 import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.syntax._
+import local.common.Codecs
 
-object ElecManager{
+import scala.io.Source
+
+object ElecManager {
   case class GetTrayLabels(project: String, seqId: String)
+
   case class GetCablesByTray(project: String, seqId: String, bundle: String)
+
   case class GetEqLabels(project: String, seqId: String)
+
   case class GetHoleLabel(project: String, seqId: String)
+
   case class GetCablesByNodes(project: String, node1: String, node2: String, bundle: String)
+
   case class GetTraysByZonesAndSystems(project: String, docNumber: String)
+
+  case class GetTraysBySystem(project: String, docNumber: String)
+
+  case class GetTotalTraysBySystem(project: String, docNumber: String)
+
   case class GetTrayBundles(project: String)
+
   case class GenerateTrayPdf(project: String, docNumber: String, revision: String = "")
+
   case class FixTrayBundle(project: String, docNumber: String)
+
   case class GetElecParts(project: String, bundle: String)
+
   case class GetElecCables(project: String, bundle: String, magistral: String)
+
   case class ElecCable(cableId: String, fromEq: String, fromEqDescr: String, toEq: String, toEqDescr: String, seg: String, sect: String, spec: String, cabType: String, system: String, systemDescr: String, user: String, fromZone: String, fromZoneDescr: String, toZone: String, toZoneDescr: String, fRout: String)
+
   case class GetElecInfo(project: String)
+
+  case class TrayBySystem(system: String, stockCode: String = "", trayDesc: String = "", length: Double = 0, weight: Double = 0)
+
+  case class TraysBySystem(system: String = "",
+                           oid: Int = 0,
+                           zone: String = "",
+                           line: Int = 0,
+                           weight: Double = 0,
+                           x_cog: Double = 0,
+                           y_cog: Double = 0,
+                           z_cog: Double = 0,
+                           cType: String = "",
+                           tType: Int = 0,
+                           stockCode: String = "",
+                           trayDesc: String = "",
+                           NODE1: String = "",
+                           N1X: Double = 0,
+                           N1Y: Double = 0,
+                           N1Z: Double = 0,
+                           NODE2: String = "",
+                           N2X: Double = 0,
+                           N2Y: Double = 0,
+                           N2Z: Double = 0,
+                           length: String
+                          )
 }
-class ElecManager extends Actor with ElecHelper {
+
+class ElecManager extends Actor with ElecHelper with Codecs {
   implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
 
   override def receive: Receive = {
-    case GetTrayLabels(project, seqId) => sender() ! Json.toJson(TrayManager.trayLabels(project,seqId))
-    case GetCablesByTray(project, seqId, bundle) => sender() ! Json.toJson(TrayManager.genCablesByTraySeqIdAndComplect(project,seqId, bundle))
-    case GetEqLabels(project, seqId) => sender() ! Json.toJson(EleEqManager.genEqLabelsByEqOid(project,seqId))
-    case GetHoleLabel(project, seqId) => sender() ! cableBoxBySeqIdJson(project,seqId)
+    case GetTrayLabels(project, seqId) => sender() ! Json.toJson(TrayManager.trayLabels(project, seqId))
+    case GetCablesByTray(project, seqId, bundle) => sender() ! Json.toJson(TrayManager.genCablesByTraySeqIdAndComplect(project, seqId, bundle))
+    case GetEqLabels(project, seqId) => sender() ! Json.toJson(EleEqManager.genEqLabelsByEqOid(project, seqId))
+    case GetHoleLabel(project, seqId) => sender() ! cableBoxBySeqIdJson(project, seqId)
     case GetCablesByNodes(project, node1, node2, bundle) => sender() ! Json.toJson(TrayManager.genCablesInLineByTwoNodesAndComplect(project, node1, node2, bundle))
     case GetTraysByZonesAndSystems(project, docNumber) =>
-      sender() ! retrieveAllPartsByComplectNameJSON(project,docNumber)
+      sender() ! retrieveAllPartsByComplectNameJSON(project, docNumber)
+    case GetTraysBySystem(project, docNumber) =>
+      sender() ! getTraysBySystem(project, docNumber).asJson.noSpaces
+    case GetTotalTraysBySystem(project, docNumber) =>
+      sender() ! getTotalTraysBySystem(project, docNumber).asJson.noSpaces
     case GetTrayBundles(project) =>
       sender() ! retrieveEleComplectsJsonString(project)
     case FixTrayBundle(project, docNumber) =>
-      sender() ! fixFBS(project,docNumber)
+      sender() ! fixFBS(project, docNumber)
 
 
     case GenerateTrayPdf(project, docNumber, revision) =>
@@ -91,5 +141,69 @@ class ElecManager extends Actor with ElecHelper {
       sender() ! getCablesInfo(project).asJson.noSpaces
 
     case _ => None
+  }
+
+  def getTraysBySystem(project: String, docNumber: String): ListBuffer[TraysBySystem] = {
+    val res = ListBuffer.empty[TraysBySystem];
+    GetOracleConnection(project) match {
+      case Some(c) =>
+        val query = Source.fromResource("queries/elecTraysInSystem.sql").mkString.replaceAll(":docNumber", "'" + docNumber + "'");
+        val s = c.prepareStatement(query);
+        val rs = s.executeQuery();
+        while (rs.next()) {
+          res += new TraysBySystem(
+            rs.getString("SYSTEM"),
+            rs.getInt("OID"),
+            rs.getString("ZONE"),
+            rs.getInt("LINE"),
+            rs.getDouble("WEIGHT"),
+            rs.getDouble("X_COG"),
+            rs.getDouble("Y_COG"),
+            rs.getDouble("Z_COG"),
+            rs.getString("CTYPE"),
+            rs.getInt("TYPE"),
+            rs.getString("STOCK_CODE"),
+            rs.getString("TRAY_DESC"),
+            rs.getString("NODE_1"),
+            rs.getDouble("N1_X"),
+            rs.getDouble("N1_Y"),
+            rs.getDouble("N1_Z"),
+            rs.getString("NODE_2"),
+            rs.getDouble("N2_X"),
+            rs.getDouble("N2_Y"),
+            rs.getDouble("N2_Z"),
+            rs.getString("LENGHT")
+          )
+        }
+        rs.close()
+        s.close()
+        c.close()
+      case _ =>
+    }
+    res
+  }
+
+  def getTotalTraysBySystem(project: String, docNumber: String): ListBuffer[TrayBySystem] = {
+    val res = ListBuffer.empty[TrayBySystem];
+    GetOracleConnection(project) match {
+      case Some(c) =>
+        val query = Source.fromResource("queries/elecTotalTraysInSystem.sql").mkString.replaceAll(":docNumber", "'" + docNumber + "'");
+        val s = c.prepareStatement(query);
+        val rs = s.executeQuery();
+        while (rs.next()) {
+          res += new TrayBySystem(
+            rs.getString("SYSTEM"),
+            rs.getString("STOCK_CODE"),
+            rs.getString("TRAY_DESC"),
+            rs.getDouble("LENGTH"),
+            rs.getDouble("WEIGHT")
+          )
+        }
+        rs.close()
+        s.close()
+        c.close()
+      case _ =>
+    }
+    res
   }
 }
