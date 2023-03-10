@@ -81,14 +81,14 @@ object ElecManager {
                            tType: Int = 0,
                            stockCode: String = "",
                            trayDesc: String = "",
-                           NODE1: String = "",
-                           N1X: Double = 0,
-                           N1Y: Double = 0,
-                           N1Z: Double = 0,
-                           NODE2: String = "",
-                           N2X: Double = 0,
-                           N2Y: Double = 0,
-                           N2Z: Double = 0,
+                           node1: String = "",
+                           x_n1: Double = 0,
+                           y_n1: Double = 0,
+                           z_n1: Double = 0,
+                           node2: String = "",
+                           x_n2: Double = 0,
+                           y_n2: Double = 0,
+                           z_n2: Double = 0,
                            length: String
                           )
 }
