@@ -89,7 +89,7 @@ object ElecManager {
                            x_n2: Double = 0,
                            y_n2: Double = 0,
                            z_n2: Double = 0,
-                           length: String
+                           length: Double = 0
                           )
 }
 
@@ -147,7 +147,8 @@ class ElecManager extends Actor with ElecHelper with Codecs {
     val res = ListBuffer.empty[TraysBySystem];
     GetOracleConnection(project) match {
       case Some(c) =>
-        val query = Source.fromResource("queries/elecTraysInSystem.sql").mkString.replaceAll(":docNumber", "'" + docNumber + "'");
+        val doc = docNumber.split("-").takeRight(2).mkString("-")
+        val query = Source.fromResource("queries/elecTraysInSystem.sql").mkString.replaceAll(":docNumber", "'" + doc  + "'");
         val s = c.prepareStatement(query);
         val rs = s.executeQuery();
         while (rs.next()) {
@@ -172,7 +173,7 @@ class ElecManager extends Actor with ElecHelper with Codecs {
             rs.getDouble("N2_X"),
             rs.getDouble("N2_Y"),
             rs.getDouble("N2_Z"),
-            rs.getString("LENGHT")
+            rs.getDouble("LENGHT")
           )
         }
         rs.close()

@@ -34,4 +34,4 @@ where
     s.pattern = vcpl.seqid and
     pe.node1 = n1.seqid and
     pe.node2 = n2.seqid
-    and sys.name in '871-101'
+    and sys.name in :docNumber
