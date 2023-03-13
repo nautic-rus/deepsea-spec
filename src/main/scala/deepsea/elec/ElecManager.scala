@@ -53,6 +53,8 @@ object ElecManager {
 
   case class GetTotalTraysBySystem(project: String, docNumber: String)
 
+  case class GetCableBoxesBySystem(project: String, docNumber: String)
+
   case class GetTrayBundles(project: String)
 
   case class GenerateTrayPdf(project: String, docNumber: String, revision: String = "")
@@ -91,6 +93,31 @@ object ElecManager {
                            z_n2: Double = 0,
                            length: Double = 0
                           )
+
+  case class CableBoxesBySystem(system: String = "",
+                                userId: String = "",
+                                oid: Int = 0,
+                                zone: String = "",
+                                line: Int = 0,
+                                weight: Double = 0,
+                                x_cog: Double = 0,
+                                y_cog: Double = 0,
+                                z_cog: Double = 0,
+                                sType: String = "",
+                                tType: Int = 0,
+                                code: String = "",
+                                stockCode: String = "",
+                                trayDesc: String = "",
+                                node1: String = "",
+                                x_n1: Double = 0,
+                                y_n1: Double = 0,
+                                z_n1: Double = 0,
+                                node2: String = "",
+                                x_n2: Double = 0,
+                                y_n2: Double = 0,
+                                z_n2: Double = 0,
+                                length: Double = 0
+                               )
 }
 
 class ElecManager extends Actor with ElecHelper with Codecs {
@@ -108,6 +135,10 @@ class ElecManager extends Actor with ElecHelper with Codecs {
       sender() ! getTraysBySystem(project, docNumber).asJson.noSpaces
     case GetTotalTraysBySystem(project, docNumber) =>
       sender() ! getTotalTraysBySystem(project, docNumber).asJson.noSpaces
+    case GetCableBoxesBySystem(project, docNumber) =>
+      val q = getCableBoxesBySystem(project, docNumber)
+      val f = q.asJson.noSpaces
+      sender() ! f
     case GetTrayBundles(project) =>
       sender() ! retrieveEleComplectsJsonString(project)
     case FixTrayBundle(project, docNumber) =>
@@ -148,32 +179,32 @@ class ElecManager extends Actor with ElecHelper with Codecs {
     GetOracleConnection(project) match {
       case Some(c) =>
         val doc = docNumber.split("-").takeRight(2).mkString("-")
-        val query = Source.fromResource("queries/elecTraysInSystem.sql").mkString.replaceAll(":docNumber", "'" + doc  + "'");
+        val query = Source.fromResource("queries/elecTraysInSystem.sql").mkString.replaceAll(":docNumber", "'" + doc + "'");
         val s = c.prepareStatement(query);
         val rs = s.executeQuery();
         while (rs.next()) {
           res += new TraysBySystem(
-            rs.getString("SYSTEM"),
-            rs.getInt("OID"),
-            rs.getString("ZONE"),
-            rs.getInt("LINE"),
-            rs.getDouble("WEIGHT"),
-            rs.getDouble("X_COG"),
-            rs.getDouble("Y_COG"),
-            rs.getDouble("Z_COG"),
-            rs.getString("CTYPE"),
-            rs.getInt("TYPE"),
-            rs.getString("STOCK_CODE"),
-            rs.getString("TRAY_DESC"),
-            rs.getString("NODE_1"),
-            rs.getDouble("N1_X"),
-            rs.getDouble("N1_Y"),
-            rs.getDouble("N1_Z"),
-            rs.getString("NODE_2"),
-            rs.getDouble("N2_X"),
-            rs.getDouble("N2_Y"),
-            rs.getDouble("N2_Z"),
-            rs.getDouble("LENGHT")
+            Option(rs.getString("SYSTEM")).getOrElse(""),
+            Option(rs.getInt("OID")).getOrElse(0),
+            Option(rs.getString("ZONE")).getOrElse(""),
+            Option(rs.getInt("LINE")).getOrElse(0),
+            Option(rs.getDouble("WEIGHT")).getOrElse(0.0),
+            Option(rs.getDouble("X_COG")).getOrElse(0.0),
+            Option(rs.getDouble("Y_COG")).getOrElse(0.0),
+            Option(rs.getDouble("Z_COG")).getOrElse(0.0),
+            Option(rs.getString("CTYPE")).getOrElse(""),
+            Option(rs.getInt("TYPE")).getOrElse(0),
+            Option(rs.getString("STOCK_CODE")).getOrElse(""),
+            Option(rs.getString("TRAY_DESC")).getOrElse(""),
+            Option(rs.getString("NODE_1")).getOrElse(""),
+            Option(rs.getDouble("N1_X")).getOrElse(0.0),
+            Option(rs.getDouble("N1_Y")).getOrElse(0.0),
+            Option(rs.getDouble("N1_Z")).getOrElse(0.0),
+            Option(rs.getString("NODE_2")).getOrElse(""),
+            Option(rs.getDouble("N2_X")).getOrElse(0.0),
+            Option(rs.getDouble("N2_Y")).getOrElse(0.0),
+            Option(rs.getDouble("N2_Z")).getOrElse(0.0),
+            Option(rs.getDouble("LENGTH")).getOrElse(0.0)
           )
         }
         rs.close()
@@ -198,6 +229,49 @@ class ElecManager extends Actor with ElecHelper with Codecs {
             rs.getString("TRAY_DESC"),
             rs.getDouble("LENGTH"),
             rs.getDouble("WEIGHT")
+          )
+        }
+        rs.close()
+        s.close()
+        c.close()
+      case _ =>
+    }
+    res
+  }
+
+  def getCableBoxesBySystem(project: String, docNumber: String): ListBuffer[CableBoxesBySystem] = {
+    val res = ListBuffer.empty[CableBoxesBySystem];
+    GetOracleConnection(project) match {
+      case Some(c) =>
+        val doc = docNumber.split("-").takeRight(2).mkString("-")
+        val query = Source.fromResource("queries/elecTotalCableBoxesInSystem.sql").mkString.replaceAll(":docNumber", "'" + doc + "'");
+        val s = c.prepareStatement(query);
+        val rs = s.executeQuery();
+        while (rs.next()) {
+          res += new CableBoxesBySystem(
+            Option(rs.getString("SYSTEM")).getOrElse(""),
+            Option(rs.getString("USERID")).getOrElse(""),
+            Option(rs.getInt("OID")).getOrElse(0),
+            Option(rs.getString("ZONE")).getOrElse(""),
+            Option(rs.getInt("LINE")).getOrElse(0),
+            Option(rs.getDouble("WEIGHT")).getOrElse(0.0),
+            Option(rs.getDouble("X_COG")).getOrElse(0.0),
+            Option(rs.getDouble("Y_COG")).getOrElse(0.0),
+            Option(rs.getDouble("Z_COG")).getOrElse(0.0),
+            Option(rs.getString("SEAL_TYPE")).getOrElse(""),
+            Option(rs.getInt("TYPE")).getOrElse(0),
+            Option(rs.getString("CODE")).getOrElse(""),
+            Option(rs.getString("STOCK_CODE")).getOrElse(""),
+            Option(rs.getString("DESCR")).getOrElse(""),
+            Option(rs.getString("NODE_1")).getOrElse(""),
+            Option(rs.getDouble("N1_X")).getOrElse(0.0),
+            Option(rs.getDouble("N1_Y")).getOrElse(0.0),
+            Option(rs.getDouble("N1_Z")).getOrElse(0.0),
+            Option(rs.getString("NODE_2")).getOrElse(""),
+            Option(rs.getDouble("N2_X")).getOrElse(0.0),
+            Option(rs.getDouble("N2_Y")).getOrElse(0.0),
+            Option(rs.getDouble("N2_Z")).getOrElse(0.0),
+            Option(rs.getDouble("LENGTH")).getOrElse(0.0)
           )
         }
         rs.close()

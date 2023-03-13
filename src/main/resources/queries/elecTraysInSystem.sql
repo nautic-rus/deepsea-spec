@@ -1,15 +1,19 @@
 select
     sys.name as system,
-    ps.oid, z.name as zone,
-    pe.line, pe.weight,
-    pe.x_cog, pe.y_cog,
-    pe.z_cog, pe.ctype,
+    ps.oid,
+    z.name as zone,
+    pe.line,
+    pe.weight,
+    pe.x_cog,
+    pe.y_cog,
+    pe.z_cog,
+    pe.ctype,
     pe.type,
     vcpl.stock_code,
     vcpl.descr as tray_desc,
     n1.userid as node_1, n1.x * 1000 as n1_x, n1.y * 1000 as n1_y, n1.z * 1000 as n1_z,
     n2.userid as node_2, n2.x * 1000 as n2_x, n2.y * 1000 as n2_y, n2.z * 1000 as n2_z,
-    SQRT(POWER((n2.X - n1.X), 2) + POWER((n2.Y - n1.Y), 2) + POWER((n2.Z - n1.Z), 2)) * 1000 as LENGHT
+    SQRT(POWER((n2.X - n1.X), 2) + POWER((n2.Y - n1.Y), 2) + POWER((n2.Z - n1.Z), 2)) * 1000 as length
 from
     cn002.systems sys,
     cn002.pipeline_segment ps,

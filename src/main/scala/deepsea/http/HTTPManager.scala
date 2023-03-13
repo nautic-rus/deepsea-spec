@@ -107,6 +107,9 @@ class HTTPManager extends Actor {
       (get & path("totalTraysBySystems") & parameter("project") & parameter("docNumber")) { (project, docNumber) =>
         askFor(ActorManager.elec, GetTotalTraysBySystem(project, docNumber))
       },
+      (get & path("cableBoxesBySystems") & parameter("project") & parameter("docNumber")) { (project, docNumber) =>
+        askFor(ActorManager.elec, GetCableBoxesBySystem(project, docNumber))
+      },
       (get & path("traySpec") & parameter("project") & parameter("docNumber") & parameter("revision")) { (project, docNumber, revision) =>
         askFor(ActorManager.elec, GenerateTrayPdf(project, docNumber, revision))
       },
