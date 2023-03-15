@@ -125,6 +125,11 @@ object ElecManager {
                                  material: Material
                                )
 
+  case class TraysAndCableBoxes (
+                                trays: TraysBySystem,
+                                cableBoxes: CableBoxesBySystem
+                                )
+
 
   class ElecManager extends Actor with ElecHelper with Codecs {
     implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)

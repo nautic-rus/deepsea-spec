@@ -4,7 +4,7 @@ select
 	pe.idsq as oid,
 	z.name as zone,
     pe.line,
-    pe.weight,
+    vcpl.weight,
     pe.X_COG,
     pe.Y_COG,
     pe.Z_COG,
