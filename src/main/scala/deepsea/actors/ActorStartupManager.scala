@@ -9,6 +9,7 @@ import deepsea.actors.ActorStartupManager.{DatabaseManagerStarted, HTTPManagerSt
 import deepsea.database.DatabaseManager
 import deepsea.devices.DeviceManager
 import deepsea.elec.ElecManager
+import deepsea.elec.ElecManager.ElecManager
 import deepsea.files.FileManager
 import deepsea.http.HTTPManager
 import deepsea.hull.HullManager
