@@ -126,8 +126,8 @@ object ElecManager {
                                )
 
   case class TraysAndCableBoxes (
-                                trays: TraysBySystem,
-                                cableBoxes: CableBoxesBySystem
+                                trays: List[TraysBySystem],
+                                cableBoxes: List[CableBoxesBySystem]
                                 )
 
 

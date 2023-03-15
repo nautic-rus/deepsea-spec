@@ -66,7 +66,7 @@ trait ElecHelper extends Codecs{
     }
   }
 
-  def getTraysBySystem(project: String, docNumber: String): ListBuffer[TraysBySystem] = {
+  def getTraysBySystem(project: String, docNumber: String): List[TraysBySystem] = {
     val res = ListBuffer.empty[TraysBySystem];
     GetOracleConnection(project) match {
       case Some(c) =>
@@ -110,10 +110,10 @@ trait ElecHelper extends Codecs{
         c.close()
       case _ =>
     }
-    res
+    res.toList
   }
 
-  def getTotalTraysBySystem(project: String, docNumber: String): ListBuffer[TrayBySystem] = {
+  def getTotalTraysBySystem(project: String, docNumber: String): List[TrayBySystem] = {
     val res = ListBuffer.empty[TrayBySystem];
     GetOracleConnection(project) match {
       case Some(c) =>
@@ -134,10 +134,10 @@ trait ElecHelper extends Codecs{
         c.close()
       case _ =>
     }
-    res
+    res.toList
   }
 
-  def getCableBoxesBySystem(project: String, docNumber: String): ListBuffer[CableBoxesBySystem] = {
+  def getCableBoxesBySystem(project: String, docNumber: String): List[CableBoxesBySystem] = {
     val res = ListBuffer.empty[CableBoxesBySystem];
     GetOracleConnection(project) match {
       case Some(c) =>
@@ -184,7 +184,7 @@ trait ElecHelper extends Codecs{
         c.close()
       case _ =>
     }
-    res
+    res.toList
   }
 
 }
