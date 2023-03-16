@@ -21,7 +21,7 @@ select
     n2.x * 1000 as n2_x,
     n2.y * 1000 as n2_y,
     n2.z * 1000 as n2_z,
-    sqrt(power((n2.X - n1.X), 2) + power((n2.Y - n1.Y), 2) + power((n2.Z - n1.Z), 2)) * 1000 as length
+    sqrt(power((n2.X - n1.X), 2) + power((n2.Y - n1.Y), 2) + power((n2.Z - n1.Z), 2)) as length
 from
     systems sys,
 	pls_elem PE,

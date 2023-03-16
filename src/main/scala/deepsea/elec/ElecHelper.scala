@@ -53,7 +53,7 @@ trait ElecHelper extends Codecs{
 
 
   def getMaterials(): List[Material] = {
-    GetMongoConnection() match {
+    DBManager.GetMongoConnection() match {
       case Some(mongoData) =>
         val materialsNCollectionName = "materials-n";
         val materialsCollection: MongoCollection[Material] = mongoData.getCollection(materialsNCollectionName);

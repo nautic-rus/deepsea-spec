@@ -8,7 +8,7 @@ select
             POWER((n2.X - n1.X), 2) +
             POWER((n2.Y - n1.Y), 2) +
             POWER((n2.Z - n1.Z), 2)
-            ) * 1000
+            )
         ) as LENGTH
 from
     cn002.systems sys,
