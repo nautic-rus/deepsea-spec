@@ -68,9 +68,9 @@ trait ElecHelper extends Codecs{
 
   def getTraysBySystem(project: String, docNumber: String): List[TraysBySystem] = {
     val res = ListBuffer.empty[TraysBySystem];
-    GetOracleConnection(project) match {
+    DBManager.GetOracleConnection(project) match {
       case Some(c) =>
-        val doc = docNumber.split("-").takeRight(2).mkString("-")
+        val doc = docNumber.split("-").takeRight(2).mkString("-");
         val query = Source.fromResource("queries/elecTraysInSystem.sql").mkString.replaceAll(":docNumber", "'" + doc + "'");
         val s = c.prepareStatement(query);
         val rs = s.executeQuery();
@@ -115,7 +115,7 @@ trait ElecHelper extends Codecs{
 
   def getTotalTraysBySystem(project: String, docNumber: String): List[TrayBySystem] = {
     val res = ListBuffer.empty[TrayBySystem];
-    GetOracleConnection(project) match {
+    DBManager.GetOracleConnection(project) match {
       case Some(c) =>
         val query = Source.fromResource("queries/elecTotalTraysInSystem.sql").mkString.replaceAll(":docNumber", "'" + docNumber + "'");
         val s = c.prepareStatement(query);
@@ -139,7 +139,7 @@ trait ElecHelper extends Codecs{
 
   def getCableBoxesBySystem(project: String, docNumber: String): List[CableBoxesBySystem] = {
     val res = ListBuffer.empty[CableBoxesBySystem];
-    GetOracleConnection(project) match {
+    DBManager.GetOracleConnection(project) match {
       case Some(c) =>
         val doc = docNumber.split("-").takeRight(2).mkString("-")
         val query = Source.fromResource("queries/elecTotalCableBoxesInSystem.sql").mkString.replaceAll(":docNumber", "'" + doc + "'");
