@@ -186,9 +186,8 @@ object ElecManager {
         sender() ! getCablesInfo(project).asJson.noSpaces
       case GetElecEspFiles(project, docNumber, docName, revision) =>
         val rev = if (revision == "NO REV") "" else revision
-        val file: String = Files.createTempDirectory("elecPdf").toAbsolutePath.toString + "/" + docNumber + "_rev" + rev + ".pdf"
-        genTraysAndCBListEnPDF(project, docNumber, docName, rev, file)
-        Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
+        val path = genTraysAndCBListEnPDF(project, docNumber, docName, rev, "ru")
+        Await.result(ActorManager.files ? GenerateUrl(path), timeout.duration) match {
           case url: String => sender() ! url.asJson.noSpaces
           case _ => sender() ! "error".asJson.noSpaces
         }
