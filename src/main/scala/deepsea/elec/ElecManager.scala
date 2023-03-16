@@ -34,6 +34,7 @@ import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.syntax._
 import local.common.Codecs
+import local.pdf.ru.ele.EleTrayCableBoxReportRu.genTraysAndCBListEnPDF
 
 import scala.collection.immutable.Stream.Empty
 import scala.io.Source
@@ -70,6 +71,8 @@ object ElecManager {
   case class ElecCable(cableId: String, fromEq: String, fromEqDescr: String, toEq: String, toEqDescr: String, seg: String, sect: String, spec: String, cabType: String, system: String, systemDescr: String, user: String, fromZone: String, fromZoneDescr: String, toZone: String, toZoneDescr: String, fRout: String)
 
   case class GetElecInfo(project: String)
+
+  case class GetElecEspFiles(project: String, docNumber: String, docName: String, revision: String)
 
   case class TrayBySystem(system: String, stockCode: String = "", trayDesc: String = "", length: Double = 0, weight: Double = 0)
 
@@ -181,7 +184,14 @@ object ElecManager {
         })
       case GetElecInfo(project) =>
         sender() ! getCablesInfo(project).asJson.noSpaces
-
+      case GetElecEspFiles(project, docNumber, docName, revision) =>
+        val rev = if (revision == "NO REV") "" else revision
+        val file: String = Files.createTempDirectory("elecPdf").toAbsolutePath.toString + "/" + docNumber + "_rev" + rev + ".pdf"
+        genTraysAndCBListEnPDF(project, docNumber, docName, rev, file)
+        Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
+          case url: String => sender() ! url.asJson.noSpaces
+          case _ => sender() ! "error".asJson.noSpaces
+        }
       case _ => None
     }
   }

@@ -36,9 +36,10 @@ object EleTrayCableBoxReportRu extends UtilsPDF with ElecHelper{
   )
   val units: List[Units] = getUnits
 
-  def genTraysAndCBListEnPDF(docNumber: String, docName: String, rev: String, rawData: TraysAndCableBoxes, lang: String): String = {
+  def genTraysAndCBListEnPDF(project: String, docNumber: String, docName: String, rev: String, lang: String): String = {
 
    /* val materials: List[Material] = getMaterials*/
+    val rawData: TraysAndCableBoxes = TraysAndCableBoxes(getTraysBySystem(project, docNumber), getCableBoxesBySystem(project, docNumber))
     val filePath: String = Files.createTempDirectory("traysCbPdf").toAbsolutePath.toString + File.separator + docNumber + "_rev" + rev + ".pdf"
     val rows: List[Item11ColumnsEN] = genRows(rawData, docNumber, rev, lang)
     val totalRows: List[Item11ColumnsEN] = genTotalRows(rawData, docNumber, rev, lang)

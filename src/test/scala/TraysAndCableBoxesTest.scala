@@ -9,7 +9,7 @@ class TraysAndCableBoxesTest extends AnyFunSuite with ElecHelper {
   val project = "N002"
   val docNumber: String = "200101-871-401"
   val traysAndCableBoxes: TraysAndCableBoxes = TraysAndCableBoxes(getTraysBySystem(project, docNumber), getCableBoxesBySystem(project, docNumber))
-  val path: String = genTraysAndCBListEnPDF(docNumber, "FILL DOC NAME!", "0", traysAndCableBoxes, "ru")
+  val path: String = genTraysAndCBListEnPDF(project, docNumber, "FILL DOC NAME!", "0", "ru")
   println(path)
 
   val a = 0;

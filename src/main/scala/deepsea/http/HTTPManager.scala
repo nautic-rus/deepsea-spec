@@ -94,6 +94,9 @@ class HTTPManager extends Actor {
       (get & path("elecInfo") & parameter("project")) { (project) =>
         askFor(ActorManager.elec, GetElecInfo(project))
       },
+      (get & path("elecEspFiles") & parameter("project") & parameter("docNumber") & parameter("docName") & parameter("revision")) { (project, docNumber, docName, revision) =>
+        askFor(ActorManager.elec, GetElecEspFiles(project, docNumber, docName, revision))
+      },
       //ELEC TOOLS
       (get & path("trayBundles") & parameter("project")) { (project) =>
         askFor(ActorManager.elec, GetTrayBundles(project))
