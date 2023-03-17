@@ -19,13 +19,18 @@ object DBManager extends Codecs{
   private val oracleConnections = ListBuffer.empty[OracleConnection]
   private val mongoClient: MongoClient = MongoClient("mongodb://192.168.1.26")
 
-  List("N002", "N004", "SC01", "LV01").foreach(project => {
-    configOracle.setDriverClassName("oracle.jdbc.driver.OracleDriver")
-    configOracle.setJdbcUrl("jdbc:oracle:thin:@office.nautic-rus.ru:1521:ORA3DB")
-    configOracle.setUsername("C" + project)
-    configOracle.setPassword("Whatab0utus")
-    configOracle.setMaximumPoolSize(5)
-    oracleConnections += OracleConnection(project, new HikariDataSource(configOracle))
+  List("N002", "N004", "SC01", "LV01", "AN01").foreach(project => {
+    try{
+        configOracle.setDriverClassName("oracle.jdbc.driver.OracleDriver")
+        configOracle.setJdbcUrl("jdbc:oracle:thin:@192.168.1.12:1521:ORA3DB")
+        configOracle.setUsername("C" + project)
+        configOracle.setPassword("Whatab0utus")
+        configOracle.setMaximumPoolSize(5)
+        oracleConnections += OracleConnection(project, new HikariDataSource(configOracle))
+    }
+    catch {
+      case e: Exception =>
+    }
   })
 
   private val configPG = new HikariConfig()

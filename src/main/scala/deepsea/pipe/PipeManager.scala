@@ -7,8 +7,10 @@ import akka.util.Timeout
 import deepsea.actors.ActorManager
 import deepsea.database.DatabaseManager
 import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection}
+import deepsea.esp.EspManager.{EspElement, EspElementClass}
 import deepsea.files.FileManager.GenerateUrl
 import deepsea.pipe.PipeManager.{GetPipeESP, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSpoolModel, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SetSpoolLock, SpoolLock, SystemDef, UpdatePipeComp, UpdatePipeJoints}
+import io.circe.generic.JsonCodec
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.Filters.{all, and, equal, in, notEqual}
 import org.mongodb.scala.{Document, MongoCollection, bson}
@@ -22,6 +24,7 @@ import local.pdf.en.pipe.SpoolsReportEN.{genSpoolsListEnPDF, genSpoolsListEnPDFA
 
 import java.util.concurrent.TimeUnit
 import java.util.{Date, UUID}
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{Await, ExecutionContextExecutor}
 import scala.concurrent.duration.{Duration, DurationInt, SECONDS}
@@ -29,7 +32,71 @@ import scala.concurrent.duration.{Duration, DurationInt, SECONDS}
 
 object PipeManager{
 
-  case class PipeSeg(project: String, zone: String, system: String, line: String, pls: Int, elem: Int, typeCode: String, typeDesc: String, classAlpha: String, compType: String, compUserId: String, smat: String, sqInSystem: Int, isPieceId: Int, var spPieceId: Int, isom: String, spool: String, var length: Double, radius: Double, angle: Double, weight: Double, stock: String, fcon3: String, insul: String, var material: Material = Material(), var systemDescr: String = "")
+  case class PipeSeg(project: String, zone: String, system: String, line: String,
+                     pls: Int, elem: Int, typeCode: String, typeDesc: String, classAlpha: String, compType: String, compUserId: String, smat: String,
+                     sqInSystem: Int, isPieceId: Int, var spPieceId: Int, isom: String, spool: String, var length: Double, radius: Double, angle: Double,
+                     weight: Double, stock: String, fcon3: String, insul: String, var material: Material = Material(), var systemDescr: String = "") extends EspElementClass {
+//    def toEspElement: Map[String, String] ={
+//      val res = mutable.Map.empty[String, String]
+//      res += ("project" -> project)
+//      res += ("zone" -> zone)
+//      res += ("system" -> system)
+//      res += ("line" -> line)
+//      res += ("pls" -> pls)
+//      res += ("elem" -> elem)
+//      res += ("typeCode" -> typeCode)
+//      res += ("typeDesc" -> typeDesc)
+//      res += ("classAlpha" -> classAlpha)
+//      res += ("compType" -> compType)
+//      res += ("compUserId" -> compUserId)
+//      res += ("smat" -> smat)
+//      res += ("sqInSystem" -> sqInSystem)
+//      res += ("isPieceId" -> isPieceId)
+//      res += ("spPieceId" -> spPieceId)
+//      res += ("isom" -> isom)
+//      res += ("spool" -> spool)
+//      res += ("length" -> length)
+//      res += ("radius" -> radius)
+//      res += ("angle" -> angle)
+//      res += ("weight" -> weight)
+//      res += ("stock" -> stock)
+//      res += ("fcon3" -> fcon3)
+//      res += ("insul" -> insul)
+//      res += ("material" -> material)
+//      res += ("systemDescr" -> systemDescr)
+//      res.toMap
+//    }
+//    def fromEspElement(map: Map[String, String]): PipeSeg ={
+//      PipeSeg(
+//        map.getOrElse("project", ""),
+//        map.getOrElse("zone", ""),
+//        map.getOrElse("system", ""),
+//        map.getOrElse("line", ""),
+//        map.getOrElse("pls", "0").toIntOption.getOrElse(0),
+//        map.getOrElse("elem", "0").toIntOption.getOrElse(0),
+//        map.getOrElse("typeCode", ""),
+//        map.getOrElse("typeDesc", ""),
+//        map.getOrElse("classAlpha", ""),
+//        map.getOrElse("compType", ""),
+//        map.getOrElse("compUserId", ""),
+//        map.getOrElse("smat", ""),
+//        map.getOrElse("sqInSystem", "0").toIntOption.getOrElse(0),
+//        map.getOrElse("isPieceId", "0").toIntOption.getOrElse(0),
+//        map.getOrElse("spPieceId", "0").toIntOption.getOrElse(0),
+//        map.getOrElse("isom", ""),
+//        map.getOrElse("spool", ""),
+//        map.getOrElse("length", "0").toDoubleOption.getOrElse(0),
+//        map.getOrElse("radius", "0").toDoubleOption.getOrElse(0),
+//        map.getOrElse("angle", "0").toIntOption.getOrElse(0),
+//        map.getOrElse("weight", "0").toDoubleOption.getOrElse(0),
+//        map.getOrElse("stock", ""),
+//        map.getOrElse("fcon3", "0"),
+//        map.getOrElse("insul", "0"),
+//        map.getOrElse("material", ""),
+//        map.getOrElse("systemDescr", ""),
+//      )
+//    }
+  }
   case class PipeSegBilling(zone: String, system: String, typeCode: String, typeDesc: String, classAlpha: String, compType: String, compUserId: String, smat: String, length: Double, weight: Double, stock: String, insul: String, material: Material = Material(), systemDescr: String = "", count: Int = 1)
   case class PipeSegActual(name: String, date: Long)
   case class Material(

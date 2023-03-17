@@ -22,6 +22,7 @@ object ActorManager {
   var pipeCache: ActorRef = _
   var devices: ActorRef = _
   var accommodations: ActorRef = _
+  var esp: ActorRef = _
 
   def init(): Unit ={
     system = ActorSystem()

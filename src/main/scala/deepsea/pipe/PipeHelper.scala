@@ -73,7 +73,7 @@ trait PipeHelper extends Codecs {
     }
   }
   def getPipeSegs(project: String, system: String = "", sqInSystem: Int = -1): List[PipeSeg] ={
-    GetMongoCacheConnection() match {
+    DBManager.GetMongoCacheConnection() match {
       case Some(mongo) =>
 
         val vPipeCompCollectionActualName = "vPipeCompActual"
@@ -82,7 +82,7 @@ trait PipeHelper extends Codecs {
         val vPipeJointsCollectionActualName = "vPipeJointsActual"
         val vPipeJointsActualCollection: MongoCollection[PipeSegActual] = mongo.getCollection(vPipeJointsCollectionActualName)
 
-        GetMongoConnection() match {
+        DBManager.GetMongoConnection() match {
           case Some(mongoData) =>
             val materialsNCollectionName = "materials-n"
             val materialsCollection: MongoCollection[Material] = mongoData.getCollection(materialsNCollectionName)

@@ -2,6 +2,8 @@ package local.common
 
 import deepsea.accomodations.AccommodationManager.{Accommodation, BBox}
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
+import deepsea.elec.ElecManager.ElecCable
+import deepsea.esp.EspManager.{EspElement, EspElementClass, EspObject}
 import deepsea.elec.ElecManager.{CableBoxesBySystem, ElecCable, TrayBySystem}
 import deepsea.hull.HullManager._
 import deepsea.pipe.PipeManager.{Material, MaterialTranslation, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SpoolLock, SystemDef, UnitTranslation, Units}
@@ -92,6 +94,12 @@ trait Codecs {
 
   implicit val BBoxDecoder: Decoder[BBox] = deriveDecoder[BBox]
   implicit val BBoxEncoder: Encoder[BBox] = deriveEncoder[BBox]
+
+  implicit val EspElementDecoder: Decoder[EspElement] = deriveDecoder[EspElement]
+  implicit val EspElementEncoder: Encoder[EspElement] = deriveEncoder[EspElement]
+
+  implicit val EspObjectDecoder: Decoder[EspObject] = deriveDecoder[EspObject]
+  implicit val EspObjectEncoder: Encoder[EspObject] = deriveEncoder[EspObject]
 
 
   //KOKOVIN
@@ -186,6 +194,7 @@ trait Codecs {
   implicit val CableBoxesBySystemDecoder: Decoder[CableBoxesBySystem] = deriveDecoder[CableBoxesBySystem]
   implicit val CableBoxesBySystemEncoder: Encoder[CableBoxesBySystem] = deriveEncoder[CableBoxesBySystem]
 
+
   val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
     //BOGDAN
 
@@ -209,6 +218,8 @@ trait Codecs {
     classOf[UnitTranslation],
     classOf[BBox],
     classOf[ElecCable],
+    classOf[EspObject],
+    classOf[EspElement],
 
     //KOKOVIN
     classOf[EleComplect],
@@ -225,10 +236,6 @@ trait Codecs {
     classOf[AnkerPlate],
     classOf[CableBoxModule],
     classOf[NestLock],
-
-    //MAMONOV
-    classOf[TrayBySystem],
-    classOf[CableBoxesBySystem]
   ), DEFAULT_CODEC_REGISTRY)
 
   def mongoDatabase(): MongoDatabase = MongoDB.mongoClient().getDatabase("3degdatabase").withCodecRegistry(codecRegistry)
