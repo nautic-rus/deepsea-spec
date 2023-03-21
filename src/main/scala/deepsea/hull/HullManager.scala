@@ -6,9 +6,10 @@ import akka.util.Timeout
 import com.mongodb.BasicDBObject
 import deepsea.App
 import deepsea.actors.ActorManager
-import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection}
+import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection, GetOracleConnectionFromPool, timeout}
+import deepsea.esp.EspManager.GetHullEsp
 import deepsea.files.FileManager.GenerateUrl
-import deepsea.hull.HullManager.{BsDesignNode, GetBsDesignNodes, GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, GetHullSystems, HullEsp, HullPartPlateDef, HullPartProfileDef, HullSystem, PlatePart, ProfilePart, RemoveParts, SetHullEsp}
+import deepsea.hull.HullManager.{BsDesignNode, GetBsDesignNodes, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, GetHullSystems, HullEsp, HullPartPlateDef, HullPartProfileDef, HullSystem, PlatePart, ProfilePart, RemoveParts}
 import deepsea.hull.classes.HullPart
 import deepsea.pipe.PipeManager.{Material, PipeSeg, PipeSegActual, ProjectName}
 import io.circe.{Decoder, Encoder}
@@ -38,7 +39,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
 import java.io.{File, FileOutputStream}
 import java.nio.file.Files
-import java.sql.ResultSet
+import java.sql.{Connection, ResultSet}
 import java.util
 import java.util.concurrent.TimeUnit
 import java.util.zip.{ZipEntry, ZipOutputStream}
@@ -56,11 +57,11 @@ object HullManager {
 
   case class GetHullPartsByDocNumber(project: String, docNumber: String)
 
-  case class GetHullEsp(docNumber: String, revision: String = "")
-
-  case class SetHullEsp(project: String, docNumber: String, user: String, revision: String)
-
-  case class GetHullEspFiles(project: String, docNumber: String, docName: String, revision: String)
+//  case class GetHullEsp(docNumber: String, revision: String = "")
+//
+//  case class SetHullEsp(project: String, docNumber: String, user: String, revision: String)
+//
+//  case class GetHullEspFiles(project: String, docNumber: String, docName: String, revision: String)
 
   case class HullPartPlateDef(PART_OID: Int, MATERIAL: String, MATERIAL_OID: Int, THICK: Double, STOCK_CODE: String)
 
@@ -237,55 +238,60 @@ class HullManager extends Actor with Codecs{
 
     //GET CURRENT TEMPLE PART LIST, GET AND SET ESP
     case GetHullPartsByDocNumber(project, docNumber) =>
-      sender() ! genForanPartsByDrawingNumJSON(project, docNumber)
-    case GetHullEsp(docNumber, revision) =>
-      val mongo = mongoClient()
-      val partLists = mongo.getDatabase(App.conf.getString("mongo.db")).getCollection(espCollectionName).withCodecRegistry(codecRegistry)
-      val partListsHistory = mongo.getDatabase(App.conf.getString("mongo.db")).getCollection(espCollectionName + "History").withCodecRegistry(codecRegistry)
-      val dbObject = new BasicDBObject()
-      dbObject.put("docNumber", docNumber)
-      if (revision != "") {
-        dbObject.put("revision", revision)
-      }
-      Await.result(partLists.find[HullEsp](dbObject).first().toFuture(), Duration(10, SECONDS)) match {
-        case existSP: HullEsp =>
-          sender() ! existSP.asJson.noSpaces
-        case _ =>
-          Await.result(partListsHistory.find[HullEsp](dbObject).first().toFuture(), Duration(10, SECONDS)) match {
-            case existSP: HullEsp =>
-              sender() ! existSP.asJson.noSpaces
-            case _ =>
-              sender() ! "not found"
-          }
-      }
-    case SetHullEsp(project, docNumber, user, revision) =>
-      val hullParts = ForanPartsByDrawingNum(project, docNumber).sortBy(s => s.PART_CODE)
-      val mongo = mongoClient()
-      val partLists = mongo.getDatabase(App.conf.getString("mongo.db")).getCollection(espCollectionName).withCodecRegistry(codecRegistry)
-      val partListsHistory = mongo.getDatabase(App.conf.getString("mongo.db")).getCollection(espCollectionName + "History").withCodecRegistry(codecRegistry)
-
-      var version = 0
-      Await.result(partLists.find[HullEsp](new BasicDBObject("docNumber", docNumber)).first().toFuture(), Duration(10, SECONDS)) match {
-        case existSP: HullEsp =>
-          version = existSP.version + 1
-          Await.result(partListsHistory.insertOne(Document.apply(existSP.asJson.noSpaces)).toFuture(), Duration(10, SECONDS))
-          Await.result(partLists.deleteOne(new BasicDBObject("docNumber", docNumber)).toFuture(), Duration(10, SECONDS))
-        case _ => None
-      }
-
-      val date = new Date().getTime
-      val hullPartList = HullEsp(project, "hull", hullParts, docNumber, user, revision, date, version)
-      Await.result(partLists.insertOne(Document.apply(hullPartList.asJson.noSpaces)).toFuture(), Duration(10, SECONDS))
-
-      sender() ! "success"
-    case GetHullEspFiles(project, docNumber, docName, revision) =>
-      val rev = if (revision == "NO REV")  "" else revision
-      val file: String = Files.createTempDirectory("hullPdf").toAbsolutePath.toString + "/" + docNumber + "_rev" + rev + ".pdf"
-      genHullPartListEnPDF(project, docNumber, docName, rev, file)
-      Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
-        case url: String => sender() ! url.asJson.noSpaces
+      Await.result(ActorManager.esp ? GetHullEsp(project, "hull", docNumber), timeout.duration) match {
+        case res: String => sender() ! res
         case _ => sender() ! "error".asJson.noSpaces
       }
+
+      //sender() ! genForanPartsByDrawingNumJSON(project, docNumber)
+//    case GetHullEsp(docNumber, revision) =>
+//      val mongo = mongoClient()
+//      val partLists = mongo.getDatabase(App.conf.getString("mongo.db")).getCollection(espCollectionName).withCodecRegistry(codecRegistry)
+//      val partListsHistory = mongo.getDatabase(App.conf.getString("mongo.db")).getCollection(espCollectionName + "History").withCodecRegistry(codecRegistry)
+//      val dbObject = new BasicDBObject()
+//      dbObject.put("docNumber", docNumber)
+//      if (revision != "") {
+//        dbObject.put("revision", revision)
+//      }
+//      Await.result(partLists.find[HullEsp](dbObject).first().toFuture(), Duration(10, SECONDS)) match {
+//        case existSP: HullEsp =>
+//          sender() ! existSP.asJson.noSpaces
+//        case _ =>
+//          Await.result(partListsHistory.find[HullEsp](dbObject).first().toFuture(), Duration(10, SECONDS)) match {
+//            case existSP: HullEsp =>
+//              sender() ! existSP.asJson.noSpaces
+//            case _ =>
+//              sender() ! "not found"
+//          }
+//      }
+//    case SetHullEsp(project, docNumber, user, revision) =>
+//      val hullParts = ForanPartsByDrawingNum(project, docNumber).sortBy(s => s.PART_CODE)
+//      val mongo = mongoClient()
+//      val partLists = mongo.getDatabase(App.conf.getString("mongo.db")).getCollection(espCollectionName).withCodecRegistry(codecRegistry)
+//      val partListsHistory = mongo.getDatabase(App.conf.getString("mongo.db")).getCollection(espCollectionName + "History").withCodecRegistry(codecRegistry)
+//
+//      var version = 0
+//      Await.result(partLists.find[HullEsp](new BasicDBObject("docNumber", docNumber)).first().toFuture(), Duration(10, SECONDS)) match {
+//        case existSP: HullEsp =>
+//          version = existSP.version + 1
+//          Await.result(partListsHistory.insertOne(Document.apply(existSP.asJson.noSpaces)).toFuture(), Duration(10, SECONDS))
+//          Await.result(partLists.deleteOne(new BasicDBObject("docNumber", docNumber)).toFuture(), Duration(10, SECONDS))
+//        case _ => None
+//      }
+//
+//      val date = new Date().getTime
+//      val hullPartList = HullEsp(project, "hull", hullParts, docNumber, user, revision, date, version)
+//      Await.result(partLists.insertOne(Document.apply(hullPartList.asJson.noSpaces)).toFuture(), Duration(10, SECONDS))
+//
+//      sender() ! "success"
+//    case GetHullEspFiles(project, docNumber, docName, revision) =>
+//      val rev = if (revision == "NO REV")  "" else revision
+//      val file: String = Files.createTempDirectory("hullPdf").toAbsolutePath.toString + "/" + docNumber + "_rev" + rev + ".pdf"
+//      genHullPartListEnPDF(project, docNumber, docName, rev, file)
+//      Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
+//        case url: String => sender() ! url.asJson.noSpaces
+//        case _ => sender() ! "error".asJson.noSpaces
+//      }
 
     case GetHullPlatesForMaterial(project, material, thickness) =>
       sender() ! getPlates(project, material, thickness.toDoubleOption.getOrElse(0)).asJson.noSpaces

@@ -3,7 +3,7 @@ package local.common
 import deepsea.accomodations.AccommodationManager.{Accommodation, BBox}
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
 import deepsea.elec.ElecManager.ElecCable
-import deepsea.esp.EspManager.{EspElement, EspElementClass, EspObject}
+import deepsea.esp.EspManager.{EspElement, EspObject, HullEspObject, PipeEspObject}
 import deepsea.elec.ElecManager.{CableBoxesBySystem, ElecCable, TrayBySystem}
 import deepsea.hull.HullManager._
 import deepsea.pipe.PipeManager.{Material, MaterialTranslation, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SpoolLock, SystemDef, UnitTranslation, Units}
@@ -95,11 +95,12 @@ trait Codecs {
   implicit val BBoxDecoder: Decoder[BBox] = deriveDecoder[BBox]
   implicit val BBoxEncoder: Encoder[BBox] = deriveEncoder[BBox]
 
-  implicit val EspElementDecoder: Decoder[EspElement] = deriveDecoder[EspElement]
-  implicit val EspElementEncoder: Encoder[EspElement] = deriveEncoder[EspElement]
+  implicit val HullEspObjectDecoder: Decoder[HullEspObject] = deriveDecoder[HullEspObject]
+  implicit val HullEspObjectEncoder: Encoder[HullEspObject] = deriveEncoder[HullEspObject]
 
-  implicit val EspObjectDecoder: Decoder[EspObject] = deriveDecoder[EspObject]
-  implicit val EspObjectEncoder: Encoder[EspObject] = deriveEncoder[EspObject]
+  implicit val PipeEspObjectDecoder: Decoder[PipeEspObject] = deriveDecoder[PipeEspObject]
+  implicit val PipeEspObjectEncoder: Encoder[PipeEspObject] = deriveEncoder[PipeEspObject]
+
 
 
   //KOKOVIN
@@ -218,8 +219,8 @@ trait Codecs {
     classOf[UnitTranslation],
     classOf[BBox],
     classOf[ElecCable],
-    classOf[EspObject],
-    classOf[EspElement],
+    classOf[HullEspObject],
+    classOf[PipeEspObject],
 
     //KOKOVIN
     classOf[EleComplect],

@@ -25,7 +25,7 @@ object DBManager extends Codecs{
         configOracle.setJdbcUrl("jdbc:oracle:thin:@192.168.1.12:1521:ORA3DB")
         configOracle.setUsername("C" + project)
         configOracle.setPassword("Whatab0utus")
-        configOracle.setMaximumPoolSize(5)
+        configOracle.setMaximumPoolSize(2)
         oracleConnections += OracleConnection(project, new HikariDataSource(configOracle))
     }
     catch {
@@ -38,7 +38,7 @@ object DBManager extends Codecs{
   configPG.setJdbcUrl("jdbc:postgresql://192.168.1.26/deepsea")
   configPG.setUsername("deepsea")
   configPG.setPassword("Ship1234")
-  configPG.setMaximumPoolSize(10)
+  configPG.setMaximumPoolSize(5)
   val dsPG = new HikariDataSource(configPG)
 
   def GetOracleConnection(project: String): Option[Connection] ={

@@ -1,9 +1,10 @@
 package deepsea.esp
 
 import akka.actor.Actor
-import deepsea.esp.EspManager.{CreateEsp, EspElement, EspObject, GetEsp}
+import deepsea.database.DBManager
+import deepsea.esp.EspManager.{CreateEsp, EspObject, GetHullEsp, HullEspObject, InitIssues, Issue, PipeEspObject}
 import deepsea.pipe.PipeHelper
-import deepsea.pipe.PipeManager.{Material, PipeSeg}
+import deepsea.pipe.PipeManager.{Material, PipeSeg, ProjectName}
 import io.circe.generic.JsonCodec
 import io.circe.{Decoder, Encoder}
 import io.circe.syntax.EncoderOps
@@ -13,54 +14,134 @@ import io.circe._
 import io.circe.generic.JsonCodec
 import io.circe.syntax._
 import local.hull.PartManager.{ForanPartsByDrawingNum, PrdPart}
+import org.mongodb.scala.MongoCollection
 
 import java.util.{Date, UUID}
+import scala.collection.mutable.ListBuffer
+import scala.concurrent.Await
+import scala.concurrent.duration.{Duration, SECONDS}
 
 object EspManager{
 
-  case class EspObject(id: String, foranProject: String, docNumber: String, rev: String, date: Long, user: String, kind: String, elements: List[EspElement])
+  val espObjectsCollectionName = "esp-objects"
+  val espKinds: List[String] = List("hull", "pipe")
 
-  trait EspElementClass
-  case class EspElement(kind: String, prdPart: Option[PrdPart] = Option.empty[PrdPart], pipeSeg: Option[PipeSeg] = Option.empty[PipeSeg]){
-    def getOption: Option[EspElementClass] = {
-      kind match {
-        case "hull" => prdPart
-        case "pipe" => pipeSeg
-        case _ => Option.empty[EspElementClass]
-      }
-    }
-  }
+  case class HullEspObject(override val id: String,
+                           override val foranProject: String,
+                           override val docNumber: String,
+                           override val rev: String,
+                           override val date: Long,
+                           override val user: String,
+                           override val kind: String,
+                           override val taskId: Int,
+                           elements: List[PrdPart]) extends EspObject(id, foranProject, docNumber, rev, date, user, kind, taskId)
+  case class PipeEspObject(override val id: String,
+                           override val foranProject: String,
+                           override val docNumber: String,
+                           override val rev: String,
+                           override val date: Long,
+                           override val user: String,
+                           override val kind: String,
+                           override val taskId: Int,
+                           elements: List[PipeSeg]) extends EspObject(id, foranProject, docNumber, rev, date, user, kind, taskId)
 
-  case class CreateEsp(foranProject: String, docNumber: String, rev: String, user: String, kind: String)
-  case class GetEsp(docNumber: String, rev: String)
+  case class EspHistoryObject(override val id: String,
+                              override val foranProject: String,
+                              override val docNumber: String,
+                              override val rev: String,
+                              override val date: Long,
+                              override val user: String,
+                              override val kind: String,
+                              override val taskId: Int) extends EspObject(id, foranProject, docNumber, rev, date, user, kind, taskId)
+  abstract class EspObject(val id: String, val foranProject: String, val docNumber: String, val rev: String, val date: Long, val user: String, val kind: String, val taskId: Int)
+  trait EspElement
+
+
+  case class CreateEsp(foranProject: String, docNumber: String, rev: String, user: String, kind: String, taskId: String)
+  case class GetHullEsp(foranProject: String, kind: String, docNumber: String, rev: String = "")
+  case class GetPipeEsp(foranProject: String, kind: String, docNumber: String, rev: String = "")
+
+  case class Issue(id: Int, project: String, issue_type: String, doc_number: String, revision: String, department: String)
+  case class InitIssues()
 }
 
-class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper{
+class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper {
 
   override def preStart(): Unit = {
-    //val qw = getAllLatestEsp
-    //val jk = qw
+   // self ! InitIssues()
+//    val qw = getAllLatestEsp()
+//    val jk = qw
     //self ! CreateEsp("N002", "200101-222-104", "C", "isaev", "hull")
   }
   override def receive: Receive = {
-    case CreateEsp(foranProject, docNumber, rev, user, kind) =>
+    case CreateEsp(foranProject, docNumber, rev, user, kind, taskId) =>
       val id = UUID.randomUUID().toString
       val date = new Date().getTime
-      val hullElements = kind match {
+      kind match {
         case "hull" =>
-          ForanPartsByDrawingNum(foranProject, docNumber).map(x => EspElement("hull", prdPart = Option(x)))
+          addHullEsp(HullEspObject(id, foranProject, docNumber, rev, date, user, kind, taskId.toIntOption.getOrElse(0), elements = ForanPartsByDrawingNum(foranProject, docNumber)))
         case "pipe" =>
           val projectSystem = getSystemAndProjectFromDocNumber(docNumber)
-          val pipeSegs = getPipeSegs(projectSystem._1, projectSystem._2)
-          pipeSegs.map(x => EspElement("pipe", pipeSeg = Option(x)))
-        case _ => List.empty[EspElement]
+          addPipeEsp(PipeEspObject(id, foranProject, docNumber, rev, date, user, kind, taskId.toIntOption.getOrElse(0), elements = getPipeSegs(projectSystem._1, projectSystem._2)))
+        case _ => Option.empty[EspObject]
       }
-      val esp = EspObject(id, foranProject, docNumber, rev, date, user, kind, hullElements)
-      addEsp(esp)
       sender() ! "success".asJson.noSpaces
-    case GetEsp(docNumber, rev) =>
-      sender() ! getAllLatestEsp.asJson.noSpaces
-      //sender() ! getLatestEsp(docNumber, rev).asJson.noSpaces
+    case GetHullEsp(foranProject, kind, docNumber, rev) =>
+      kind match {
+        case "hull" =>
+          sender() ! getHullLatestEsp(foranProject, kind, docNumber, rev).asJson.noSpaces
+        case "pipe" =>
+          sender() ! getPipeLatestEsp(foranProject, kind, docNumber, rev).asJson.noSpaces
+        case _ =>
+          sender() ! "error".asJson.noSpaces
+      }
+    case InitIssues() =>
+      DBManager.GetMongoConnection() match {
+        case Some(mongo) =>
+          val issues = ListBuffer.empty[Issue]
+          DBManager.GetPGConnection() match {
+            case Some(c) =>
+              val s = c.createStatement()
+              val query = "select * from issue"
+              val rs = s.executeQuery(query)
+              while (rs.next()){
+                issues += Issue(
+                  rs.getInt("id"),
+                  rs.getString("project"),
+                  rs.getString("issue_type"),
+                  rs.getString("doc_number"),
+                  rs.getString("revision"),
+                  rs.getString("department"),
+                )
+              }
+              s.close()
+              c.close()
+          }
+          val date = new Date().getTime
+          val id = UUID.randomUUID().toString
+          val projectNamesCollection: MongoCollection[ProjectName] = mongo.getCollection("project-names")
+          val projectNames = Await.result(projectNamesCollection.find().toFuture(), Duration(30, SECONDS)) match {
+            case values: Seq[ProjectName] => values.toList
+            case _ => List.empty[ProjectName]
+          }
+          issues.filter(x => x.issue_type == "RKD").groupBy(_.doc_number).foreach(issue => {
+            projectNames.find(_.pdsp == issue._2.head.project) match {
+              case Some(project) =>
+                issue._2.head.department match {
+                  case "Hull" =>
+                    val parts = ForanPartsByDrawingNum(project.foran, issue._1)
+                    if (parts.nonEmpty){
+                      addHullEsp(HullEspObject(id, project.foran, issue._2.head.doc_number, issue._2.head.revision, date, "op", "hull", issue._2.head.id, elements = parts))
+                    }
+                  case "System" =>
+                  case _ => None
+                }
+              case _ => None
+            }
+          })
+        case _ => None
+      }
+      val q = 0
     case _ => None
   }
 }

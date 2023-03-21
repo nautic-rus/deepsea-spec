@@ -1,77 +1,197 @@
 package deepsea.esp
 
+import com.mongodb.client.model.BsonField
 import deepsea.database.DBManager
-import deepsea.esp.EspManager.EspObject
+import deepsea.esp.EspManager.{EspElement, EspHistoryObject, EspObject, HullEspObject, PipeEspObject, espKinds, espObjectsCollectionName}
+import local.common.Codecs
+import org.bson.conversions.Bson
 import org.mongodb.scala.model.Accumulators.addToSet
-import org.mongodb.scala.{Document, MongoCollection}
-import org.mongodb.scala.model.Aggregates.{group, sort}
+import org.mongodb.scala.{Document, MongoCollection, model}
+import org.mongodb.scala.model.Aggregates.{addFields, group, project, replaceWith, sort}
+import org.mongodb.scala.model.{BsonField, Field}
 import org.mongodb.scala.model.Filters.{and, empty, equal}
-import org.mongodb.scala.model.Sorts.descending
+import org.mongodb.scala.model.Sorts.{ascending, descending}
 
+import scala.collection.mutable.ListBuffer
 import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, SECONDS}
 
-trait EspManagerHelper {
-  def addEsp(esp: EspObject): Unit ={
+trait EspManagerHelper extends Codecs{
+  def addHullEsp(esp: HullEspObject): Unit ={
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
-        val espCollectionName = "esp-objects"
-        val espCollection: MongoCollection[EspObject] = mongo.getCollection(espCollectionName)
+        val espCollectionName = List(espObjectsCollectionName, esp.foranProject, esp.kind).mkString("-").toLowerCase
+        val espCollection: MongoCollection[HullEspObject] = mongo.getCollection(espCollectionName)
+        Await.result(espCollection.insertOne(esp).toFuture(), Duration(60, SECONDS))
+      case _ => None
+    }
+  }
+  def addPipeEsp(esp: PipeEspObject): Unit ={
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val espCollectionName = List(espObjectsCollectionName, esp.foranProject, esp.kind).mkString("-").toLowerCase
+        val espCollection: MongoCollection[PipeEspObject] = mongo.getCollection(espCollectionName)
         Await.result(espCollection.insertOne(esp).toFuture(), Duration(10, SECONDS))
       case _ => None
     }
   }
-  def getLatestEsp(docNumber: String, rev: String): Option[EspObject] ={
+  def getHullLatestEsp(foranProject: String, kind: String, docNumber: String, rev: String): Option[HullEspObject] ={
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
-        val espCollectionName = "esp-objects"
-        val espCollection: MongoCollection[EspObject] = mongo.getCollection(espCollectionName)
-        Await.result(espCollection.find(and(equal("docNumber", docNumber), equal("rev", rev))).sort(descending("date")).first().toFuture(), Duration(10, SECONDS)) match {
-          case espObject: EspObject => Option(espObject)
-          case _ => Option.empty[EspObject]
+        val espCollectionName = List(espObjectsCollectionName, foranProject, kind).mkString("-").toLowerCase
+        val espCollection: MongoCollection[HullEspObject] = mongo.getCollection(espCollectionName)
+        if (rev == ""){
+          Await.result(espCollection.find(and(equal("docNumber", docNumber))).sort(descending("date")).first().toFuture(), Duration(10, SECONDS)) match {
+            case espObject: HullEspObject => Option(espObject)
+            case _ => Option.empty[HullEspObject]
+          }
+        }
+        else{
+          Await.result(espCollection.find(and(equal("docNumber", docNumber), equal("rev", rev))).sort(descending("date")).first().toFuture(), Duration(10, SECONDS)) match {
+            case espObject: HullEspObject => Option(espObject)
+            case _ => Option.empty[HullEspObject]
+          }
         }
       case _ => None
     }
   }
-  def getAllEsp: List[EspObject] ={
-    DBManager.GetMongoConnection() match {
-      case Some(mongo) =>
-        val espCollectionName = "esp-objects"
-        val espCollection: MongoCollection[EspObject] = mongo.getCollection(espCollectionName)
-        Await.result(espCollection.find().sort(descending("date")).first().toFuture(), Duration(10, SECONDS)) match {
-          case espObjects: Seq[EspObject] => espObjects.toList
-          case _ => List.empty[EspObject]
-        }
-      case _ => List.empty[EspObject]
-    }
+  def getAllEspHistory(foranProject: String): List[EspHistoryObject] ={
+    val res = ListBuffer.empty[EspHistoryObject]
+    espKinds.foreach(kind => {
+      DBManager.GetMongoConnection() match {
+        case Some(mongo) =>
+          val espCollectionName = List(espObjectsCollectionName, foranProject, kind).mkString("-").toLowerCase
+          val espCollection: MongoCollection[Document] = mongo.getCollection(espCollectionName)
+          Await.result(espCollection.find().toFuture(), Duration(10, SECONDS)) match {
+            case espObject: Seq[Document] =>
+              res ++= espObject.map(esp => {
+                EspHistoryObject(
+                  esp.getString("id"),
+                  esp.getString("foranProject"),
+                  esp.getString("docNumber"),
+                  esp.getString("rev"),
+                  esp.getLong("date"),
+                  esp.getString("user"),
+                  esp.getString("kind"),
+                  esp.getInteger("taskId"),
+                )
+              })
+            case _ => Option.empty[HullEspObject]
+          }
+        case _ => None
+      }
+    })
+    res.toList
   }
-  def getAllLatestEsp: List[EspObject] ={
+  def getEspHistory(foranProject: String, docNumber: String): List[EspHistoryObject] ={
+    val res = ListBuffer.empty[EspHistoryObject]
+    espKinds.foreach(kind => {
+      DBManager.GetMongoConnection() match {
+        case Some(mongo) =>
+          val espCollectionName = List(espObjectsCollectionName, foranProject, kind).mkString("-").toLowerCase
+          val espCollection: MongoCollection[Document] = mongo.getCollection(espCollectionName)
+          Await.result(espCollection.find(and(equal("docNumber", docNumber))).toFuture(), Duration(10, SECONDS)) match {
+            case espObject: Seq[Document] =>
+              res ++= espObject.map(esp => {
+                EspHistoryObject(
+                  esp.getString("id"),
+                  esp.getString("foranProject"),
+                  esp.getString("docNumber"),
+                  esp.getString("rev"),
+                  esp.getLong("date"),
+                  esp.getString("user"),
+                  esp.getString("kind"),
+                  esp.getInteger("taskId"),
+                )
+              })
+            case _ => Option.empty[HullEspObject]
+          }
+        case _ => None
+      }
+    })
+    res.toList
+  }
+  def getEspHistoryWithElements(foranProject: String, kind: String, docNumber: String): List[EspObject] ={
+    val res = ListBuffer.empty[EspObject]
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
-        val espCollectionName = "esp-objects"
-        val espCollection = mongo.getCollection(espCollectionName)
-        try{
-          Await.result(espCollection.aggregate(Seq(sort(descending("date")), group(Document("docNumber" -> "$docNumber"),
-            addToSet("id", "$id"),
-            addToSet("foranProject", "$foranProject"),
-            addToSet("docNumber", "$docNumber"),
-            addToSet("rev", "$rev"),
-            addToSet("date", "$date"),
-            addToSet("elements", "$elements"),
-          ))).toFuture(), Duration(10, SECONDS)) match {
-            case espObjects: Seq[Document] =>
-              val q = espObjects.toList
-              val qa = q
-              List.empty[EspObject]
-            case _ => List.empty[EspObject]
+        val espCollectionName = List(espObjectsCollectionName, foranProject, kind).mkString("-").toLowerCase
+        kind match {
+          case "hull" =>
+            val espCollection: MongoCollection[HullEspObject] = mongo.getCollection(espCollectionName)
+            Await.result(espCollection.find(and(equal("docNumber", docNumber))).sort(descending("date")).toFuture(), Duration(10, SECONDS)) match {
+              case espObjects: Seq[HullEspObject] =>
+                res ++= espObjects
+              case _ => None
+            }
+          case "pipe" =>
+            val espCollection: MongoCollection[PipeEspObject] = mongo.getCollection(espCollectionName)
+            Await.result(espCollection.find(and(equal("docNumber", docNumber))).sort(descending("date")).toFuture(), Duration(10, SECONDS)) match {
+              case espObjects: Seq[PipeEspObject] =>
+                res ++= espObjects
+              case _ => None
+            }
+          case _ => None
+        }
+      case _ => None
+    }
+    res.toList
+  }
+  def getPipeLatestEsp(foranProject: String, kind: String, docNumber: String, rev: String): Option[PipeEspObject] ={
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val espCollectionName = List(espObjectsCollectionName, foranProject, kind).mkString("-").toLowerCase
+        val espCollection: MongoCollection[PipeEspObject] = mongo.getCollection(espCollectionName)
+        if (rev == ""){
+          Await.result(espCollection.find(and(equal("docNumber", docNumber))).sort(descending("date")).first().toFuture(), Duration(10, SECONDS)) match {
+            case espObject: PipeEspObject => Option(espObject)
+            case _ => Option.empty[PipeEspObject]
           }
         }
-        catch {
-          case e: Exception =>
-            println(e.toString)
-            List.empty[EspObject]
+        else{
+          Await.result(espCollection.find(and(equal("docNumber", docNumber), equal("rev", rev))).sort(descending("date")).first().toFuture(), Duration(10, SECONDS)) match {
+            case espObject: PipeEspObject => Option(espObject)
+            case _ => Option.empty[PipeEspObject]
+          }
         }
-      case _ => List.empty[EspObject]
+      case _ => None
     }
+  }
+  def getAllLatestEsp(projects: List[String] = List("N002", "N004")): List[EspObject] ={
+    val res = ListBuffer.empty[EspObject]
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        projects.foreach(project => {
+          espKinds.foreach(kind => {
+            val espCollectionName = List(espObjectsCollectionName, project, kind).mkString("-").toLowerCase
+            val espCollection: MongoCollection[EspObject] = mongo.getCollection(espCollectionName)
+            try{
+              Await.result(espCollection.aggregate(
+                Seq(
+                  sort(ascending("date")),
+                  group(
+                    Document("_id" -> "$docNumber"),
+                    model.BsonField("id", Document("$last" -> "$id")),
+                    model.BsonField("foranProject", Document("$last" -> "$foranProject")),
+                    model.BsonField("docNumber", Document("$last" -> "$docNumber")),
+                    model.BsonField("rev", Document("$last" -> "$rev")),
+                    model.BsonField("date", Document("$last" -> "$date")),
+                    model.BsonField("user", Document("$last" -> "$user")),
+                    model.BsonField("kind", Document("$last" -> "$kind")),
+                    model.BsonField("elements", Document("$last" -> "$elements")),
+                  )
+                )).toFuture(), Duration(10, SECONDS)) match {
+                case espObjects: Seq[EspObject] => res ++= espObjects.toList
+                case _ => None
+              }
+            }
+            catch {
+              case e: Exception => println(e.toString)
+            }
+          })
+        })
+      case _ => None
+    }
+    res.toList
   }
 }

@@ -13,14 +13,14 @@ import deepsea.App
 import deepsea.actors.ActorManager
 import deepsea.actors.ActorStartupManager.HTTPManagerStarted
 import deepsea.elec.ElecManager._
-import deepsea.hull.HullManager.{GetBsDesignNodes, GetHullEsp, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, GetHullSystems, RemoveParts, SetHullEsp}
+import deepsea.hull.HullManager.{GetBsDesignNodes, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, GetHullSystems, RemoveParts}
 import deepsea.spec.SpecManager._
 import org.apache.log4j.{LogManager, Logger}
 import play.api.libs.json.{JsValue, Json}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
 import deepsea.accomodations.AccommodationManager.{AddAccommodationGroup, GetAccommodations, GetAccommodationsESP, SetAccommodationLabel}
 import deepsea.devices.DeviceManager.{AddDeviceToSystem, GetDevices, GetDevicesESP, RemoveDeviceFromSystem}
-import deepsea.esp.EspManager.{CreateEsp, GetEsp}
+import deepsea.esp.EspManager.CreateEsp
 import deepsea.pipe.PipeManager.{GetPipeESP, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSpoolModel, GetSystems, GetZones, SetSpoolLock}
 
 import java.io.File
@@ -59,15 +59,18 @@ class HTTPManager extends Actor {
       (get & path("hullPartList") & parameter("project") & parameter("docNumber")) { (project, docNumber) =>
         askFor(ActorManager.hullManager, GetHullPartsByDocNumber(project, docNumber))
       },
-      (get & path("hullEsp") & parameter("docNumber") & parameter("revision")) { (docNumber, revision) =>
-        askFor(ActorManager.hullManager, GetHullEsp(docNumber, revision))
-      },
-      (get & path("setHullEsp") & parameter("project") & parameter("docNumber") & parameter("user") & parameter("revision")) { (project, docNumber, user, revision) =>
-        askFor(ActorManager.hullManager, SetHullEsp(project, docNumber, user, revision))
-      },
-      (get & path("hullEspFiles") & parameter("project") & parameter("docNumber") & parameter("docName") & parameter("revision")) { (project, docNumber, docName, revision) =>
-        askFor(ActorManager.hullManager, GetHullEspFiles(project, docNumber, docName, revision))
-      },
+//      (get & path("createHullEsp") & parameter("project", "docNumber", "rev", "user", "kind", "taskId")) { (project, docNumber, rev, user, kind, takId) =>
+//        askFor(ActorManager.esp, CreateEsp(project, docNumber, rev, user, kind, taskId))
+//      },
+//      (get & path("hullEsp") & parameter("docNumber") & parameter("revision")) { (docNumber, revision) =>
+//        askFor(ActorManager.hullManager, GetHullEsp(docNumber, revision))
+//      },
+//      (get & path("setHullEsp") & parameter("project") & parameter("docNumber") & parameter("user") & parameter("revision")) { (project, docNumber, user, revision) =>
+//        askFor(ActorManager.hullManager, SetHullEsp(project, docNumber, user, revision))
+//      },
+//      (get & path("hullEspFiles") & parameter("project") & parameter("docNumber") & parameter("docName") & parameter("revision")) { (project, docNumber, docName, revision) =>
+//        askFor(ActorManager.hullManager, GetHullEspFiles(project, docNumber, docName, revision))
+//      },
       (get & path("hullSystems") & parameter("project")) { (project) =>
         askFor(ActorManager.hullManager, GetHullSystems(project))
       },
@@ -243,11 +246,9 @@ class HTTPManager extends Actor {
       (get & path("eqFoundationsUpdateStatus") & parameter("project") & parameter("id") & parameter("user")) { (project, id, user) =>
         askFor(ActorManager.spec, UpdateStatusEqFoundations(project, id, user))
       },
-      (get & path("esp") & parameter("docNumber", "revision")) { (docNumber, revision) =>
-        askFor(ActorManager.esp, GetEsp(docNumber, revision))
-      },
-      (get & path("createEsp") & parameter("foranProject", "docNumber", "rev", "user", "kind")) { (foranProject, docNumber, rev, user, kind) =>
-        askFor(ActorManager.esp, CreateEsp(foranProject, docNumber, rev, user, kind))
+
+      (get & path("createHullEsp") & parameter("foranProject", "docNumber", "rev", "user", "kind", "taskId")) { (foranProject, docNumber, rev, user, kind, taskId) =>
+        askFor(ActorManager.esp, CreateEsp(foranProject, docNumber, rev, user, kind, taskId))
       },
     )
   }

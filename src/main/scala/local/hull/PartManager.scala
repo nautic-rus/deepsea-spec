@@ -1,6 +1,6 @@
 package local.hull
 
-import deepsea.esp.EspManager.{EspElement, EspElementClass}
+import deepsea.esp.EspManager.{EspElement}
 import deepsea.pipe.PipeManager.Material
 import io.circe.generic.JsonCodec
 import io.circe.{Decoder, Encoder}
@@ -38,7 +38,7 @@ object PartManager extends PartHelper with Codecs {
                       FH: Double = 0.0,
                       FT: Double = 0.0,
                       STRGROUP:String=""
-                    ) extends EspElementClass
+                    ) extends EspElement
 
 
   def genForanPartLabelByDrawingNumAndPartNameJSON(project: String, drNum: String, partName: String): String = {
