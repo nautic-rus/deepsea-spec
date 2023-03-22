@@ -13,7 +13,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, SECONDS}
 import scala.io.Source
 
-trait ElecHelper extends Codecs{
+trait ElecHelper extends Codecs {
   def getCablesInfo(project: String): List[ElecCable] = {
     val cables = ListBuffer.empty[ElecCable]
     DBManager.GetOracleConnection(project) match {
@@ -108,6 +108,47 @@ trait ElecHelper extends Codecs{
         rs.close()
         s.close()
         c.close()
+
+
+        val angleCode: String = "MTLESNSTLXXX0047";
+        val angle: Material = materials.find(x => x.code == angleCode) match {
+          case Some(value) => value
+          case _ => Material()
+        }
+
+        var totalHeight: Double = 0.0;
+        res.groupBy(x => x.stockCode).foreach(gr => {
+          val len = gr._2.map(_.length).sum;
+          totalHeight += 0.3 * Math.ceil(len / 1.2) * 2;
+        })
+        val wght: Double = totalHeight * angle.singleWeight;
+        val totalWeight: String = if (wght < 0.01) " 0.01" else String.format("%.2f", wght);
+
+        res += new TraysBySystem(
+          doc,
+          0,
+          "",
+          0,
+          totalWeight.toDoubleOption.getOrElse(0.0),
+          0.0,
+          0.0,
+          0.0,
+          "",
+          0,
+          angleCode,
+          "",
+          "",
+          0.0,
+          0.0,
+          0.0,
+          "",
+          0.0,
+          0.0,
+          0.0,
+          totalHeight,
+          angle
+        )
+
       case _ =>
     }
     res.toList
@@ -173,7 +214,9 @@ trait ElecHelper extends Codecs{
             Option(rs.getDouble("N2_Y")).getOrElse(0.0),
             Option(rs.getDouble("N2_Z")).getOrElse(0.0),
             Option(rs.getDouble("LENGTH")).getOrElse(0.0),
-            materials.find(x => {x.code == code || name.contains(x.name)}) match {
+            materials.find(x => {
+              x.code == code || name.contains(x.name)
+            }) match {
               case Some(value) => value
               case _ => Material()
             }
