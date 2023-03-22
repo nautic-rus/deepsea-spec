@@ -69,7 +69,7 @@ object EspManager{
 class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper {
 
   override def preStart(): Unit = {
-     self ! InitIssues()
+     //self ! InitIssues()
 //    val qw = getAllLatestEsp()
 //    val jk = qw
     //self ! CreateEsp("N002", "200101-222-104", "C", "isaev", "hull")
