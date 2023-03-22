@@ -98,6 +98,7 @@ object ElecManager {
                             y_n2: Double = 0,
                             z_n2: Double = 0,
                             length: Double = 0,
+//                            height: Double = 0,
                             material: Material
                           )
 
@@ -128,9 +129,9 @@ object ElecManager {
                                  material: Material
                                )
 
-  case class TraysAndCableBoxes (
+  case class TrayAndCableBox (
                                 trays: List[TraysBySystem],
-                                cableBoxes: List[CableBoxesBySystem]
+                                cableBoxes: List[CableBoxesBySystem],
                                 )
 
 

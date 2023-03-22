@@ -6,7 +6,7 @@ import com.itextpdf.layout.Document
 import com.itextpdf.layout.element.{Cell, Paragraph, Table, Text}
 import com.itextpdf.layout.properties.{HorizontalAlignment, TextAlignment, VerticalAlignment}
 import deepsea.elec.{ElecHelper, ElecManager}
-import deepsea.elec.ElecManager.{CableBoxesBySystem, TraysAndCableBoxes, TraysBySystem}
+import deepsea.elec.ElecManager.{CableBoxesBySystem, TrayAndCableBox, TraysBySystem}
 import deepsea.materials.MaterialsHelper
 import deepsea.pipe.PipeManager.{Material, Units}
 import local.common.DBRequests.findChess
@@ -39,7 +39,7 @@ object EleTrayCableBoxReportRu extends UtilsPDF with ElecHelper{
   def genTraysAndCBListEnPDF(project: String, docNumber: String, docName: String, rev: String, lang: String): String = {
 
    /* val materials: List[Material] = getMaterials*/
-    val rawData: TraysAndCableBoxes = TraysAndCableBoxes(getTraysBySystem(project, docNumber), getCableBoxesBySystem(project, docNumber))
+    val rawData: TrayAndCableBox = TrayAndCableBox(getTraysBySystem(project, docNumber), getCableBoxesBySystem(project, docNumber))
     val filePath: String = Files.createTempDirectory("traysCbPdf").toAbsolutePath.toString + File.separator + docNumber + "_rev" + rev + ".pdf"
     val rows: List[Item11ColumnsEN] = genRows(rawData, docNumber, rev, lang)
     val totalRows: List[Item11ColumnsEN] = genTotalRows(rawData, docNumber, rev, lang)
@@ -141,7 +141,7 @@ object EleTrayCableBoxReportRu extends UtilsPDF with ElecHelper{
     retBuff.toList
   }
 
-  private def genRows(rawData: TraysAndCableBoxes, docNumber: String, rev: String, lang: String): List[Item11ColumnsEN] = {
+  private def genRows(rawData: TrayAndCableBox, docNumber: String, rev: String, lang: String): List[Item11ColumnsEN] = {
     val chess: DrawingChess = {
       val l = findChess(docNumber, rev)
       if (l.nonEmpty) l.head else DrawingChess()
@@ -200,7 +200,7 @@ object EleTrayCableBoxReportRu extends UtilsPDF with ElecHelper{
     cbsRows.sortBy(s => s.A1).toList.sortBy(s => if (s.A1.contains(".")) s.A1.split("\\.").map(s => s.reverse.padTo(10 - s.length, '0').reverse).mkString("") else s.A1.reverse.padTo(10 - s.A1.length, '0').reverse)
   }
 
-  private def genTotalRows(rawData: TraysAndCableBoxes, docNumber: String, rev: String, lang: String): List[Item11ColumnsEN] = {
+  private def genTotalRows(rawData: TrayAndCableBox, docNumber: String, rev: String, lang: String): List[Item11ColumnsEN] = {
     val chess: DrawingChess = {
       val l = findChess(docNumber, rev)
       if (l.nonEmpty) l.head else DrawingChess()
