@@ -7,9 +7,9 @@ import com.mongodb.BasicDBObject
 import deepsea.App
 import deepsea.actors.ActorManager
 import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection, GetOracleConnectionFromPool, timeout}
-import deepsea.esp.EspManager.GetHullEsp
+import deepsea.esp.EspManager.{GetEsp, GetHullEsp}
 import deepsea.files.FileManager.GenerateUrl
-import deepsea.hull.HullManager.{BsDesignNode, GetBsDesignNodes, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, GetHullSystems, HullEsp, HullPartPlateDef, HullPartProfileDef, HullSystem, PlatePart, ProfilePart, RemoveParts}
+import deepsea.hull.HullManager.{BsDesignNode, GetBsDesignNodes, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, GetHullSystems, HullEsp, HullPartPlateDef, HullPartProfileDef, HullSystem, PlatePart, ProfilePart, RemoveParts}
 import deepsea.hull.classes.HullPart
 import deepsea.pipe.PipeManager.{Material, PipeSeg, PipeSegActual, ProjectName}
 import io.circe.{Decoder, Encoder}
@@ -61,7 +61,7 @@ object HullManager {
 //
 //  case class SetHullEsp(project: String, docNumber: String, user: String, revision: String)
 //
-//  case class GetHullEspFiles(project: String, docNumber: String, docName: String, revision: String)
+  case class GetHullEspFiles(project: String, docNumber: String, docName: String, revision: String)
 
   case class HullPartPlateDef(PART_OID: Int, MATERIAL: String, MATERIAL_OID: Int, THICK: Double, STOCK_CODE: String)
 
@@ -238,7 +238,7 @@ class HullManager extends Actor with Codecs{
 
     //GET CURRENT TEMPLE PART LIST, GET AND SET ESP
     case GetHullPartsByDocNumber(project, docNumber) =>
-      Await.result(ActorManager.esp ? GetHullEsp(project, "hull", docNumber), timeout.duration) match {
+      Await.result(ActorManager.esp ? GetEsp(project, "hull", docNumber), timeout.duration) match {
         case res: String => sender() ! res
         case _ => sender() ! "error".asJson.noSpaces
       }
@@ -284,14 +284,14 @@ class HullManager extends Actor with Codecs{
 //      Await.result(partLists.insertOne(Document.apply(hullPartList.asJson.noSpaces)).toFuture(), Duration(10, SECONDS))
 //
 //      sender() ! "success"
-//    case GetHullEspFiles(project, docNumber, docName, revision) =>
-//      val rev = if (revision == "NO REV")  "" else revision
-//      val file: String = Files.createTempDirectory("hullPdf").toAbsolutePath.toString + "/" + docNumber + "_rev" + rev + ".pdf"
-//      genHullPartListEnPDF(project, docNumber, docName, rev, file)
-//      Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
-//        case url: String => sender() ! url.asJson.noSpaces
-//        case _ => sender() ! "error".asJson.noSpaces
-//      }
+    case GetHullEspFiles(project, docNumber, docName, revision) =>
+      val rev = if (revision == "NO REV")  "" else revision
+      val file: String = Files.createTempDirectory("hullPdf").toAbsolutePath.toString + "/" + docNumber + "_rev" + rev + ".pdf"
+      genHullPartListEnPDF(project, docNumber, docName, rev, file)
+      Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
+        case url: String => sender() ! url.asJson.noSpaces
+        case _ => sender() ! "error".asJson.noSpaces
+      }
 
     case GetHullPlatesForMaterial(project, material, thickness) =>
       sender() ! getPlates(project, material, thickness.toDoubleOption.getOrElse(0)).asJson.noSpaces

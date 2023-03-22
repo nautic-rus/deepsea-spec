@@ -2,7 +2,7 @@ package deepsea.esp
 
 import akka.actor.Actor
 import deepsea.database.DBManager
-import deepsea.esp.EspManager.{CreateEsp, EspObject, GetHullEsp, HullEspObject, InitIssues, Issue, PipeEspObject}
+import deepsea.esp.EspManager.{CreateEsp, EspObject, GetEsp, GetHullEsp, HullEspObject, InitIssues, Issue, PipeEspObject}
 import deepsea.pipe.PipeHelper
 import deepsea.pipe.PipeManager.{Material, PipeSeg, ProjectName}
 import io.circe.generic.JsonCodec
@@ -58,8 +58,9 @@ object EspManager{
 
 
   case class CreateEsp(foranProject: String, docNumber: String, rev: String, user: String, kind: String, taskId: String)
-  case class GetHullEsp(foranProject: String, kind: String, docNumber: String, rev: String = "")
-  case class GetPipeEsp(foranProject: String, kind: String, docNumber: String, rev: String = "")
+  case class GetHullEsp(foranProject: String, docNumber: String, rev: String = "")
+  case class GetPipeEsp(foranProject: String, docNumber: String, rev: String = "")
+  case class GetEsp(foranProject: String, kind: String, docNumber: String, rev: String = "")
 
   case class Issue(id: Int, project: String, issue_type: String, doc_number: String, revision: String, department: String)
   case class InitIssues()
@@ -68,7 +69,7 @@ object EspManager{
 class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper {
 
   override def preStart(): Unit = {
-   // self ! InitIssues()
+     self ! InitIssues()
 //    val qw = getAllLatestEsp()
 //    val jk = qw
     //self ! CreateEsp("N002", "200101-222-104", "C", "isaev", "hull")
@@ -86,7 +87,7 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
         case _ => Option.empty[EspObject]
       }
       sender() ! "success".asJson.noSpaces
-    case GetHullEsp(foranProject, kind, docNumber, rev) =>
+    case GetEsp(foranProject, kind, docNumber, rev) =>
       kind match {
         case "hull" =>
           sender() ! getHullLatestEsp(foranProject, kind, docNumber, rev).asJson.noSpaces
@@ -129,11 +130,13 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
               case Some(project) =>
                 issue._2.head.department match {
                   case "Hull" =>
-                    val parts = ForanPartsByDrawingNum(project.foran, issue._1)
-                    if (parts.nonEmpty){
-                      addHullEsp(HullEspObject(id, project.foran, issue._2.head.doc_number, issue._2.head.revision, date, "op", "hull", issue._2.head.id, elements = parts))
-                    }
+//                    val parts = ForanPartsByDrawingNum(project.foran, issue._1)
+//                    if (parts.nonEmpty){
+//                      addHullEsp(HullEspObject(id, project.foran, issue._2.head.doc_number, issue._2.head.revision, date, "op", "hull", issue._2.head.id, elements = parts))
+//                    }
                   case "System" =>
+                    val projectSystem = getSystemAndProjectFromDocNumber(issue._2.head.doc_number)
+                    addPipeEsp(PipeEspObject(id, project.foran, issue._2.head.doc_number, issue._2.head.revision, date, "op", "pipe", issue._2.head.id, elements = getPipeSegs(projectSystem._1, projectSystem._2)))
                   case _ => None
                 }
               case _ => None

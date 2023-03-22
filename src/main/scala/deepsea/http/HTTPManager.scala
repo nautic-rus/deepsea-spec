@@ -13,7 +13,7 @@ import deepsea.App
 import deepsea.actors.ActorManager
 import deepsea.actors.ActorStartupManager.HTTPManagerStarted
 import deepsea.elec.ElecManager._
-import deepsea.hull.HullManager.{GetBsDesignNodes, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, GetHullSystems, RemoveParts}
+import deepsea.hull.HullManager.{GetBsDesignNodes, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, GetHullSystems, RemoveParts}
 import deepsea.spec.SpecManager._
 import org.apache.log4j.{LogManager, Logger}
 import play.api.libs.json.{JsValue, Json}
@@ -68,9 +68,9 @@ class HTTPManager extends Actor {
 //      (get & path("setHullEsp") & parameter("project") & parameter("docNumber") & parameter("user") & parameter("revision")) { (project, docNumber, user, revision) =>
 //        askFor(ActorManager.hullManager, SetHullEsp(project, docNumber, user, revision))
 //      },
-//      (get & path("hullEspFiles") & parameter("project") & parameter("docNumber") & parameter("docName") & parameter("revision")) { (project, docNumber, docName, revision) =>
-//        askFor(ActorManager.hullManager, GetHullEspFiles(project, docNumber, docName, revision))
-//      },
+      (get & path("hullEspFiles") & parameter("project") & parameter("docNumber") & parameter("docName") & parameter("revision")) { (project, docNumber, docName, revision) =>
+        askFor(ActorManager.hullManager, GetHullEspFiles(project, docNumber, docName, revision))
+      },
       (get & path("hullSystems") & parameter("project")) { (project) =>
         askFor(ActorManager.hullManager, GetHullSystems(project))
       },
@@ -248,6 +248,9 @@ class HTTPManager extends Actor {
       },
 
       (get & path("createHullEsp") & parameter("foranProject", "docNumber", "rev", "user", "kind", "taskId")) { (foranProject, docNumber, rev, user, kind, taskId) =>
+        askFor(ActorManager.esp, CreateEsp(foranProject, docNumber, rev, user, kind, taskId))
+      },
+      (get & path("createPipeEsp") & parameter("foranProject", "docNumber", "rev", "user", "kind", "taskId")) { (foranProject, docNumber, rev, user, kind, taskId) =>
         askFor(ActorManager.esp, CreateEsp(foranProject, docNumber, rev, user, kind, taskId))
       },
     )
