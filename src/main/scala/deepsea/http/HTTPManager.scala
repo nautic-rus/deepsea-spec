@@ -247,11 +247,11 @@ class HTTPManager extends Actor {
         askFor(ActorManager.spec, UpdateStatusEqFoundations(project, id, user))
       },
 
-      (get & path("createHullEsp") & parameter("project", "docNumber", "rev", "user", "kind", "taskId")) { (foranProject, docNumber, rev, user, kind, taskId) =>
-        askFor(ActorManager.esp, CreateEsp(foranProject, docNumber, rev, user, kind, taskId))
+      (get & path("createHullEsp") & parameter("project", "docNumber", "rev", "user", "kind", "taskId")) { (project, docNumber, rev, user, kind, taskId) =>
+        askFor(ActorManager.esp, CreateEsp(project, docNumber, rev, user, kind, taskId))
       },
-      (get & path("createPipeEsp") & parameter("project", "docNumber", "rev", "user", "kind", "taskId")) { (foranProject, docNumber, rev, user, kind, taskId) =>
-        askFor(ActorManager.esp, CreateEsp(foranProject, docNumber, rev, user, kind, taskId))
+      (get & path("createPipeEsp") & parameter("project", "docNumber", "rev", "user", "kind", "taskId")) { (project, docNumber, rev, user, kind, taskId) =>
+        askFor(ActorManager.esp, CreateEsp(project, docNumber, rev, user, kind, taskId))
       },
     )
   }
