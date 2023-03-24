@@ -69,10 +69,10 @@ object EspManager{
 class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper {
 
   override def preStart(): Unit = {
-     //self ! InitIssues()
+//    self ! InitIssues()
 //    val qw = getAllLatestEsp()
 //    val jk = qw
-    //self ! CreateEsp("N002", "200101-222-104", "C", "isaev", "hull")
+//    self ! CreateEsp("N002", "200101-222-104", "C", "isaev", "hull")
   }
   override def receive: Receive = {
     case CreateEsp(foranProject, docNumber, rev, user, kind, taskId) =>
@@ -130,10 +130,10 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
               case Some(project) =>
                 issue._2.head.department match {
                   case "Hull" =>
-//                    val parts = ForanPartsByDrawingNum(project.foran, issue._1)
-//                    if (parts.nonEmpty){
-//                      addHullEsp(HullEspObject(id, project.foran, issue._2.head.doc_number, issue._2.head.revision, date, "op", "hull", issue._2.head.id, elements = parts))
-//                    }
+                    val parts = ForanPartsByDrawingNum(project.foran, issue._1)
+                    if (parts.nonEmpty){
+                      addHullEsp(HullEspObject(id, project.foran, issue._2.head.doc_number, issue._2.head.revision, date, "op", "hull", issue._2.head.id, elements = parts))
+                    }
                   case "System" =>
                     val projectSystem = getSystemAndProjectFromDocNumber(issue._2.head.doc_number)
                     addPipeEsp(PipeEspObject(id, project.foran, issue._2.head.doc_number, issue._2.head.revision, date, "op", "pipe", issue._2.head.id, elements = getPipeSegs(projectSystem._1, projectSystem._2)))

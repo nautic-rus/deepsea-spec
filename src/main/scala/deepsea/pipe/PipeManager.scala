@@ -7,7 +7,7 @@ import akka.util.Timeout
 import deepsea.actors.ActorManager
 import deepsea.database.DatabaseManager
 import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection}
-import deepsea.esp.EspManager.{EspElement}
+import deepsea.esp.EspManager.{EspElement, GetEsp, GetHullEsp}
 import deepsea.files.FileManager.GenerateUrl
 import deepsea.pipe.PipeManager.{GetPipeESP, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSpoolModel, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SetSpoolLock, SpoolLock, SystemDef, UpdatePipeComp, UpdatePipeJoints}
 import io.circe.generic.JsonCodec
@@ -181,8 +181,12 @@ class PipeManager extends Actor with Codecs with PipeHelper {
     case GetPipeSegsBilling(project) => sender() ! getPipeSegsBilling(project).asJson.noSpaces
     case GetPipeSegsByDocNumber(docNumber, json) =>
       val projectSystem = getSystemAndProjectFromDocNumber(docNumber)
-      val pipeSegs = getPipeSegs(projectSystem._1, projectSystem._2)
-      sender() ! (if (json) pipeSegs.asJson.noSpaces else pipeSegs)
+      Await.result(ActorManager.esp ? GetEsp(projectSystem._1, "pipe", docNumber), timeout.duration) match {
+        case res: String => sender() ! res
+        case _ => sender() ! "error".asJson.noSpaces
+      }
+      //val pipeSegs = getPipeSegs(projectSystem._1, projectSystem._2)
+      //sender() ! (if (json) pipeSegs.asJson.noSpaces else pipeSegs)
     case SetSpoolLock(jsValue) =>
       setSpoolLock(jsValue)
       sender() ! "success".asJson.noSpaces
