@@ -274,7 +274,11 @@ trait AccommodationHelper {
     val userIds = ListBuffer.empty[String]
     res.sortBy(x =>
       if (x.material.name.contains("L=")){
-        "B" + addLeftZeros(x.userId)
+        val l = "(?<=L=)\\d+".r.findFirstIn(x.material.name) match {
+          case Some(value) => value
+          case _ => ""
+        }
+        "B" + addLeftZeros(x.material.code + addLeftZeros(l.length.toString, 10))
       }
       else if (x.userId.contains(".")) {
         "C" + addLeftZeros(x.userId.split("\\.").head) + addLeftZeros(x.userId.split("\\.").last)
