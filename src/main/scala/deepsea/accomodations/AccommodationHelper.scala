@@ -278,7 +278,7 @@ trait AccommodationHelper {
           case Some(value) => value
           case _ => ""
         }
-        "B" + addLeftZeros(x.material.code + addLeftZeros(l.length.toString, 10))
+        "B" + addLeftZeros(x.material.code + addLeftZeros(l, 10))
       }
       else if (x.userId.contains(".")) {
         "C" + addLeftZeros(x.userId.split("\\.").head) + addLeftZeros(x.userId.split("\\.").last)
