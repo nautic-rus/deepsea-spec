@@ -98,7 +98,7 @@ object ElecManager {
                             y_n2: Double = 0,
                             z_n2: Double = 0,
                             length: Double = 0,
-//                            height: Double = 0,
+                            //                            height: Double = 0,
                             material: Material
                           )
 
@@ -129,10 +129,34 @@ object ElecManager {
                                  material: Material
                                )
 
-  case class TrayAndCableBox (
-                                trays: List[TraysBySystem],
-                                cableBoxes: List[CableBoxesBySystem],
-                                )
+  case class TrayAndCableBox(
+                              trays: List[TraysBySystem],
+                              cableBoxes: List[CableBoxesBySystem],
+                            )
+
+  case class CableRoute(
+                     system: String = "",
+                     code: String = "",
+                     description: String = "",
+                     nom_section: String = "",
+                     diameter: Int = 0,
+                     seg_code: String,
+                     f_route:  Double = 0,
+                     length: Double = 0.0,
+                     from_node: String = "",
+                     from_node_desc: String = "",
+                     from_node_room: String = "",
+                     from_elem: String = "",
+                     from_elem_desc: String = "",
+                     to_node: String = "",
+                     to_node_desc: String = "",
+                     to_node_room: String = "",
+                     to_elem: String = "",
+                     to_elem_desc: String = "",
+                     cab_route_area: String = "",
+                     stockcode: String = "",
+                     material: Material
+                   )
 
 
   class ElecManager extends Actor with ElecHelper with Codecs {
