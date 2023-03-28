@@ -284,7 +284,7 @@ trait AccommodationHelper {
       }).foreach(x => {
       val userId = x.userId
       if (userIds.contains(x.userId)){
-        //x.userId = x.userId + "." + (userIds.count(y => y == x.userId)).toString
+        x.userId = x.userId + "." //+ (userIds.count(y => y == x.userId)).toString
       }
       userIds += userId
     })
