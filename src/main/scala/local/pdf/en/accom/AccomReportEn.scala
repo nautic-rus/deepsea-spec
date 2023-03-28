@@ -584,7 +584,11 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
     val rowsGrouped: List[Device] = {
       val step1: ListBuffer[Device] = ListBuffer.empty[Device]
       rawData.foreach(s => {
-        if (s.userId.contains("#")) {
+        if (s.userId.contains("*")){
+          val nuid = s.userId.split("\\.").head
+          step1 += s.copy(userId = nuid, zone = "")
+        }
+        else if (s.userId.contains("#")) {
           val nuid = s.userId.split("#").head
           step1 += s.copy(userId = nuid, zone = "")
         } else {

@@ -278,7 +278,7 @@ trait AccommodationHelper {
           case Some(value) => value
           case _ => ""
         }
-        "B" + addLeftZeros(x.material.code + addLeftZeros(l, 10))
+        "B" + addLeftZeros(l, 10)
       }
       else if (x.userId.contains(".")) {
         "C" + addLeftZeros(x.userId.split("\\.").head) + addLeftZeros(x.userId.split("\\.").last)
@@ -288,7 +288,7 @@ trait AccommodationHelper {
       }).foreach(x => {
       val userId = x.userId
       if (userIds.contains(x.userId)){
-        x.userId = x.userId + ".ANY" //+ (userIds.count(y => y == x.userId)).toString
+        x.userId = x.userId + "." + (userIds.count(y => y == x.userId)).toString + "*"
       }
       userIds += userId
     })
