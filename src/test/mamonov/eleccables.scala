@@ -11,45 +11,52 @@ import scala.io.Source
 
 class eleccables extends AnyFunSuite {
   val res = ListBuffer.empty[CableRoute];
-  DBManager.GetOracleConnection("N002") match {
+  DBManager.GetOracleConnection("P701") match {
     case Some(c) =>
-      val docNumber = "170701-888-130Э4";
-      val doc = docNumber.split("-").takeRight(2).mkString("-");
-      val query = Source.fromResource("queries/elecCables.sql").mkString.replaceAll(":docNumber", "'" + doc + "'");
-      val s = c.prepareStatement(query);
-      val rs = s.executeQuery();
+      val doc = "170701-888-130Э4";
       val materials: List[Material] = getMaterials();
-      while (rs.next()) {
-        val code = Option(rs.getString("STOCKCODE")).getOrElse("");
-        val name = Option(rs.getString("CODE")).getOrElse("");
-        res += CableRoute(
-          Option(rs.getString("SYSTEM")).getOrElse(""),
-          name,
-          Option(rs.getString("DESCR")).getOrElse(""),
-          Option(rs.getString("NOM_SECTION")).getOrElse(""),
-          Option(rs.getInt("O_DIAMETER")).getOrElse(0),
-          Option(rs.getString("SEG_CODE")).getOrElse(""),
-          Option(rs.getDouble("F_ROUT")).getOrElse(0),
-          Option(rs.getDouble("LENGTH")).getOrElse(0.0),
-          Option(rs.getString("FROM_NODE")).getOrElse(""),
-          Option(rs.getString("FROM_NODE_DESC")).getOrElse(""),
-          Option(rs.getString("FROM_NODE_ROOM")).getOrElse(""),
-          Option(rs.getString("FROM_ELEM")).getOrElse(""),
-          Option(rs.getString("FROM_ELEM_DESC")).getOrElse(""),
-          Option(rs.getString("TO_NODE")).getOrElse(""),
-          Option(rs.getString("TO_NODE_DESC")).getOrElse(""),
-          Option(rs.getString("TO_NODE_ROOM")).getOrElse(""),
-          Option(rs.getString("TO_ELEM")).getOrElse(""),
-          Option(rs.getString("TO_ELEM_DESC")).getOrElse(""),
-          Option(rs.getString("CAB_ROUTE_AREA")).getOrElse(""),
-          code,
-          materials.find(x => {
-            x.code == code || name.contains(x.name);
-          }) match {
-            case Some(value) => value;
-            case _ => Material();
-          }
-        )
+//      val doc = docNumber.split("-").takeRight(2).mkString("-");
+      val query = Source.fromResource("queries/elecCables.sql").mkString.replaceAll(":docNumber", "'%" + doc + "%'");
+      val s = c.createStatement();
+      val rs = s.executeQuery(query);
+      try {
+        while (rs.next()) {
+          val code = Option(rs.getString("STOCK_CODE")).getOrElse("");
+          val name = Option(rs.getString("CODE")).getOrElse("");
+          res += CableRoute(
+            Option(rs.getString("SYSTEM")).getOrElse(""),
+            name,
+            Option(rs.getString("DESCRIPTION")).getOrElse(""),
+            Option(rs.getString("NOM_SECTION")).getOrElse(""),
+            Option(rs.getInt("DIAMETER")).getOrElse(0),
+            Option(rs.getString("SEG_CODE")).getOrElse(""),
+            Option(rs.getDouble("F_ROUT")).getOrElse(0),
+            Option(rs.getDouble("LENGTH")).getOrElse(0.0),
+            Option(rs.getString("FROM_SYSTEM")).getOrElse(""),
+            Option(rs.getString("FROM_EQ_ID")).getOrElse(""),
+            Option(rs.getString("FROM_EQ_DESC")).getOrElse(""),
+            Option(rs.getString("FROM_EQ")).getOrElse(""),
+            Option(rs.getString("FROM_ZONE")).getOrElse(""),
+            Option(rs.getString("FROM_ZONE_DESC")).getOrElse(""),
+            Option(rs.getString("TO_SYSTEM")).getOrElse(""),
+            Option(rs.getString("TO_EQ_ID")).getOrElse(""),
+            Option(rs.getString("TO_EQ_DESC")).getOrElse(""),
+            Option(rs.getString("TO_EQ")).getOrElse(""),
+            Option(rs.getString("TO_ZONE")).getOrElse(""),
+            Option(rs.getString("TO_ZONE_DESC")).getOrElse(""),
+            Option(rs.getString("ROUTE_AREA")).getOrElse(""),
+            code,
+            materials.find(x => {
+              x.code == code || name.contains(x.name);
+            }) match {
+              case Some(value) => value;
+              case _ => Material();
+            }
+          )
+        }
+      }
+      catch {
+        case e: Exception => println(e.toString)
       }
       rs.close();
       s.close();
