@@ -77,7 +77,7 @@ object AccommodationManager{
           case "006" =>
             if (objType == 0 && profileLength != 0 && profileLength <= 400 && profileSection != 0){
               val length = Math.round(profileLength)
-              (if (weight != 0) weight else bsWeight) / (length / 1000 * material.singleWeight)
+              Math.ceil((if (weight != 0) weight else bsWeight) / (length / 1000 * material.singleWeight))
             }
             else{
               material.singleWeight
