@@ -288,7 +288,7 @@ trait AccommodationHelper {
         case Some(group) => group.userId
         case _ => "NoUserId"
       })
-    })
+    }).tapEach(x => x.units = x.material.units)
 
     val userIds = ListBuffer.empty[String]
     res.sortBy(x =>
@@ -311,7 +311,7 @@ trait AccommodationHelper {
       }
       userIds += userId
     })
-    res.tapEach(x => x.units = x.material.units).filter(_.material.code != "").toList
+    res.filter(_.material.code != "").toList
   }
   def addLeftZeros(input: String, length: Int = 5): String ={
     var res = input
