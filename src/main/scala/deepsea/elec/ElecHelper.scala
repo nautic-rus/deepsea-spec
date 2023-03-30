@@ -229,7 +229,7 @@ trait ElecHelper extends Codecs {
 
   def getCablesBySystem(project: String, docNumber: String): List[CableRoute] = {
     val res = ListBuffer.empty[CableRoute];
-    DBManager.GetOracleConnection("P701") match {
+    DBManager.GetOracleConnection(project) match {
       case Some(c) =>
         val materials: List[Material] = getMaterials();
         val query = Source.fromResource("queries/elecCables.sql").mkString.replaceAll(":docNumber", "'%" + docNumber + "%'");
