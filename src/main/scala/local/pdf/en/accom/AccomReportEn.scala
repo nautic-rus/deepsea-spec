@@ -596,14 +596,14 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
         }
       })
 
-      val step2: ListBuffer[Device] = ListBuffer.empty[Device]
-      step1.toList.groupBy(s => s.userId).foreach(gr => {
-        var acc = 0.0
-        gr._2.foreach(item => acc = acc + item.count)
-        step2 += gr._2.head.copy(count = acc)
-      })
+//      val step2: ListBuffer[Device] = ListBuffer.empty[Device]
+//      step1.toList.groupBy(s => s.userId).foreach(gr => {
+//        var acc = 0.0
+//        gr._2.foreach(item => acc = acc + item.count)
+//        step2 += gr._2.head.copy(count = acc)
+//      })
 
-      step2.toList
+      step1.toList
     }
     val rows: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
     rowsGrouped.foreach(row => {
