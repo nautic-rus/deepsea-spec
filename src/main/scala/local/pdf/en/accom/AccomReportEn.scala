@@ -644,11 +644,11 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
     }
 
     rawData.foreach(d => {
-      d.material = materials.find(x => x.code == d.material.code) match {
+      d.material = materials.find(x => x.code == d.material.code && x.project == d.material.project) match {
         case Some(value) => value
         case _ => d.material
       }
-      d.units = materials.find(x => x.code == d.material.code) match {
+      d.units = materials.find(x => x.code == d.material.code && x.project == d.material.project) match {
         case Some(value) => value.units
         case _ => d.units
       }
@@ -672,7 +672,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
         }
       }
 
-      val qtySubs: MaterialReplacement = materials.find(s => s.code.equals(row.material.code)) match {
+      val qtySubs: MaterialReplacement = materials.find(s => s.code.equals(row.material.code) && s.project == row.material.project) match {
         case Some(m) => {
           if (!row.units.equals(m.units)) {
             row.units + m.units match {
