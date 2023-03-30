@@ -5,7 +5,7 @@ import deepsea.database.DatabaseManager.RsIterator
 import deepsea.database.{DBManager, DatabaseManager}
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
 import deepsea.pipe.PipeManager.{Material, ProjectName, SystemDef, Units}
-import local.pdf.en.accom.AccomReportEn.{getSystemDefs, units}
+import local.pdf.en.accom.AccomReportEn.getSystemDefs
 import org.mongodb.scala.{MongoCollection, classTagToClassOf}
 import org.mongodb.scala.model.Filters.equal
 
@@ -251,29 +251,10 @@ trait AccommodationHelper {
       }
     }).toList ++
     accommodations.map(_.asDevice).filter(m => m.material.code != "" && groups.map(x => x.code).contains(m.material.code + m.zone)).groupBy(x => x.material.code + x.material.name + x.zone).map(acc => {
-      acc._2.head.copy(
-        weight = if (acc._2.head.material.name.contains("L=")){
-          acc._2.head.material.singleWeight
-        }
-        else{
-          acc._2.map(_.weight).sum
-        },
-        units = if (acc._2.head.material.name.contains("L=")){
-          "796"
-        }
-        else{
-          acc._2.head.material.units
-        },
-        count = acc._2.head.units match {
-          case "006" =>
-            if (acc._2.head.material.name.contains("L=")){
-              acc._2.length
-            }
-            else{
-              acc._2.head.count
-            }
-          case "055" => acc._2.head.material.singleWeight
-          case _ => acc._2.map(_.count).sum
+      acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.head.units match {
+        case "006" => acc._2.head.count
+        case "055" => acc._2.head.material.singleWeight
+        case _ => acc._2.map(_.count).sum
       }, userId = groups.find(x => x.code == acc._2.head.material.code + acc._2.head.zone) match {
         case Some(group) => group.userId
         case _ => "NoUserId"
@@ -288,7 +269,7 @@ trait AccommodationHelper {
         case Some(group) => group.userId
         case _ => "NoUserId"
       })
-    }).tapEach(x => x.units = x.material.units)
+    })
 
     val userIds = ListBuffer.empty[String]
     res.sortBy(x =>
@@ -311,7 +292,7 @@ trait AccommodationHelper {
       }
       userIds += userId
     })
-    res.filter(_.material.code != "").toList
+    res.tapEach(x => x.units = x.material.units).filter(_.material.code != "").toList
   }
   def addLeftZeros(input: String, length: Int = 5): String ={
     var res = input
