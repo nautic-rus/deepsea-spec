@@ -584,11 +584,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
     val rowsGrouped: List[Device] = {
       val step1: ListBuffer[Device] = ListBuffer.empty[Device]
       rawData.foreach(s => {
-        if (s.userId.contains("*")){
-          val nuid = s.userId.split("\\.").head
-          step1 += s.copy(userId = nuid, zone = "")
-        }
-        else if (s.userId.contains("#")) {
+        if (s.userId.contains("#")) {
           val nuid = s.userId.split("#").head
           step1 += s.copy(userId = nuid, zone = "")
         } else {
@@ -596,14 +592,15 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
         }
       })
 
-      val step2: ListBuffer[Device] = ListBuffer.empty[Device]
-      step1.toList.groupBy(s => s.userId).foreach(gr => {
-        var acc = 0.0
-        gr._2.foreach(item => acc = acc + item.count)
-        step2 += gr._2.head.copy(count = acc)
-      })
-
-      step2.toList
+//      val step2: ListBuffer[Device] = ListBuffer.empty[Device]
+//      step1.toList.groupBy(s => s.userId).foreach(gr => {
+//        var acc = 0.0
+//        gr._2.foreach(item => acc = acc + item.count)
+//        step2 += gr._2.head.copy(count = acc)
+//      })
+//
+//      step2.toList
+      step1.toList
     }
     val rows: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
     rowsGrouped.foreach(row => {
@@ -634,7 +631,8 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
       rows += Item11ColumnsEN(A1 = id, A2 = mat, A3 = unit, A4 = qty, A5 = weight, A6 = matDescr, A7 = room, A8 = drPos, A12 = row.material.code)
 
     })
-    rows.sortBy(s => s.A1).toList.sortBy(s => if (s.A1.contains(".")) s.A1.split("\\.").map(s => s.reverse.padTo(10 - s.length, '0').reverse).mkString("") else s.A1.reverse.padTo(10 - s.A1.length, '0').reverse)
+    //rows.toList
+    rows.sortBy(s => s.A1).toList.sortBy(s => if (s.A1.contains(".")) s.A1.split("\\.").map(s => s.reverse.padTo(10 - s.length, '0').reverse).mkString("") else s.A1.reverse.padTo(10 - s.A1.length, '0').reverse).map(x => if (x.A1.contains("*")) x.copy(A1 = "") else x)
   }
 
   private def genTotalRows(rawData: List[Device], lang: String, materials: List[Material]): List[Item11ColumnsEN] = {
@@ -645,12 +643,24 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
       case None => ""
     }
 
+    rawData.foreach(d => {
+      d.material = materials.find(x => x.code == d.material.code && x.project == d.material.project) match {
+        case Some(value) => value
+        case _ => d.material
+      }
+      d.units = materials.find(x => x.code == d.material.code && x.project == d.material.project) match {
+        case Some(value) => value.units
+        case _ => d.units
+      }
+    })
+
 
     rawData.groupBy(p => (p.units, p.material.code)).foreach(gr => {
 
 
       val row = gr._2.head
       //val unit = formatUnits(row.material)
+      val sumWeight = gr._2.map(_.weight).sum
       val qtyA = gr._2.map(_.count).sum
       val w ={
         if(row.units.equals("796")){
@@ -662,7 +672,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
         }
       }
 
-      val qtySubs: MaterialReplacement = materials.find(s => s.code.equals(row.material.code)) match {
+      val qtySubs: MaterialReplacement = materials.find(s => s.code.equals(row.material.code) && s.project == row.material.project) match {
         case Some(m) => {
           if (!row.units.equals(m.units)) {
             row.units + m.units match {
@@ -675,19 +685,19 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
         }
         case None => MaterialReplacement(row.material.units, qtyA)
       }
-      val weight: String = formatWGTDouble(w)
+      val weight: String = qtySubs.unit match {
+        case "006" => formatWGTDouble(sumWeight)
+        case _ => formatWGTDouble(w)
+      }
 
       val qty: String ={
         qtySubs.unit match {
-          case "pcs."=>qtySubs.newQty.toInt.toString
-
-          case "796"=>qtySubs.newQty.toInt.toString
-
-          case "166"=>weight
-
+          case "pcs."=> qtySubs.newQty.toInt.toString
+          case "796"=> qtySubs.newQty.toInt.toString
+          case "166"=> weight
+          case "006" => formatWGTDouble(sumWeight)
           case _=> String.format("%.2f", qtySubs.newQty)
         }
-
       }
 
       val mat = row.material.name(lang)

@@ -4,6 +4,7 @@ import com.mongodb.client.model.BsonField
 import deepsea.database.DBManager
 import deepsea.esp.EspManager.{EspElement, EspHistoryObject, EspObject, HullEspObject, PipeEspObject, espKinds, espObjectsCollectionName}
 import local.common.Codecs
+import local.pdf.ru.common.ReportCommon.Item11Columns
 import org.bson.conversions.Bson
 import org.mongodb.scala.model.Accumulators.addToSet
 import org.mongodb.scala.{Document, MongoCollection, model}
@@ -157,12 +158,12 @@ trait EspManagerHelper extends Codecs{
       case _ => None
     }
   }
-  def getAllLatestEsp(projects: List[String] = List("N002", "N004")): List[EspObject] ={
+  def getAllLatestEsp(projects: List[String] = List("N002", "N004"), kinds: List[String] = espKinds): List[EspObject] ={
     val res = ListBuffer.empty[EspObject]
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
         projects.foreach(project => {
-          espKinds.foreach(kind => {
+          kinds.foreach(kind => {
             val espCollectionName = List(espObjectsCollectionName, project, kind).mkString("-").toLowerCase
             val espCollection: MongoCollection[EspObject] = mongo.getCollection(espCollectionName)
             try{
@@ -194,4 +195,51 @@ trait EspManagerHelper extends Codecs{
     }
     res.toList
   }
+  def generateHullGlobalEsp(projects: List[String]): List[Item11Columns] ={
+    val res = ListBuffer.empty[Item11Columns]
+    projects.foreach(p => {
+      val esps = getAllLatestEsp(List(p), List("hull"))
+      val elems = esps.map(_.asInstanceOf[HullEspObject]).flatMap(_.elements)
+      elems.groupBy(x => (x.ELEM_TYPE, x.THICKNESS, x.WIDTH, x.MATERIAL)).map(group => {
+        val qty = group._2.map(_.QTY).sum
+        val weight = group._2.head.WEIGHT_UNIT
+        val weightTotal = group._2.map(_.TOTAL_WEIGHT).sum
+        res += Item11Columns(
+          isHeader = false,
+          "",
+          group._1._1,
+          List(group._1._2, group._1._3.toString).mkString(","),
+          group._1._4,
+          qty.toString,
+          weight.formatted("%.2f"),
+          weightTotal.formatted("%.2f")
+        )
+      })
+    })
+    res.toList
+  }
+  def generatePipeGlobalEsp(projects: List[String]): List[Item11Columns] ={
+    val res = ListBuffer.empty[Item11Columns]
+    projects.foreach(p => {
+      val esps = getAllLatestEsp(List(p), List("pipe"))
+      val elems = esps.map(_.asInstanceOf[PipeEspObject]).flatMap(_.elements).filter(_.material.code != "")
+      elems.groupBy(x => (x.material.code)).map(group => {
+//        val qty = group._2.map(_.QTY).sum
+//        val weight = group._2.head.WEIGHT_UNIT
+//        val weightTotal = group._2.map(_.TOTAL_WEIGHT).sum
+//        res += Item11Columns(
+//          isHeader = false,
+//          "",
+//          group._1._1,
+//          List(group._1._2, group._1._3.toString).mkString(","),
+//          group._1._4,
+//          qty.toString,
+//          weight.formatted("%.2f"),
+//          weightTotal.formatted("%.2f")
+//        )
+      })
+    })
+    res.toList
+  }
+
 }

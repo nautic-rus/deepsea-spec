@@ -99,7 +99,7 @@ trait AccommodationHelper {
 //    }
 //    accommodations.toList
 //  }
-  def getAccommodationsAsDevices(docNumber: String): List[Device] ={
+  def getAccommodationsAsDevices(docNumber: String, lang: String): List[Device] ={
     val accommodations = ListBuffer.empty[Accommodation]
     val groups = ListBuffer.empty[AccommodationGroup]
     DBManager.GetMongoConnection() match {
@@ -258,6 +258,11 @@ trait AccommodationHelper {
       }, userId = groups.find(x => x.code == acc._2.head.material.code + acc._2.head.zone) match {
         case Some(group) => group.userId
         case _ => "NoUserId"
+      }, material = if (acc._2.head.material.name.contains("L=")){
+        acc._2.head.material.copy(name = acc._2.head.material.name + ", " + acc._2.length + (if (lang == "ru") " шт" else " pcs"))
+      }
+      else{
+        acc._2.head.material
       })
     }).toList ++
     accommodations.map(_.asDevice).filter(m => m.material.code != "" && groups.map(_.code).contains(m.material.code) && !groups.map(_.code).contains(m.material.code + m.zone)).groupBy(x => x.material.code + x.material.name).map(acc => {
@@ -268,6 +273,11 @@ trait AccommodationHelper {
       }, userId = groups.find(x => acc._1.startsWith(x.code)) match {
         case Some(group) => group.userId
         case _ => "NoUserId"
+      }, material = if (acc._2.head.material.name.contains("L=")){
+        acc._2.head.material.copy(name = acc._2.head.material.name + ", " + acc._2.length + (if (lang == "ru") " шт" else " pcs"))
+      }
+      else{
+        acc._2.head.material
       })
     })
 

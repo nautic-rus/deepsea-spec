@@ -35,7 +35,7 @@ class DeviceManager extends Actor with DeviceHelper with AccommodationHelper wit
 
   override def receive: Receive = {
     case GetDevices(docNumber) =>
-      val devices = getDevices(docNumber) ++ getAccommodationsAsDevices(docNumber)
+      val devices = getDevices(docNumber) ++ getAccommodationsAsDevices(docNumber, "ru")
       devices.filter(_.userId.contains(".")).filter(x => x.zone == "" || x.zone == "-" || x.zone == "*").foreach(x => {
         devices.find(y => y.userId == x.userId.split("\\.").head) match {
           case Some(orig) => x.zone = orig.zone
@@ -45,7 +45,7 @@ class DeviceManager extends Actor with DeviceHelper with AccommodationHelper wit
       sender() ! devices.asJson.noSpaces
     case GetDevicesESP(docNumber, revision, lang) =>
       val docName: String = getSystemName(docNumber)
-      val devices: List[Device] = getDevices(docNumber).tapEach(x => x.userId = removeLeftZeros(x.origUserId)) ++ getAccommodationsAsDevices(docNumber)
+      val devices: List[Device] = getDevices(docNumber).tapEach(x => x.userId = removeLeftZeros(x.origUserId)) ++ getAccommodationsAsDevices(docNumber, lang)
       val rev = if (revision == "NO REV")  "" else revision
       val file = genAccomListEnPDF(docNumber, docName, rev, devices, lang)
       Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
