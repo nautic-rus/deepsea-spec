@@ -632,7 +632,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
 
     })
     //rows.toList
-    rows.sortBy(s => s.A1).toList.sortBy(s => if (s.A1.contains(".")) s.A1.split("\\.").map(s => s.reverse.padTo(10 - s.length, '0').reverse).mkString("") else s.A1.reverse.padTo(10 - s.A1.length, '0').reverse)
+    rows.sortBy(s => s.A1).toList.sortBy(s => if (s.A1.contains(".")) s.A1.split("\\.").map(s => s.reverse.padTo(10 - s.length, '0').reverse).mkString("") else s.A1.reverse.padTo(10 - s.A1.length, '0').reverse).map(x => if (x.A1.contains("*")) x.copy(A1 = "") else x)
   }
 
   private def genTotalRows(rawData: List[Device], lang: String, materials: List[Material]): List[Item11ColumnsEN] = {
