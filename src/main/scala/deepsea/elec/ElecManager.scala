@@ -58,6 +58,8 @@ object ElecManager {
 
   case class GetCableBoxesBySystem(project: String, docNumber: String)
 
+  case class GetCablesBySystem(project: String, docNumber: String)
+
   case class GetTrayBundles(project: String)
 
   case class GenerateTrayPdf(project: String, docNumber: String, revision: String = "")
@@ -98,7 +100,7 @@ object ElecManager {
                             y_n2: Double = 0,
                             z_n2: Double = 0,
                             length: Double = 0,
-//                            height: Double = 0,
+                            //                            height: Double = 0,
                             material: Material
                           )
 
@@ -129,10 +131,43 @@ object ElecManager {
                                  material: Material
                                )
 
-  case class TrayAndCableBox (
-                                trays: List[TraysBySystem],
-                                cableBoxes: List[CableBoxesBySystem],
-                                )
+  case class TrayAndCableBox(
+                              trays: List[TraysBySystem],
+                              cableBoxes: List[CableBoxesBySystem],
+                            )
+
+  case class CableRoute(
+                     system: String = "",
+                     code: String = "",
+                     description: String = "",
+                     nom_section: String = "",
+                     diameter: Int = 0,
+                     seg_code: String,
+                     f_rout:  Double = 0,
+                     length: Double = 0.0,
+                     l_correction: Double = 0,
+                     from_system: String = "",
+                     from_eq_id: String = "",
+                     from_x: Double = 0.0,
+                     from_y: Double = 0.0,
+                     from_z: Double = 0.0,
+                     from_eq_desc: String = "",
+                     from_eq: String = "",
+                     from_zone: String = "",
+                     from_zone_desc: String = "",
+                     to_system: String = "",
+                     to_eq_id: String = "",
+                     to_x: Double = 0.0,
+                     to_y: Double = 0.0,
+                     to_z: Double = 0.0,
+                     to_eq_desc: String = "",
+                     to_eq: String = "",
+                     to_zone: String = "",
+                     to_zone_desc: String = "",
+                     cab_route_area: String = "",
+                     stock_code: String = "",
+                     material: Material
+                   )
 
 
   class ElecManager extends Actor with ElecHelper with Codecs {
@@ -152,6 +187,10 @@ object ElecManager {
         sender() ! getTotalTraysBySystem(project, docNumber).asJson.noSpaces
       case GetCableBoxesBySystem(project, docNumber) =>
         val q = getCableBoxesBySystem(project, docNumber)
+        val f = q.asJson.noSpaces
+        sender() ! f
+      case GetCablesBySystem(project, docNumber) =>
+        val q = getCablesBySystem(project, docNumber)
         val f = q.asJson.noSpaces
         sender() ! f
       case GetTrayBundles(project) =>

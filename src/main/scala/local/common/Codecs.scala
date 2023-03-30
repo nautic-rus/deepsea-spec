@@ -2,9 +2,8 @@ package local.common
 
 import deepsea.accomodations.AccommodationManager.{Accommodation, BBox}
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
-import deepsea.elec.ElecManager.ElecCable
+import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, ElecCable, TrayBySystem}
 import deepsea.esp.EspManager.{EspElement, EspObject, HullEspObject, PipeEspObject}
-import deepsea.elec.ElecManager.{CableBoxesBySystem, ElecCable, TrayBySystem}
 import deepsea.hull.HullManager._
 import deepsea.pipe.PipeManager.{Material, MaterialTranslation, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SpoolLock, SystemDef, UnitTranslation, Units}
 import io.circe.{Decoder, Encoder}
@@ -195,8 +194,15 @@ trait Codecs {
   implicit val CableBoxesBySystemDecoder: Decoder[CableBoxesBySystem] = deriveDecoder[CableBoxesBySystem]
   implicit val CableBoxesBySystemEncoder: Encoder[CableBoxesBySystem] = deriveEncoder[CableBoxesBySystem]
 
+  implicit val CableRouteDecoder: Decoder[CableRoute] = deriveDecoder[CableRoute]
+  implicit val CableRouteEncoder: Encoder[CableRoute] = deriveEncoder[CableRoute]
+
 
   val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
+
+    //MAMONOV
+    classOf[CableRoute],
+
     //BOGDAN
 
     classOf[PlatePart],
