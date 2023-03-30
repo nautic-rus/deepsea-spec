@@ -5,7 +5,7 @@ import deepsea.database.DatabaseManager.RsIterator
 import deepsea.database.{DBManager, DatabaseManager}
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
 import deepsea.pipe.PipeManager.{Material, ProjectName, SystemDef, Units}
-import local.pdf.en.accom.AccomReportEn.getSystemDefs
+import local.pdf.en.accom.AccomReportEn.{getSystemDefs, units}
 import org.mongodb.scala.{MongoCollection, classTagToClassOf}
 import org.mongodb.scala.model.Filters.equal
 
@@ -257,6 +257,12 @@ trait AccommodationHelper {
         }
         else{
           acc._2.map(_.weight).sum
+        },
+        units = if (acc._2.head.material.name.contains("L=")){
+          "796"
+        }
+        else{
+          acc._2.head.material.units
         },
         count = acc._2.head.units match {
           case "006" =>
