@@ -648,6 +648,10 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
         case Some(value) => value
         case _ => d.material
       }
+      d.units = materials.find(x => x.code == d.material.code) match {
+        case Some(value) => value.units
+        case _ => d.units
+      }
     })
 
 
@@ -681,7 +685,10 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
         }
         case None => MaterialReplacement(row.material.units, qtyA)
       }
-      val weight: String = formatWGTDouble(w)
+      val weight: String = qtySubs.unit match {
+        case "006" => formatWGTDouble(sumWeight)
+        case _ => formatWGTDouble(w)
+      }
 
       val qty: String ={
         qtySubs.unit match {
