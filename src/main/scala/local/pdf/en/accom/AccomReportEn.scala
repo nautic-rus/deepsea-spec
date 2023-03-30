@@ -586,7 +586,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
       rawData.foreach(s => {
         if (s.userId.contains("*")){
           val nuid = s.userId.split("\\.").head
-          step1 += s.copy(userId = "", zone = "")
+          step1 += s.copy(userId = nuid, zone = "")
         }
         else if (s.userId.contains("#")) {
           val nuid = s.userId.split("#").head
@@ -602,7 +602,8 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
 //        gr._2.foreach(item => acc = acc + item.count)
 //        step2 += gr._2.head.copy(count = acc)
 //      })
-
+//
+//      step2.toList
       step1.toList
     }
     val rows: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
@@ -634,7 +635,8 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
       rows += Item11ColumnsEN(A1 = id, A2 = mat, A3 = unit, A4 = qty, A5 = weight, A6 = matDescr, A7 = room, A8 = drPos, A12 = row.material.code)
 
     })
-    rows.toList.sortBy(s => if (s.A1.contains(".")) s.A1.split("\\.").map(s => s.reverse.padTo(10 - s.length, '0').reverse).mkString("") else s.A1.reverse.padTo(10 - s.A1.length, '0').reverse)
+    rows.toList
+    //rows.sortBy(s => s.A1).toList.sortBy(s => if (s.A1.contains(".")) s.A1.split("\\.").map(s => s.reverse.padTo(10 - s.length, '0').reverse).mkString("") else s.A1.reverse.padTo(10 - s.A1.length, '0').reverse)
   }
 
   private def genTotalRows(rawData: List[Device], lang: String, materials: List[Material]): List[Item11ColumnsEN] = {
