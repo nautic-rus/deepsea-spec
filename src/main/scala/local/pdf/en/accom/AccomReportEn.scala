@@ -586,7 +586,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
       rawData.foreach(s => {
         if (s.userId.contains("*")){
           val nuid = s.userId.split("\\.").head
-          step1 += s.copy(userId = nuid, zone = "")
+          step1 += s.copy(userId = "", zone = "")
         }
         else if (s.userId.contains("#")) {
           val nuid = s.userId.split("#").head
