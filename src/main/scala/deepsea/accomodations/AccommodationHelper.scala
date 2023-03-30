@@ -273,6 +273,11 @@ trait AccommodationHelper {
       }, userId = groups.find(x => acc._1.startsWith(x.code)) match {
         case Some(group) => group.userId
         case _ => "NoUserId"
+      }, material = if (acc._2.head.material.name.contains("L=")){
+        acc._2.head.material.copy(name = acc._2.head.material.name + ", " + acc._2.length + (if (lang == "ru") " шт" else " pcs"))
+      }
+      else{
+        acc._2.head.material
       })
     })
 
