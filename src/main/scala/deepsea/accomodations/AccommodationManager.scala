@@ -63,25 +63,9 @@ object AccommodationManager{
         },
         "",
         "",
+        material.units,
         material.units match {
-          case "006" =>
-            if (objType == 0 && profileLength != 0 && profileLength <= 400 && profileSection != 0){
-              "796"
-            }
-            else{
-              material.units
-            }
-          case _ => material.units
-        },
-        material.units match {
-          case "006" =>
-            if (objType == 0 && profileLength != 0 && profileLength <= 400 && profileSection != 0){
-              val length = Math.round(profileLength)
-              Math.ceil((if (weight != 0) weight else bsWeight) / (length / 1000 * material.singleWeight))
-            }
-            else{
-              material.singleWeight
-            }
+          case "006" => material.singleWeight
           case "055" => material.singleWeight
           case _ => surface / 2
         }
