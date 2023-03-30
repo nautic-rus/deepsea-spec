@@ -643,12 +643,20 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
       case None => ""
     }
 
+    rawData.foreach(d => {
+      d.material = materials.find(x => x.code == d.material.code) match {
+        case Some(value) => value
+        case _ => d.material
+      }
+    })
+
 
     rawData.groupBy(p => (p.units, p.material.code)).foreach(gr => {
 
 
       val row = gr._2.head
       //val unit = formatUnits(row.material)
+      val sumWeight = gr._2.map(_.weight).sum
       val qtyA = gr._2.map(_.count).sum
       val w ={
         if(row.units.equals("796")){
@@ -677,15 +685,12 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
 
       val qty: String ={
         qtySubs.unit match {
-          case "pcs."=>qtySubs.newQty.toInt.toString
-
-          case "796"=>qtySubs.newQty.toInt.toString
-
-          case "166"=>weight
-
+          case "pcs."=> qtySubs.newQty.toInt.toString
+          case "796"=> qtySubs.newQty.toInt.toString
+          case "166"=> weight
+          case "006" => formatWGTDouble(sumWeight)
           case _=> String.format("%.2f", qtySubs.newQty)
         }
-
       }
 
       val mat = row.material.name(lang)
