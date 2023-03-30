@@ -89,7 +89,7 @@ class AccommodationManager extends Actor with AccommodationHelper with Codecs {
     //case GetAccommodations(docNumber) => sender() ! getAccommodations(docNumber).filter(_.material.code != "").asJson.noSpaces
     case GetAccommodationsESP(docNumber, revision, lang) =>
       val docName: String = getASName(docNumber)
-      val devices: List[Device] = getAccommodationsAsDevices(docNumber)
+      val devices: List[Device] = getAccommodationsAsDevices(docNumber, lang)
       val file = genAccomListEnPDF(docNumber, docName, revision, devices, lang)
       Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
         case url: String => sender() ! url.asJson.noSpaces
