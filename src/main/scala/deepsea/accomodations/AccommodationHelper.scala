@@ -99,7 +99,7 @@ trait AccommodationHelper {
 //    }
 //    accommodations.toList
 //  }
-  def getAccommodationsAsDevices(docNumber: String): List[Device] ={
+  def getAccommodationsAsDevices(docNumber: String, lang: String): List[Device] ={
     val accommodations = ListBuffer.empty[Accommodation]
     val groups = ListBuffer.empty[AccommodationGroup]
     DBManager.GetMongoConnection() match {
@@ -259,7 +259,7 @@ trait AccommodationHelper {
         case Some(group) => group.userId
         case _ => "NoUserId"
       }, material = if (acc._2.head.material.name.contains("L=")){
-        acc._2.head.material.copy(name = acc._2.head.material.name + ", " + acc._2.length + " pcs")
+        acc._2.head.material.copy(name = acc._2.head.material.name + ", " + acc._2.length + (if (lang == "ru") " шт" else " pcs"))
       }
       else{
         acc._2.head.material
