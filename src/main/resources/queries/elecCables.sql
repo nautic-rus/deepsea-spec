@@ -22,6 +22,7 @@ select
   n1.y * 1000 as from_y,
   n1.z * 1000 as from_z,
   el1.descr as from_eq_desc,
+  cp1.stock_code as from_stock_code,
   ele1.userid as from_eq,
   z1.userid as from_zone,
   zl1.descr from_zone_desc,
@@ -31,6 +32,7 @@ select
   n2.y * 1000 as to_y,
   n2.z * 1000 as to_z,
   el2.descr as to_eq_desc,
+  cp2.stock_code as to_stock_code,
   ele2.userid as to_eq,
   z2.userid as to_zone,
   zl2.descr to_zone_desc,
@@ -67,12 +69,14 @@ from
   left join node n2 on n2.seqid = cr2.node2
   left join rout_area ra2 on ra2.seqid = n2.r_area
   left join element ele1 on ele1.oid = c.from_e
+  left join component cp1 on cp1.oid = ele1.comp
   left join systems_lang sl1 on sl1.system = ele1.system and sl1.lang = '-2'
   left join element_lang el1 on el1.elem = ele1.oid and el1.lang = '-2'
   left join element_elec ee1 on ee1.elem = c.from_e
   left join zone z1 on z1.oid = ele1.zone
   left join zone_lang zl1 on zl1.zone = z1.oid
   left join element ele2 on ele2.oid = c.to_e
+  left join component cp2 on cp2.oid = ele2.comp
   left join systems_lang sl2 on sl2.system = ele2.system and sl2.lang = '-2'
   left join element_lang el2 on el2.elem = ele2.oid and el2.lang = '-2'
   left join element_elec ee2 on ee2.elem = c.to_e
