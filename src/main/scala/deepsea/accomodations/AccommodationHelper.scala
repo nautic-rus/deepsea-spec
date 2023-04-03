@@ -259,7 +259,8 @@ trait AccommodationHelper {
         case Some(group) => group.userId
         case _ => "NoUserId"
       }, material = if (acc._2.head.material.name.contains("L=")){
-        acc._2.head.material.copy(name = acc._2.head.material.name + ", " + acc._2.length + (if (lang == "ru") " шт" else " pcs"))
+        acc._2.head.material.copy(name = acc._2.head.material.name + ", " + acc._2.length + "pcs",
+          translations = acc._2.head.material.translations.map(t => t.copy(name = acc._2.head.material.name + ", " + acc._2.length + "шт")))
       }
       else{
         acc._2.head.material
@@ -274,7 +275,8 @@ trait AccommodationHelper {
         case Some(group) => group.userId
         case _ => "NoUserId"
       }, material = if (acc._2.head.material.name.contains("L=")){
-        acc._2.head.material.copy(name = acc._2.head.material.name + ", " + acc._2.length + (if (lang == "ru") " шт" else " pcs"))
+        acc._2.head.material.copy(name = acc._2.head.material.name + ", " + acc._2.length + "pcs",
+          translations = acc._2.head.material.translations.map(t => t.copy(name = acc._2.head.material.name + ", " + acc._2.length + "шт")))
       }
       else{
         acc._2.head.material

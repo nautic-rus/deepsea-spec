@@ -64,11 +64,14 @@ object EspManager{
 
   case class Issue(id: Int, project: String, issue_type: String, doc_number: String, revision: String, department: String)
   case class InitIssues()
+
+  case class ExportPipeFittings()
 }
 
 class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper {
 
   override def preStart(): Unit = {
+//    generatePipeGlobalEsp(List("N002"))
 //    self ! InitIssues()
 //    val qw = getAllLatestEsp()
 //    val jk = qw

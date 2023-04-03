@@ -3,7 +3,11 @@ package deepsea.esp
 import com.mongodb.client.model.BsonField
 import deepsea.database.DBManager
 import deepsea.esp.EspManager.{EspElement, EspHistoryObject, EspObject, HullEspObject, PipeEspObject, espKinds, espObjectsCollectionName}
+import deepsea.materials.MaterialsHelper
+import deepsea.pipe.PipeManager.{Material, Units}
+import io.circe.syntax.EncoderOps
 import local.common.Codecs
+import local.pdf.en.accom.AccomReportEn.getUnits
 import local.pdf.ru.common.ReportCommon.Item11Columns
 import org.bson.conversions.Bson
 import org.mongodb.scala.model.Accumulators.addToSet
@@ -17,7 +21,7 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, SECONDS}
 
-trait EspManagerHelper extends Codecs{
+trait EspManagerHelper extends Codecs with MaterialsHelper{
   def addHullEsp(esp: HullEspObject): Unit ={
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
@@ -158,47 +162,85 @@ trait EspManagerHelper extends Codecs{
       case _ => None
     }
   }
-  def getAllLatestEsp(projects: List[String] = List("N002", "N004"), kinds: List[String] = espKinds): List[EspObject] ={
-    val res = ListBuffer.empty[EspObject]
+  def getHullAllLatestEsp(projects: List[String] = List("N002", "N004")): List[HullEspObject] ={
+    val res = ListBuffer.empty[HullEspObject]
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
         projects.foreach(project => {
-          kinds.foreach(kind => {
-            val espCollectionName = List(espObjectsCollectionName, project, kind).mkString("-").toLowerCase
-            val espCollection: MongoCollection[EspObject] = mongo.getCollection(espCollectionName)
-            try{
-              Await.result(espCollection.aggregate(
-                Seq(
-                  sort(ascending("date")),
-                  group(
-                    Document("_id" -> "$docNumber"),
-                    model.BsonField("id", Document("$last" -> "$id")),
-                    model.BsonField("foranProject", Document("$last" -> "$foranProject")),
-                    model.BsonField("docNumber", Document("$last" -> "$docNumber")),
-                    model.BsonField("rev", Document("$last" -> "$rev")),
-                    model.BsonField("date", Document("$last" -> "$date")),
-                    model.BsonField("user", Document("$last" -> "$user")),
-                    model.BsonField("kind", Document("$last" -> "$kind")),
-                    model.BsonField("elements", Document("$last" -> "$elements")),
-                  )
-                )).toFuture(), Duration(10, SECONDS)) match {
-                case espObjects: Seq[EspObject] => res ++= espObjects.toList
-                case _ => None
-              }
+          val espCollectionName = List(espObjectsCollectionName, project, "hull").mkString("-").toLowerCase
+          val espCollection: MongoCollection[HullEspObject] = mongo.getCollection(espCollectionName)
+          try {
+            Await.result(espCollection.aggregate(
+              Seq(
+                sort(ascending("date")),
+                group(
+                  Document("_id" -> "$docNumber"),
+                  model.BsonField("id", Document("$last" -> "$id")),
+                  model.BsonField("foranProject", Document("$last" -> "$foranProject")),
+                  model.BsonField("docNumber", Document("$last" -> "$docNumber")),
+                  model.BsonField("rev", Document("$last" -> "$rev")),
+                  model.BsonField("date", Document("$last" -> "$date")),
+                  model.BsonField("user", Document("$last" -> "$user")),
+                  model.BsonField("kind", Document("$last" -> "$kind")),
+                  model.BsonField("taskId", Document("$last" -> "$taskId")),
+                  model.BsonField("elements", Document("$last" -> "$elements")),
+                )
+              )).toFuture(), Duration(10, SECONDS)) match {
+              case espObjects: Seq[HullEspObject] => res ++= espObjects.toList
+              case _ => None
             }
-            catch {
-              case e: Exception => println(e.toString)
-            }
-          })
+          }
+          catch {
+            case e: Exception => println(e.toString)
+          }
         })
       case _ => None
     }
     res.toList
   }
+  def getPipeAllLatestEsp(projects: List[String] = List("N002", "N004")): List[PipeEspObject] ={
+    val res = ListBuffer.empty[PipeEspObject]
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        projects.foreach(project => {
+          val espCollectionName = List(espObjectsCollectionName, project, "pipe").mkString("-").toLowerCase
+          val espCollection: MongoCollection[PipeEspObject] = mongo.getCollection(espCollectionName)
+          try {
+            Await.result(espCollection.aggregate(
+              Seq(
+                sort(ascending("date")),
+                group(
+                  Document("_id" -> "$docNumber"),
+                  model.BsonField("id", Document("$last" -> "$id")),
+                  model.BsonField("foranProject", Document("$last" -> "$foranProject")),
+                  model.BsonField("docNumber", Document("$last" -> "$docNumber")),
+                  model.BsonField("rev", Document("$last" -> "$rev")),
+                  model.BsonField("date", Document("$last" -> "$date")),
+                  model.BsonField("user", Document("$last" -> "$user")),
+                  model.BsonField("kind", Document("$last" -> "$kind")),
+                  model.BsonField("taskId", Document("$last" -> "$taskId")),
+                  model.BsonField("elements", Document("$last" -> "$elements")),
+                )
+              )).toFuture(), Duration(10, SECONDS)) match {
+              case espObjects: Seq[PipeEspObject] => res ++= espObjects.toList
+              case _ => None
+            }
+          }
+          catch {
+            case e: Exception => println(e.toString)
+          }
+        })
+      case _ => None
+    }
+    res.toList
+  }
+
+
+
   def generateHullGlobalEsp(projects: List[String]): List[Item11Columns] ={
     val res = ListBuffer.empty[Item11Columns]
     projects.foreach(p => {
-      val esps = getAllLatestEsp(List(p), List("hull"))
+      val esps = getHullAllLatestEsp(List(p))
       val elems = esps.map(_.asInstanceOf[HullEspObject]).flatMap(_.elements)
       elems.groupBy(x => (x.ELEM_TYPE, x.THICKNESS, x.WIDTH, x.MATERIAL)).map(group => {
         val qty = group._2.map(_.QTY).sum
@@ -220,25 +262,53 @@ trait EspManagerHelper extends Codecs{
   }
   def generatePipeGlobalEsp(projects: List[String]): List[Item11Columns] ={
     val res = ListBuffer.empty[Item11Columns]
+    val materials = getMaterials
+    val units: List[Units] = getUnits
     projects.foreach(p => {
-      val esps = getAllLatestEsp(List(p), List("pipe"))
-      val elems = esps.map(_.asInstanceOf[PipeEspObject]).flatMap(_.elements).filter(_.material.code != "")
+      val esps = getPipeAllLatestEsp(List(p))
+      val elems = esps.flatMap(_.elements).filter(_.material.code != "")
       elems.groupBy(x => (x.material.code)).map(group => {
-//        val qty = group._2.map(_.QTY).sum
-//        val weight = group._2.head.WEIGHT_UNIT
-//        val weightTotal = group._2.map(_.TOTAL_WEIGHT).sum
-//        res += Item11Columns(
-//          isHeader = false,
-//          "",
-//          group._1._1,
-//          List(group._1._2, group._1._3.toString).mkString(","),
-//          group._1._4,
-//          qty.toString,
-//          weight.formatted("%.2f"),
-//          weightTotal.formatted("%.2f")
-//        )
+        val material = materials.find(_.code == group._1) match {
+          case Some(value) => value
+          case _ => Material()
+        }
+        val qty = material.units match {
+          case "796" => group._2.length
+          case "006" => group._2.map(_.length).sum
+          case "166" => group._2.map(_.weight).sum
+          case _ => group._2.length
+        }
+        val weight = material.units match {
+          case _ => material.singleWeight
+        }
+        val weightTotal = material.units match {
+          case "796" => qty * material.singleWeight
+          case _ => group._2.map(_.weight).sum
+        }
+
+
+
+        res += Item11Columns(
+          isHeader = false,
+          material.code,
+          material.name("ru"),
+          material.name,
+          units.find(_.code == material.units) match {
+            case Some(value) => value.thumb
+            case _ => material.units
+          },
+          qty.toString,
+          weight.formatted("%.2f"),
+          weightTotal.formatted("%.2f"),
+          esps.filter(_.elements.exists(_.material.code == material.code)).map(_.docNumber).mkString(",")
+        )
       })
     })
+    val fittings = res.filter(_.A1.startsWith("SYSFIT"))
+    val json = fittings.asJson.noSpaces
+    val qwe = json
+
+
     res.toList
   }
 
