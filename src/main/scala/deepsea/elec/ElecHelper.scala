@@ -229,7 +229,7 @@ trait ElecHelper extends Codecs {
 
   def getCablesBySystem(project: String, docNumber: String): List[CableRoute] = {
     val res = ListBuffer.empty[CableRoute];
-    DBManager.GetOracleConnection("P701") match {
+    DBManager.GetOracleConnection(project) match {
       case Some(c) =>
         val materials: List[Material] = getMaterials();
         val query = Source.fromResource("queries/elecCables.sql").mkString.replaceAll(":docNumber", "'%" + docNumber + "%'");
@@ -251,20 +251,22 @@ trait ElecHelper extends Codecs {
                 Option(rs.getDouble("L_CORRECTION")).getOrElse(0.0),
                 Option(rs.getString("FROM_SYSTEM")).getOrElse(""),
                 Option(rs.getString("FROM_EQ_ID")).getOrElse(""),
+                Option(rs.getString("FROM_EQ_DESC")).getOrElse(""),
+                Option(rs.getString("FROM_EQ")).getOrElse(""),
+                Option(rs.getString("FROM_STOCK_CODE")).getOrElse(""),
                 Option(rs.getDouble("FROM_X")).getOrElse(0.0),
                 Option(rs.getDouble("FROM_Y")).getOrElse(0.0),
                 Option(rs.getDouble("FROM_Z")).getOrElse(0.0),
-                Option(rs.getString("FROM_EQ_DESC")).getOrElse(""),
-                Option(rs.getString("FROM_EQ")).getOrElse(""),
                 Option(rs.getString("FROM_ZONE")).getOrElse(""),
                 Option(rs.getString("FROM_ZONE_DESC")).getOrElse(""),
                 Option(rs.getString("TO_SYSTEM")).getOrElse(""),
                 Option(rs.getString("TO_EQ_ID")).getOrElse(""),
+                Option(rs.getString("TO_EQ_DESC")).getOrElse(""),
+                Option(rs.getString("TO_EQ")).getOrElse(""),
+                Option(rs.getString("TO_STOCK_CODE")).getOrElse(""),
                 Option(rs.getDouble("TO_X")).getOrElse(0.0),
                 Option(rs.getDouble("TO_Y")).getOrElse(0.0),
                 Option(rs.getDouble("TO_Z")).getOrElse(0.0),
-                Option(rs.getString("TO_EQ_DESC")).getOrElse(""),
-                Option(rs.getString("TO_EQ")).getOrElse(""),
                 Option(rs.getString("TO_ZONE")).getOrElse(""),
                 Option(rs.getString("TO_ZONE_DESC")).getOrElse(""),
                 Option(rs.getString("ROUTE_AREA")).getOrElse(""),
