@@ -554,7 +554,9 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
     rawData.foreach(row => {
       val id = formatSpoolId(row.spool, row.spPieceId.toString)
       //val mat = row.material.code+ " "+ row.material.name
-      val mat = row.material.name(lang)
+      val matName = row.material.name(lang)
+      val matDesc = row.material.description(lang)
+      val mat = if (matDesc != "") matName + " (" + matDesc + ")" else matName
       val qty = formatQTY(row)
       val unit = formatUnits(row.material)
       val weight: String = formatWGT(row)
