@@ -20,7 +20,7 @@ import play.api.libs.json.{JsValue, Json}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
 import deepsea.accomodations.AccommodationManager.{AddAccommodationGroup, GetAccommodations, GetAccommodationsESP, SetAccommodationLabel}
 import deepsea.devices.DeviceManager.{AddDeviceToSystem, GetDevices, GetDevicesESP, RemoveDeviceFromSystem}
-import deepsea.esp.EspManager.CreateEsp
+import deepsea.esp.EspManager.{CreateEsp, GetGlobalEsp}
 import deepsea.pipe.PipeManager.{GetPipeESP, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSpoolModel, GetSystems, GetZones, SetSpoolLock}
 
 import java.io.File
@@ -255,6 +255,9 @@ class HTTPManager extends Actor {
       },
       (get & path("createPipeEsp") & parameter("project", "docNumber", "rev", "user", "kind", "taskId")) { (project, docNumber, rev, user, kind, taskId) =>
         askFor(ActorManager.esp, CreateEsp(project, docNumber, rev, user, kind, taskId))
+      },
+      (get & path("getGlobalEsp") & parameter("projects", "kinds")) { (projects, kinds) =>
+        askFor(ActorManager.esp, GetGlobalEsp(projects, kinds))
       },
     )
   }

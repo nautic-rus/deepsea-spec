@@ -2,7 +2,7 @@ package deepsea.esp
 
 import akka.actor.Actor
 import deepsea.database.DBManager
-import deepsea.esp.EspManager.{CreateEsp, EspObject, GetEsp, GetHullEsp, HullEspObject, InitIssues, Issue, PipeEspObject}
+import deepsea.esp.EspManager.{CreateEsp, EspObject, GetEsp, GetGlobalEsp, GetHullEsp, HullEspObject, InitIssues, Issue, PipeEspObject}
 import deepsea.pipe.PipeHelper
 import deepsea.pipe.PipeManager.{Material, PipeSeg, ProjectName}
 import io.circe.generic.JsonCodec
@@ -12,7 +12,9 @@ import local.common.Codecs
 import local.pdf.ru.common.ReportCommon.Item11Columns
 import io.circe._
 import io.circe.generic.JsonCodec
+import io.circe.parser.decode
 import io.circe.syntax._
+import local.ele.CommonEle.EleComplectParts
 import local.hull.PartManager.{ForanPartsByDrawingNum, PrdPart}
 import org.mongodb.scala.MongoCollection
 
@@ -64,6 +66,7 @@ object EspManager{
 
   case class Issue(id: Int, project: String, issue_type: String, doc_number: String, revision: String, department: String)
   case class InitIssues()
+  case class GetGlobalEsp(projects: String, kinds: String)
 
   case class ExportPipeFittings()
 }
@@ -71,6 +74,8 @@ object EspManager{
 class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper {
 
   override def preStart(): Unit = {
+//    val qwe = generateGlobalEsp(List("N002"))
+//    val q = qwe
 //    generatePipeGlobalEsp(List("N002"))
 //    self ! InitIssues()
 //    val qw = getAllLatestEsp()
@@ -147,7 +152,19 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
           })
         case _ => None
       }
-      val q = 0
+    case GetGlobalEsp(projectsValue, kindsValue) =>
+      val item11Columns = decode[List[String]](projectsValue) match {
+        case Right(projects) =>
+          decode[List[String]](kindsValue) match {
+            case Right(kinds) =>
+              val hull = if (kinds.contains("hull")) generateHullGlobalEsp(projects) else List.empty[Item11Columns]
+              val pipe = if (kinds.contains("pipe")) generatePipeGlobalEsp(projects) else List.empty[Item11Columns]
+              hull ++ pipe
+            case Left(value) => List.empty[Item11Columns]
+          }
+        case Left(value) => List.empty[Item11Columns]
+      }
+      sender() ! item11Columns.asJson.noSpaces
     case _ => None
   }
 }

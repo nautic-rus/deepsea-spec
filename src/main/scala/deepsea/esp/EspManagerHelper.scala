@@ -185,7 +185,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
                   model.BsonField("taskId", Document("$last" -> "$taskId")),
                   model.BsonField("elements", Document("$last" -> "$elements")),
                 )
-              )).toFuture(), Duration(10, SECONDS)) match {
+              )).allowDiskUse(true).toFuture(), Duration(10, SECONDS)) match {
               case espObjects: Seq[HullEspObject] => res ++= espObjects.toList
               case _ => None
             }
@@ -221,7 +221,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
                   model.BsonField("taskId", Document("$last" -> "$taskId")),
                   model.BsonField("elements", Document("$last" -> "$elements")),
                 )
-              )).toFuture(), Duration(10, SECONDS)) match {
+              )).allowDiskUse(true).toFuture(), Duration(10, SECONDS)) match {
               case espObjects: Seq[PipeEspObject] => res ++= espObjects.toList
               case _ => None
             }
@@ -235,13 +235,15 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
     res.toList
   }
 
-
+  def generateGlobalEsp(projects: List[String]): String = {
+    (generateHullGlobalEsp(projects) ++ generatePipeGlobalEsp(projects)).asJson.noSpaces
+  }
 
   def generateHullGlobalEsp(projects: List[String]): List[Item11Columns] ={
     val res = ListBuffer.empty[Item11Columns]
     projects.foreach(p => {
       val esps = getHullAllLatestEsp(List(p))
-      val elems = esps.map(_.asInstanceOf[HullEspObject]).flatMap(_.elements)
+      val elems = esps.flatMap(_.elements)
       elems.groupBy(x => (x.ELEM_TYPE, x.THICKNESS, x.WIDTH, x.MATERIAL)).map(group => {
         val qty = group._2.map(_.QTY).sum
         val weight = group._2.head.WEIGHT_UNIT
@@ -286,8 +288,6 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
           case _ => group._2.map(_.weight).sum
         }
 
-
-
         res += Item11Columns(
           isHeader = false,
           material.code,
@@ -304,11 +304,6 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
         )
       })
     })
-    val fittings = res.filter(_.A1.startsWith("SYSFIT"))
-    val json = fittings.asJson.noSpaces
-    val qwe = json
-
-
     res.toList
   }
 
