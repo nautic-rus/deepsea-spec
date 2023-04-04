@@ -551,7 +551,16 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
 
   private def genRows(rawData: List[PipeSeg], lang: String): List[Item11ColumnsEN] = {
     val rows: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
-    rawData.foreach(row => {
+
+    val rowsQTY: ListBuffer[PipeSeg] = ListBuffer.empty[PipeSeg]
+    rawData.groupBy(s=>(s.spool,s.spPieceId)).foreach(gr=>{
+      val master: PipeSeg =gr._2.head
+      val qty: Double =gr._2.map(_.length).sum
+      val wgt: Double =gr._2.map(_.weight).sum
+      rowsQTY+=(master.copy(length =qty,weight = wgt))
+    })
+
+    rowsQTY.foreach(row => {
       val id = formatSpoolId(row.spool, row.spPieceId.toString)
       //val mat = row.material.code+ " "+ row.material.name
       val matName = row.material.name(lang)
@@ -562,6 +571,9 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
       val weight: String = formatWGT(row)
       rows += Item11ColumnsEN(A1 = id, A2 = mat, A3 = unit, A4 = qty, A5 = weight, A11 = row.typeCode, A12 = row.material.code)
     })
+
+
+
     rows.sortBy(s => s.A1).toList
   }
 
