@@ -87,9 +87,9 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
       val id = UUID.randomUUID().toString
       val date = new Date().getTime
       kind match {
-        case "hull" =>
+        case "hull" | "hull-final" =>
           addHullEsp(HullEspObject(id, foranProject, docNumber, rev, date, user, kind, taskId.toIntOption.getOrElse(0), elements = ForanPartsByDrawingNum(foranProject, docNumber)))
-        case "pipe" =>
+        case "pipe" | "pipe-final" =>
           val projectSystem = getSystemAndProjectFromDocNumber(docNumber)
           addPipeEsp(PipeEspObject(id, foranProject, docNumber, rev, date, user, kind, taskId.toIntOption.getOrElse(0), elements = getPipeSegs(projectSystem._1, projectSystem._2)))
         case _ => Option.empty[EspObject]
@@ -97,9 +97,9 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
       sender() ! "success".asJson.noSpaces
     case GetEsp(foranProject, kind, docNumber, rev) =>
       kind match {
-        case "hull" =>
+        case "hull" | "hull-final" =>
           sender() ! getHullLatestEsp(foranProject, kind, docNumber, rev).asJson.noSpaces
-        case "pipe" =>
+        case "pipe" | "pipe-final" =>
           sender() ! getPipeLatestEsp(foranProject, kind, docNumber, rev).asJson.noSpaces
         case _ =>
           sender() ! "error".asJson.noSpaces
