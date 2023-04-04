@@ -25,7 +25,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
   def addHullEsp(esp: HullEspObject): Unit ={
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
-        val espCollectionName = List(espObjectsCollectionName, esp.foranProject, esp.kind).mkString("-").toLowerCase
+        val espCollectionName = List(espObjectsCollectionName, esp.foranProject, "hull").mkString("-").toLowerCase
         val espCollection: MongoCollection[HullEspObject] = mongo.getCollection(espCollectionName)
         Await.result(espCollection.insertOne(esp).toFuture(), Duration(60, SECONDS))
       case _ => None
@@ -34,7 +34,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
   def addPipeEsp(esp: PipeEspObject): Unit ={
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
-        val espCollectionName = List(espObjectsCollectionName, esp.foranProject, esp.kind).mkString("-").toLowerCase
+        val espCollectionName = List(espObjectsCollectionName, esp.foranProject, "pipe").mkString("-").toLowerCase
         val espCollection: MongoCollection[PipeEspObject] = mongo.getCollection(espCollectionName)
         Await.result(espCollection.insertOne(esp).toFuture(), Duration(10, SECONDS))
       case _ => None
