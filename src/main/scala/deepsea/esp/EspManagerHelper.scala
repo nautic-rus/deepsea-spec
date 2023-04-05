@@ -2,7 +2,7 @@ package deepsea.esp
 
 import com.mongodb.client.model.BsonField
 import deepsea.database.DBManager
-import deepsea.esp.EspManager.{EspElement, EspHistoryObject, EspObject, HullEspObject, PipeEspObject, espKinds, espObjectsCollectionName}
+import deepsea.esp.EspManager.{EspElement, EspHistoryObject, EspObject, HullEspObject, MaterialSummary, PipeEspObject, espKinds, espObjectsCollectionName}
 import deepsea.materials.MaterialsHelper
 import deepsea.pipe.PipeManager.{Material, Units}
 import io.circe.syntax.EncoderOps
@@ -262,6 +262,29 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
     })
     res.toList
   }
+  def generateHullGlobalEspAsData(projects: List[String]): List[MaterialSummary] ={
+    val res = ListBuffer.empty[MaterialSummary]
+    projects.foreach(p => {
+      val esps = getHullAllLatestEsp(List(p))
+      val elems = esps.flatMap(_.elements)
+      elems.groupBy(x => (x.ELEM_TYPE, x.THICKNESS, x.WIDTH, x.MATERIAL)).map(group => {
+        val qty = group._2.map(_.QTY).sum
+        val weight = group._2.head.WEIGHT_UNIT
+        val weightTotal = group._2.map(_.TOTAL_WEIGHT).sum
+        res += MaterialSummary(
+          Material(),
+          group._1._1,
+          List(group._1._2, group._1._3.toString).mkString(","),
+          group._1._4,
+          qty,
+          weight,
+          weightTotal,
+          List.empty[String]
+        )
+      })
+    })
+    res.toList
+  }
   def generatePipeGlobalEsp(projects: List[String]): List[Item11Columns] ={
     val res = ListBuffer.empty[Item11Columns]
     val materials = getMaterials
@@ -297,10 +320,52 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
             case Some(value) => value.thumb
             case _ => material.units
           },
-          qty.toString,
+          qty.formatted("%.2f"),
           weight.formatted("%.2f"),
           weightTotal.formatted("%.2f"),
           esps.filter(_.elements.exists(_.material.code == material.code)).map(_.docNumber).mkString(",")
+        )
+      })
+    })
+    res.toList
+  }
+  def generatePipeGlobalEspAsData(projects: List[String]): List[MaterialSummary] ={
+    val res = ListBuffer.empty[MaterialSummary]
+    val materials = getMaterials
+    val units: List[Units] = getUnits
+    projects.foreach(p => {
+      val esps = getPipeAllLatestEsp(List(p))
+      val elems = esps.flatMap(_.elements).filter(_.material.code != "")
+      elems.groupBy(x => (x.material.code)).map(group => {
+        val material = materials.find(_.code == group._1) match {
+          case Some(value) => value
+          case _ => Material()
+        }
+        val qty = material.units match {
+          case "796" => group._2.length
+          case "006" => group._2.map(_.length).sum
+          case "166" => group._2.map(_.weight).sum
+          case _ => group._2.length
+        }
+        val weight = material.units match {
+          case _ => material.singleWeight
+        }
+        val weightTotal = material.units match {
+          case "796" => qty * material.singleWeight
+          case _ => group._2.map(_.weight).sum
+        }
+        res += MaterialSummary(
+          material,
+          material.name,
+          material.description,
+          units.find(_.code == material.units) match {
+            case Some(value) => value.thumb
+            case _ => material.units
+          },
+          qty,
+          weight,
+          weightTotal,
+          esps.filter(_.elements.exists(_.material.code == material.code)).map(_.docNumber)
         )
       })
     })

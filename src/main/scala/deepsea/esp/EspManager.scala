@@ -68,6 +68,8 @@ object EspManager{
   case class InitIssues()
   case class GetGlobalEsp(projects: String, kinds: String)
 
+  case class MaterialSummary(material: Material, name: String, descr: String, unitsName: String, qty: Double, singleWeight: Double, totalWeight: Double, drawings: List[String])
+
   case class ExportPipeFittings()
 }
 
