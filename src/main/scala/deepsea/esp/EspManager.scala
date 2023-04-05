@@ -152,18 +152,10 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
           })
         case _ => None
       }
-    case GetGlobalEsp(projectsValue, kindsValue) =>
-      val item11Columns = decode[List[String]](projectsValue) match {
-        case Right(projects) =>
-          decode[List[String]](kindsValue) match {
-            case Right(kinds) =>
-              val hull = if (kinds.contains("hull")) generateHullGlobalEsp(projects) else List.empty[Item11Columns]
-              val pipe = if (kinds.contains("pipe")) generatePipeGlobalEsp(projects) else List.empty[Item11Columns]
-              hull ++ pipe
-            case Left(value) => List.empty[Item11Columns]
-          }
-        case Left(value) => List.empty[Item11Columns]
-      }
+    case GetGlobalEsp(projects, kinds) =>
+      val hull = if (kinds.contains("hull")) generateHullGlobalEsp(projects.split(",").toList) else List.empty[Item11Columns]
+      val pipe = if (kinds.contains("pipe")) generatePipeGlobalEsp(projects.split(",").toList) else List.empty[Item11Columns]
+      val item11Columns = hull ++ pipe
       sender() ! item11Columns.asJson.noSpaces
     case _ => None
   }
