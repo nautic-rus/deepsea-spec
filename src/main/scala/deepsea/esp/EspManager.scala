@@ -2,7 +2,7 @@ package deepsea.esp
 
 import akka.actor.Actor
 import deepsea.database.DBManager
-import deepsea.esp.EspManager.{CreateEsp, EspObject, GetEsp, GetGlobalEsp, GetHullEsp, HullEspObject, InitIssues, Issue, PipeEspObject}
+import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, EspObject, GetEsp, GetGlobalEsp, GetHullEsp, GetMaterialPurchases, HullEspObject, InitIssues, Issue, MaterialPurchase, PipeEspObject}
 import deepsea.pipe.PipeHelper
 import deepsea.pipe.PipeManager.{Material, PipeSeg, ProjectName}
 import io.circe.generic.JsonCodec
@@ -67,7 +67,9 @@ object EspManager{
   case class Issue(id: Int, project: String, issue_type: String, doc_number: String, revision: String, department: String)
   case class InitIssues()
   case class GetGlobalEsp(projects: String, kinds: String)
-
+  case class MaterialPurchase(code: String, project: String, date: Long, user: String, qty: Double)
+  case class AddMaterialPurchase(materialPurchase: String)
+  case class GetMaterialPurchases(project: String)
   case class MaterialSummary(material: Material, name: String, descr: String, unitsName: String, qty: Double, singleWeight: Double, totalWeight: Double, drawings: List[String])
 
   case class ExportPipeFittings()
@@ -159,6 +161,15 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
       val pipe = if (kinds.contains("pipe")) generatePipeGlobalEsp(projects.split(",").toList) else List.empty[Item11Columns]
       val item11Columns = hull ++ pipe
       sender() ! item11Columns.asJson.noSpaces
+    case AddMaterialPurchase(materialPurchaseValue) =>
+      decode[MaterialPurchase](materialPurchaseValue) match {
+        case Right(materialPurchase) =>
+          addMaterialPurchase(materialPurchase)
+        case Left(value) =>
+      }
+      sender() ! "success".asJson.noSpaces
+    case GetMaterialPurchases(project) =>
+      sender() ! getMaterialPurchases(project).asJson.noSpaces
     case _ => None
   }
 }

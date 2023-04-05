@@ -3,7 +3,7 @@ package local.common
 import deepsea.accomodations.AccommodationManager.{Accommodation, BBox}
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
 import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, ElecCable, TrayBySystem}
-import deepsea.esp.EspManager.{EspElement, EspObject, HullEspObject, PipeEspObject}
+import deepsea.esp.EspManager.{EspElement, EspObject, HullEspObject, MaterialPurchase, PipeEspObject}
 import deepsea.hull.HullManager._
 import deepsea.pipe.PipeManager.{Material, MaterialTranslation, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SpoolLock, SystemDef, UnitTranslation, Units}
 import io.circe.{Decoder, Encoder}
@@ -99,6 +99,9 @@ trait Codecs {
 
   implicit val PipeEspObjectDecoder: Decoder[PipeEspObject] = deriveDecoder[PipeEspObject]
   implicit val PipeEspObjectEncoder: Encoder[PipeEspObject] = deriveEncoder[PipeEspObject]
+
+  implicit val MaterialPurchaseDecoder: Decoder[MaterialPurchase] = deriveDecoder[MaterialPurchase]
+  implicit val MaterialPurchaseEncoder: Encoder[MaterialPurchase] = deriveEncoder[MaterialPurchase]
 
 
 
@@ -227,6 +230,7 @@ trait Codecs {
     classOf[ElecCable],
     classOf[HullEspObject],
     classOf[PipeEspObject],
+    classOf[MaterialPurchase],
 
     //KOKOVIN
     classOf[EleComplect],

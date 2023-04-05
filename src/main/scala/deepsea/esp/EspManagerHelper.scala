@@ -2,7 +2,7 @@ package deepsea.esp
 
 import com.mongodb.client.model.BsonField
 import deepsea.database.DBManager
-import deepsea.esp.EspManager.{EspElement, EspHistoryObject, EspObject, HullEspObject, MaterialSummary, PipeEspObject, espKinds, espObjectsCollectionName}
+import deepsea.esp.EspManager.{EspElement, EspHistoryObject, EspObject, HullEspObject, MaterialPurchase, MaterialSummary, PipeEspObject, espKinds, espObjectsCollectionName}
 import deepsea.materials.MaterialsHelper
 import deepsea.pipe.PipeManager.{Material, Units}
 import io.circe.syntax.EncoderOps
@@ -371,5 +371,25 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
     })
     res.toList
   }
-
+  def addMaterialPurchase(materialPurchase: MaterialPurchase): Unit ={
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val collectionName = "material-purchases"
+        val collection: MongoCollection[MaterialPurchase] = mongo.getCollection(collectionName)
+        Await.result(collection.insertOne(materialPurchase).toFuture(), Duration(60, SECONDS))
+      case _ => None
+    }
+  }
+  def getMaterialPurchases(project: String): List[MaterialPurchase] ={
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val collectionName = "material-purchases"
+        val collection: MongoCollection[MaterialPurchase] = mongo.getCollection(collectionName)
+        Await.result(collection.find(equal("project", project)).toFuture(), Duration(30, SECONDS)) match {
+          case values: Seq[MaterialPurchase] => values.toList
+          case _ => List.empty[MaterialPurchase]
+        }
+      case _ => List.empty[MaterialPurchase]
+    }
+  }
 }
