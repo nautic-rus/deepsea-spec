@@ -256,7 +256,7 @@ class HTTPManager extends Actor {
       (get & path("createPipeEsp") & parameter("project", "docNumber", "rev", "user", "kind", "taskId")) { (project, docNumber, rev, user, kind, taskId) =>
         askFor(ActorManager.esp, CreateEsp(project, docNumber, rev, user, kind, taskId))
       },
-      (get & path("getGlobalEsp") & parameter("projects", "kinds")) { (projects, kinds) =>
+      (get & path("materialsSummary") & parameter("projects", "kinds")) { (projects, kinds) =>
         askFor(ActorManager.esp, GetGlobalEsp(projects, kinds))
       },
     )
