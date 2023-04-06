@@ -259,7 +259,7 @@ class HTTPManager extends Actor {
       (get & path("materialsSummary") & parameter("projects", "kinds")) { (projects, kinds) =>
         askFor(ActorManager.esp, GetGlobalEsp(projects, kinds))
       },
-      (post & path("materialPurchase") & parameter("purchase")) { (purchase) =>
+      (post & path("materialPurchase") & entity(as[String])) { (purchase) =>
         askFor(ActorManager.esp, AddMaterialPurchase(purchase))
       },
       (get & path("materialPurchases") & parameter("project")) { (project) =>
