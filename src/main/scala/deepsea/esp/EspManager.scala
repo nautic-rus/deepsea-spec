@@ -67,7 +67,7 @@ object EspManager{
   case class Issue(id: Int, project: String, issue_type: String, doc_number: String, revision: String, department: String)
   case class InitIssues()
   case class GetGlobalEsp(projects: String, kinds: String)
-  case class MaterialPurchase(code: String, project: String, date: Long, user: String, qty: Double)
+  case class MaterialPurchase(code: String, project: String, date: Long, user: String, qty: Double, contract: String)
   case class AddMaterialPurchase(materialPurchase: String)
   case class GetMaterialPurchases(project: String)
   case class MaterialSummary(material: Material, name: String, descr: String, unitsName: String, qty: Double, singleWeight: Double, totalWeight: Double, drawings: List[String])
