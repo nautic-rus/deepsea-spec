@@ -15,7 +15,8 @@ select
     c.perc_corr, c.ext_len_1, c.ext_len_2,
     c.est_leng
   ) as length,
-  c.perc_corr as l_correction,
+  c.ext_len_1 as ext_len_1,
+  c.ext_len_2 as ext_len_2,
   sl1.descr as from_system,
   n1.userid as from_eq_id,
   n1.x * 1000 as from_x,
