@@ -95,7 +95,7 @@ class DatabaseManager extends Actor with Codecs {
 
     List("P701", "P707", "N002", "N003", "N004", "N005", "TEST").foreach(project => {
       configOracle.setDriverClassName("oracle.jdbc.driver.OracleDriver")
-      configOracle.setJdbcUrl("jdbc:oracle:thin:@office.nautic-rus.ru:1521:ORA3DB")
+      configOracle.setJdbcUrl("jdbc:oracle:thin:@192.168.1.12:1521:ORA3DB")
       configOracle.setUsername("C" + project)
       configOracle.setPassword("Whatab0utus")
       configOracle.setMaximumPoolSize(5)
