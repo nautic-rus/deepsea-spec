@@ -2,7 +2,7 @@ package deepsea.esp
 
 import com.mongodb.client.model.BsonField
 import deepsea.database.DBManager
-import deepsea.esp.EspManager.{EspElement, EspHistoryObject, EspObject, HullEspObject, MaterialPurchase, MaterialSummary, PipeEspObject, espKinds, espObjectsCollectionName}
+import deepsea.esp.EspManager.{DocumentWithMaterial, EspElement, EspHistoryObject, EspObject, GlobalEsp, HullEspObject, MaterialPurchase, MaterialSummary, PipeEspObject, espKinds, espObjectsCollectionName}
 import deepsea.materials.MaterialsHelper
 import deepsea.pipe.PipeManager.{Material, Units}
 import io.circe.syntax.EncoderOps
@@ -239,8 +239,8 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
     (generateHullGlobalEsp(projects) ++ generatePipeGlobalEsp(projects)).asJson.noSpaces
   }
 
-  def generateHullGlobalEsp(projects: List[String]): List[Item11Columns] ={
-    val res = ListBuffer.empty[Item11Columns]
+  def generateHullGlobalEsp(projects: List[String]): List[GlobalEsp] ={
+    val res = ListBuffer.empty[GlobalEsp]
     projects.foreach(p => {
       val esps = getHullAllLatestEsp(List(p))
       val elems = esps.flatMap(_.elements)
@@ -248,16 +248,43 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
         val qty = group._2.map(_.QTY).sum
         val weight = group._2.head.WEIGHT_UNIT
         val weightTotal = group._2.map(_.TOTAL_WEIGHT).sum
-        res += Item11Columns(
-          isHeader = false,
+
+        val docMaterial = ListBuffer.empty[DocumentWithMaterial]
+        esps.foreach(esp => {
+          esp.elements.filter(x => x.ELEM_TYPE == group._1._1 && x.THICKNESS == group._1._2 && x.WIDTH == group._1._3 && x.MATERIAL == group._1._4).foreach(pos => {
+            docMaterial += DocumentWithMaterial(
+              esp.docNumber,
+              esp.rev,
+              esp.user,
+              esp.date,
+              "kg",
+              pos.TOTAL_WEIGHT,
+              pos.WEIGHT_UNIT,
+              pos.TOTAL_WEIGHT
+            )
+          })
+        })
+
+        res += GlobalEsp(
           "",
           group._1._1,
           List(group._1._2, group._1._3.toString).mkString(","),
           group._1._4,
-          qty.toString,
-          weight.formatted("%.2f"),
-          weightTotal.formatted("%.2f")
+          qty,
+          weight.formatted("%.2f").toDouble,
+          weightTotal.formatted("%.2f").toDouble,
+          docMaterial.toList
         )
+//        res += Item11Columns(
+//          isHeader = false,
+//          "",
+//          group._1._1,
+//          List(group._1._2, group._1._3.toString).mkString(","),
+//          group._1._4,
+//          qty.toString,
+//          weight.formatted("%.2f"),
+//          weightTotal.formatted("%.2f")
+//        )
       })
     })
     res.toList
@@ -285,8 +312,8 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
     })
     res.toList
   }
-  def generatePipeGlobalEsp(projects: List[String]): List[Item11Columns] ={
-    val res = ListBuffer.empty[Item11Columns]
+  def generatePipeGlobalEsp(projects: List[String]): List[GlobalEsp] ={
+    val res = ListBuffer.empty[GlobalEsp]
     val materials = getMaterials
     val units: List[Units] = getUnits
     projects.foreach(p => {
@@ -298,7 +325,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
           case _ => Material()
         }
         val qty = material.units match {
-          case "796" => group._2.length
+          case "796" => group._2.length / 1000
           case "006" => group._2.map(_.length).sum
           case "166" => group._2.map(_.weight).sum
           case _ => group._2.length
@@ -311,8 +338,28 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
           case _ => group._2.map(_.weight).sum
         }
 
-        res += Item11Columns(
-          isHeader = false,
+        val docMaterial = ListBuffer.empty[DocumentWithMaterial]
+        esps.foreach(esp => {
+          esp.elements.filter(x => x.material.code == material.code).foreach(pos => {
+            docMaterial += DocumentWithMaterial(
+              esp.docNumber,
+              esp.rev,
+              esp.user,
+              esp.date,
+              pos.material.units,
+              material.units match {
+                case "796" => 1
+                case "006" => pos.length / 1000
+                case "166" => pos.weight
+                case _ => group._2.length
+              },
+              material.singleWeight,
+              pos.weight
+            )
+          })
+        })
+
+        res += GlobalEsp(
           material.code,
           material.name("ru"),
           material.name,
@@ -320,11 +367,26 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
             case Some(value) => value.thumb
             case _ => material.units
           },
-          qty.formatted("%.2f"),
-          weight.formatted("%.2f"),
-          weightTotal.formatted("%.2f"),
-          esps.filter(_.elements.exists(_.material.code == material.code)).map(_.docNumber).mkString(",")
+          qty.formatted("%.2f").toDouble,
+          weight.formatted("%.2f").toDouble,
+          weightTotal.formatted("%.2f").toDouble,
+          docMaterial.toList
         )
+
+//        res += Item11Columns(
+//          isHeader = false,
+//          material.code,
+//          material.name("ru"),
+//          material.name,
+//          units.find(_.code == material.units) match {
+//            case Some(value) => value.thumb
+//            case _ => material.units
+//          },
+//          qty.formatted("%.2f"),
+//          weight.formatted("%.2f"),
+//          weightTotal.formatted("%.2f"),
+//          esps.filter(_.elements.exists(_.material.code == material.code)).map(_.docNumber).mkString(",")
+//        )
       })
     })
     res.toList
