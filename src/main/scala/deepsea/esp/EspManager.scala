@@ -2,7 +2,7 @@ package deepsea.esp
 
 import akka.actor.Actor
 import deepsea.database.DBManager
-import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, EspObject, GetEsp, GetGlobalEsp, GetHullEsp, GetMaterialPurchases, HullEspObject, InitIssues, Issue, MaterialPurchase, PipeEspObject}
+import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, EspObject, GetEsp, GetGlobalEsp, GetHullEsp, GetMaterialPurchases, GlobalEsp, HullEspObject, InitIssues, Issue, MaterialPurchase, PipeEspObject}
 import deepsea.pipe.PipeHelper
 import deepsea.pipe.PipeManager.{Material, PipeSeg, ProjectName}
 import io.circe.generic.JsonCodec
@@ -73,6 +73,8 @@ object EspManager{
   case class MaterialSummary(material: Material, name: String, descr: String, unitsName: String, qty: Double, singleWeight: Double, totalWeight: Double, drawings: List[String])
 
   case class ExportPipeFittings()
+  case class GlobalEsp(code: String, name: String, desc: String, units: String, qty: Double, weight: Double, weightTotal: Double, documents: List[DocumentWithMaterial])
+  case class DocumentWithMaterial(docNumber: String, rev: String, user: String, date: Long, units: String, qty: Double, weight: Double, totalWeight: Double)
 }
 
 class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper {
@@ -157,10 +159,10 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
         case _ => None
       }
     case GetGlobalEsp(projects, kinds) =>
-      val hull = if (kinds.contains("hull")) generateHullGlobalEsp(projects.split(",").toList) else List.empty[Item11Columns]
-      val pipe = if (kinds.contains("pipe")) generatePipeGlobalEsp(projects.split(",").toList) else List.empty[Item11Columns]
-      val item11Columns = hull ++ pipe
-      sender() ! item11Columns.asJson.noSpaces
+      val hull = if (kinds.contains("hull")) generateHullGlobalEsp(projects.split(",").toList) else List.empty[GlobalEsp]
+      val pipe = if (kinds.contains("pipe")) generatePipeGlobalEsp(projects.split(",").toList) else List.empty[GlobalEsp]
+      val globalEsp = hull ++ pipe
+      sender() ! globalEsp.asJson.noSpaces
     case AddMaterialPurchase(materialPurchaseValue) =>
       decode[MaterialPurchase](materialPurchaseValue) match {
         case Right(materialPurchase) =>
