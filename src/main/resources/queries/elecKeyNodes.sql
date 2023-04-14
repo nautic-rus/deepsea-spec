@@ -23,4 +23,4 @@ select
 from
   node nnd
 where
-  nnd.seqid in : nodes
+  nnd.seqid in :nodes

@@ -37,7 +37,8 @@ select
   ele2.userid as to_eq,
   z2.userid as to_zone,
   zl2.descr to_zone_desc,
-  get_cab_route_area (c.seqid) as route_area,
+  get_cab_route (c.seqid) as route_area,
+  get_cab_route_id (c.seqid) as route_area_id,
   ss.codenumber as stock_code
 from
   (select * from cable where syst in (select system from systems_lang where descr like (:docNumber))) c

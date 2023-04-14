@@ -168,9 +168,15 @@ object ElecManager {
                      to_zone: String = "",
                      to_zone_desc: String = "",
                      cab_route_area: String = "",
+                     cab_route_area_id: String = "",
                      stock_code: String = "",
                      material: Material
                    )
+
+  case class NodeConnect(
+                 id: Int,
+                 count: Int
+                 )
 
 
   class ElecManager extends Actor with ElecHelper with Codecs {

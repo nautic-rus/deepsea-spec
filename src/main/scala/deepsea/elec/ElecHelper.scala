@@ -2,11 +2,11 @@ package deepsea.elec
 
 import deepsea.database.DBManager
 import deepsea.database.DatabaseManager.{GetMongoConnection, GetOracleConnection}
-import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, ElecCable, TrayBySystem, TraysBySystem}
+import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, ElecCable, NodeConnect, TrayBySystem, TraysBySystem}
 import deepsea.pipe.PipeManager.Material
 import local.common.Codecs
 import org.mongodb.scala.MongoCollection
-import org.mongodb.scala.model.Filters.{and, equal}
+import org.mongodb.scala.model.Filters.{and, equal, not}
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Await
@@ -186,38 +186,43 @@ trait ElecHelper extends Codecs {
         val s = c.prepareStatement(query);
         val rs = s.executeQuery();
         val materials: List[Material] = getMaterials();
-        while (rs.next()) {
-          val code = Option(rs.getString("STOCK_CODE")).getOrElse("");
-          val name = Option(rs.getString("CODE")).getOrElse("");
-          res += new CableBoxesBySystem(
-            Option(rs.getString("SYSTEM")).getOrElse(""),
-            Option(rs.getString("USERID")).getOrElse(""),
-            Option(rs.getInt("OID")).getOrElse(0),
-            Option(rs.getString("ZONE")).getOrElse(""),
-            Option(rs.getInt("LINE")).getOrElse(0),
-            Option(rs.getDouble("WEIGHT")).getOrElse(0.0),
-            Option(rs.getDouble("X_COG")).getOrElse(0.0),
-            Option(rs.getDouble("Y_COG")).getOrElse(0.0),
-            Option(rs.getDouble("Z_COG")).getOrElse(0.0),
-            Option(rs.getString("SEAL_TYPE")).getOrElse(""),
-            Option(rs.getInt("TYPE")).getOrElse(0),
-            name,
-            code,
-            Option(rs.getString("DESCR")).getOrElse(""),
-            Option(rs.getString("NODE_1")).getOrElse(""),
-            Option(rs.getDouble("N1_X")).getOrElse(0.0),
-            Option(rs.getDouble("N1_Y")).getOrElse(0.0),
-            Option(rs.getDouble("N1_Z")).getOrElse(0.0),
-            Option(rs.getString("NODE_2")).getOrElse(""),
-            Option(rs.getDouble("N2_X")).getOrElse(0.0),
-            Option(rs.getDouble("N2_Y")).getOrElse(0.0),
-            Option(rs.getDouble("N2_Z")).getOrElse(0.0),
-            Option(rs.getDouble("LENGTH")).getOrElse(0.0),
-            materials.find(x => x.code == code) match {
-              case Some(value) => value
-              case _ => Material()
-            }
-          )
+        try {
+          while (rs.next()) {
+            val code = Option(rs.getString("STOCK_CODE")).getOrElse("");
+            val name = Option(rs.getString("CODE")).getOrElse("");
+            res += new CableBoxesBySystem(
+              Option(rs.getString("SYSTEM")).getOrElse(""),
+              Option(rs.getString("USERID")).getOrElse(""),
+              Option(rs.getInt("OID")).getOrElse(0),
+              Option(rs.getString("ZONE")).getOrElse(""),
+              Option(rs.getInt("LINE")).getOrElse(0),
+              Option(rs.getDouble("WEIGHT")).getOrElse(0.0),
+              Option(rs.getDouble("X_COG")).getOrElse(0.0),
+              Option(rs.getDouble("Y_COG")).getOrElse(0.0),
+              Option(rs.getDouble("Z_COG")).getOrElse(0.0),
+              Option(rs.getString("SEAL_TYPE")).getOrElse(""),
+              Option(rs.getInt("TYPE")).getOrElse(0),
+              name,
+              code,
+              Option(rs.getString("DESCR")).getOrElse(""),
+              Option(rs.getString("NODE_1")).getOrElse(""),
+              Option(rs.getDouble("N1_X")).getOrElse(0.0),
+              Option(rs.getDouble("N1_Y")).getOrElse(0.0),
+              Option(rs.getDouble("N1_Z")).getOrElse(0.0),
+              Option(rs.getString("NODE_2")).getOrElse(""),
+              Option(rs.getDouble("N2_X")).getOrElse(0.0),
+              Option(rs.getDouble("N2_Y")).getOrElse(0.0),
+              Option(rs.getDouble("N2_Z")).getOrElse(0.0),
+              Option(rs.getDouble("LENGTH")).getOrElse(0.0),
+              materials.find(x => x.code == code) match {
+                case Some(value) => value
+                case _ => Material()
+              }
+            )
+          }
+        }
+        catch {
+          case e: Exception => println(e.toString)
         }
         rs.close()
         s.close()
@@ -239,49 +244,84 @@ trait ElecHelper extends Codecs {
           while (rs.next()) {
             val code = Option(rs.getString("STOCK_CODE")).getOrElse("");
             val name = Option(rs.getString("CODE")).getOrElse("");
-              res += CableRoute(
-                Option(rs.getString("SYSTEM")).getOrElse(""),
-                name,
-                Option(rs.getString("DESCRIPTION")).getOrElse(""),
-                Option(rs.getString("NOM_SECTION")).getOrElse(""),
-                Option(rs.getInt("DIAMETER")).getOrElse(0),
-                Option(rs.getString("SEG_CODE")).getOrElse(""),
-                Option(rs.getDouble("F_ROUT")).getOrElse(0),
-                Option(rs.getDouble("LENGTH")).getOrElse(0.0),
-                Option(rs.getDouble("EXT_LEN_1")).getOrElse(0.0),
-                Option(rs.getDouble("EXT_LEN_2")).getOrElse(0.0),
-                Option(rs.getString("FROM_SYSTEM")).getOrElse(""),
-                Option(rs.getString("FROM_EQ_ID")).getOrElse(""),
-                Option(rs.getString("FROM_EQ_DESC")).getOrElse(""),
-                Option(rs.getString("FROM_EQ")).getOrElse(""),
-                Option(rs.getString("FROM_STOCK_CODE")).getOrElse(""),
-                Option(rs.getDouble("FROM_X")).getOrElse(0.0),
-                Option(rs.getDouble("FROM_Y")).getOrElse(0.0),
-                Option(rs.getDouble("FROM_Z")).getOrElse(0.0),
-                Option(rs.getString("FROM_ZONE")).getOrElse(""),
-                Option(rs.getString("FROM_ZONE_DESC")).getOrElse(""),
-                Option(rs.getString("TO_SYSTEM")).getOrElse(""),
-                Option(rs.getString("TO_EQ_ID")).getOrElse(""),
-                Option(rs.getString("TO_EQ_DESC")).getOrElse(""),
-                Option(rs.getString("TO_EQ")).getOrElse(""),
-                Option(rs.getString("TO_STOCK_CODE")).getOrElse(""),
-                Option(rs.getDouble("TO_X")).getOrElse(0.0),
-                Option(rs.getDouble("TO_Y")).getOrElse(0.0),
-                Option(rs.getDouble("TO_Z")).getOrElse(0.0),
-                Option(rs.getString("TO_ZONE")).getOrElse(""),
-                Option(rs.getString("TO_ZONE_DESC")).getOrElse(""),
-                Option(rs.getString("ROUTE_AREA")).getOrElse(""),
-                code,
-                materials.find(x => x.code == code) match {
-                  case Some(value) => value
-                  case _ => Material()
-                }
-              )
+            res += CableRoute(
+              Option(rs.getString("SYSTEM")).getOrElse(""),
+              name,
+              Option(rs.getString("DESCRIPTION")).getOrElse(""),
+              Option(rs.getString("NOM_SECTION")).getOrElse(""),
+              Option(rs.getInt("DIAMETER")).getOrElse(0),
+              Option(rs.getString("SEG_CODE")).getOrElse(""),
+              Option(rs.getDouble("F_ROUT")).getOrElse(0),
+              Option(rs.getDouble("LENGTH")).getOrElse(0.0),
+              Option(rs.getDouble("EXT_LEN_1")).getOrElse(0.0),
+              Option(rs.getDouble("EXT_LEN_2")).getOrElse(0.0),
+              Option(rs.getString("FROM_SYSTEM")).getOrElse(""),
+              Option(rs.getString("FROM_EQ_ID")).getOrElse(""),
+              Option(rs.getString("FROM_EQ_DESC")).getOrElse(""),
+              Option(rs.getString("FROM_EQ")).getOrElse(""),
+              Option(rs.getString("FROM_STOCK_CODE")).getOrElse(""),
+              Option(rs.getDouble("FROM_X")).getOrElse(0.0),
+              Option(rs.getDouble("FROM_Y")).getOrElse(0.0),
+              Option(rs.getDouble("FROM_Z")).getOrElse(0.0),
+              Option(rs.getString("FROM_ZONE")).getOrElse(""),
+              Option(rs.getString("FROM_ZONE_DESC")).getOrElse(""),
+              Option(rs.getString("TO_SYSTEM")).getOrElse(""),
+              Option(rs.getString("TO_EQ_ID")).getOrElse(""),
+              Option(rs.getString("TO_EQ_DESC")).getOrElse(""),
+              Option(rs.getString("TO_EQ")).getOrElse(""),
+              Option(rs.getString("TO_STOCK_CODE")).getOrElse(""),
+              Option(rs.getDouble("TO_X")).getOrElse(0.0),
+              Option(rs.getDouble("TO_Y")).getOrElse(0.0),
+              Option(rs.getDouble("TO_Z")).getOrElse(0.0),
+              Option(rs.getString("TO_ZONE")).getOrElse(""),
+              Option(rs.getString("TO_ZONE_DESC")).getOrElse(""),
+              Option(rs.getString("ROUTE_AREA")).getOrElse(""),
+              Option(rs.getString("ROUTE_AREA_ID")).getOrElse(""),
+              code,
+              materials.find(x => x.code == code) match {
+                case Some(value) => value
+                case _ => Material()
+              }
+            )
           }
         }
         catch {
           case e: Exception => println(e.toString)
         }
+
+//        res.foreach(cable => {
+//          val rout = ListBuffer.empty[NodeConnect];
+//          var nodes = ListBuffer.empty[Int];
+//          val route_area = cable.cab_route_area.split(' ').toList
+//          val route_area_id = cable.cab_route_area_id.split(',').toList
+////          val queryFun = Source.fromResource("queries/functions/get_cab_route_id.sql").mkString
+////          s.execute(queryFun)
+//          val queryN = Source.fromResource("queries/elecKeyNodes.sql").mkString.replaceAll(":nodes", "(" + cable.cab_route_area_id + ")")
+//          val rsn = s.executeQuery(queryN)
+//          try {
+//            while (rsn.next()) {
+//              rout += NodeConnect(
+//                Option(rsn.getInt("SEQID")).getOrElse(0),
+//                Option(rsn.getInt("COUNT")).getOrElse(0))
+//            }
+//
+//            val filterRout =  rout.filter(_.count > 2)
+//            filterRout.foreach(node => {
+//              val i = rout.indexOf(node);
+//              if (i != 0 || i != filterRout.size - 1) {
+//                nodes += rout(i-1).id;
+//                nodes += rout(i+1).id;
+//              }
+//            })
+//
+//            nodes = nodes.distinct
+//
+//
+//          }
+//          catch {
+//            case e: Exception => println(e.toString)
+//          }
+//        })
         rs.close();
         s.close();
         c.close();
