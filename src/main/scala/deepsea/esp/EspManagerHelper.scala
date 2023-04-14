@@ -241,6 +241,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
 
   def generateHullGlobalEsp(projects: List[String]): List[GlobalEsp] ={
     val res = ListBuffer.empty[GlobalEsp]
+    val units: List[Units] = getUnits
     projects.foreach(p => {
       val esps = getHullAllLatestEsp(List(p))
       val elems = esps.flatMap(_.elements)
@@ -258,6 +259,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
               esp.user,
               esp.date,
               "kg",
+              "166",
               pos.TOTAL_WEIGHT,
               pos.WEIGHT_UNIT,
               pos.TOTAL_WEIGHT
@@ -269,11 +271,16 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
           "",
           group._1._1,
           List(group._1._2, group._1._3.toString).mkString(","),
+          units.find(_.code == group._1._4) match {
+            case Some(value) => value.thumb
+            case _ => group._1._4
+          },
           group._1._4,
           qty,
           weight.formatted("%.2f").toDouble,
           weightTotal.formatted("%.2f").toDouble,
-          docMaterial.toList
+          docMaterial.toList,
+          Material()
         )
 //        res += Item11Columns(
 //          isHeader = false,
@@ -346,6 +353,10 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
               esp.rev,
               esp.user,
               esp.date,
+              units.find(_.code == material.units) match {
+                case Some(value) => value.thumb
+                case _ => material.units
+              },
               pos.material.units,
               material.units match {
                 case "796" => 1
@@ -367,10 +378,12 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
             case Some(value) => value.thumb
             case _ => material.units
           },
+          material.units,
           qty.formatted("%.2f").toDouble,
           weight.formatted("%.2f").toDouble,
           weightTotal.formatted("%.2f").toDouble,
-          docMaterial.toList
+          docMaterial.toList,
+          material
         )
 
 //        res += Item11Columns(

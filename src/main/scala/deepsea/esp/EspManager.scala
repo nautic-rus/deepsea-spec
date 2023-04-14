@@ -73,8 +73,8 @@ object EspManager{
   case class MaterialSummary(material: Material, name: String, descr: String, unitsName: String, qty: Double, singleWeight: Double, totalWeight: Double, drawings: List[String])
 
   case class ExportPipeFittings()
-  case class GlobalEsp(code: String, name: String, desc: String, units: String, qty: Double, weight: Double, weightTotal: Double, documents: List[DocumentWithMaterial])
-  case class DocumentWithMaterial(docNumber: String, rev: String, user: String, date: Long, units: String, qty: Double, weight: Double, totalWeight: Double)
+  case class GlobalEsp(code: String, name: String, desc: String, units: String, unitsValue: String, qty: Double, weight: Double, weightTotal: Double, documents: List[DocumentWithMaterial], material: Material)
+  case class DocumentWithMaterial(docNumber: String, rev: String, user: String, date: Long, units: String, unitsValue: String, qty: Double, weight: Double, totalWeight: Double)
 }
 
 class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper {
