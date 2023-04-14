@@ -1,20 +1,26 @@
 select
   nnd.seqid,
-  nnd.userid,
   (
     select
-      count(
-        distinct(n.seqid)
-      )
+      count(*)
     from
-      node n
-      join cab_route cr on (
-        cr.node1 = n.seqid
-        or cr.node2 = n.seqid
-      )
-      and cr.node1 = nnd.seqid
+      (
+        select
+          cr.node1
+        from
+          cab_route cr
+        where
+          cr.node2 = nnd.seqid
+        union
+        select
+          cr.node2
+        from
+          cab_route cr
+        where
+          cr.node1 = nnd.seqid
+      ) cs
   ) as count
 from
   node nnd
 where
-  nnd.seqid in (:nodes)
+  nnd.seqid in : nodes
