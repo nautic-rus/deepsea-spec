@@ -262,7 +262,8 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
               "166",
               pos.TOTAL_WEIGHT,
               pos.WEIGHT_UNIT,
-              pos.TOTAL_WEIGHT
+              pos.TOTAL_WEIGHT,
+              pos.PART_CODE
             )
           })
         })
@@ -365,7 +366,8 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
                 case _ => group._2.length
               },
               material.singleWeight,
-              pos.weight
+              pos.weight,
+              pos.spool + "." + pos.spPieceId
             )
           })
         })
