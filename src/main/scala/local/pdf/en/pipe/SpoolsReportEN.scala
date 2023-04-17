@@ -54,7 +54,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
         itemsIN.foreach(row => {
           row.A3 match {
             case "pcs" => buff += row.copy(A3 = "шт")
-            case "m" => buff += row.copy(A3 = "шт")
+            case "m" => buff += row.copy(A3 = "м")
             case _ => buff += row
           }
         })
@@ -69,7 +69,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
         totalItemsIN.foreach(row => {
           row.A3 match {
             case "pcs" => buff += row.copy(A3 = "шт")
-            case "m" => buff += row.copy(A3 = "шт")
+            case "m" => buff += row.copy(A3 = "м")
             case _ => buff += row
           }
         })

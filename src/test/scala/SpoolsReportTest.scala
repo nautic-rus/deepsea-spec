@@ -12,7 +12,7 @@ class SpoolsReportTest extends AnyFunSuite with PipeHelper {
 
 //  val ret: String = genSpoolsListEnPDF("210101-800-0001", "FUEL SYSTEM", "0", jk, "ru")
 
-  val retAll: String = genSpoolsListEnPDFAll("210101-819-0001", "FUEL SYSTEM", "0", pipeSegs,"en")
+  val retAll: String = genSpoolsListEnPDFAll("210101-701-001", "FUEL SYSTEM", "0", pipeSegs,"en")
 
  // println(ret)
   println(retAll)
