@@ -172,6 +172,11 @@ object ElecManager {
                      material: Material
                    )
 
+  case class NodeConnect(
+                 id: Int,
+                 count: Int
+                 )
+
 
   class ElecManager extends Actor with ElecHelper with Codecs {
     implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
