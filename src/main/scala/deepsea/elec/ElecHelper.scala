@@ -234,16 +234,61 @@ trait ElecHelper extends Codecs {
 
   def getCablesBySystem(project: String, docNumber: String): List[CableRoute] = {
     val res = ListBuffer.empty[CableRoute];
+
     DBManager.GetOracleConnection(project) match {
       case Some(c) =>
         val materials: List[Material] = getMaterials();
-        val query = Source.fromResource("queries/elecCables.sql").mkString.replaceAll(":docNumber", "'%" + docNumber + "%'");
+        val rout = ListBuffer.empty[NodeConnect];
+
         val s = c.createStatement();
+
+        val queryN = Source.fromResource("queries/elecKeyNodes.sql").mkString
+        val rsn = s.executeQuery(queryN)
+        try {
+          while (rsn.next()) {
+            rout += NodeConnect(
+              Option(rsn.getInt("SEQID")).getOrElse(0),
+              Option(rsn.getInt("COUNT")).getOrElse(0))
+          }
+        }
+        catch {
+          case e: Exception => println(e.toString)
+        }
+
+        val query = Source.fromResource("queries/elecCables.sql").mkString.replaceAll(":docNumber", "'%" + docNumber + "%'");
         val rs = s.executeQuery(query);
         try {
           while (rs.next()) {
             val code = Option(rs.getString("STOCK_CODE")).getOrElse("");
             val name = Option(rs.getString("CODE")).getOrElse("");
+            val cab_route_area = Option(rs.getString("ROUTE_AREA")).getOrElse("");
+//            val cab_route_area_id = Option(rs.getString("ROUTE_AREA_ID")).getOrElse("");
+//
+//            val nodes = ListBuffer.empty[Int]
+//            val routeArea = cab_route_area.split('^').toList
+//            val routeAreaId = cab_route_area_id.split(',').toList
+//            val nodesId = rout.filter(x => routeAreaId.contains(x.id.toString))
+//
+//            val filterRout = nodesId.filter(_.count > 2)
+//            filterRout.foreach(node => {
+//              val i = rout.indexOf(node);
+//              if (i == 0 || i == filterRout.size - 1) {
+//                nodes += node.id
+//              } else {
+//                nodes += rout(i - 1).id;
+//                nodes += rout(i + 1).id;
+//              }
+//            })
+
+//            val paramRouteArea = ListBuffer.empty[String]
+//
+//            routeAreaId.foreach(node => {
+//              val i = rout.indexOf(node);
+//              if (node == nodes(i).toString) {
+//                paramRouteArea += routeArea(i)
+//              }
+//            })
+
             res += CableRoute(
               Option(rs.getString("SYSTEM")).getOrElse(""),
               name,
@@ -275,8 +320,7 @@ trait ElecHelper extends Codecs {
               Option(rs.getDouble("TO_Z")).getOrElse(0.0),
               Option(rs.getString("TO_ZONE")).getOrElse(""),
               Option(rs.getString("TO_ZONE_DESC")).getOrElse(""),
-              Option(rs.getString("ROUTE_AREA")).getOrElse(""),
-              Option(rs.getString("ROUTE_AREA_ID")).getOrElse(""),
+              cab_route_area,
               code,
               materials.find(x => x.code == code) match {
                 case Some(value) => value
@@ -289,39 +333,7 @@ trait ElecHelper extends Codecs {
           case e: Exception => println(e.toString)
         }
 
-//        res.foreach(cable => {
-//          val rout = ListBuffer.empty[NodeConnect];
-//          var nodes = ListBuffer.empty[Int];
-//          val route_area = cable.cab_route_area.split(' ').toList
-//          val route_area_id = cable.cab_route_area_id.split(',').toList
-////          val queryFun = Source.fromResource("queries/functions/get_cab_route_id.sql").mkString
-////          s.execute(queryFun)
-//          val queryN = Source.fromResource("queries/elecKeyNodes.sql").mkString.replaceAll(":nodes", "(" + cable.cab_route_area_id + ")")
-//          val rsn = s.executeQuery(queryN)
-//          try {
-//            while (rsn.next()) {
-//              rout += NodeConnect(
-//                Option(rsn.getInt("SEQID")).getOrElse(0),
-//                Option(rsn.getInt("COUNT")).getOrElse(0))
-//            }
-//
-//            val filterRout =  rout.filter(_.count > 2)
-//            filterRout.foreach(node => {
-//              val i = rout.indexOf(node);
-//              if (i != 0 || i != filterRout.size - 1) {
-//                nodes += rout(i-1).id;
-//                nodes += rout(i+1).id;
-//              }
-//            })
-//
-//            nodes = nodes.distinct
-//
-//
-//          }
-//          catch {
-//            case e: Exception => println(e.toString)
-//          }
-//        })
+
         rs.close();
         s.close();
         c.close();

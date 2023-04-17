@@ -22,5 +22,3 @@ select
   ) as count
 from
   node nnd
-where
-  nnd.seqid in :nodes

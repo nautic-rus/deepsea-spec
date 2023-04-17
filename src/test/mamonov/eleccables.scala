@@ -55,7 +55,6 @@ class eleccables extends AnyFunSuite {
             Option(rs.getString("TO_ZONE")).getOrElse(""),
             Option(rs.getString("TO_ZONE_DESC")).getOrElse(""),
             Option(rs.getString("ROUTE_AREA")).getOrElse(""),
-            Option(rs.getString("ROUTE_AREA_ID")).getOrElse(""),
             code,
             materials.find(x => x.code == code) match {
               case Some(value) => value
