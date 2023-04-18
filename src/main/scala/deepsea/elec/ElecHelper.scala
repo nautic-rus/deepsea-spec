@@ -2,7 +2,7 @@ package deepsea.elec
 
 import deepsea.database.DBManager
 import deepsea.database.DatabaseManager.{GetMongoConnection, GetOracleConnection}
-import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, ElecCable, NodeConnect, TrayBySystem, TraysBySystem}
+import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, ElecAngle, ElecCable, NodeConnect, TrayBySystem, TraysBySystem}
 import deepsea.pipe.PipeManager.Material
 import local.common.Codecs
 import org.mongodb.scala.MongoCollection
@@ -65,8 +65,20 @@ trait ElecHelper extends Codecs {
     }
   }
 
+  def getElecAngles: List[ElecAngle] = {
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val elecAnglesCollection: MongoCollection[ElecAngle] = mongo.getCollection("elec-angles")
+        Await.result(elecAnglesCollection.find[ElecAngle]().toFuture(), Duration(30, SECONDS)) match {
+          case elecAngles => elecAngles.toList
+          case _ => List.empty[ElecAngle]
+        }
+      case _ => List.empty[ElecAngle]
+    }
+  }
   def getTraysBySystem(project: String, docNumber: String): List[TraysBySystem] = {
-    val res = ListBuffer.empty[TraysBySystem];
+    val res = ListBuffer.empty[TraysBySystem]
+    val elecAngles = getElecAngles
     DBManager.GetOracleConnection(project) match {
       case Some(c) =>
         val doc = docNumber.split("-").takeRight(2).mkString("-");
@@ -109,44 +121,96 @@ trait ElecHelper extends Codecs {
         c.close()
 
 
-        val angleCode: String = "MTLESNSTLXXX0047";
-        val angle: Material = materials.find(x => x.code == angleCode) match {
-          case Some(value) => value
-          case _ => Material()
-        }
 
-        var totalHeight: Double = 0.0;
-        res.groupBy(x => x.stockCode).foreach(gr => {
-          val len = gr._2.map(_.length).sum;
-          totalHeight += 0.3 * Math.ceil(len / 1.2) * 2;
+        //todo - here goes some stuff needs to be edited
+
+        res.foreach(e => {
+          val elecAngle = elecAngles.find(a => e.material.name.contains(a.name)) match {
+            case Some(angleValue) =>
+              materials.find(_.code == angleValue.code) match {
+                case Some(material) => material
+                case _ => Material()
+              }
+            case _ => Material()
+          }
+          if (elecAngle.code != ""){
+
+            var totalHeight: Double = 0.0;
+            res.groupBy(x => x.stockCode).foreach(gr => {
+              val len = gr._2.map(_.length).sum;
+              totalHeight += 0.3 * Math.ceil(len / 1.2) * 2;
+            })
+            val wght: Double = totalHeight * elecAngle.singleWeight;
+            val totalWeight: String = if (wght < 0.01) " 0.01" else String.format("%.2f", wght);
+
+            res += new TraysBySystem(
+              doc,
+              0,
+              "",
+              0,
+              totalWeight.toDoubleOption.getOrElse(0.0),
+              0.0,
+              0.0,
+              0.0,
+              "",
+              0,
+              elecAngle.code,
+              "",
+              "",
+              0.0,
+              0.0,
+              0.0,
+              "",
+              0.0,
+              0.0,
+              0.0,
+              totalHeight,
+              elecAngle
+            )
+          }
         })
-        val wght: Double = totalHeight * angle.singleWeight;
-        val totalWeight: String = if (wght < 0.01) " 0.01" else String.format("%.2f", wght);
 
-        res += new TraysBySystem(
-          doc,
-          0,
-          "",
-          0,
-          totalWeight.toDoubleOption.getOrElse(0.0),
-          0.0,
-          0.0,
-          0.0,
-          "",
-          0,
-          angleCode,
-          "",
-          "",
-          0.0,
-          0.0,
-          0.0,
-          "",
-          0.0,
-          0.0,
-          0.0,
-          totalHeight,
-          angle
-        )
+
+        //todo - here it finished
+
+//        val angleCode: String = "MTLESNSTLXXX0047";
+//        val angle: Material = materials.find(x => x.code == angleCode) match {
+//          case Some(value) => value
+//          case _ => Material()
+//        }
+//
+//        var totalHeight: Double = 0.0;
+//        res.groupBy(x => x.stockCode).foreach(gr => {
+//          val len = gr._2.map(_.length).sum;
+//          totalHeight += 0.3 * Math.ceil(len / 1.2) * 2;
+//        })
+//        val wght: Double = totalHeight * angle.singleWeight;
+//        val totalWeight: String = if (wght < 0.01) " 0.01" else String.format("%.2f", wght);
+//
+//        res += new TraysBySystem(
+//          doc,
+//          0,
+//          "",
+//          0,
+//          totalWeight.toDoubleOption.getOrElse(0.0),
+//          0.0,
+//          0.0,
+//          0.0,
+//          "",
+//          0,
+//          angleCode,
+//          "",
+//          "",
+//          0.0,
+//          0.0,
+//          0.0,
+//          "",
+//          0.0,
+//          0.0,
+//          0.0,
+//          totalHeight,
+//          angle
+//        )
 
       case _ =>
     }
