@@ -221,7 +221,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
                   model.BsonField("taskId", Document("$last" -> "$taskId")),
                   model.BsonField("elements", Document("$last" -> "$elements")),
                 )
-              )).allowDiskUse(true).toFuture(), Duration(10, SECONDS)) match {
+              )).allowDiskUse(true).toFuture(), Duration(60, SECONDS)) match {
               case espObjects: Seq[PipeEspObject] => res ++= espObjects.toList
               case _ => None
             }
