@@ -124,8 +124,8 @@ trait ElecHelper extends Codecs {
 
         //todo - here goes some stuff needs to be edited
 
-        res.foreach(e => {
-          val elecAngle = elecAngles.find(a => e.material.name.contains(a.name)) match {
+        res.map(_.material).distinct.foreach(e => {
+          val elecAngle = elecAngles.find(a => e.name.contains(a.name)) match {
             case Some(angleValue) =>
               materials.find(_.code == angleValue.code) match {
                 case Some(material) => material
