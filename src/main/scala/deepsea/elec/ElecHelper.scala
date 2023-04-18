@@ -125,7 +125,7 @@ trait ElecHelper extends Codecs {
         val elecAngles = getElecAngles
         val anglesRes = ListBuffer.empty[TraysBySystem]
         res.groupBy(_.trayDesc).foreach(gr => {
-          val elecAngle = elecAngles.find(a => a.name == gr._1) match {
+          val elecAngle = elecAngles.find(a => gr._1.contains(a.name)) match {
             case Some(angleValue) =>
               materials.find(_.code == angleValue.code) match {
                 case Some(material) => material
