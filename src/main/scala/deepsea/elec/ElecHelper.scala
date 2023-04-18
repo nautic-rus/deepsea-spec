@@ -125,13 +125,8 @@ trait ElecHelper extends Codecs {
 
         //todo - here goes some stuff needs to be edited
 
-
-        res.map(_.material.code).distinct.foreach(eCode => {
-          val e = materials.find(_.code == eCode) match {
-            case Some(value) => value
-            case _ => Material()
-          }
-          val elecAngle = elecAngles.find(a => e.name.contains(a.name)) match {
+        res.groupBy(_.trayDesc).foreach(gr => {
+          val elecAngle = elecAngles.find(a => a.name == gr._1) match {
             case Some(angleValue) =>
               materials.find(_.code == angleValue.code) match {
                 case Some(material) => material
@@ -141,7 +136,7 @@ trait ElecHelper extends Codecs {
           }
           if (elecAngle.code != ""){
 
-            val len = res.filter(_.stockCode == e.code).map(_.length).sum
+            val len = gr._2.map(_.length).sum
             val totalHeight = 0.3 * Math.ceil(len / 1.2) * 2;
             val wght: Double = totalHeight * elecAngle.singleWeight;
             val totalWeight: String = if (wght < 0.01) " 0.01" else String.format("%.2f", wght);
@@ -172,6 +167,7 @@ trait ElecHelper extends Codecs {
             )
           }
         })
+
 
 
         //todo - here it finished
