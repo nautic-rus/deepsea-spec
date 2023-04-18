@@ -74,7 +74,7 @@ trait ElecHelper extends Codecs with EspManagerHelper {
         val rs = s.executeQuery()
         val projects = getIssueProjects
         val rkdProject = projects.find(_.foran == project) match {
-          case Some(value) => value
+          case Some(value) => value.rkd
           case _ => ""
         }
         val materials: List[Material] = getMaterials.filter(_.project == rkdProject)
