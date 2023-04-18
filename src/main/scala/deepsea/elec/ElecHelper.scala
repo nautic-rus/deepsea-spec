@@ -3,7 +3,8 @@ package deepsea.elec
 import deepsea.database.DBManager
 import deepsea.database.DatabaseManager.{GetMongoConnection, GetOracleConnection}
 import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, ElecAngle, ElecCable, NodeConnect, TrayBySystem, TraysBySystem}
-import deepsea.pipe.PipeManager.Material
+import deepsea.esp.EspManagerHelper
+import deepsea.pipe.PipeManager.{Material, ProjectName}
 import local.common.Codecs
 import org.mongodb.scala.MongoCollection
 import org.mongodb.scala.model.Filters.{and, equal, not}
@@ -13,7 +14,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, SECONDS}
 import scala.io.Source
 
-trait ElecHelper extends Codecs {
+trait ElecHelper extends Codecs with EspManagerHelper {
   def getCablesInfo(project: String): List[ElecCable] = {
     val cables = ListBuffer.empty[ElecCable]
     DBManager.GetOracleConnection(project) match {
@@ -80,11 +81,16 @@ trait ElecHelper extends Codecs {
     val res = ListBuffer.empty[TraysBySystem]
     DBManager.GetOracleConnection(project) match {
       case Some(c) =>
-        val doc = docNumber.split("-").takeRight(2).mkString("-");
-        val query = Source.fromResource("queries/elecTraysInSystem.sql").mkString.replaceAll(":docNumber", "'" + doc + "'");
-        val s = c.prepareStatement(query);
-        val rs = s.executeQuery();
-        val materials: List[Material] = getMaterials()
+        val doc = docNumber.split("-").takeRight(2).mkString("-")
+        val query = Source.fromResource("queries/elecTraysInSystem.sql").mkString.replaceAll(":docNumber", "'" + doc + "'")
+        val s = c.prepareStatement(query)
+        val rs = s.executeQuery()
+        val projects = getIssueProjects
+        val rkdProject = projects.find(_.foran == project) match {
+          case Some(value) => value
+          case _ => ""
+        }
+        val materials: List[Material] = getMaterials().filter(_.project == rkdProject)
         while (rs.next()) {
           val code = Option(rs.getString("STOCK_CODE")).getOrElse("");
           res += TraysBySystem(
@@ -109,7 +115,7 @@ trait ElecHelper extends Codecs {
             Option(rs.getDouble("N2_Y")).getOrElse(0.0),
             Option(rs.getDouble("N2_Z")).getOrElse(0.0),
             Option(rs.getDouble("LENGTH")).getOrElse(0.0),
-            materials.find(x => x.code == code && x.project == project) match {
+            materials.find(x => x.code == code) match {
               case Some(value) => value
               case _ => Material()
             }
@@ -127,7 +133,7 @@ trait ElecHelper extends Codecs {
         res.groupBy(_.trayDesc).foreach(gr => {
           val elecAngle = elecAngles.find(a => gr._1.contains(a.name)) match {
             case Some(angleValue) =>
-              materials.find(x => x.code == angleValue.code && x.project == project) match {
+              materials.find(x => x.code == angleValue.code) match {
                 case Some(material) => material
                 case _ => Material()
               }

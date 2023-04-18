@@ -2,7 +2,7 @@ package deepsea.esp
 
 import com.mongodb.client.model.BsonField
 import deepsea.database.DBManager
-import deepsea.esp.EspManager.{DocumentWithMaterial, EspElement, EspHistoryObject, EspObject, GlobalEsp, HullEspObject, MaterialPurchase, MaterialSummary, PipeEspObject, espKinds, espObjectsCollectionName}
+import deepsea.esp.EspManager.{DocumentWithMaterial, EspElement, EspHistoryObject, EspObject, GlobalEsp, HullEspObject, IssueProject, MaterialPurchase, MaterialSummary, PipeEspObject, espKinds, espObjectsCollectionName}
 import deepsea.materials.MaterialsHelper
 import deepsea.pipe.PipeManager.{Material, Units}
 import io.circe.syntax.EncoderOps
@@ -473,5 +473,30 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
         }
       case _ => List.empty[MaterialPurchase]
     }
+  }
+  def getIssueProjects: ListBuffer[IssueProject] ={
+    val res = ListBuffer.empty[IssueProject]
+    DBManager.GetPGConnection() match {
+      case Some(c) =>
+        val s = c.createStatement()
+        val rs = s.executeQuery(s"select * from issue_projects where status = 0 order by id")
+        while (rs.next()){
+          res += IssueProject(
+            Option(rs.getInt("id")).getOrElse(0),
+            Option(rs.getString("name")).getOrElse(""),
+            Option(rs.getString("pdsp")).getOrElse(""),
+            Option(rs.getString("rkd")).getOrElse(""),
+            Option(rs.getString("foran")).getOrElse(""),
+            Option(rs.getString("managers")).getOrElse(""),
+            Option(rs.getString("status")).getOrElse(""),
+            Option(rs.getString("factory")).getOrElse(""),
+          )
+        }
+        rs.close()
+        s.close()
+        c.close()
+      case _ =>
+    }
+    res
   }
 }
