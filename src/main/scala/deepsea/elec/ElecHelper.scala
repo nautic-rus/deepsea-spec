@@ -78,6 +78,7 @@ trait ElecHelper extends Codecs {
   }
   def getTraysBySystem(project: String, docNumber: String): List[TraysBySystem] = {
     val res = ListBuffer.empty[TraysBySystem]
+    val anglesRes = ListBuffer.empty[TraysBySystem]
     val elecAngles = getElecAngles
     DBManager.GetOracleConnection(project) match {
       case Some(c) =>
@@ -124,6 +125,7 @@ trait ElecHelper extends Codecs {
 
         //todo - here goes some stuff needs to be edited
 
+
         res.map(_.material).distinct.foreach(e => {
           val elecAngle = elecAngles.find(a => e.name.contains(a.name)) match {
             case Some(angleValue) =>
@@ -135,15 +137,12 @@ trait ElecHelper extends Codecs {
           }
           if (elecAngle.code != ""){
 
-            var totalHeight: Double = 0.0;
-            res.groupBy(x => x.stockCode).foreach(gr => {
-              val len = gr._2.map(_.length).sum;
-              totalHeight += 0.3 * Math.ceil(len / 1.2) * 2;
-            })
+            val len = res.filter(_.stockCode == e.code).map(_.length).sum
+            val totalHeight = 0.3 * Math.ceil(len / 1.2) * 2;
             val wght: Double = totalHeight * elecAngle.singleWeight;
             val totalWeight: String = if (wght < 0.01) " 0.01" else String.format("%.2f", wght);
 
-            res += new TraysBySystem(
+            anglesRes += TraysBySystem(
               doc,
               0,
               "",
@@ -214,7 +213,7 @@ trait ElecHelper extends Codecs {
 
       case _ =>
     }
-    res.toList
+    (res ++ anglesRes).toList
   }
 
   def getTotalTraysBySystem(project: String, docNumber: String): List[TrayBySystem] = {
