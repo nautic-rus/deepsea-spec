@@ -52,19 +52,6 @@ trait ElecHelper extends Codecs with EspManagerHelper {
     cables.toList
   }
 
-  def getMaterials(): List[Material] = {
-    DBManager.GetMongoConnection() match {
-      case Some(mongoData) =>
-        val materialsNCollectionName = "materials-n";
-        val materialsCollection: MongoCollection[Material] = mongoData.getCollection(materialsNCollectionName);
-
-        Await.result(materialsCollection.find[Material]().toFuture(), Duration(30, SECONDS)) match {
-          case dbMaterials => dbMaterials.toList;
-          case _ => List.empty[Material]
-        }
-      case _ => List.empty[Material]
-    }
-  }
 
   def getElecAngles: List[ElecAngle] = {
     DBManager.GetMongoConnection() match {
@@ -90,7 +77,7 @@ trait ElecHelper extends Codecs with EspManagerHelper {
           case Some(value) => value
           case _ => ""
         }
-        val materials: List[Material] = getMaterials().filter(_.project == rkdProject)
+        val materials: List[Material] = getMaterials.filter(_.project == rkdProject)
         while (rs.next()) {
           val code = Option(rs.getString("STOCK_CODE")).getOrElse("");
           res += TraysBySystem(
@@ -252,7 +239,7 @@ trait ElecHelper extends Codecs with EspManagerHelper {
         val query = Source.fromResource("queries/elecTotalCableBoxesInSystem.sql").mkString.replaceAll(":docNumber", "'" + doc + "'");
         val s = c.prepareStatement(query);
         val rs = s.executeQuery();
-        val materials: List[Material] = getMaterials();
+        val materials: List[Material] = getMaterials
         try {
           while (rs.next()) {
             val code = Option(rs.getString("STOCK_CODE")).getOrElse("");
@@ -304,7 +291,7 @@ trait ElecHelper extends Codecs with EspManagerHelper {
 
     DBManager.GetOracleConnection(project) match {
       case Some(c) =>
-        val materials: List[Material] = getMaterials();
+        val materials: List[Material] = getMaterials
         val rout = ListBuffer.empty[NodeConnect];
 
         val s = c.createStatement();
