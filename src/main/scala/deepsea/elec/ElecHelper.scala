@@ -142,7 +142,7 @@ trait ElecHelper extends Codecs with EspManagerHelper {
               0.0,
               0.0,
               0.0,
-              "",
+              "ANGLE",
               0,
               elecAngle.code,
               "",
