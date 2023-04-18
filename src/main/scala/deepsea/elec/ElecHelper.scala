@@ -159,7 +159,33 @@ trait ElecHelper extends Codecs with EspManagerHelper {
             )
           }
         })
-        res ++= anglesRes
+
+        anglesRes.groupBy(_.stockCode).foreach(gr => {
+          res += TraysBySystem(
+            doc,
+            0,
+            "",
+            0,
+            gr._2.map(_.weight).sum,
+            0.0,
+            0.0,
+            0.0,
+            "ANGLE",
+            0,
+            gr._1,
+            "",
+            "",
+            0.0,
+            0.0,
+            0.0,
+            "",
+            0.0,
+            0.0,
+            0.0,
+            gr._2.map(_.length).sum,
+            gr._2.head.material
+          )
+        })
 
         //todo - here it finished
 
