@@ -2,7 +2,7 @@ package deepsea.esp
 
 import com.mongodb.client.model.BsonField
 import deepsea.database.DBManager
-import deepsea.esp.EspManager.{DocumentWithMaterial, EspElement, EspHistoryObject, EspObject, GlobalEsp, HullEspObject, MaterialPurchase, MaterialSummary, PipeEspObject, espKinds, espObjectsCollectionName}
+import deepsea.esp.EspManager.{DocumentWithMaterial, EspElement, EspHistoryObject, EspObject, GlobalEsp, HullEspObject, IssueProject, MaterialPurchase, MaterialSummary, PipeEspObject, espKinds, espObjectsCollectionName}
 import deepsea.materials.MaterialsHelper
 import deepsea.pipe.PipeManager.{Material, Units}
 import io.circe.syntax.EncoderOps
@@ -221,7 +221,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
                   model.BsonField("taskId", Document("$last" -> "$taskId")),
                   model.BsonField("elements", Document("$last" -> "$elements")),
                 )
-              )).allowDiskUse(true).toFuture(), Duration(10, SECONDS)) match {
+              )).allowDiskUse(true).toFuture(), Duration(60, SECONDS)) match {
               case espObjects: Seq[PipeEspObject] => res ++= espObjects.toList
               case _ => None
             }
@@ -333,8 +333,8 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
           case _ => Material()
         }
         val qty = material.units match {
-          case "796" => group._2.length / 1000
-          case "006" => group._2.map(_.length).sum
+          case "796" => group._2.length
+          case "006" => group._2.map(_.length).sum / 1000
           case "166" => group._2.map(_.weight).sum
           case _ => group._2.length
         }
@@ -367,7 +367,12 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
               },
               material.singleWeight,
               pos.weight,
-              pos.spool + "." + pos.spPieceId
+              if (pos.spool != ""){
+                pos.spool + "." + pos.spPieceId
+              }
+              else{
+                ""
+              }
             )
           })
         })
@@ -468,5 +473,30 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
         }
       case _ => List.empty[MaterialPurchase]
     }
+  }
+  def getIssueProjects: ListBuffer[IssueProject] ={
+    val res = ListBuffer.empty[IssueProject]
+    DBManager.GetPGConnection() match {
+      case Some(c) =>
+        val s = c.createStatement()
+        val rs = s.executeQuery(s"select * from issue_projects where status = 0 order by id")
+        while (rs.next()){
+          res += IssueProject(
+            Option(rs.getInt("id")).getOrElse(0),
+            Option(rs.getString("name")).getOrElse(""),
+            Option(rs.getString("pdsp")).getOrElse(""),
+            Option(rs.getString("rkd")).getOrElse(""),
+            Option(rs.getString("foran")).getOrElse(""),
+            Option(rs.getString("managers")).getOrElse(""),
+            Option(rs.getString("status")).getOrElse(""),
+            Option(rs.getString("factory")).getOrElse(""),
+          )
+        }
+        rs.close()
+        s.close()
+        c.close()
+      case _ =>
+    }
+    res
   }
 }

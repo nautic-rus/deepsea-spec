@@ -2,8 +2,9 @@ package deepsea.elec
 
 import deepsea.database.DBManager
 import deepsea.database.DatabaseManager.{GetMongoConnection, GetOracleConnection}
-import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, ElecCable, NodeConnect, TrayBySystem, TraysBySystem}
-import deepsea.pipe.PipeManager.Material
+import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, ElecAngle, ElecCable, NodeConnect, TrayBySystem, TraysBySystem}
+import deepsea.esp.EspManagerHelper
+import deepsea.pipe.PipeManager.{Material, ProjectName}
 import local.common.Codecs
 import org.mongodb.scala.MongoCollection
 import org.mongodb.scala.model.Filters.{and, equal, not}
@@ -13,7 +14,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, SECONDS}
 import scala.io.Source
 
-trait ElecHelper extends Codecs {
+trait ElecHelper extends Codecs with EspManagerHelper {
   def getCablesInfo(project: String): List[ElecCable] = {
     val cables = ListBuffer.empty[ElecCable]
     DBManager.GetOracleConnection(project) match {
@@ -51,32 +52,35 @@ trait ElecHelper extends Codecs {
     cables.toList
   }
 
-  def getMaterials(): List[Material] = {
-    DBManager.GetMongoConnection() match {
-      case Some(mongoData) =>
-        val materialsNCollectionName = "materials-n";
-        val materialsCollection: MongoCollection[Material] = mongoData.getCollection(materialsNCollectionName);
 
-        Await.result(materialsCollection.find[Material]().toFuture(), Duration(30, SECONDS)) match {
-          case dbMaterials => dbMaterials.toList;
-          case _ => List.empty[Material]
+  def getElecAngles: List[ElecAngle] = {
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val elecAnglesCollection: MongoCollection[ElecAngle] = mongo.getCollection("elec-angles")
+        Await.result(elecAnglesCollection.find[ElecAngle]().toFuture(), Duration(30, SECONDS)) match {
+          case elecAngles => elecAngles.toList
+          case _ => List.empty[ElecAngle]
         }
-      case _ => List.empty[Material]
+      case _ => List.empty[ElecAngle]
     }
   }
-
   def getTraysBySystem(project: String, docNumber: String): List[TraysBySystem] = {
-    val res = ListBuffer.empty[TraysBySystem];
+    val res = ListBuffer.empty[TraysBySystem]
     DBManager.GetOracleConnection(project) match {
       case Some(c) =>
-        val doc = docNumber.split("-").takeRight(2).mkString("-");
-        val query = Source.fromResource("queries/elecTraysInSystem.sql").mkString.replaceAll(":docNumber", "'" + doc + "'");
-        val s = c.prepareStatement(query);
-        val rs = s.executeQuery();
-        val materials: List[Material] = getMaterials();
+        val doc = docNumber.split("-").takeRight(2).mkString("-")
+        val query = Source.fromResource("queries/elecTraysInSystem.sql").mkString.replaceAll(":docNumber", "'" + doc + "'")
+        val s = c.prepareStatement(query)
+        val rs = s.executeQuery()
+        val projects = getIssueProjects
+        val rkdProject = projects.find(_.foran == project) match {
+          case Some(value) => value.rkd
+          case _ => ""
+        }
+        val materials: List[Material] = getMaterials.filter(_.project == rkdProject)
         while (rs.next()) {
           val code = Option(rs.getString("STOCK_CODE")).getOrElse("");
-          res += new TraysBySystem(
+          res += TraysBySystem(
             Option(rs.getString("SYSTEM")).getOrElse(""),
             Option(rs.getInt("OID")).getOrElse(0),
             Option(rs.getString("ZONE")).getOrElse(""),
@@ -109,44 +113,120 @@ trait ElecHelper extends Codecs {
         c.close()
 
 
-        val angleCode: String = "MTLESNSTLXXX0047";
-        val angle: Material = materials.find(x => x.code == angleCode) match {
-          case Some(value) => value
-          case _ => Material()
-        }
 
-        var totalHeight: Double = 0.0;
-        res.groupBy(x => x.stockCode).foreach(gr => {
-          val len = gr._2.map(_.length).sum;
-          totalHeight += 0.3 * Math.ceil(len / 1.2) * 2;
+        //todo - here goes some stuff needs to be edited
+        val elecAngles = getElecAngles
+        val anglesRes = ListBuffer.empty[TraysBySystem]
+        res.groupBy(_.trayDesc).foreach(gr => {
+          val elecAngle = elecAngles.find(a => gr._1.contains(a.name)) match {
+            case Some(angleValue) =>
+              materials.find(x => x.code == angleValue.code) match {
+                case Some(material) => material
+                case _ => Material()
+              }
+            case _ => Material()
+          }
+          if (elecAngle.code != ""){
+
+            val len = gr._2.map(_.length).sum
+            val totalHeight = 0.3 * Math.ceil(len / 1.2) * 2
+            val wght: Double = totalHeight * elecAngle.singleWeight
+            val totalWeight: String = if (wght < 0.01) " 0.01" else String.format("%.2f", wght)
+
+            anglesRes += TraysBySystem(
+              doc,
+              0,
+              "",
+              0,
+              totalWeight.toDoubleOption.getOrElse(0.0),
+              0.0,
+              0.0,
+              0.0,
+              "ANGLE",
+              0,
+              elecAngle.code,
+              "",
+              "",
+              0.0,
+              0.0,
+              0.0,
+              "",
+              0.0,
+              0.0,
+              0.0,
+              totalHeight,
+              elecAngle
+            )
+          }
         })
-        val wght: Double = totalHeight * angle.singleWeight;
-        val totalWeight: String = if (wght < 0.01) " 0.01" else String.format("%.2f", wght);
 
-        res += new TraysBySystem(
-          doc,
-          0,
-          "",
-          0,
-          totalWeight.toDoubleOption.getOrElse(0.0),
-          0.0,
-          0.0,
-          0.0,
-          "",
-          0,
-          angleCode,
-          "",
-          "",
-          0.0,
-          0.0,
-          0.0,
-          "",
-          0.0,
-          0.0,
-          0.0,
-          totalHeight,
-          angle
-        )
+        anglesRes.groupBy(_.stockCode).foreach(gr => {
+          res += TraysBySystem(
+            doc,
+            0,
+            "",
+            0,
+            gr._2.map(_.weight).sum,
+            0.0,
+            0.0,
+            0.0,
+            "ANGLE",
+            0,
+            gr._1,
+            "",
+            "",
+            0.0,
+            0.0,
+            0.0,
+            "",
+            0.0,
+            0.0,
+            0.0,
+            gr._2.map(_.length).sum,
+            gr._2.head.material
+          )
+        })
+
+        //todo - here it finished
+
+//        val angleCode: String = "MTLESNSTLXXX0047";
+//        val angle: Material = materials.find(x => x.code == angleCode) match {
+//          case Some(value) => value
+//          case _ => Material()
+//        }
+//
+//        var totalHeight: Double = 0.0;
+//        res.groupBy(x => x.stockCode).foreach(gr => {
+//          val len = gr._2.map(_.length).sum;
+//          totalHeight += 0.3 * Math.ceil(len / 1.2) * 2;
+//        })
+//        val wght: Double = totalHeight * angle.singleWeight;
+//        val totalWeight: String = if (wght < 0.01) " 0.01" else String.format("%.2f", wght);
+//
+//        res += new TraysBySystem(
+//          doc,
+//          0,
+//          "",
+//          0,
+//          totalWeight.toDoubleOption.getOrElse(0.0),
+//          0.0,
+//          0.0,
+//          0.0,
+//          "",
+//          0,
+//          angleCode,
+//          "",
+//          "",
+//          0.0,
+//          0.0,
+//          0.0,
+//          "",
+//          0.0,
+//          0.0,
+//          0.0,
+//          totalHeight,
+//          angle
+//        )
 
       case _ =>
     }
@@ -185,7 +265,7 @@ trait ElecHelper extends Codecs {
         val query = Source.fromResource("queries/elecTotalCableBoxesInSystem.sql").mkString.replaceAll(":docNumber", "'" + doc + "'");
         val s = c.prepareStatement(query);
         val rs = s.executeQuery();
-        val materials: List[Material] = getMaterials();
+        val materials: List[Material] = getMaterials
         try {
           while (rs.next()) {
             val code = Option(rs.getString("STOCK_CODE")).getOrElse("");
@@ -237,7 +317,7 @@ trait ElecHelper extends Codecs {
 
     DBManager.GetOracleConnection(project) match {
       case Some(c) =>
-        val materials: List[Material] = getMaterials();
+        val materials: List[Material] = getMaterials
         val rout = ListBuffer.empty[NodeConnect];
 
         val s = c.createStatement();

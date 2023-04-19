@@ -77,6 +77,7 @@ object ElecManager {
   case class GetElecEspFiles(project: String, docNumber: String, docName: String, revision: String)
 
   case class TrayBySystem(system: String, stockCode: String = "", trayDesc: String = "", length: Double = 0, weight: Double = 0)
+  case class ElecAngle(name: String, code: String)
 
   case class TraysBySystem(
                             system: String = "",

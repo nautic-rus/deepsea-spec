@@ -2,7 +2,7 @@ package local.common
 
 import deepsea.accomodations.AccommodationManager.{Accommodation, BBox}
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
-import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, ElecCable, TrayBySystem}
+import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, ElecAngle, ElecCable, TrayBySystem}
 import deepsea.esp.EspManager.{DocumentWithMaterial, EspElement, EspObject, GlobalEsp, HullEspObject, MaterialPurchase, PipeEspObject}
 import deepsea.hull.HullManager._
 import deepsea.pipe.PipeManager.{Material, MaterialTranslation, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SpoolLock, SystemDef, UnitTranslation, Units}
@@ -108,6 +108,10 @@ trait Codecs {
 
   implicit val DocumentWithMaterialDecoder: Decoder[DocumentWithMaterial] = deriveDecoder[DocumentWithMaterial]
   implicit val DocumentWithMaterialEncoder: Encoder[DocumentWithMaterial] = deriveEncoder[DocumentWithMaterial]
+
+
+  implicit val ElecAngleDecoder: Decoder[ElecAngle] = deriveDecoder[ElecAngle]
+  implicit val ElecAngleEncoder: Encoder[ElecAngle] = deriveEncoder[ElecAngle]
 
 
 
@@ -242,6 +246,7 @@ trait Codecs {
     classOf[MaterialPurchase],
     classOf[GlobalEsp],
     classOf[DocumentWithMaterial],
+    classOf[ElecAngle],
 
     //KOKOVIN
     classOf[EleComplect],
