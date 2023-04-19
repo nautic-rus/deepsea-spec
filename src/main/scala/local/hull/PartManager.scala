@@ -37,7 +37,8 @@ object PartManager extends PartHelper with Codecs {
                       WT: Double = 0.0,
                       FH: Double = 0.0,
                       FT: Double = 0.0,
-                      STRGROUP:String=""
+                      STRGROUP:String="",
+                      STOCK_CODE:String=""
                     ) extends EspElement
 
 

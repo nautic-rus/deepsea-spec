@@ -11,6 +11,10 @@ object CommonTypes {
                           date: String="",
                           labels: List[DrawingChessItem]=List.empty[DrawingChessItem]
                          )
+  case class Component(oid: Int, stock: String)
+  case class SystemLang(system:Int, lang:Int, long_descr:String)
+  case class StdProfileMove(oid:Int,  stock:String)
+  case class StdPlateMove(oid:Int,  stock:String)
 
 
 }

@@ -16,7 +16,7 @@ import io.circe.parser._
 import io.circe.generic.auto._
 import io.circe.syntax._
 import io.circe.generic.semiauto._
-import local.common.DBRequests.MountItem
+import local.common.DBRequests.{MaterialNode, MountItem}
 import local.domain.CommonTypes.{DrawingChess, DrawingChessItem, ZoneSystem}
 import local.domain.WorkShopMaterial
 import local.ele.CommonEle.{Cable, EleComplect}
@@ -206,6 +206,9 @@ trait Codecs {
   implicit val CableRouteDecoder: Decoder[CableRoute] = deriveDecoder[CableRoute]
   implicit val CableRouteEncoder: Encoder[CableRoute] = deriveEncoder[CableRoute]
 
+  implicit val MaterialNodeDecoder: Decoder[MaterialNode] = deriveDecoder[MaterialNode]
+  implicit val MaterialNodeEncoder: Encoder[MaterialNode] = deriveEncoder[MaterialNode]
+
 
   val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
 
@@ -255,6 +258,7 @@ trait Codecs {
     classOf[AnkerPlate],
     classOf[CableBoxModule],
     classOf[NestLock],
+    classOf[MaterialNode],
   ), DEFAULT_CODEC_REGISTRY)
 
   def mongoDatabase(): MongoDatabase = MongoDB.mongoClient().getDatabase("3degdatabase").withCodecRegistry(codecRegistry)

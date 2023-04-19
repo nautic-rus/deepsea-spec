@@ -28,7 +28,7 @@ import java.util.Date
 
 
 object DBRequests extends Codecs {
-
+  case class MaterialNode(project: String, label: String, label_ru: String, data: String, user: String, date: Long)
   case class MountItem(workShopMaterial: WorkShopMaterial = new WorkShopMaterial(), label: String = "NF", kei: String = "", qty: Double = 0, isNeedLabel: Boolean = false)
 
   private def collectionWorkShopMaterial(): MongoCollection[WorkShopMaterial] = mongoDatabase().getCollection("materials")
