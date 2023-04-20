@@ -409,7 +409,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
 //        )
       })
     })
-    res.toList
+    res.toList.filter(_.code != "")
   }
   def generatePipeGlobalEspAsData(projects: List[String]): List[MaterialSummary] ={
     val res = ListBuffer.empty[MaterialSummary]
