@@ -254,6 +254,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
           case Some(value) => value
           case _ => Material()
         }
+        val name = List(group._2.head.PART_TYPE, group._2.head.PART_DESC, group._2.head.THICKNESS, group._2.head.MATERIAL).mkString(", ")
 
 
         val docMaterial = ListBuffer.empty[DocumentWithMaterial]
@@ -277,13 +278,13 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
 
         res += GlobalEsp(
           group._1,
-          material.name,
+          (if (material.name != "") material.name else name),
           material.description,
           units.find(_.code == material.units) match {
             case Some(value) => value.thumb
             case _ => material.units
           },
-          material.units,
+          "166",
           qty,
           weight.formatted("%.2f").toDouble,
           weightTotal.formatted("%.2f").toDouble,
