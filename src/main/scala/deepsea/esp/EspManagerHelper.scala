@@ -277,8 +277,8 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
 
         res += GlobalEsp(
           group._1,
-          material.name("ru"),
-          material.description("ru"),
+          material.name,
+          material.description,
           units.find(_.code == material.units) match {
             case Some(value) => value.thumb
             case _ => material.units

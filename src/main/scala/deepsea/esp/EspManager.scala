@@ -81,7 +81,7 @@ object EspManager{
 class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper {
 
   override def preStart(): Unit = {
-//    val qwe = generateHullGlobalEsp(List("N002"))
+//    val qwe = generateGlobalEsp(List("N002"))
 //    val q = qwe
 //    generatePipeGlobalEsp(List("N002"))
 //    self ! InitIssues()
