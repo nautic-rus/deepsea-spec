@@ -326,8 +326,8 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
     val units: List[Units] = getUnits
     projects.foreach(p => {
       val esps = getPipeAllLatestEsp(List(p))
-      val elems = esps.flatMap(_.elements).filter(_.material.code != "")
-      elems.groupBy(x => (x.material.code)).map(group => {
+      val elems = esps.flatMap(_.elements).filter(_.stock != "")
+      elems.groupBy(x => (x.stock)).map(group => {
         val material = materials.find(_.code == group._1) match {
           case Some(value) => value
           case _ => Material()
@@ -348,7 +348,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
 
         val docMaterial = ListBuffer.empty[DocumentWithMaterial]
         esps.foreach(esp => {
-          esp.elements.filter(x => x.material.code == material.code).foreach(pos => {
+          esp.elements.filter(x => x.stock == material.code).foreach(pos => {
             docMaterial += DocumentWithMaterial(
               esp.docNumber,
               esp.rev,
