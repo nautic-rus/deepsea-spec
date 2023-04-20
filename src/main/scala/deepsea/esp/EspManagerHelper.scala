@@ -185,7 +185,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
                   model.BsonField("taskId", Document("$last" -> "$taskId")),
                   model.BsonField("elements", Document("$last" -> "$elements")),
                 )
-              )).allowDiskUse(true).toFuture(), Duration(10, SECONDS)) match {
+              )).allowDiskUse(true).toFuture(), Duration(60, SECONDS)) match {
               case espObjects: Seq[HullEspObject] => res ++= espObjects.toList
               case _ => None
             }
@@ -242,17 +242,23 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
   def generateHullGlobalEsp(projects: List[String]): List[GlobalEsp] ={
     val res = ListBuffer.empty[GlobalEsp]
     val units: List[Units] = getUnits
+    val materials = getMaterials
     projects.foreach(p => {
       val esps = getHullAllLatestEsp(List(p))
       val elems = esps.flatMap(_.elements)
-      elems.groupBy(x => (x.ELEM_TYPE, x.THICKNESS, x.WIDTH, x.MATERIAL)).map(group => {
+      elems.filter(_.STOCK_CODE != "").groupBy(x => x.STOCK_CODE).map(group => {
         val qty = group._2.map(_.QTY).sum
         val weight = group._2.head.WEIGHT_UNIT
         val weightTotal = group._2.map(_.TOTAL_WEIGHT).sum
+        val material = materials.find(_.code == group._1) match {
+          case Some(value) => value
+          case _ => Material()
+        }
+
 
         val docMaterial = ListBuffer.empty[DocumentWithMaterial]
         esps.foreach(esp => {
-          esp.elements.filter(x => x.ELEM_TYPE == group._1._1 && x.THICKNESS == group._1._2 && x.WIDTH == group._1._3 && x.MATERIAL == group._1._4).foreach(pos => {
+          esp.elements.filter(x => x.STOCK_CODE == group._1).foreach(pos => {
             docMaterial += DocumentWithMaterial(
               esp.docNumber,
               esp.rev,
@@ -268,20 +274,21 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
           })
         })
 
+
         res += GlobalEsp(
-          "",
-          group._1._1,
-          List(group._1._2, group._1._3.toString).mkString(","),
-          units.find(_.code == group._1._4) match {
+          group._1,
+          material.name("ru"),
+          material.description("ru"),
+          units.find(_.code == material.units) match {
             case Some(value) => value.thumb
-            case _ => group._1._4
+            case _ => material.units
           },
-          group._1._4,
+          material.units,
           qty,
           weight.formatted("%.2f").toDouble,
           weightTotal.formatted("%.2f").toDouble,
           docMaterial.toList,
-          Material()
+          material
         )
 //        res += Item11Columns(
 //          isHeader = false,
@@ -295,7 +302,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
 //        )
       })
     })
-    res.toList
+    res.toList.filter(_.code != "")
   }
   def generateHullGlobalEspAsData(projects: List[String]): List[MaterialSummary] ={
     val res = ListBuffer.empty[MaterialSummary]
