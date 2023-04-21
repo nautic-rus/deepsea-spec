@@ -335,7 +335,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
     projects.foreach(p => {
       val esps = getPipeAllLatestEsp(List(p))
       val elems = esps.flatMap(_.elements).filter(_.stock != "")
-      elems.groupBy(x => (x.stock)).map(group => {
+      elems.filter(_.spool != "").groupBy(x => x.stock).map(group => {
         val material = materials.find(_.code == group._1) match {
           case Some(value) => value
           case _ => Material()
