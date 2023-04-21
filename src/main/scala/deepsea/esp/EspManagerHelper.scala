@@ -356,7 +356,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
 
         val docMaterial = ListBuffer.empty[DocumentWithMaterial]
         esps.foreach(esp => {
-          esp.elements.filter(x => x.stock == material.code).foreach(pos => {
+          esp.elements.filter(x => x.stock == material.code && x.spool != "").foreach(pos => {
             docMaterial += DocumentWithMaterial(
               esp.docNumber,
               esp.rev,
