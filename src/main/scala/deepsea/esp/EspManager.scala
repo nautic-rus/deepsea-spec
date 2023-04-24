@@ -36,7 +36,7 @@ object EspManager{
                            override val user: String,
                            override val kind: String,
                            override val taskId: Int,
-                           elements: List[PrdPart]) extends EspObject(id, foranProject, docNumber, rev, date, user, kind, taskId)
+                           var elements: List[PrdPart]) extends EspObject(id, foranProject, docNumber, rev, date, user, kind, taskId)
   case class PipeEspObject(override val id: String,
                            override val foranProject: String,
                            override val docNumber: String,
@@ -45,7 +45,7 @@ object EspManager{
                            override val user: String,
                            override val kind: String,
                            override val taskId: Int,
-                           elements: List[PipeSeg]) extends EspObject(id, foranProject, docNumber, rev, date, user, kind, taskId)
+                           var elements: List[PipeSeg]) extends EspObject(id, foranProject, docNumber, rev, date, user, kind, taskId)
 
   case class EspHistoryObject(override val id: String,
                               override val foranProject: String,
