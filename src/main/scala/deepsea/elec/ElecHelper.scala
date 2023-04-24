@@ -64,6 +64,7 @@ trait ElecHelper extends Codecs with EspManagerHelper {
       case _ => List.empty[ElecAngle]
     }
   }
+
   def getTraysBySystem(project: String, docNumber: String): List[TraysBySystem] = {
     val res = ListBuffer.empty[TraysBySystem]
     DBManager.GetOracleConnection(project) match {
@@ -113,7 +114,6 @@ trait ElecHelper extends Codecs with EspManagerHelper {
         c.close()
 
 
-
         //todo - here goes some stuff needs to be edited
         val elecAngles = getElecAngles
         val anglesRes = ListBuffer.empty[TraysBySystem]
@@ -126,7 +126,7 @@ trait ElecHelper extends Codecs with EspManagerHelper {
               }
             case _ => Material()
           }
-          if (elecAngle.code != ""){
+          if (elecAngle.code != "") {
 
             val len = gr._2.map(_.length).sum
             val totalHeight = 0.3 * Math.ceil(len / 1.2) * 2
@@ -187,46 +187,46 @@ trait ElecHelper extends Codecs with EspManagerHelper {
           )
         })
 
-        //todo - here it finished
+      //todo - here it finished
 
-//        val angleCode: String = "MTLESNSTLXXX0047";
-//        val angle: Material = materials.find(x => x.code == angleCode) match {
-//          case Some(value) => value
-//          case _ => Material()
-//        }
-//
-//        var totalHeight: Double = 0.0;
-//        res.groupBy(x => x.stockCode).foreach(gr => {
-//          val len = gr._2.map(_.length).sum;
-//          totalHeight += 0.3 * Math.ceil(len / 1.2) * 2;
-//        })
-//        val wght: Double = totalHeight * angle.singleWeight;
-//        val totalWeight: String = if (wght < 0.01) " 0.01" else String.format("%.2f", wght);
-//
-//        res += new TraysBySystem(
-//          doc,
-//          0,
-//          "",
-//          0,
-//          totalWeight.toDoubleOption.getOrElse(0.0),
-//          0.0,
-//          0.0,
-//          0.0,
-//          "",
-//          0,
-//          angleCode,
-//          "",
-//          "",
-//          0.0,
-//          0.0,
-//          0.0,
-//          "",
-//          0.0,
-//          0.0,
-//          0.0,
-//          totalHeight,
-//          angle
-//        )
+      //        val angleCode: String = "MTLESNSTLXXX0047";
+      //        val angle: Material = materials.find(x => x.code == angleCode) match {
+      //          case Some(value) => value
+      //          case _ => Material()
+      //        }
+      //
+      //        var totalHeight: Double = 0.0;
+      //        res.groupBy(x => x.stockCode).foreach(gr => {
+      //          val len = gr._2.map(_.length).sum;
+      //          totalHeight += 0.3 * Math.ceil(len / 1.2) * 2;
+      //        })
+      //        val wght: Double = totalHeight * angle.singleWeight;
+      //        val totalWeight: String = if (wght < 0.01) " 0.01" else String.format("%.2f", wght);
+      //
+      //        res += new TraysBySystem(
+      //          doc,
+      //          0,
+      //          "",
+      //          0,
+      //          totalWeight.toDoubleOption.getOrElse(0.0),
+      //          0.0,
+      //          0.0,
+      //          0.0,
+      //          "",
+      //          0,
+      //          angleCode,
+      //          "",
+      //          "",
+      //          0.0,
+      //          0.0,
+      //          0.0,
+      //          "",
+      //          0.0,
+      //          0.0,
+      //          0.0,
+      //          totalHeight,
+      //          angle
+      //        )
 
       case _ =>
     }
@@ -344,27 +344,34 @@ trait ElecHelper extends Codecs with EspManagerHelper {
             val name = Option(rs.getString("CODE")).getOrElse("");
             val cab_route_area = Option(rs.getString("ROUTE_AREA")).getOrElse("");
             val cab_route_area_id = Option(rs.getString("ROUTE_AREA_ID")).getOrElse("");
-
             val nodes = ListBuffer.empty[Int]
-            val routeArea = cab_route_area.split('^').toList
-            val routeAreaId = cab_route_area_id.split(',').toList
-            val nodesId = rout.filter(x => routeAreaId.contains(x.id.toString))
 
-            val filterRout = nodesId.filter(_.count > 2)
+            if (cab_route_area != "" || cab_route_area_id != "") {
+              try {
+                val routeArea = cab_route_area.split('^').toList
+                val routeAreaId = cab_route_area_id.split(',').toList
+                val nodesId = rout.filter(x => routeAreaId.contains(x.id.toString)).sortBy(x => routeAreaId.indexOf(x.id.toString))
 
-            nodes += nodesId.head.id;
+                val filterRout = nodesId.filter(_.count > 2)
 
-            filterRout.foreach(node => {
-              val i = nodesId.indexOf(node);
-              if (i != 0) {
-                nodes += nodesId(i - 1).id;
+                nodes += nodesId.head.id;
+
+                filterRout.foreach(node => {
+                  val i = nodesId.indexOf(node);
+                  if (i != 0) {
+                    nodes += nodesId(i - 1).id;
+                  }
+                  if (i != nodesId.size - 1) {
+                    nodes += nodesId(i + 1).id;
+                  }
+                })
+
+                nodes += nodesId.last.id;
               }
-              if (i != nodesId.size - 1) {
-                nodes += nodesId(i + 1).id;
+              catch {
+                case e: Exception => println(e.toString)
               }
-            })
-
-            nodes.sortBy(x => routeAreaId.indexOf(x.toString))
+            }
 
             res += CableRoute(
               Option(rs.getString("SYSTEM")).getOrElse(""),
@@ -398,7 +405,7 @@ trait ElecHelper extends Codecs with EspManagerHelper {
               Option(rs.getString("TO_ZONE")).getOrElse(""),
               Option(rs.getString("TO_ZONE_DESC")).getOrElse(""),
               cab_route_area,
-              nodes.mkString(","),
+              nodes.distinct.mkString(","),
               code,
               materials.find(x => x.code == code) match {
                 case Some(value) => value
