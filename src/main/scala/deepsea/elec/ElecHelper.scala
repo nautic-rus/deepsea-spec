@@ -344,7 +344,8 @@ trait ElecHelper extends Codecs with EspManagerHelper {
             val name = Option(rs.getString("CODE")).getOrElse("");
             val cab_route_area = Option(rs.getString("ROUTE_AREA")).getOrElse("");
             val cab_route_area_id = Option(rs.getString("ROUTE_AREA_ID")).getOrElse("");
-            val nodes = ListBuffer.empty[Int]
+            val nodes = ListBuffer.empty[String]
+            val nodes_id = ListBuffer.empty[Int]
 
             if (cab_route_area != "" || cab_route_area_id != "") {
               try {
@@ -354,19 +355,24 @@ trait ElecHelper extends Codecs with EspManagerHelper {
 
                 val filterRout = nodesId.filter(_.count > 2)
 
-                nodes += nodesId.head.id;
+                nodes_id += nodesId.head.id;
 
                 filterRout.foreach(node => {
                   val i = nodesId.indexOf(node);
                   if (i != 0) {
-                    nodes += nodesId(i - 1).id;
+                    nodes_id += nodesId(i - 1).id;
                   }
                   if (i != nodesId.size - 1) {
-                    nodes += nodesId(i + 1).id;
+                    nodes_id += nodesId(i + 1).id;
                   }
                 })
 
-                nodes += nodesId.last.id;
+                nodes_id += nodesId.last.id;
+
+                nodes_id.distinct.foreach(node => {
+                  val i = routeAreaId.indexOf(node.toString);
+                  nodes += routeArea(i);
+                })
               }
               catch {
                 case e: Exception => println(e.toString)
@@ -404,8 +410,8 @@ trait ElecHelper extends Codecs with EspManagerHelper {
               Option(rs.getDouble("TO_Z")).getOrElse(0.0),
               Option(rs.getString("TO_ZONE")).getOrElse(""),
               Option(rs.getString("TO_ZONE_DESC")).getOrElse(""),
-              cab_route_area,
-              nodes.distinct.mkString(","),
+              nodes.mkString(","),
+              nodes_id.distinct.mkString(","),
               code,
               materials.find(x => x.code == code) match {
                 case Some(value) => value
