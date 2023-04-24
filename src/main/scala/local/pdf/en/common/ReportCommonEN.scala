@@ -17,15 +17,13 @@ import scala.collection.mutable.ListBuffer
 
 
 object ReportCommonEN extends UtilsPDF {
-  case class DocNameEN(code: String = "XXXXX", num: String = "210101-101-0103", name: String = "BLOCK 104. PART LIST.", lastRev: String = "0")
+  case class DocNameEN(code: String = "XXXXX", num: String = "210101-101-0103", name: String = "BLOCK 104. PART LIST.", lastRev: String = "0", user: String = "")
 
   case class Item11ColumnsEN(isHeader: Boolean = false, A1: String, A2: String = "", A3: String = "", A4: String = "", A5: String = "", A6: String = "", A7: String = "", A8: String = "", A9: String = "", A10: String = "", A11: String = "", project: String = "", A12: String = "")
 
   val defaultFontSize: Float = mmToPt(3.5)
 
-
-
-  val helveticaBytes: Array[Byte] ={
+  val helveticaBytes: Array[Byte] = {
     val fontURL = this.getClass.getResource("/fonts/ArialCyr.ttf");
     val fontStream: InputStream = fontURL.openStream()
     val b: Array[Byte] = fontStream.readAllBytes()
@@ -162,7 +160,7 @@ object ReportCommonEN extends UtilsPDF {
     doc.add(genTextFixPos(docNameEN.name, fontCOURIER_BOLD, 6f, 74.5f, 17.0f, 150f))
   }
 
-  def stampEN(): Table = {
+  def stamp(): Table = {
     val cellBuff = ListBuffer.empty[Cell]
     val pointColumnWidths = Array(mmToPt(27), mmToPt(151), mmToPt(11), mmToPt(11))
     val table = new Table(pointColumnWidths)
@@ -274,9 +272,33 @@ object ReportCommonEN extends UtilsPDF {
       table.addCell(cell)
     })
 
+    table
+  }
+
+  def stampEN(): Table = {
+    val table = stamp()
     table.setFixedPosition(1, mmToPt(5), mmToPt(5), table.getWidth.getValue + 4)
     table
   }
+
+  def stampENLandscape(): Table = {
+    val table = stamp()
+    table.setFixedPosition(1, mmToPt(215), mmToPt(5), table.getWidth.getValue + 4)
+    table
+  }
+
+  def fillStampLandscape(doc: Document, docNameEN: DocNameEN, date: String = dateNow): Unit = {
+    val offset = 210.0f
+    doc.add(genTextFixPos("SFI-DRAWING NO.", fontHELVETICA, 3.0f, offset + 35f, 14f, 50f))
+    doc.add(genTextFixPos("REV.", fontHELVETICA, 3.0f, offset + 187.5f, 14f, 10f))
+    doc.add(genTextFixPos("SHEET", fontHELVETICA, 3.0f, offset + 196.5f, 14f, 10f))
+    doc.add(genTextFixPos("DATE", fontHELVETICA, 2.5f, offset + 185.5f, 21.0f, 10f))
+    doc.add(genTextFixPos(date, fontHELVETICA, 4.0f, offset + 188.0f, 17.0f, 20f))
+    doc.add(genTextFixPos(docNameEN.lastRev, fontHELVETICA, 5.0f, offset + 188.5f, 7f, 10f))
+    doc.add(genTextFixPos(docNameEN.num, fontCOURIER_BOLD, 12.0f, offset + 32.5f, 0.5f, 150f))
+    doc.add(genTextFixPos(docNameEN.name, fontCOURIER_BOLD, 4f, offset + 6.0f, 18.0f, 150f))
+  }
+
   def fillStamp(doc: Document, docNameEN: DocNameEN, date: String = dateNow): Unit = {
     doc.add(genTextFixPos("SFI-DRAWING NO.", fontHELVETICA, 3.0f, 35f, 14f, 50f))
     doc.add(genTextFixPos("REV.", fontHELVETICA, 3.0f, 187.5f, 14f, 10f))

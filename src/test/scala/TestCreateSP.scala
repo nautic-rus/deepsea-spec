@@ -30,9 +30,10 @@ class TestCreateSP extends AnyFunSuite with BStree with UtilsPDF{
  //val pl2: String =getHullPartList("NR004-150-101")
 
   //val testChess: List[CommonTypes.DrawingChess] =findChess("docNumber","2")
-  //val ret: List[PartManager.PrdPart] =ForanPartsByDrawingNum("N002", "200101-222-0105")
-  genHullPartListEnPDF("SC01","300000-222-0105", "300000-222-0105","0","c:\\1\\1.pdf")
+  //val ret: List[PartManager.PrdPart] =ForanPartsByDrawingNum("N002", "200101-222-BS12")
 
+  genHullPartListEnPDF("SC01","300000-222-0105", "300000-222-0105","0","c:\\1\\1.pdf")
+  val t=0
 /*
   private val pageSize: PageSize = PageSize.A4
 
