@@ -169,12 +169,14 @@ object ElecManager {
                      to_zone: String = "",
                      to_zone_desc: String = "",
                      cab_route_area: String = "",
+                     cab_route_area_id: String = "",
                      stock_code: String = "",
                      material: Material
                    )
 
   case class NodeConnect(
                  id: Int,
+                 name: String,
                  count: Int
                  )
 

@@ -328,6 +328,7 @@ trait ElecHelper extends Codecs with EspManagerHelper {
           while (rsn.next()) {
             rout += NodeConnect(
               Option(rsn.getInt("SEQID")).getOrElse(0),
+              Option(rsn.getString("USERID")).getOrElse(""),
               Option(rsn.getInt("COUNT")).getOrElse(0))
           }
         }
@@ -342,32 +343,28 @@ trait ElecHelper extends Codecs with EspManagerHelper {
             val code = Option(rs.getString("STOCK_CODE")).getOrElse("");
             val name = Option(rs.getString("CODE")).getOrElse("");
             val cab_route_area = Option(rs.getString("ROUTE_AREA")).getOrElse("");
-//            val cab_route_area_id = Option(rs.getString("ROUTE_AREA_ID")).getOrElse("");
-//
-//            val nodes = ListBuffer.empty[Int]
-//            val routeArea = cab_route_area.split('^').toList
-//            val routeAreaId = cab_route_area_id.split(',').toList
-//            val nodesId = rout.filter(x => routeAreaId.contains(x.id.toString))
-//
-//            val filterRout = nodesId.filter(_.count > 2)
-//            filterRout.foreach(node => {
-//              val i = rout.indexOf(node);
-//              if (i == 0 || i == filterRout.size - 1) {
-//                nodes += node.id
-//              } else {
-//                nodes += rout(i - 1).id;
-//                nodes += rout(i + 1).id;
-//              }
-//            })
+            val cab_route_area_id = Option(rs.getString("ROUTE_AREA_ID")).getOrElse("");
 
-//            val paramRouteArea = ListBuffer.empty[String]
-//
-//            routeAreaId.foreach(node => {
-//              val i = rout.indexOf(node);
-//              if (node == nodes(i).toString) {
-//                paramRouteArea += routeArea(i)
-//              }
-//            })
+            val nodes = ListBuffer.empty[Int]
+            val routeArea = cab_route_area.split('^').toList
+            val routeAreaId = cab_route_area_id.split(',').toList
+            val nodesId = rout.filter(x => routeAreaId.contains(x.id.toString))
+
+            val filterRout = nodesId.filter(_.count > 2)
+
+            nodes += nodesId.head.id;
+
+            filterRout.foreach(node => {
+              val i = nodesId.indexOf(node);
+              if (i != 0) {
+                nodes += nodesId(i - 1).id;
+              }
+              if (i != nodesId.size - 1) {
+                nodes += nodesId(i + 1).id;
+              }
+            })
+
+            nodes.sortBy(x => routeAreaId.indexOf(x.toString))
 
             res += CableRoute(
               Option(rs.getString("SYSTEM")).getOrElse(""),
@@ -401,6 +398,7 @@ trait ElecHelper extends Codecs with EspManagerHelper {
               Option(rs.getString("TO_ZONE")).getOrElse(""),
               Option(rs.getString("TO_ZONE_DESC")).getOrElse(""),
               cab_route_area,
+              nodes.mkString(","),
               code,
               materials.find(x => x.code == code) match {
                 case Some(value) => value

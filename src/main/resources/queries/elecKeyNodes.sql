@@ -1,5 +1,6 @@
 select
   nnd.seqid,
+  nnd.userid,
   (
     select
       count(*)
