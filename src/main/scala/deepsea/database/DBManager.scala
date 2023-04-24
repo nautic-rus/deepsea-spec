@@ -17,7 +17,7 @@ object DBManager extends Codecs{
 
   private val configOracle = new HikariConfig()
   private val oracleConnections = ListBuffer.empty[OracleConnection]
-  private val mongoClient: MongoClient = MongoClient("mongodb://192.168.1.26")
+  private val mongoClient: MongoClient = MongoClient("mongodb://192.168.1.36")
 
   List("N002", "N004", "SC01", "LV01", "AN01", "P701").foreach(project => {
     try{
