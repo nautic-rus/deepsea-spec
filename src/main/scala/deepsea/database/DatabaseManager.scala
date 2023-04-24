@@ -102,7 +102,7 @@ class DatabaseManager extends Actor with Codecs {
       oracleConnections += OracleConnection(project, new HikariDataSource(configOracle))
     })
 
-    mongoClient = MongoClient("mongodb://192.168.1.26")
+    mongoClient = MongoClient("mongodb://192.168.1.36")
 
 
     ActorManager.startup ! DatabaseManagerStarted()

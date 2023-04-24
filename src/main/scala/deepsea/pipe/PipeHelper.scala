@@ -246,7 +246,7 @@ trait PipeHelper extends Codecs {
     configOracle.setPassword("Whatab0utus")
     configOracle.setMaximumPoolSize(5)
     val ds = new HikariDataSource(configOracle)
-    val mongoClient: MongoClient = MongoClient("mongodb://192.168.1.26")
+    val mongoClient: MongoClient = MongoClient("mongodb://192.168.1.36")
     val projectSystem: (String, String) = getSystemAndProjectFromDocNumber(docNumber, mongoClient.getDatabase("3degdatabase").withCodecRegistry(codecRegistry), ds.getConnection)
     val mongo = mongoClient.getDatabase("cache").withCodecRegistry(codecRegistry)
     val mongoData = mongoClient.getDatabase("3degdatabase").withCodecRegistry(codecRegistry)
