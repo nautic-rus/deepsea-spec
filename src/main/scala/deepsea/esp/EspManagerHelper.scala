@@ -1,14 +1,19 @@
 package deepsea.esp
 
+import akka.pattern.ask
 import com.mongodb.client.model.BsonField
+import deepsea.actors.ActorManager
 import deepsea.database.DBManager
 import deepsea.esp.EspManager.{DocumentWithMaterial, EspElement, EspHistoryObject, EspObject, GlobalEsp, HullEspObject, IssueProject, MaterialPurchase, MaterialSummary, PipeEspObject, espKinds, espObjectsCollectionName}
+import deepsea.files.FileManager
+import deepsea.files.FileManager.GenerateUrl
 import deepsea.materials.MaterialsHelper
 import deepsea.pipe.PipeManager.{Material, Units}
 import io.circe.syntax.EncoderOps
 import local.common.Codecs
 import local.pdf.en.accom.AccomReportEn.getUnits
 import local.pdf.ru.common.ReportCommon.Item11Columns
+import local.pdf.ru.order.OrderReportV1
 import org.bson.conversions.Bson
 import org.mongodb.scala.model.Accumulators.addToSet
 import org.mongodb.scala.{Document, MongoCollection, model}
@@ -238,6 +243,11 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
   def generateGlobalEsp(projects: List[String]): String = {
     (generateHullGlobalEsp(projects) ++ generatePipeGlobalEsp(projects)).asJson.noSpaces
   }
+  def generateGlobalEspPDF(project: String, code: String, user: String): Unit ={
+    val file = OrderReportV1.generateOrderPDF(project, code, user)
+    val url = FileManager.generateUrl(file)
+
+  }
 
   def generateHullGlobalEsp(projects: List[String]): List[GlobalEsp] ={
     val res = ListBuffer.empty[GlobalEsp]
@@ -256,7 +266,6 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
         }
         val name = List(group._2.head.PART_TYPE, group._2.head.PART_DESC, group._2.head.THICKNESS, group._2.head.MATERIAL).mkString(", ")
 
-
         val docMaterial = ListBuffer.empty[DocumentWithMaterial]
         esps.foreach(esp => {
           esp.elements.filter(x => x.STOCK_CODE == group._1).foreach(pos => {
@@ -274,8 +283,6 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
             )
           })
         })
-
-
         res += GlobalEsp(
           group._1,
           (if (material.name != "") material.name else name),
@@ -291,16 +298,6 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
           docMaterial.toList,
           material
         )
-//        res += Item11Columns(
-//          isHeader = false,
-//          "",
-//          group._1._1,
-//          List(group._1._2, group._1._3.toString).mkString(","),
-//          group._1._4,
-//          qty.toString,
-//          weight.formatted("%.2f"),
-//          weightTotal.formatted("%.2f")
-//        )
       })
     })
     res.toList.filter(_.code != "")

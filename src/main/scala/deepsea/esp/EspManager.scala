@@ -2,7 +2,7 @@ package deepsea.esp
 
 import akka.actor.Actor
 import deepsea.database.DBManager
-import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, EspObject, GetEsp, GetGlobalEsp, GetHullEsp, GetMaterialPurchases, GlobalEsp, HullEspObject, InitIssues, Issue, MaterialPurchase, PipeEspObject}
+import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, EspObject, GetEsp, GetGlobalEsp, GetGlobalEspPdf, GetHullEsp, GetMaterialPurchases, GlobalEsp, HullEspObject, InitIssues, Issue, MaterialPurchase, PipeEspObject}
 import deepsea.pipe.PipeHelper
 import deepsea.pipe.PipeManager.{Material, PipeSeg, ProjectName}
 import io.circe.generic.JsonCodec
@@ -71,7 +71,7 @@ object EspManager{
   case class AddMaterialPurchase(materialPurchase: String)
   case class GetMaterialPurchases(project: String)
   case class MaterialSummary(material: Material, name: String, descr: String, unitsName: String, qty: Double, singleWeight: Double, totalWeight: Double, drawings: List[String])
-
+  case class GetGlobalEspPdf(project: String, code: String, user: String)
   case class ExportPipeFittings()
   case class GlobalEsp(code: String, name: String, desc: String, units: String, unitsValue: String, qty: Double, weight: Double, weightTotal: Double, documents: List[DocumentWithMaterial], material: Material)
   case class DocumentWithMaterial(docNumber: String, rev: String, user: String, date: Long, units: String, unitsValue: String, qty: Double, weight: Double, totalWeight: Double, label: String)
@@ -164,6 +164,8 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
       val pipe = if (kinds.contains("pipe")) generatePipeGlobalEsp(projects.split(",").toList) else List.empty[GlobalEsp]
       val globalEsp = hull ++ pipe
       sender() ! globalEsp.asJson.noSpaces
+    case GetGlobalEspPdf(project, code, user) =>
+      sender() ! generateGlobalEspPDF(project, code, user)
     case AddMaterialPurchase(materialPurchaseValue) =>
       decode[MaterialPurchase](materialPurchaseValue) match {
         case Right(materialPurchase) =>

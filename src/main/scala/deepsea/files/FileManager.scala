@@ -13,6 +13,19 @@ object FileManager{
   case class CreateFile(prefix: String, ext: String)
   case class CloudFile(path: String, url: String, file: File)
   case class GenerateUrl(path: String)
+  def generateUrl(path: String): Unit ={
+    val source = new File(path)
+    var pathId = UUID.randomUUID().toString.substring(0, 8)
+    var file = new File(App.Cloud.Directory + "/" + pathId)
+    while (file.exists()){
+      pathId = UUID.randomUUID().toString.substring(0, 8)
+      file = new File(App.Cloud.Directory + "/" + pathId)
+    }
+    file.mkdir()
+    val cloudPath = App.Cloud.Directory + "/" + pathId + "/" + source.getName
+    Files.write(new File(cloudPath).toPath, Files.readAllBytes(source.toPath))
+    App.Cloud.Url + "/" + pathId + "/" + source.getName
+  }
 }
 class FileManager extends Actor{
   override def receive: Receive = {
