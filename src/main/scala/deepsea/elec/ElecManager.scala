@@ -169,8 +169,8 @@ object ElecManager {
                      to_z: Double = 0.0,
                      to_zone: String = "",
                      to_zone_desc: String = "",
-                     cab_route_area: String = "",
-                     cab_route_area_id: String = "",
+                     cab_route_area: List[String],
+                     cab_route_area_id: List[Int],
                      stock_code: String = "",
                      material: Material
                    )
