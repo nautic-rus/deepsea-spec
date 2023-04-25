@@ -411,8 +411,8 @@ trait ElecHelper extends Codecs with EspManagerHelper {
               Option(rs.getDouble("TO_Z")).getOrElse(0.0),
               Option(rs.getString("TO_ZONE")).getOrElse(""),
               Option(rs.getString("TO_ZONE_DESC")).getOrElse(""),
-              nodes.mkString(","),
-              nodes_id.distinct.mkString(","),
+              nodes.toList,
+              nodes_id.distinct.toList,
               code,
               materials.find(x => x.code == code) match {
                 case Some(value) => value
