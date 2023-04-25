@@ -243,11 +243,6 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
   def generateGlobalEsp(projects: List[String]): String = {
     (generateHullGlobalEsp(projects) ++ generatePipeGlobalEsp(projects)).asJson.noSpaces
   }
-  def generateGlobalEspPDF(project: String, code: String, user: String): Unit ={
-    val file = OrderReportV1.generateOrderPDF(project, code, user)
-    val url = FileManager.generateUrl(file)
-
-  }
 
   def generateHullGlobalEsp(projects: List[String]): List[GlobalEsp] ={
     val res = ListBuffer.empty[GlobalEsp]
