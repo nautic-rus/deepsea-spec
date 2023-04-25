@@ -1,8 +1,12 @@
 package deepsea.esp
 
 import akka.actor.Actor
+import akka.pattern.ask
+import akka.util.Timeout
+import deepsea.actors.ActorManager
 import deepsea.database.DBManager
-import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, EspObject, GetEsp, GetGlobalEsp, GetHullEsp, GetMaterialPurchases, GlobalEsp, HullEspObject, InitIssues, Issue, MaterialPurchase, PipeEspObject}
+import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, EspObject, GetEsp, GetGlobalEsp, GetGlobalEspPdf, GetHullEsp, GetMaterialPurchases, GlobalEsp, HullEspObject, InitIssues, Issue, MaterialPurchase, PipeEspObject}
+import deepsea.files.FileManager.GenerateUrl
 import deepsea.pipe.PipeHelper
 import deepsea.pipe.PipeManager.{Material, PipeSeg, ProjectName}
 import io.circe.generic.JsonCodec
@@ -16,8 +20,10 @@ import io.circe.parser.decode
 import io.circe.syntax._
 import local.ele.CommonEle.EleComplectParts
 import local.hull.PartManager.{ForanPartsByDrawingNum, PrdPart}
+import local.pdf.ru.order.OrderReportV1
 import org.mongodb.scala.MongoCollection
 
+import java.util.concurrent.TimeUnit
 import java.util.{Date, UUID}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Await
@@ -71,7 +77,7 @@ object EspManager{
   case class AddMaterialPurchase(materialPurchase: String)
   case class GetMaterialPurchases(project: String)
   case class MaterialSummary(material: Material, name: String, descr: String, unitsName: String, qty: Double, singleWeight: Double, totalWeight: Double, drawings: List[String])
-
+  case class GetGlobalEspPdf(project: String, code: String, user: String)
   case class ExportPipeFittings()
   case class GlobalEsp(code: String, name: String, desc: String, units: String, unitsValue: String, qty: Double, weight: Double, weightTotal: Double, documents: List[DocumentWithMaterial], material: Material)
   case class DocumentWithMaterial(docNumber: String, rev: String, user: String, date: Long, units: String, unitsValue: String, qty: Double, weight: Double, totalWeight: Double, label: String)
@@ -79,6 +85,7 @@ object EspManager{
 }
 
 class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper {
+  implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
 
   override def preStart(): Unit = {
 //    val qwe = generateGlobalEsp(List("N002"))
@@ -164,6 +171,19 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
       val pipe = if (kinds.contains("pipe")) generatePipeGlobalEsp(projects.split(",").toList) else List.empty[GlobalEsp]
       val globalEsp = hull ++ pipe
       sender() ! globalEsp.asJson.noSpaces
+    case GetGlobalEspPdf(project, code, user) =>
+      println("BEFORE CREATING ********************")
+      val file = OrderReportV1.generateOrderPDF(project, code, user)
+      println("FILE CREATED ********************" + file)
+      if (file.nonEmpty){
+        Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
+          case url: String => sender() ! url.asJson.noSpaces
+          case _ => sender() ! "error".asJson.noSpaces
+        }
+      }
+      else{
+        sender() ! "error".asJson.noSpaces
+      }
     case AddMaterialPurchase(materialPurchaseValue) =>
       decode[MaterialPurchase](materialPurchaseValue) match {
         case Right(materialPurchase) =>

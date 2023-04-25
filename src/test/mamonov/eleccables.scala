@@ -14,7 +14,7 @@ class eleccables extends AnyFunSuite {
   DBManager.GetOracleConnection("P701") match {
     case Some(c) =>
       val doc = "170701-888-130Э4";
-      val materials: List[Material] = getMaterials();
+      val materials: List[Material] = getMaterials;
 //      val doc = docNumber.split("-").takeRight(2).mkString("-");
       val query = Source.fromResource("queries/elecCables.sql").mkString.replaceAll(":docNumber", "'%" + doc + "%'");
       val s = c.createStatement();
@@ -54,6 +54,7 @@ class eleccables extends AnyFunSuite {
             Option(rs.getDouble("TO_Z")).getOrElse(0.0),
             Option(rs.getString("TO_ZONE")).getOrElse(""),
             Option(rs.getString("TO_ZONE_DESC")).getOrElse(""),
+            Option(rs.getString("ROUTE_AREA")).getOrElse(""),
             Option(rs.getString("ROUTE_AREA")).getOrElse(""),
             code,
             materials.find(x => x.code == code) match {

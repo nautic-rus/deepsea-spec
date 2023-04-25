@@ -1,4 +1,4 @@
-CREATE OR REPLACE function CP701.get_cab_route_id (cab_seqid number) return varchar2 as
+CREATE OR REPLACE function CP701.get_cab_route_defice (cab_seqid number) return varchar2 as
  N PLS_INTEGER;
  InstallNode PLS_INTEGER;
  Ruta VARCHAR2(4000);
@@ -15,11 +15,11 @@ begin
  END IF;
  FOR rec IN C1(cab_seqid) LOOP
  IF rec.nodid=InstallNode THEN
- Nodo := '*' || rec.nodid;
+ Nodo := '*' || rec.node;
  ELSE
- Nodo := rec.nodid;
+ Nodo := rec.node;
  END IF;
- Ruta := Ruta || Nodo || ',';
+ Ruta := Ruta || Nodo || '^';
  END LOOP;
  Ruta := SUBSTR(Ruta, 0, LENGTH(Ruta) - 1);
  RETURN Ruta;
