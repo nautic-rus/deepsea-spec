@@ -144,6 +144,7 @@ object ElecManager {
                      nom_section: String = "",
                      diameter: Int = 0,
                      seg_code: String,
+                     bunch: String,
                      f_rout:  Double = 0,
                      length: Double = 0.0,
                      ext_len_1: Double = 0,

@@ -386,6 +386,7 @@ trait ElecHelper extends Codecs with EspManagerHelper {
               Option(rs.getString("NOM_SECTION")).getOrElse(""),
               Option(rs.getInt("DIAMETER")).getOrElse(0),
               Option(rs.getString("SEG_CODE")).getOrElse(""),
+              Option(rs.getString("BUNCH")).getOrElse(""),
               Option(rs.getDouble("F_ROUT")).getOrElse(0),
               Option(rs.getDouble("LENGTH")).getOrElse(0.0),
               Option(rs.getDouble("EXT_LEN_1")).getOrElse(0.0),
