@@ -132,6 +132,51 @@
             <version>7.2.5</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.itextpdf/barcodes -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>barcodes</artifactId>
+            <version>7.2.5</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.itextpdf/forms -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>forms</artifactId>
+            <version>7.2.5</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.itextpdf/io -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>io</artifactId>
+            <version>7.2.5</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.itextpdf/pdfa -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>pdfa</artifactId>
+            <version>7.2.5</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.itextpdf/sign -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>sign</artifactId>
+            <version>7.2.5</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.itextpdf/styled-xml-parser -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>styled-xml-parser</artifactId>
+            <version>7.2.5</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.itextpdf/svg -->
+        <dependency>
+            <groupId>com.itextpdf</groupId>
+            <artifactId>svg</artifactId>
+            <version>7.2.5</version>
+        </dependency>
+
 
         <dependency>
             <groupId>commons-net</groupId>
