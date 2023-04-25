@@ -9,6 +9,7 @@ select
   ) as nom_section,
   ss.o_diameter as diameter,
   seg.code as seg_code,
+  c.bunch as bunch,
   c.f_rout as f_rout,
    get_cab_length (
     c.seqid, c.from_e, c.to_e, c.f_rout,
