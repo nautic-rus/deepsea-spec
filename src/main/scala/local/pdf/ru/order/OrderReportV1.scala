@@ -73,7 +73,8 @@ object OrderReportV1 extends UtilsPDF {
 
 
   def generateOrderPDF(project: String, code: String, user: String = "NoName"): String = {
-    val dbProject="n002"
+    val dbProject = "n002"
+    val file = File.createTempFile("orderList", ".pdf")
     descrTreeBuffer.clear()
     if (code.length >= 3) {
       val materialNodes: List[MaterialNode] = {
@@ -114,21 +115,21 @@ object OrderReportV1 extends UtilsPDF {
                 hull ++ pipe
               }.filter(s => s.code.startsWith(code))
               val rows = toRows(rn, in, materialNodes)
-              val filePath: String = Files.createTempDirectory("orderPdf").toAbsolutePath.toString + File.separator + dn.num + "_d" + new Date().getTime.toString + ".pdf"
-              processPDF(dn, filePath, rows)
-              filePath
+              //val filePath: String = Files.createTempDirectory("orderPdf").toAbsolutePath.toString + File.separator + dn.num + "_d" + new Date().getTime.toString + ".pdf"
+              processPDF(dn, file.toString, rows)
             }
             case None => ""
           }
         }
         case None => ""
       }
-    }else ""
+    } else ""
+    file.toString
   }
 
-  private def processPDF(docNameEN: DocNameEN, path: String, items: List[Item11ColumnsEN]): Unit = {
+  private def processPDF(docNameEN: DocNameEN, file: String, items: List[Item11ColumnsEN]): Unit = {
 
-    val pdfWriter: PdfWriter = new PdfWriter(path, new WriterProperties().setFullCompressionMode(true)) {
+    val pdfWriter: PdfWriter = new PdfWriter(file, new WriterProperties().setFullCompressionMode(true)) {
       setSmartMode(true)
     }
     val pdfDoc = new PdfDocument(pdfWriter) {

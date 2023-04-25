@@ -20,7 +20,7 @@ import play.api.libs.json.{JsValue, Json}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
 import deepsea.accomodations.AccommodationManager.{AddAccommodationGroup, GetAccommodations, GetAccommodationsESP, SetAccommodationLabel}
 import deepsea.devices.DeviceManager.{AddDeviceToSystem, GetDevices, GetDevicesESP, RemoveDeviceFromSystem}
-import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, GetGlobalEsp, GetMaterialPurchases}
+import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, GetGlobalEsp, GetGlobalEspPdf, GetMaterialPurchases}
 import deepsea.pipe.PipeManager.{GetPipeESP, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSpoolModel, GetSystems, GetZones, SetSpoolLock}
 
 import java.io.File
@@ -258,6 +258,9 @@ class HTTPManager extends Actor {
       },
       (get & path("materialsSummary") & parameter("projects", "kinds")) { (projects, kinds) =>
         askFor(ActorManager.esp, GetGlobalEsp(projects, kinds))
+      },
+      (get & path("materialsSummaryPdf") & parameter("project", "code", "user")) { (project, code, user) =>
+        askFor(ActorManager.esp, GetGlobalEspPdf(project, code, user))
       },
       (post & path("materialPurchase") & entity(as[String])) { (purchase) =>
         askFor(ActorManager.esp, AddMaterialPurchase(purchase))
