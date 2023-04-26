@@ -220,45 +220,26 @@
 
 
     <build>
-        <sourceDirectory>src/main/scala</sourceDirectory>
-        <testSourceDirectory>src/test/scala</testSourceDirectory>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>3.1.0</version>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
+                <version>4.8.1</version>
                 <configuration>
-                    <executable>java</executable>
-                    <arguments>
-                        <argument>-classpath</argument>
-                        <classpath />
-                        <argument>deepsea.App</argument>
-                    </arguments>
-                </configuration>
-            </plugin>
-
-       <!--     <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <archive>
-                        <manifest>
+                    <launchers>
+                        <launcher>
                             <mainClass>deepsea.App</mainClass>
-                        </manifest>
-                    </archive>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
+                        </launcher>
+                    </launchers>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>make-assembly</id> &lt;!&ndash; this is used for inheritance merges &ndash;&gt;
-                        <phase>package</phase> &lt;!&ndash; bind to the packaging phase &ndash;&gt;
                         <goals>
-                            <goal>single</goal>
+                            <goal>compile</goal>
                         </goals>
                     </execution>
                 </executions>
-            </plugin>-->
+            </plugin>
         </plugins>
     </build>
 
