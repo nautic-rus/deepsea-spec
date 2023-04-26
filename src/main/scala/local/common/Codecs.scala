@@ -247,6 +247,7 @@ trait Codecs {
     classOf[GlobalEsp],
     classOf[DocumentWithMaterial],
     classOf[ElecAngle],
+    classOf[MaterialNode],
 
     //KOKOVIN
     classOf[EleComplect],

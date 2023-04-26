@@ -21,6 +21,7 @@ object App {
     val Host = "cloud.nautic-rus.ru"
     val Protocol = "https"
     val Directory = "/cloud"
+    //val Directory = "c:/files"
     val Url: String = App.HTTPServer.RestUrl + "/files"
   }
   def main(args: Array[String]): Unit = {
