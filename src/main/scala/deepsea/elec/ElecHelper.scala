@@ -2,7 +2,7 @@ package deepsea.elec
 
 import deepsea.database.DBManager
 import deepsea.database.DatabaseManager.{GetMongoConnection, GetOracleConnection}
-import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, ElecAngle, ElecCable, NodeConnect, TrayBySystem, TraysBySystem}
+import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, ElecAngle, ElecCable, EquipmentConnection, NodeConnect, TrayBySystem, TraysBySystem}
 import deepsea.esp.EspManagerHelper
 import deepsea.pipe.PipeManager.{Material, ProjectName}
 import local.common.Codecs
@@ -432,5 +432,11 @@ trait ElecHelper extends Codecs with EspManagerHelper {
       case _ =>
     }
     res.toList;
+  }
+
+  def getEquipmentsBySystem (project: String, docNumber: String): List[EquipmentConnection] = {
+    val res = ListBuffer.empty[EquipmentConnection]
+
+    res.toList
   }
 }
