@@ -336,9 +336,10 @@ trait ElecHelper extends Codecs with EspManagerHelper {
           case e: Exception => println(e.toString)
         }
 
-        val query = Source.fromResource("queries/elecCables.sql").mkString.replaceAll(":docNumber", "'%" + docNumber + "%'");
-        val rs = s.executeQuery(query);
         try {
+          val query = Source.fromResource("queries/elecCables.sql").mkString.replaceAll(":docNumber", "'%" + docNumber + "%'");
+          val rs = s.executeQuery(query);
+
           while (rs.next()) {
             val code = Option(rs.getString("STOCK_CODE")).getOrElse("");
             val name = Option(rs.getString("CODE")).getOrElse("");
@@ -420,13 +421,11 @@ trait ElecHelper extends Codecs with EspManagerHelper {
               }
             )
           }
+          rs.close();
         }
         catch {
           case e: Exception => println(e.toString)
         }
-
-
-        rs.close();
         s.close();
         c.close();
       case _ =>
@@ -434,9 +433,45 @@ trait ElecHelper extends Codecs with EspManagerHelper {
     res.toList;
   }
 
-  def getEquipmentsBySystem (project: String, docNumber: String): List[EquipmentConnection] = {
+  def getEquipmentsBySystem(project: String, docNumber: String): List[EquipmentConnection] = {
     val res = ListBuffer.empty[EquipmentConnection]
-
+    DBManager.GetOracleConnection(project) match {
+      case Some(c) => {
+        val s = c.createStatement()
+        try {
+          val query = Source.fromResource("queries/elecEquipments.sql").mkString.replaceAll(":docNumber", "'%" + docNumber + "%'")
+          val rs = s.executeQuery(query)
+          while (rs.next()) {
+            res += EquipmentConnection(
+              Option(rs.getInt("OID")).getOrElse(0),
+              Option(rs.getString("USERID")).getOrElse(""),
+              Option(rs.getString("LABEL")).getOrElse(""),
+              Option(rs.getDouble("X")).getOrElse(0),
+              Option(rs.getDouble("Y")).getOrElse(0),
+              Option(rs.getDouble("Z")).getOrElse(0),
+              Option(rs.getDouble("VX")).getOrElse(0),
+              Option(rs.getDouble("VY")).getOrElse(0),
+              Option(rs.getDouble("VZ")).getOrElse(0),
+              Option(rs.getDouble("A11")).getOrElse(0),
+              Option(rs.getDouble("A12")).getOrElse(0),
+              Option(rs.getDouble("A13")).getOrElse(0),
+              Option(rs.getDouble("A21")).getOrElse(0),
+              Option(rs.getDouble("A22")).getOrElse(0),
+              Option(rs.getDouble("A23")).getOrElse(0),
+              Option(rs.getDouble("A31")).getOrElse(0),
+              Option(rs.getDouble("A32")).getOrElse(0),
+              Option(rs.getDouble("A33")).getOrElse(0),
+              Option(rs.getDouble("A41")).getOrElse(0),
+              Option(rs.getDouble("A42")).getOrElse(0),
+              Option(rs.getDouble("A43")).getOrElse(0),
+            )
+          }
+        } catch {
+          case e: Exception => println(e.toString)
+        }
+      }
+      case _ =>
+    }
     res.toList
   }
 }

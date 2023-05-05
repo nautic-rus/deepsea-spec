@@ -1,4 +1,5 @@
 select
+  e.oid,
   e.userid,
   mdl.label,
   mdl.x,
