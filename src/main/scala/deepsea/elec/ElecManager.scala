@@ -60,6 +60,8 @@ object ElecManager {
 
   case class GetCablesBySystem(project: String, docNumber: String)
 
+  case class GetEquipmentsBySystem(project: String, docNumber: String)
+
   case class GetTrayBundles(project: String)
 
   case class GenerateTrayPdf(project: String, docNumber: String, revision: String = "")
@@ -181,6 +183,14 @@ object ElecManager {
                  count: Int
                  )
 
+  case class EquipmentConnection (
+                                 id: Int,
+                                 name: String,
+                                 point: String,
+                                 pX: Double,
+                                 pY: Double,
+                                 pZ: Double,
+                                 )
 
   class ElecManager extends Actor with ElecHelper with Codecs {
     implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
@@ -202,9 +212,9 @@ object ElecManager {
         val f = q.asJson.noSpaces
         sender() ! f
       case GetCablesBySystem(project, docNumber) =>
-        val q = getCablesBySystem(project, docNumber)
-        val f = q.asJson.noSpaces
-        sender() ! f
+        sender() ! getCablesBySystem(project, docNumber).asJson.noSpaces
+      case GetEquipmentsBySystem(project, docNumber) =>
+        sender() ! getEquipmentsBySystem(project, docNumber).asJson.noSpaces
       case GetTrayBundles(project) =>
         sender() ! retrieveEleComplectsJsonString(project)
       case FixTrayBundle(project, docNumber) =>

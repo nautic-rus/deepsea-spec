@@ -2,7 +2,7 @@ package local.common
 
 import deepsea.accomodations.AccommodationManager.{Accommodation, BBox}
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
-import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, ElecAngle, ElecCable, TrayBySystem}
+import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, ElecAngle, ElecCable, EquipmentConnection, TrayBySystem}
 import deepsea.esp.EspManager.{DocumentWithMaterial, EspElement, EspObject, GlobalEsp, HullEspObject, MaterialPurchase, PipeEspObject}
 import deepsea.hull.HullManager._
 import deepsea.pipe.PipeManager.{Material, MaterialTranslation, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SpoolLock, SystemDef, UnitTranslation, Units}
@@ -213,11 +213,15 @@ trait Codecs {
   implicit val MaterialNodeDecoder: Decoder[MaterialNode] = deriveDecoder[MaterialNode]
   implicit val MaterialNodeEncoder: Encoder[MaterialNode] = deriveEncoder[MaterialNode]
 
+  implicit val EquipmentConnectionDecoder: Decoder[EquipmentConnection] = deriveDecoder[EquipmentConnection]
+  implicit val EquipmentConnectionEncoder: Encoder[EquipmentConnection] = deriveEncoder[EquipmentConnection]
+
 
   val codecRegistry: CodecRegistry = fromRegistries(fromProviders(
 
     //MAMONOV
     classOf[CableRoute],
+    classOf[EquipmentConnection],
 
     //BOGDAN
 

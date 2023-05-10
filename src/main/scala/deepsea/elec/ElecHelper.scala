@@ -1,8 +1,9 @@
 package deepsea.elec
 
+import breeze.linalg.DenseMatrix
 import deepsea.database.DBManager
 import deepsea.database.DatabaseManager.{GetMongoConnection, GetOracleConnection}
-import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, ElecAngle, ElecCable, NodeConnect, TrayBySystem, TraysBySystem}
+import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, ElecAngle, ElecCable, EquipmentConnection, NodeConnect, TrayBySystem, TraysBySystem}
 import deepsea.esp.EspManagerHelper
 import deepsea.pipe.PipeManager.{Material, ProjectName}
 import local.common.Codecs
@@ -336,9 +337,10 @@ trait ElecHelper extends Codecs with EspManagerHelper {
           case e: Exception => println(e.toString)
         }
 
-        val query = Source.fromResource("queries/elecCables.sql").mkString.replaceAll(":docNumber", "'%" + docNumber + "%'");
-        val rs = s.executeQuery(query);
         try {
+          val query = Source.fromResource("queries/elecCables.sql").mkString.replaceAll(":docNumber", "'%" + docNumber + "%'");
+          val rs = s.executeQuery(query);
+
           while (rs.next()) {
             val code = Option(rs.getString("STOCK_CODE")).getOrElse("");
             val name = Option(rs.getString("CODE")).getOrElse("");
@@ -420,17 +422,60 @@ trait ElecHelper extends Codecs with EspManagerHelper {
               }
             )
           }
+          rs.close();
         }
         catch {
           case e: Exception => println(e.toString)
         }
-
-
-        rs.close();
         s.close();
         c.close();
       case _ =>
     }
     res.toList;
+  }
+
+  def getEquipmentsBySystem(project: String, docNumber: String): List[EquipmentConnection] = {
+    val res = ListBuffer.empty[EquipmentConnection]
+    DBManager.GetOracleConnection(project) match {
+      case Some(c) => {
+        val s = c.createStatement()
+        try {
+          val query = Source.fromResource("queries/elecEquipments.sql").mkString.replaceAll(":docNumber", "'%" + docNumber + "%'")
+          val rs = s.executeQuery(query)
+          while (rs.next()) {
+            val pX: Double = Option(rs.getDouble("X")).getOrElse(0)
+            val pY: Double = Option(rs.getDouble("Y")).getOrElse(0)
+            val pZ: Double = Option(rs.getDouble("Z")).getOrElse(0)
+            val a11: Double =  Option(rs.getDouble("A11")).getOrElse(0)
+            val a12: Double =  Option(rs.getDouble("A12")).getOrElse(0)
+            val a13: Double =  Option(rs.getDouble("A13")).getOrElse(0)
+            val a21: Double =  Option(rs.getDouble("A21")).getOrElse(0)
+            val a22: Double =  Option(rs.getDouble("A22")).getOrElse(0)
+            val a23: Double =  Option(rs.getDouble("A23")).getOrElse(0)
+            val a31: Double =  Option(rs.getDouble("A31")).getOrElse(0)
+            val a32: Double =  Option(rs.getDouble("A32")).getOrElse(0)
+            val a33: Double =  Option(rs.getDouble("A33")).getOrElse(0)
+            val a41: Double =  Option(rs.getDouble("A41")).getOrElse(0)
+            val a42: Double =  Option(rs.getDouble("A42")).getOrElse(0)
+            val a43: Double =  Option(rs.getDouble("A43")).getOrElse(0)
+
+            val resMatrix = DenseMatrix((a11, a21, a31, a41), (a12, a22, a32, a42), (a13, a23, a33, a43)) * DenseMatrix((pX), (pY), (pZ), (1))
+
+            res += EquipmentConnection(
+              Option(rs.getInt("OID")).getOrElse(0),
+              Option(rs.getString("USERID")).getOrElse(""),
+              Option(rs.getString("LABEL")).getOrElse(""),
+            resMatrix.valueAt(0),
+            resMatrix.valueAt(1),
+            resMatrix.valueAt(2)
+            )
+          }
+        } catch {
+          case e: Exception => println(e.toString)
+        }
+      }
+      case _ =>
+    }
+    res.toList
   }
 }
