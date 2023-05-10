@@ -190,21 +190,6 @@ object ElecManager {
                                  pX: Double,
                                  pY: Double,
                                  pZ: Double,
-                                 pVX: Double,
-                                 pVY: Double,
-                                 pVZ: Double,
-                                 a11: Double,
-                                 a12: Double,
-                                 a13: Double,
-                                 a21: Double,
-                                 a22: Double,
-                                 a23: Double,
-                                 a31: Double,
-                                 a32: Double,
-                                 a33: Double,
-                                 a41: Double,
-                                 a42: Double,
-                                 a43: Double,
                                  )
 
   class ElecManager extends Actor with ElecHelper with Codecs {
