@@ -22,8 +22,10 @@ import deepsea.accomodations.AccommodationManager.{AddAccommodationGroup, GetAcc
 import deepsea.devices.DeviceManager.{AddDeviceToSystem, GetDevices, GetDevicesESP, RemoveDeviceFromSystem}
 import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, GetGlobalEsp, GetGlobalEspPdf, GetMaterialPurchases}
 import deepsea.pipe.PipeManager.{GetPipeESP, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSpoolModel, GetSystems, GetZones, SetSpoolLock}
+import io.circe.syntax.EncoderOps
 
 import java.io.File
+import java.util.Date
 import java.util.concurrent.TimeUnit
 import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 
@@ -267,6 +269,10 @@ class HTTPManager extends Actor {
       },
       (get & path("materialPurchases") & parameter("project")) { (project) =>
         askFor(ActorManager.esp, GetMaterialPurchases(project))
+      },
+
+      (get & path("time")) {
+        complete(HttpEntity(new Date().getTime.asJson.noSpaces))
       },
     )
   }
