@@ -103,6 +103,9 @@ class PipeCache extends Actor{
               }, insul = rs.getString("INSULUSERID") match {
                 case value: String => value
                 case _ => ""
+              }, classDescription = rs.getString("DESCRIPTION_1") match {
+                case value: String => value
+                case _ => ""
               })
           }
           s.close()
