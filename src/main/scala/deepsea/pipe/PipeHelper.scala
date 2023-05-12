@@ -125,6 +125,18 @@ trait PipeHelper extends Codecs {
               case _ =>
             }
 
+            res.foreach(pipeSeg => {
+              """\w{12}\d{4}""".r.findFirstIn(pipeSeg.classDescription) match {
+                case Some(value) =>
+                  materials.find(_.code == value) match {
+                    case Some(addMaterial) =>
+                      res += pipeSeg.copy(material = addMaterial, stock = addMaterial.code, weight = addMaterial.singleWeight, compUserId = addMaterial.name, spPieceId = res.count(_.spool == pipeSeg.spool) + 1)
+                    case _ => None
+                  }
+                case _ => None
+              }
+            })
+
             Await.result(vPipeJointsActualCollection.find().toFuture(), Duration(30, SECONDS)) match {
               case values: Seq[PipeSegActual] =>
                 Await.result(mongo.getCollection[PipeSeg](values.last.name).find(and(equal("project", project), if (system != "") equal("system", system) else notEqual("system", system), if (sqInSystem != -1) equal("sqInSystem", sqInSystem) else notEqual("sqInSystem", sqInSystem))).toFuture(), Duration(300, SECONDS)) match {
@@ -171,7 +183,7 @@ trait PipeHelper extends Codecs {
             sups.groupBy(x => x.code).foreach(gr => {
               materials.find(_.code == gr._1) match {
                 case Some(material) =>
-                  res += PipeSeg(project, "", system, "", 0, 0, "SUP", "Support", "", "SUP", gr._2.map(_.userId).mkString(","), "", 0, 0, 0, "", "SUP", gr._2.length, 0, 0, material.singleWeight, gr._1, "", "", material, system)
+                  res += PipeSeg(project, "", system, "", 0, 0, "SUP", "Support", "", "SUP", gr._2.map(_.userId).mkString(","), "", 0, 0, 0, "", "SUP", gr._2.length, 0, 0, material.singleWeight, gr._1, "", "", "", material, system)
                   spool += 1
                 case _ => None
               }
@@ -210,7 +222,7 @@ trait PipeHelper extends Codecs {
                     0, 0, materials.find(_.code == split(1)) match {
                       case Some(value) => value.singleWeight
                       case _ => 0
-                    }, split(1), "", "", materials.find(_.code == split(1)) match {
+                    }, split(1), "", "", "", materials.find(_.code == split(1)) match {
                       case Some(value) => value
                       case _ => Material()
                     }
@@ -341,7 +353,7 @@ trait PipeHelper extends Codecs {
     sups.groupBy(x => x).foreach(gr => {
       materials.find(_.code == gr._1) match {
         case Some(material) =>
-          res += PipeSeg(project, "", system, "", 0, 0, "SUP", "Support", "", "SUP", "", "", 0, 0, 0, "", spool.toString, 0, 0, 0, material.singleWeight, gr._1, "", "", material, system)
+          res += PipeSeg(project, "", system, "", 0, 0, "SUP", "Support", "", "SUP", "", "", 0, 0, 0, "", spool.toString, 0, 0, 0, material.singleWeight, gr._1, "", "", "", material, system)
           spool += 1
         case _ => None
       }

@@ -35,7 +35,7 @@ object PipeManager{
   case class PipeSeg(project: String, zone: String, system: String, line: String,
                      pls: Int, elem: Int, typeCode: String, typeDesc: String, classAlpha: String, compType: String, compUserId: String, smat: String,
                      sqInSystem: Int, isPieceId: Int, var spPieceId: Int, isom: String, spool: String, var length: Double, radius: Double, angle: Double,
-                     weight: Double, stock: String, fcon3: String, insul: String, var material: Material = Material(), var systemDescr: String = "") extends EspElement {
+                     weight: Double, stock: String, fcon3: String, insul: String, classDescription: String, var material: Material = Material(), var systemDescr: String = "") extends EspElement {
 //    def toEspElement: Map[String, String] ={
 //      val res = mutable.Map.empty[String, String]
 //      res += ("project" -> project)
