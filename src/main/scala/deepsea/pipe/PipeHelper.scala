@@ -125,6 +125,18 @@ trait PipeHelper extends Codecs {
               case _ =>
             }
 
+            res.foreach(pipeSeg => {
+              """\w{12}\d{4}""".r.findFirstIn(pipeSeg.classDescription) match {
+                case Some(value) =>
+                  materials.find(_.code == value) match {
+                    case Some(addMaterial) =>
+                      res += pipeSeg.copy(material = addMaterial, stock = addMaterial.code, weight = addMaterial.singleWeight, compUserId = addMaterial.name, spPieceId = res.count(_.spool == pipeSeg.spool) + 1)
+                    case _ => None
+                  }
+                case _ => None
+              }
+            })
+
             Await.result(vPipeJointsActualCollection.find().toFuture(), Duration(30, SECONDS)) match {
               case values: Seq[PipeSegActual] =>
                 Await.result(mongo.getCollection[PipeSeg](values.last.name).find(and(equal("project", project), if (system != "") equal("system", system) else notEqual("system", system), if (sqInSystem != -1) equal("sqInSystem", sqInSystem) else notEqual("sqInSystem", sqInSystem))).toFuture(), Duration(300, SECONDS)) match {
