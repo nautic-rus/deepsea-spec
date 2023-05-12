@@ -171,7 +171,7 @@ trait PipeHelper extends Codecs {
             sups.groupBy(x => x.code).foreach(gr => {
               materials.find(_.code == gr._1) match {
                 case Some(material) =>
-                  res += PipeSeg(project, "", system, "", 0, 0, "SUP", "Support", "", "SUP", gr._2.map(_.userId).mkString(","), "", 0, 0, 0, "", "SUP", gr._2.length, 0, 0, material.singleWeight, gr._1, "", "", material, system)
+                  res += PipeSeg(project, "", system, "", 0, 0, "SUP", "Support", "", "SUP", gr._2.map(_.userId).mkString(","), "", 0, 0, 0, "", "SUP", gr._2.length, 0, 0, material.singleWeight, gr._1, "", "", "", material, system)
                   spool += 1
                 case _ => None
               }
@@ -210,7 +210,7 @@ trait PipeHelper extends Codecs {
                     0, 0, materials.find(_.code == split(1)) match {
                       case Some(value) => value.singleWeight
                       case _ => 0
-                    }, split(1), "", "", materials.find(_.code == split(1)) match {
+                    }, split(1), "", "", "", materials.find(_.code == split(1)) match {
                       case Some(value) => value
                       case _ => Material()
                     }
@@ -341,7 +341,7 @@ trait PipeHelper extends Codecs {
     sups.groupBy(x => x).foreach(gr => {
       materials.find(_.code == gr._1) match {
         case Some(material) =>
-          res += PipeSeg(project, "", system, "", 0, 0, "SUP", "Support", "", "SUP", "", "", 0, 0, 0, "", spool.toString, 0, 0, 0, material.singleWeight, gr._1, "", "", material, system)
+          res += PipeSeg(project, "", system, "", 0, 0, "SUP", "Support", "", "SUP", "", "", 0, 0, 0, "", spool.toString, 0, 0, 0, material.singleWeight, gr._1, "", "", "", material, system)
           spool += 1
         case _ => None
       }
