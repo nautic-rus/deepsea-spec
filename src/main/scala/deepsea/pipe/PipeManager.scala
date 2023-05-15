@@ -164,6 +164,21 @@ object PipeManager{
   case class GetSpoolModel(docNumber: String, spool: String, isom: String)
   case class PipeSup(code: String, userId: String)
 
+  case class Pls(typeCode: Int, zone: Int, system: Int, line: String, pls: Int, elem: Int){
+    def equals(that: Pls): Boolean = {
+      typeCode == that.typeCode &&
+      zone == that.zone &&
+      system == that.system &&
+      line == that.line &&
+      pls == that.pls &&
+      (elem == that.elem || elem == 0 || that.elem == 0)
+    }
+  }
+  case class PlsElem(pls: Pls, weight: Double, isomId: Int, spoolId: Int, isPieceId: Int, spPieceId: Int, cType: String, idsq: Int, cmp_oid: Int, cmp_stock: String, zone: String, spool: String, isom: String, classDescr: String)
+  case class PipeLineSegment(pls: Pls, bdatri: String, oid: Int)
+  case class PlsParam(pls: Pls, paramObj: Int, paramSq: Int, value: Double)
+  case class MaterialQuality(code: String, descr: String, weight: Double, thickness: Double)
+
 }
 class PipeManager extends Actor with Codecs with PipeHelper {
 

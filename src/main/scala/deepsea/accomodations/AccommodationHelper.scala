@@ -137,7 +137,7 @@ trait AccommodationHelper {
             val query = s"select system, long_descr from systems_lang where system in (select oid from systems where name = '$system')"
             val rs = s.executeQuery(query)
             while (rs.next()) {
-              val descr = Option(rs.getString("LONG_DESCR")).getOrElse("")
+              val descr = Option(rs.getString("LONG_DESCR")).getOrElse("").replace("\r", "")
               if (descr.contains("|")){
                 descr.split('\n').foreach(l => {
                   if (l.contains('@')){
