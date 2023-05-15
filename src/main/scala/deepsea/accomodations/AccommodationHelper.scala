@@ -142,8 +142,8 @@ trait AccommodationHelper {
                 descr.split('\n').foreach(l => {
                   if (l.contains('@')){
                     val split = l.replace("@", "").split('|')
-                    if (split.length > 1){
-                      groups += AccommodationGroup(split.head, split.last)
+                    if (split.length > 2){
+                      groups += AccommodationGroup(split.head, split(1) + split(2))
                     }
                   }
                 })
