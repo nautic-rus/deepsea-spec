@@ -597,7 +597,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
     DBManager.GetOracleConnection(project) match {
       case Some(connection) =>
         val stmt = connection.createStatement()
-        val q = Source.fromResource("queries/plsElem.sql").mkString.replace("&system", system) + s" AND (IDSQ = $sqInSystem OR $sqInSystem = -1)"
+        val q = Source.fromResource("queries/plsElem.sql").mkString.replace("&system", system) + s" AND (PLS.IDSQ = $sqInSystem OR $sqInSystem = -1)"
 
         val plsElems = RsIterator(stmt.executeQuery(q)).map(rs => {
           PlsElem(
@@ -681,8 +681,8 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                   plsElem.pls.line,
                   plsElem.pls.pls,
                   plsElem.pls.elem,
-                  "hvac",
-                  "component",
+                  "HVAC",
+                  "COMPONENT",
                   "",
                   plsElem.cType,
                   "",
@@ -758,8 +758,8 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                           plsElem.pls.line,
                           plsElem.pls.pls,
                           plsElem.pls.elem,
-                          "hvac",
-                          "plate",
+                          "HVAC",
+                          "PLATE",
                           "",
                           plsElem.cType,
                           hvacName,
