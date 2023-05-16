@@ -240,7 +240,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
           case _ => List.empty[PipeSeg]
         }
     }
-    if (pipeSegs.nonEmpty) pipeSegs else getHvacSegs(project, system)
+    if (pipeSegs.nonEmpty) pipeSegs else getHvacSegs(project, system, sqInSystem)
   }
   def getPipeSegsFromMongo(project: String, docNumber: String): List[PipeSeg] ={
 
@@ -586,7 +586,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
         error
     }
   }
-  def getHvacSegs(project: String, system: String): List[PipeSeg] ={
+  def getHvacSegs(project: String, system: String, sqInSystem: Int = -1): List[PipeSeg] ={
     val res = ListBuffer.empty[PipeSeg]
     val projects = getProjects
     val rkdProject = projects.find(_.foran == project) match {
@@ -597,7 +597,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
     DBManager.GetOracleConnection(project) match {
       case Some(connection) =>
         val stmt = connection.createStatement()
-        val q = Source.fromResource("queries/plsElem.sql").mkString.replace("&system", system)
+        val q = Source.fromResource("queries/plsElem.sql").mkString.replace("&system", system) + s" AND (IDSQ = $sqInSystem OR $sqInSystem = -1)"
 
         val plsElems = RsIterator(stmt.executeQuery(q)).map(rs => {
           PlsElem(
