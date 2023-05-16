@@ -715,7 +715,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                               val radius = Math.round(params(0).value)
                               val diam = Math.round(params(1).value)
                               val angle = Math.round(180 / Math.PI * params(2).value)
-                              s"Отвод $angle, ДУ$diam (${material.name})"
+                              s"ОТВОД $angle, ДУ$diam (${material.name})"
                             }
                             else{
                               "undefined"
@@ -725,7 +725,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                               val d1 = Math.round(params(0).value * 2)
                               val d2 = Math.round(params(1).value * 2)
                               val l = Math.round(params(2).value)
-                              s"Переход ДУ$d2/ДУ$d1, L=$l (${material.name})"
+                              s"ПЕРЕХОД ДУ$d2/ДУ$d1, L=$l (${material.name})"
                             }
                             else{
                               "undefined"
@@ -734,13 +734,13 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                             if (params.length == 2){
                               val d = Math.round(params(0).value * 2)
                               val l = Math.round(params(1).value)
-                              s"Воздуховод ДУ$d, L=$l (${material.name})"
+                              s"ВОЗДУХОВОД ДУ$d, L=$l (${material.name})"
                             }
                             else if (params.length == 3){
                               val d1 = Math.round(params(0).value)
                               val d2 = Math.round(params(1).value)
                               val l = Math.round(params(2).value)
-                              s"Воздуховод ${d1}х${d2}, L=$l (${material.name})"
+                              s"ВОЗДУХОВОД ${d1}х${d2}, L=$l (${material.name})"
                             }
                             else{
                               "undefined"
