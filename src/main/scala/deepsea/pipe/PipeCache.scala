@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{Await, ExecutionContextExecutor}
 import scala.concurrent.duration.{Duration, DurationInt, SECONDS}
+import scala.io.Source
 
 class PipeCache extends Actor{
   implicit val system: ActorSystem = ActorSystem()
@@ -36,7 +37,7 @@ class PipeCache extends Actor{
       GetOracleConnection(proj) match {
         case Some(c) =>
           val s = c.createStatement()
-          val query = s"select * from v_pipecomp"
+          val query = Source.fromResource("queries/pipeComps.sql").mkString
           val rs = s.executeQuery(query)
           while (rs.next()) {
             pipeSegs += PipeSeg(project = proj, zone = rs.getString("ZONENAME") match {
@@ -103,7 +104,7 @@ class PipeCache extends Actor{
               }, insul = rs.getString("INSULUSERID") match {
                 case value: String => value
                 case _ => ""
-              }, classDescription = rs.getString("DESCRIPTION_1") match {
+              }, classDescription = rs.getString("CLASSDESCR") match {
                 case value: String => value
                 case _ => ""
               })

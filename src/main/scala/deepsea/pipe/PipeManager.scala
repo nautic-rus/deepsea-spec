@@ -217,7 +217,7 @@ class PipeManager extends Actor with Codecs with PipeHelper {
         case Some(value) => value.descr.replace(docNumber, "").trim
         case _ => "NO DESCR"
       }
-      val rev = if (revision == "NO REV")  "" else revision
+      val rev = if (revision == "NO REV") "" else revision
       val file = if (bySpool == "1") genSpoolsListEnPDF(docNumber, systemDescr, rev, pipeSegs, lang) else genSpoolsListEnPDFAll(docNumber, systemDescr, revision, pipeSegs, lang)
       Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
         case url: String => sender() ! url.asJson.noSpaces
