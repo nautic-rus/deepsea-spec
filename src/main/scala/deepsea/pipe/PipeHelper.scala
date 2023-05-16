@@ -118,17 +118,20 @@ trait PipeHelper extends Codecs with MaterialsHelper {
               case _ =>
             }
 
+            val valves = ListBuffer.empty[PipeSeg]
             res.foreach(pipeSeg => {
               """\w{12}\d{4}""".r.findFirstIn(pipeSeg.classDescription) match {
                 case Some(value) =>
                   materials.find(_.code == value) match {
                     case Some(addMaterial) =>
-                      res += pipeSeg.copy(material = addMaterial, stock = addMaterial.code, weight = addMaterial.singleWeight, compUserId = addMaterial.name, spPieceId = res.count(_.spool == pipeSeg.spool) + 1)
+                      valves += pipeSeg.copy(material = addMaterial, stock = addMaterial.code, weight = addMaterial.singleWeight, compUserId = addMaterial.name, spPieceId = res.count(_.spool == pipeSeg.spool) + 1)
                     case _ => None
                   }
                 case _ => None
               }
             })
+
+            res ++= valves
 
             Await.result(vPipeJointsActualCollection.find().toFuture(), Duration(30, SECONDS)) match {
               case values: Seq[PipeSegActual] =>
