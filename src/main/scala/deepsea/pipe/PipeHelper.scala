@@ -832,6 +832,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
             Option(rs.getString("SPOOL")).getOrElse(""),
             Option(rs.getString("ISOM")).getOrElse(""),
             Option(rs.getString("DESCR")).getOrElse(""),
+            Option(rs.getString("CMPNAME")).getOrElse(""),
           )
         }).toList
 
