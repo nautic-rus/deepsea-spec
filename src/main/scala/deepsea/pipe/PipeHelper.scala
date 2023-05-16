@@ -620,6 +620,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
             Option(rs.getString("SPOOL")).getOrElse(""),
             Option(rs.getString("ISOM")).getOrElse(""),
             Option(rs.getString("DESCR")).getOrElse(""),
+            Option(rs.getString("CMPNAME")).getOrElse(""),
           )
         }).toList
 
@@ -683,7 +684,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                   plsElem.pls.elem,
                   "HVAC",
                   "COMPONENT",
-                  "",
+                  plsElem.cmpName,
                   plsElem.cType,
                   "",
                   quality,
@@ -760,7 +761,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                           plsElem.pls.elem,
                           "HVAC",
                           "PLATE",
-                          "",
+                          plsElem.cmpName,
                           plsElem.cType,
                           hvacName,
                           quality,

@@ -175,7 +175,7 @@ object PipeManager{
       (elem == that.elem || elem == 0 || that.elem == 0)
     }
   }
-  case class PlsElem(pls: Pls, weight: Double, isomId: Int, spoolId: Int, isPieceId: Int, spPieceId: Int, cType: String, idsq: Int, cmp_oid: Int, cmp_stock: String, zone: String, spool: String, isom: String, classDescr: String)
+  case class PlsElem(pls: Pls, weight: Double, isomId: Int, spoolId: Int, isPieceId: Int, spPieceId: Int, cType: String, idsq: Int, cmp_oid: Int, cmp_stock: String, zone: String, spool: String, isom: String, classDescr: String, cmpName: String)
   case class PipeLineSegment(pls: Pls, bdatri: String, oid: Int)
   case class PlsParam(pls: Pls, paramObj: Int, paramSq: Int, value: Double)
   case class MaterialQuality(code: String, descr: String, weight: Double, thickness: Double)
