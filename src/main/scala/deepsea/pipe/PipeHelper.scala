@@ -222,7 +222,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                   )
                 }
               })
-            }
+            })
             var spoolValue = ""
             var spCounter = 0
             res.filter(_.compType == "AUX").filter(_.spPieceId == 0).sortBy(_.spool).foreach(sp => {
@@ -237,7 +237,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
           case _ => List.empty[PipeSeg]
         }
     }
-    if (pipeSegs.nonEmpty) pipeSegs else getHvacSegs()
+    if (pipeSegs.nonEmpty) pipeSegs else getHvacSegs(project, system)
   }
   def getPipeSegsFromMongo(project: String, docNumber: String): List[PipeSeg] ={
 
@@ -583,7 +583,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
         error
     }
   }
-  def getHvacSegs(project: String, system: String):  List[PipeSeg] ={
+  def getHvacSegs(project: String, system: String): List[PipeSeg] ={
     val res = ListBuffer.empty[PipeSeg]
     val projects = getProjects
     val rkdProject = projects.find(_.foran == project) match {
