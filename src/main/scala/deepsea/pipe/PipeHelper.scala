@@ -124,7 +124,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                 case Some(value) =>
                   materials.find(_.code == value) match {
                     case Some(addMaterial) =>
-                      valves += pipeSeg.copy(material = addMaterial, stock = addMaterial.code, weight = addMaterial.singleWeight, compUserId = addMaterial.name, spPieceId = res.count(_.spool == pipeSeg.spool) + 1)
+                      valves += pipeSeg.copy(material = addMaterial, stock = addMaterial.code, weight = addMaterial.singleWeight, compUserId = addMaterial.name, spPieceId = res.filter(_.spool == pipeSeg.spool).maxBy(_.spPieceId).spPieceId + 1)
                     case _ => None
                   }
                 case _ => None
