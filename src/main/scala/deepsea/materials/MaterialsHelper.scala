@@ -31,4 +31,15 @@ trait MaterialsHelper {
       case _ => List.empty[MaterialNode]
     }
   }
+  def getProjects: List[ProjectName] = {
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val projectNamesCollection: MongoCollection[ProjectName] = mongo.getCollection("project-names")
+        Await.result(projectNamesCollection.find().toFuture(), Duration(30, SECONDS)) match {
+          case values: Seq[ProjectName] => values.toList
+          case _ => List.empty[ProjectName]
+        }
+      case _ => List.empty[ProjectName]
+    }
+  }
 }

@@ -9,7 +9,7 @@ import deepsea.database.DatabaseManager
 import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection}
 import deepsea.esp.EspManager.{EspElement, GetEsp, GetHullEsp}
 import deepsea.files.FileManager.GenerateUrl
-import deepsea.pipe.PipeManager.{GetPipeESP, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSpoolModel, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SetSpoolLock, SpoolLock, SystemDef, UpdatePipeComp, UpdatePipeJoints}
+import deepsea.pipe.PipeManager.{GetHvacSegs, GetPipeESP, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSpoolModel, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SetSpoolLock, SpoolLock, SystemDef, UpdatePipeComp, UpdatePipeJoints}
 import io.circe.generic.JsonCodec
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.Filters.{all, and, equal, in, notEqual}
@@ -163,6 +163,7 @@ object PipeManager{
   case class GetPipeESP(docNumber: String, revision: String, bySpool: String, lang: String)
   case class GetSpoolModel(docNumber: String, spool: String, isom: String)
   case class PipeSup(code: String, userId: String)
+  case class GetHvacSegs(docNumber: String)
 
   case class Pls(typeCode: Int, zone: Int, system: Int, line: String, pls: Int, elem: Int){
     def equals(that: Pls): Boolean = {
@@ -186,6 +187,7 @@ class PipeManager extends Actor with Codecs with PipeHelper {
   implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
 
   override def preStart(): Unit ={
+    self ! GetHvacSegs("200101-574-001")
     //self ! GetSpoolModel("210101-545-0001", "032", "0")
   }
 
@@ -223,6 +225,8 @@ class PipeManager extends Actor with Codecs with PipeHelper {
       }
     case GetSpoolModel(docNumber, spool, isom) =>
       sender() ! getSpoolModel(docNumber, spool, isom.toIntOption.getOrElse(0))
+    case GetHvacSegs(docNumber) =>
+      getHvacSegs(docNumber)
     case _ => None
 
   }

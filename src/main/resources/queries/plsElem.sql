@@ -1,11 +1,11 @@
 SELECT
     PLS.*,
     SYS.*,
-    ZON.*,
-    SPL.*,
-    ISO.*,
     CMP.*,
-    ELE.*
+    ELE.*,
+    ZON.USERID AS ZONEUSERID,
+    SPL.USERID AS SPOOL,
+    ISO.USERID AS ISOM
 FROM
     PLS_ELEM PLS
         LEFT JOIN SYSTEMS SYS ON SYS.SEQID = PLS.SYSTEM
