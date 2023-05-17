@@ -603,6 +603,9 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
           case "PIPE" => {
             if (ps.length < 0.1) "0.1" else String.format("%.1f", ps.length)
           }
+          case "FWNR" =>{
+            "1"
+          }
           case _ =>
             if (ps.length < 1.0)
               "1"
