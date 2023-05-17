@@ -14,7 +14,7 @@ object EssiCNCManagerSubdiv {
   private val minLineLen: Double = 7.8
 
 
-  private val commands: List[String] = List[String]("CUTH", "CUT")
+  private val commands: List[String] = List[String]("CUTH", "CUT","CUTX")
 
   private case class Point(x: Double, y: Double, offsetX: Double = 0.0, offsetY: Double = 0.0) {
     override def toString: String = s"${doubleToStr(x - offsetX)} ${doubleToStr(y - offsetY)}"
