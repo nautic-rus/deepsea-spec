@@ -1,7 +1,7 @@
 package deepsea.pipe
 
 import deepsea.database.DatabaseManager._
-import deepsea.pipe.PipeManager.{GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, PipeSup, ProjectName, SetSpoolLock, SpoolLock, SystemDef, Units, UpdatePipeComp, UpdatePipeJoints}
+import deepsea.pipe.PipeManager.{GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSystems, GetZones, Material, MaterialQuality, PipeLineSegment, PipeSeg, PipeSegActual, PipeSegBilling, PipeSup, Pls, PlsElem, PlsParam, ProjectName, SetSpoolLock, SpoolLock, SystemDef, Units, UpdatePipeComp, UpdatePipeJoints}
 import org.mongodb.scala.{Document, MongoClient, MongoCollection, MongoDatabase, bson}
 import org.mongodb.scala.model.Filters.{and, equal, notEqual}
 import akka.http.scaladsl.{Http, HttpExt}
@@ -12,6 +12,7 @@ import deepsea.actors.ActorManager
 import deepsea.database.{DBManager, DatabaseManager}
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
 import deepsea.files.FileManager.GenerateUrl
+import deepsea.materials.MaterialsHelper
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.Filters.{all, and, equal, in, notEqual}
 import io.circe.{Decoder, Encoder}
@@ -30,10 +31,11 @@ import java.util.zip.{ZipEntry, ZipFile, ZipOutputStream}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, SECONDS}
+import scala.io.Source
 import scala.jdk.CollectionConverters.EnumerationHasAsScala
 import scala.reflect.io.Directory
 
-trait PipeHelper extends Codecs {
+trait PipeHelper extends Codecs with MaterialsHelper {
   def getSystems(project: String): List[SystemDef] = {
     GetMongoCacheConnection() match {
       case Some(mongo) =>
@@ -73,40 +75,31 @@ trait PipeHelper extends Codecs {
     }
   }
   def getPipeSegs(project: String, system: String = "", sqInSystem: Int = -1): List[PipeSeg] ={
-    DBManager.GetMongoCacheConnection() match {
+    val pipeSegs = DBManager.GetMongoCacheConnection() match {
       case Some(mongo) =>
-
         val vPipeCompCollectionActualName = "vPipeCompActual"
         val vPipeCompActualCollection: MongoCollection[PipeSegActual] = mongo.getCollection(vPipeCompCollectionActualName)
-
         val vPipeJointsCollectionActualName = "vPipeJointsActual"
         val vPipeJointsActualCollection: MongoCollection[PipeSegActual] = mongo.getCollection(vPipeJointsCollectionActualName)
-
         DBManager.GetMongoConnection() match {
           case Some(mongoData) =>
             val materialsNCollectionName = "materials-n"
             val materialsCollection: MongoCollection[Material] = mongoData.getCollection(materialsNCollectionName)
             val projectNamesCollection: MongoCollection[ProjectName] = mongoData.getCollection("project-names")
-
             val projectNames = Await.result(projectNamesCollection.find().toFuture(), Duration(30, SECONDS)) match {
               case values: Seq[ProjectName] => values.toList
               case _ => List.empty[ProjectName]
             }
-
             val rkdProject = projectNames.find(_.foran == project) match {
               case Some(value) => value.rkd
               case _ => ""
             }
-
             val materials = Await.result(materialsCollection.find(equal("project", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
               case values: Seq[Material] => values.toList
               case _ => List.empty[Material]
             }
-
-
             val systemDefs = getSystemDefs(project)
             val res = ListBuffer.empty[PipeSeg]
-
             Await.result(vPipeCompActualCollection.find().toFuture(), Duration(30, SECONDS)) match {
               case values: Seq[PipeSegActual] =>
                 Await.result(mongo.getCollection[PipeSeg](values.last.name).find(and(equal("project", project), if (system != "") equal("system", system) else notEqual("system", system), if (sqInSystem != -1) equal("sqInSystem", sqInSystem) else notEqual("sqInSystem", sqInSystem))).toFuture(), Duration(300, SECONDS)) match {
@@ -124,6 +117,21 @@ trait PipeHelper extends Codecs {
                 }
               case _ =>
             }
+
+            val valves = ListBuffer.empty[PipeSeg]
+            res.foreach(pipeSeg => {
+              """\w{12}\d{4}""".r.findFirstIn(pipeSeg.classDescription) match {
+                case Some(value) =>
+                  materials.find(_.code == value) match {
+                    case Some(addMaterial) =>
+                      valves += pipeSeg.copy(material = addMaterial, stock = addMaterial.code, weight = addMaterial.singleWeight, compUserId = addMaterial.name, spPieceId = res.filter(_.spool == pipeSeg.spool).maxBy(_.spPieceId).spPieceId + 1)
+                    case _ => None
+                  }
+                case _ => None
+              }
+            })
+
+            res ++= valves
 
             Await.result(vPipeJointsActualCollection.find().toFuture(), Duration(30, SECONDS)) match {
               case values: Seq[PipeSegActual] =>
@@ -171,7 +179,7 @@ trait PipeHelper extends Codecs {
             sups.groupBy(x => x.code).foreach(gr => {
               materials.find(_.code == gr._1) match {
                 case Some(material) =>
-                  res += PipeSeg(project, "", system, "", 0, 0, "SUP", "Support", "", "SUP", gr._2.map(_.userId).mkString(","), "", 0, 0, 0, "", "SUP", gr._2.length, 0, 0, material.singleWeight, gr._1, "", "", material, system)
+                  res += PipeSeg(project, "", system, "", 0, 0, "SUP", "Support", "", "SUP", gr._2.map(_.userId).mkString(","), "", 0, 0, 0, "", "SUP", gr._2.length, 0, 0, material.singleWeight, gr._1, "", "", "", material, system)
                   spool += 1
                 case _ => None
               }
@@ -210,7 +218,7 @@ trait PipeHelper extends Codecs {
                     0, 0, materials.find(_.code == split(1)) match {
                       case Some(value) => value.singleWeight
                       case _ => 0
-                    }, split(1), "", "", materials.find(_.code == split(1)) match {
+                    }, split(1), "", "", "", materials.find(_.code == split(1)) match {
                       case Some(value) => value
                       case _ => Material()
                     }
@@ -218,7 +226,6 @@ trait PipeHelper extends Codecs {
                 }
               })
             })
-
             var spoolValue = ""
             var spCounter = 0
             res.filter(_.compType == "AUX").filter(_.spPieceId == 0).sortBy(_.spool).foreach(sp => {
@@ -229,13 +236,11 @@ trait PipeHelper extends Codecs {
               spCounter = spCounter + 1
               sp.spPieceId = spCounter
             })
-
             res.toList
-
           case _ => List.empty[PipeSeg]
         }
-
     }
+    if (pipeSegs.nonEmpty) pipeSegs else getHvacSegs(project, system, sqInSystem)
   }
   def getPipeSegsFromMongo(project: String, docNumber: String): List[PipeSeg] ={
 
@@ -341,7 +346,7 @@ trait PipeHelper extends Codecs {
     sups.groupBy(x => x).foreach(gr => {
       materials.find(_.code == gr._1) match {
         case Some(material) =>
-          res += PipeSeg(project, "", system, "", 0, 0, "SUP", "Support", "", "SUP", "", "", 0, 0, 0, "", spool.toString, 0, 0, 0, material.singleWeight, gr._1, "", "", material, system)
+          res += PipeSeg(project, "", system, "", 0, 0, "SUP", "Support", "", "SUP", "", "", 0, 0, 0, "", spool.toString, 0, 0, 0, material.singleWeight, gr._1, "", "", "", material, system)
           spool += 1
         case _ => None
       }
@@ -580,5 +585,219 @@ trait PipeHelper extends Codecs {
         new FileOutputStream(error).write("error, no model files for document".getBytes())
         error
     }
+  }
+  def getHvacSegs(project: String, system: String, sqInSystem: Int = -1): List[PipeSeg] ={
+    val res = ListBuffer.empty[PipeSeg]
+    val projects = getProjects
+    val rkdProject = projects.find(_.foran == project) match {
+      case Some(value) => value.rkd
+      case _ => project
+    }
+    val materials = getMaterials.filter(_.project == rkdProject)
+    DBManager.GetOracleConnection(project) match {
+      case Some(connection) =>
+        val stmt = connection.createStatement()
+        val q = Source.fromResource("queries/plsElem.sql").mkString.replace("&system", system) + s" AND (PLS.IDSQ = $sqInSystem OR $sqInSystem = -1)"
+
+        val plsElems = RsIterator(stmt.executeQuery(q)).map(rs => {
+          PlsElem(
+            Pls(Option(rs.getInt("TYPE")).getOrElse(0),
+              Option(rs.getInt("ZONE")).getOrElse(0),
+              Option(rs.getInt("SYSTEM")).getOrElse(0),
+              Option(rs.getString("LINE")).getOrElse(""),
+              Option(rs.getInt("PLS")).getOrElse(0),
+              Option(rs.getInt("ELEM")).getOrElse(0)),
+            Option(rs.getDouble("WEIGHT")).getOrElse(0),
+            Option(rs.getInt("ISOMID")).getOrElse(0),
+            Option(rs.getInt("SPOOLID")).getOrElse(0),
+            Option(rs.getInt("ISPIECEID")).getOrElse(0),
+            Option(rs.getInt("SPPIECEID")).getOrElse(0),
+            Option(rs.getString("CTYPE")).getOrElse(""),
+            Option(rs.getInt("IDSQ")).getOrElse(0),
+            Option(rs.getInt("CMP_OID")).getOrElse(0),
+            Option(rs.getString("STOCK_CODE")).getOrElse(""),
+            Option(rs.getString("ZONEUSERID")).getOrElse(""),
+            Option(rs.getString("SPOOL")).getOrElse(""),
+            Option(rs.getString("ISOM")).getOrElse(""),
+            Option(rs.getString("DESCR")).getOrElse(""),
+            Option(rs.getString("CMPNAME")).getOrElse(""),
+          )
+        }).toList
+
+        val pipeLineSegments = RsIterator(stmt.executeQuery(s"SELECT * FROM PIPELINE_SEGMENT WHERE SYSTEM IN (SELECT SEQID FROM SYSTEMS WHERE NAME LIKE '$system')")).map(rs => {
+          PipeLineSegment(
+            Pls(Option(rs.getInt("TYPE")).getOrElse(0),
+              Option(rs.getInt("ZONE")).getOrElse(0),
+              Option(rs.getInt("SYSTEM")).getOrElse(0),
+              Option(rs.getString("LINE")).getOrElse(""),
+              Option(rs.getInt("SQID")).getOrElse(0),
+              0),
+            Option(rs.getString("BDATRI")).getOrElse(""),
+            Option(rs.getInt("OID")).getOrElse(0),
+          )
+        }).toList
+
+        val plsParams = RsIterator(stmt.executeQuery(s"SELECT * FROM PLSE_PAROBJ_REALPAR WHERE SYSTEM IN (SELECT SEQID FROM SYSTEMS WHERE NAME LIKE '$system')")).map(rs => {
+          PlsParam(
+            Pls(Option(rs.getInt("TYPE")).getOrElse(0),
+              Option(rs.getInt("ZONE")).getOrElse(0),
+              Option(rs.getInt("SYSTEM")).getOrElse(0),
+              Option(rs.getString("LINE")).getOrElse(""),
+              Option(rs.getInt("PLS")).getOrElse(0),
+              Option(rs.getInt("ELEM")).getOrElse(0)),
+            Option(rs.getInt("PARAM_OBJ")).getOrElse(0),
+            Option(rs.getInt("PARAM_SQ")).getOrElse(0),
+            Option(rs.getDouble("VALUE")).getOrElse(0),
+          )
+        }).toList
+
+
+        val materialQuality = RsIterator(stmt.executeQuery(s"SELECT * FROM MATERIAL_QUALITY")).map(rs => {
+          MaterialQuality(
+            Option(rs.getString("CODE")).getOrElse(""),
+            Option(rs.getString("DESCR")).getOrElse(""),
+            Option(rs.getDouble("WEIGHT")).getOrElse(0),
+            Option(rs.getDouble("THICKNESS")).getOrElse(0),
+          )
+        }).toList
+
+        plsElems.foreach(plsElem => {
+          val bdatri = pipeLineSegments.find(_.pls.equals(plsElem.pls)) match {
+            case Some(value) => value.bdatri
+            case _ => ""
+          }
+          val params = plsParams.filter(_.pls.equals(plsElem.pls))
+          val quality = (bdatri + "    ").substring(0, 4).trim
+          val insulation = (bdatri + "    ").substring(4, 4).trim
+
+          val isComp = plsElem.cmp_oid != 0
+
+          if (isComp){
+            materials.find(_.code == plsElem.cmp_stock) match {
+              case Some(material) =>
+                res += PipeSeg(
+                  project,
+                  plsElem.zone,
+                  system,
+                  plsElem.pls.line,
+                  plsElem.pls.pls,
+                  plsElem.pls.elem,
+                  "HVAC",
+                  "COMPONENT",
+                  "",
+                  plsElem.cType,
+                  plsElem.cmpName,
+                  quality,
+                  plsElem.idsq,
+                  plsElem.isPieceId,
+                  plsElem.spPieceId,
+                  plsElem.isom,
+                  plsElem.spool,
+                  0,
+                  0,
+                  0,
+                  plsElem.weight,
+                  material.code,
+                  "",
+                  insulation,
+                  "",
+                  material
+                )
+              case _ =>
+            }
+          }
+          else{
+            materialQuality.find(_.code == quality) match {
+              case Some(qa) =>
+                """\w{12}\d{4}""".r.findFirstIn(qa.descr) match {
+                  case Some(code) =>
+                    materials.find(_.code == code) match {
+                      case Some(material) =>
+                        val hvacName = plsElem.cType match {
+                          case "B" =>
+                            if (params.length == 3){
+                              val radius = Math.round(params(0).value)
+                              val diam = Math.round(params(1).value)
+                              val angle = Math.round(180 / Math.PI * params(2).value)
+                              s"ОТВОД $angle, ДУ$diam (${material.name})"
+                            }
+                            else{
+                              "undefined"
+                            }
+                          case "A" =>
+                            if (params.length == 3){
+                              val d1 = Math.round(params(0).value * 2)
+                              val d2 = Math.round(params(1).value * 2)
+                              val l = Math.round(params(2).value)
+                              s"ПЕРЕХОД ДУ$d2/ДУ$d1, L=$l (${material.name})"
+                            }
+                            else{
+                              "undefined"
+                            }
+                          case "P" =>
+                            if (params.length == 2){
+                              val d = Math.round(params(0).value * 2)
+                              val l = Math.round(params(1).value)
+                              s"ВОЗДУХОВОД ДУ$d, L=$l (${material.name})"
+                            }
+                            else if (params.length == 3){
+                              val d1 = Math.round(params(0).value)
+                              val d2 = Math.round(params(1).value)
+                              val l = Math.round(params(2).value)
+                              s"ВОЗДУХОВОД ${d1}х${d2}, L=$l (${material.name})"
+                            }
+                            else{
+                              "undefined"
+                            }
+                          case _ => ""
+                        }
+
+                        res += PipeSeg(
+                          project,
+                          plsElem.zone,
+                          system,
+                          plsElem.pls.line,
+                          plsElem.pls.pls,
+                          plsElem.pls.elem,
+                          "HVAC",
+                          "PLATE",
+                          "",
+                          plsElem.cType,
+                          plsElem.cmpName,
+                          quality,
+                          plsElem.idsq,
+                          plsElem.isPieceId,
+                          plsElem.spPieceId,
+                          plsElem.isom,
+                          plsElem.spool,
+                          0,
+                          0,
+                          0,
+                          plsElem.weight,
+                          material.code,
+                          "",
+                          insulation,
+                          "",
+                          material.copy(name = hvacName)
+                        )
+                      case _ =>
+                    }
+                  case _ =>
+                }
+              case _ =>
+            }
+          }
+        })
+        stmt.close()
+        connection.close()
+      case _ =>
+    }
+    res.toList
+  }
+  def getHvacSegs(docNumber: String): List[PipeSeg] ={
+    val systemAndProject = getSystemAndProjectFromDocNumber(docNumber)
+    val project = systemAndProject._1
+    val system = systemAndProject._2
+    getHvacSegs(project, system)
   }
 }

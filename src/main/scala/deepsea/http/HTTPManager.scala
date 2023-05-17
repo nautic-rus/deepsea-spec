@@ -22,8 +22,10 @@ import deepsea.accomodations.AccommodationManager.{AddAccommodationGroup, GetAcc
 import deepsea.devices.DeviceManager.{AddDeviceToSystem, GetDevices, GetDevicesESP, RemoveDeviceFromSystem}
 import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, GetGlobalEsp, GetGlobalEspPdf, GetMaterialPurchases}
 import deepsea.pipe.PipeManager.{GetPipeESP, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSpoolModel, GetSystems, GetZones, SetSpoolLock}
+import io.circe.syntax.EncoderOps
 
 import java.io.File
+import java.util.Date
 import java.util.concurrent.TimeUnit
 import scala.concurrent.{Await, ExecutionContextExecutor, Future}
 
@@ -119,6 +121,9 @@ class HTTPManager extends Actor {
       },
       (get & path("cablesBySystems") & parameter("project") & parameter("docNumber")) { (project, docNumber) =>
         askFor(ActorManager.elec, GetCablesBySystem(project, docNumber))
+      },
+      (get & path("equipmentsBySystems") & parameter("project") & parameter("docNumber")) { (project, docNumber) =>
+        askFor(ActorManager.elec, GetEquipmentsBySystem(project, docNumber))
       },
       (get & path("traySpec") & parameter("project") & parameter("docNumber") & parameter("revision")) { (project, docNumber, revision) =>
         askFor(ActorManager.elec, GenerateTrayPdf(project, docNumber, revision))
@@ -267,6 +272,10 @@ class HTTPManager extends Actor {
       },
       (get & path("materialPurchases") & parameter("project")) { (project) =>
         askFor(ActorManager.esp, GetMaterialPurchases(project))
+      },
+
+      (get & path("time")) {
+        complete(HttpEntity(new Date().getTime.asJson.noSpaces))
       },
     )
   }

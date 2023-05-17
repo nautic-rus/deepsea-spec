@@ -34,6 +34,8 @@ import io.circe.generic.auto._
 import io.circe.parser._
 import io.circe.syntax._
 import local.common.Codecs
+import local.common.DBRequests.MountItem
+import local.domain.WorkShopMaterial
 import local.pdf.ru.ele.EleTrayCableBoxReportRu.genTraysAndCBListEnPDF
 
 import scala.collection.immutable.Stream.Empty
@@ -60,6 +62,8 @@ object ElecManager {
 
   case class GetCablesBySystem(project: String, docNumber: String)
 
+  case class GetEquipmentsBySystem(project: String, docNumber: String)
+
   case class GetTrayBundles(project: String)
 
   case class GenerateTrayPdf(project: String, docNumber: String, revision: String = "")
@@ -77,6 +81,7 @@ object ElecManager {
   case class GetElecEspFiles(project: String, docNumber: String, docName: String, revision: String)
 
   case class TrayBySystem(system: String, stockCode: String = "", trayDesc: String = "", length: Double = 0, weight: Double = 0)
+
   case class ElecAngle(name: String, code: String)
 
   case class TraysBySystem(
@@ -138,49 +143,116 @@ object ElecManager {
                             )
 
   case class CableRoute(
-                     system: String = "",
-                     code: String = "",
-                     description: String = "",
-                     nom_section: String = "",
-                     diameter: Int = 0,
-                     seg_code: String,
-                     bunch: String,
-                     f_rout:  Double = 0,
-                     length: Double = 0.0,
-                     ext_len_1: Double = 0,
-                     ext_len_2: Double = 0,
-                     from_system: String = "",
-                     from_eq_id: String = "",
-                     from_eq_desc: String = "",
-                     from_eq: String = "",
-                     from_stock_code: String = "",
-                     from_x: Double = 0.0,
-                     from_y: Double = 0.0,
-                     from_z: Double = 0.0,
-                     from_zone: String = "",
-                     from_zone_desc: String = "",
-                     to_system: String = "",
-                     to_eq_id: String = "",
-                     to_eq_desc: String = "",
-                     to_eq: String = "",
-                     to_stock_code: String = "",
-                     to_x: Double = 0.0,
-                     to_y: Double = 0.0,
-                     to_z: Double = 0.0,
-                     to_zone: String = "",
-                     to_zone_desc: String = "",
-                     cab_route_area: List[String],
-                     cab_route_area_id: List[Int],
-                     stock_code: String = "",
-                     material: Material
-                   )
+                         system: String = "",
+                         code: String = "",
+                         description: String = "",
+                         nom_section: String = "",
+                         diameter: Int = 0,
+                         seg_code: String,
+                         bunch: String,
+                         f_rout: Double = 0,
+                         length: Double = 0.0,
+                         ext_len_1: Double = 0,
+                         ext_len_2: Double = 0,
+                         from_system: String = "",
+                         from_eq_id: Int = 0,
+                         from_eq_desc: String = "",
+                         from_eq: String = "",
+                         from_stock_code: String = "",
+                         from_x: Double = 0.0,
+                         from_y: Double = 0.0,
+                         from_z: Double = 0.0,
+                         from_zone: String = "",
+                         from_zone_desc: String = "",
+                         to_system: String = "",
+                         to_eq_id: Int = 0,
+                         to_eq_desc: String = "",
+                         to_eq: String = "",
+                         to_stock_code: String = "",
+                         to_x: Double = 0.0,
+                         to_y: Double = 0.0,
+                         to_z: Double = 0.0,
+                         to_zone: String = "",
+                         to_zone_desc: String = "",
+                         cab_route_area: List[String],
+                         cab_route_area_id: List[Int],
+                         stock_code: String = "",
+                         material: Material
+                       )
 
   case class NodeConnect(
-                 id: Int,
-                 name: String,
-                 count: Int
-                 )
+                          id: Int,
+                          name: String,
+                          count: Int
+                        )
 
+  case class EquipmentConnection(
+                                  OID: Int = 0,
+                                  LABEL: String = "",
+                                  TYPE: Int = 0,
+                                  USERID: String = "",
+                                  NODE_USERID: String = "",
+                                  ZONE_SEQID: Int = 0,
+                                  ZONE_NAME: String = "",
+                                  ZONE_DESCR: String = "",
+                                  SYSTEM_SEQID: Int = 0,
+                                  SYSTEM_NAME: String = "",
+                                  SYSTEM_DESCR: String = "",
+                                  ABBREV: String = "",
+                                  XCOG: Double = 0.0,
+                                  YCOG: Double = 0.0,
+                                  ZCOG: Double = 0.0,
+                                  PX: Double = 0.0,
+                                  PY: Double = 0.0,
+                                  PZ: Double = 0.0,
+                                  WEIGHT: Double = 0.0,
+                                  STOCK_CODE: String = "",
+                                  CLASS_NAME: String = "",
+                                  SURFACE: String = "",
+                                  SUPPORTS: List[MountItem] = List.empty[MountItem],
+                                  workShopMaterial: WorkShopMaterial = new WorkShopMaterial()
+                                )
+  case class ForanEq(
+                              OID: Int,
+                              TYPE: Int,
+                              USERID: String,
+                              ZONE_SEQID: Int,
+                              ZONE_NAME: String,
+                              ZONE_DESCR: String,
+                              SYSTEM_SEQID: Int,
+                              SYSTEM_NAME: String,
+                              SYSTEM_DESCR: String,
+                              ABBREV: String,
+                              WEIGHT: Double,
+                              STOCK_CODE: String,
+                              CLASS_NAME: String,
+                              RA_CODE: String = "",
+                              RA_DESCR: String = "",
+                              NODE_USERID: String = "",
+                              EQELEC: String,
+                              XCOG: Double,
+                              YCOG: Double,
+                              ZCOG: Double,
+                              A11: Double,
+                              A12: Double,
+                              A13: Double,
+                              A21: Double,
+                              A22: Double,
+                              A23: Double,
+                              A31: Double,
+                              A32: Double,
+                              A33: Double,
+                              A41: Double,
+                              A42: Double,
+                              A43: Double,
+                              PX: Double,
+                              PY: Double,
+                              PZ: Double,
+                              SURFACE: String)
+
+  case class EleEq(
+
+                  )
 
   class ElecManager extends Actor with ElecHelper with Codecs {
     implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
@@ -202,9 +274,9 @@ object ElecManager {
         val f = q.asJson.noSpaces
         sender() ! f
       case GetCablesBySystem(project, docNumber) =>
-        val q = getCablesBySystem(project, docNumber)
-        val f = q.asJson.noSpaces
-        sender() ! f
+        sender() ! getCablesBySystem(project, docNumber).asJson.noSpaces
+      case GetEquipmentsBySystem(project, docNumber) =>
+        sender() ! getEquipmentsBySystem(project, docNumber).asJson.noSpaces
       case GetTrayBundles(project) =>
         sender() ! retrieveEleComplectsJsonString(project)
       case FixTrayBundle(project, docNumber) =>

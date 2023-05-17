@@ -1,11 +1,15 @@
 package deepsea.elec
 
+import breeze.linalg.{DenseMatrix, DenseVector}
 import deepsea.database.DBManager
 import deepsea.database.DatabaseManager.{GetMongoConnection, GetOracleConnection}
-import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, ElecAngle, ElecCable, NodeConnect, TrayBySystem, TraysBySystem}
+import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, ElecAngle, ElecCable, EquipmentConnection, ForanEq, NodeConnect, TrayBySystem, TraysBySystem}
 import deepsea.esp.EspManagerHelper
 import deepsea.pipe.PipeManager.{Material, ProjectName}
 import local.common.Codecs
+import local.common.DBRequests.{MountItem, calculateH, findWorkshopMaterialContains, retrieveAllMaterialsByProject}
+import local.domain.WorkShopMaterial
+import local.ele.eq.EleEqManager.EleEq
 import org.mongodb.scala.MongoCollection
 import org.mongodb.scala.model.Filters.{and, equal, not}
 
@@ -336,9 +340,10 @@ trait ElecHelper extends Codecs with EspManagerHelper {
           case e: Exception => println(e.toString)
         }
 
-        val query = Source.fromResource("queries/elecCables.sql").mkString.replaceAll(":docNumber", "'%" + docNumber + "%'");
-        val rs = s.executeQuery(query);
         try {
+          val query = Source.fromResource("queries/elecCables.sql").mkString.replaceAll(":docNumber", "'%" + docNumber + "%'");
+          val rs = s.executeQuery(query);
+
           while (rs.next()) {
             val code = Option(rs.getString("STOCK_CODE")).getOrElse("");
             val name = Option(rs.getString("CODE")).getOrElse("");
@@ -392,7 +397,7 @@ trait ElecHelper extends Codecs with EspManagerHelper {
               Option(rs.getDouble("EXT_LEN_1")).getOrElse(0.0),
               Option(rs.getDouble("EXT_LEN_2")).getOrElse(0.0),
               Option(rs.getString("FROM_SYSTEM")).getOrElse(""),
-              Option(rs.getString("FROM_EQ_ID")).getOrElse(""),
+              Option(rs.getInt("FROM_EQ_ID")).getOrElse(0),
               Option(rs.getString("FROM_EQ_DESC")).getOrElse(""),
               Option(rs.getString("FROM_EQ")).getOrElse(""),
               Option(rs.getString("FROM_STOCK_CODE")).getOrElse(""),
@@ -402,7 +407,7 @@ trait ElecHelper extends Codecs with EspManagerHelper {
               Option(rs.getString("FROM_ZONE")).getOrElse(""),
               Option(rs.getString("FROM_ZONE_DESC")).getOrElse(""),
               Option(rs.getString("TO_SYSTEM")).getOrElse(""),
-              Option(rs.getString("TO_EQ_ID")).getOrElse(""),
+              Option(rs.getInt("TO_EQ_ID")).getOrElse(0),
               Option(rs.getString("TO_EQ_DESC")).getOrElse(""),
               Option(rs.getString("TO_EQ")).getOrElse(""),
               Option(rs.getString("TO_STOCK_CODE")).getOrElse(""),
@@ -420,17 +425,147 @@ trait ElecHelper extends Codecs with EspManagerHelper {
               }
             )
           }
+          rs.close();
         }
         catch {
           case e: Exception => println(e.toString)
         }
-
-
-        rs.close();
         s.close();
         c.close();
       case _ =>
     }
     res.toList;
+  }
+
+  def getEquipmentsBySystem(project: String, docNumber: String): List[EquipmentConnection] = {
+    val res = ListBuffer.empty[EquipmentConnection]
+    DBManager.GetOracleConnection(project) match {
+      case Some(c) => {
+        val s = c.createStatement()
+        try {
+          val query = Source.fromResource("queries/elecEquipments.sql").mkString.replaceAll(":docNumber", "'%" + docNumber + "%'")
+          val rs = s.executeQuery(query)
+          val allMaterials = retrieveAllMaterialsByProject(project)
+          while (rs.next()) {
+            val eq = ForanEq(
+              Option(rs.getInt("OID")).getOrElse(0),
+              Option(rs.getInt("TYPE")).getOrElse(0),
+              Option(rs.getString("USERID")).getOrElse(""),
+              Option(rs.getInt("ZONE_SEQID")).getOrElse(0),
+              Option(rs.getString("ZONE_NAME")).getOrElse(""),
+              Option(rs.getString("ZONE_DESCR")).getOrElse(""),
+              Option(rs.getInt("SYSTEM_SEQID")).getOrElse(0),
+              Option(rs.getString("SYSTEM_NAME")).getOrElse(""),
+              Option(rs.getString("SYSTEM_DESCR")).getOrElse(""),
+              Option(rs.getString("ABBREV")).getOrElse(""),
+              Option(rs.getDouble("WEIGHT")).getOrElse(0.0),
+              Option(rs.getString("STOCK_CODE")).getOrElse(""),
+              Option(rs.getString("CLASS_NAME")).getOrElse(""),
+              Option(rs.getString("RA_CODE")).getOrElse(""),
+              Option(rs.getString("RA_DESCR")).getOrElse(""),
+              Option(rs.getString("NODE_USERID")).getOrElse(""),
+              Option(rs.getString("EQELEC")).getOrElse(""),
+              Option(rs.getDouble("XCOG")).getOrElse(0.0),
+              Option(rs.getDouble("YCOG")).getOrElse(0.0),
+              Option(rs.getDouble("ZCOG")).getOrElse(0.0),
+              Option(rs.getDouble("A11")).getOrElse(0.0),
+              Option(rs.getDouble("A12")).getOrElse(0.0),
+              Option(rs.getDouble("A13")).getOrElse(0.0),
+              Option(rs.getDouble("A21")).getOrElse(0.0),
+              Option(rs.getDouble("A22")).getOrElse(0.0),
+              Option(rs.getDouble("A23")).getOrElse(0.0),
+              Option(rs.getDouble("A31")).getOrElse(0.0),
+              Option(rs.getDouble("A32")).getOrElse(0.0),
+              Option(rs.getDouble("A33")).getOrElse(0.0),
+              Option(rs.getDouble("A41")).getOrElse(0.0),
+              Option(rs.getDouble("A42")).getOrElse(0.0),
+              Option(rs.getDouble("A43")).getOrElse(0.0),
+              Option(rs.getDouble("X")).getOrElse(0.0),
+              Option(rs.getDouble("Y")).getOrElse(0.0),
+              Option(rs.getDouble("Z")).getOrElse(0.0),
+              Option(rs.getString("SURFACE")).getOrElse("")
+            )
+
+            val resMatrix = DenseMatrix(
+              (eq.A11, eq.A21, eq.A31, eq.A41),
+              (eq.A12, eq.A22, eq.A32, eq.A42),
+              (eq.A13, eq.A23, eq.A33, eq.A43)
+            ) *
+              DenseMatrix(
+                eq.PX, eq.PY, eq.PZ, 1
+              )
+
+            val label: String = getEqelecInfo(eq.EQELEC)
+            val supports: List[MountItem] = getSupports(eq.EQELEC, allMaterials)
+            val material: WorkShopMaterial = findWorkshopMaterialContains(eq.STOCK_CODE, allMaterials)
+
+            res += EquipmentConnection(
+              eq.OID,
+              label,
+              eq.TYPE,
+              eq.USERID,
+              eq.NODE_USERID,
+              eq.ZONE_SEQID,
+              eq.ZONE_NAME,
+              eq.ZONE_DESCR,
+              eq.SYSTEM_SEQID,
+              eq.SYSTEM_NAME,
+              eq.SYSTEM_DESCR,
+              eq.ABBREV,
+              eq.XCOG,
+              eq.YCOG,
+              eq.ZCOG,
+              resMatrix.valueAt(0),
+              resMatrix.valueAt(1),
+              resMatrix.valueAt(2),
+              eq.WEIGHT,
+              eq.STOCK_CODE,
+              eq.CLASS_NAME,
+              eq.SURFACE,
+              supports,
+              material)
+          }
+          rs.close()
+          c.close()
+          s.close()
+        } catch {
+          case e: Exception => println(e.toString)
+        }
+      }
+      case _ =>
+    }
+    res.toList
+  }
+
+  private def getEqelecInfo(in: String): String = {
+    if (in.nonEmpty) {
+      if (in.contains('\n')) {
+        val fr = in.split('\n').head
+        if (fr.contains('|')) {
+          fr.split('|').head
+        } else {
+          fr
+        }
+      } else {
+        if (in.contains('|')) {
+          in.split('|').head
+        } else {
+          in
+        }
+      }
+    } else {
+      "NF"
+    }
+  }
+
+  private def getSupports(in: String, wmaterials: List[WorkShopMaterial]): List[MountItem] = {
+    val buffer = ListBuffer.empty[MountItem]
+    in.split('\n').foreach(row => {
+      if (row.count(_ == '|') == 3) {
+        val items = row.split('|')
+        buffer += MountItem(findWorkshopMaterialContains(items(1), wmaterials), items(0), items(2), items(3).toDoubleOption.getOrElse(0.0), false)
+      }
+    })
+    buffer.toList
   }
 }

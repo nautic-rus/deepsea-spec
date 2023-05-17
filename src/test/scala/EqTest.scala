@@ -70,7 +70,7 @@ class EqTest extends AnyFunSuite with EleEqHelper {
 
 
 
-   val eqLabel: String =genEqLabelsByEqOidJson("P701", "4105502")
+   val eqLabel: String = genEqLabelsByEqOidJson("P701", "4105502")
 
   val vv=0
 

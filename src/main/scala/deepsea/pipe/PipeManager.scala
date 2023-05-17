@@ -9,7 +9,7 @@ import deepsea.database.DatabaseManager
 import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection}
 import deepsea.esp.EspManager.{EspElement, GetEsp, GetHullEsp}
 import deepsea.files.FileManager.GenerateUrl
-import deepsea.pipe.PipeManager.{GetPipeESP, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSpoolModel, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SetSpoolLock, SpoolLock, SystemDef, UpdatePipeComp, UpdatePipeJoints}
+import deepsea.pipe.PipeManager.{GetHvacSegs, GetPipeESP, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSpoolModel, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SetSpoolLock, SpoolLock, SystemDef, UpdatePipeComp, UpdatePipeJoints}
 import io.circe.generic.JsonCodec
 import org.mongodb.scala.bson.BsonDocument
 import org.mongodb.scala.model.Filters.{all, and, equal, in, notEqual}
@@ -35,7 +35,7 @@ object PipeManager{
   case class PipeSeg(project: String, zone: String, system: String, line: String,
                      pls: Int, elem: Int, typeCode: String, typeDesc: String, classAlpha: String, compType: String, compUserId: String, smat: String,
                      sqInSystem: Int, isPieceId: Int, var spPieceId: Int, isom: String, spool: String, var length: Double, radius: Double, angle: Double,
-                     weight: Double, stock: String, fcon3: String, insul: String, var material: Material = Material(), var systemDescr: String = "") extends EspElement {
+                     weight: Double, stock: String, fcon3: String, insul: String, classDescription: String, var material: Material = Material(), var systemDescr: String = "") extends EspElement {
 //    def toEspElement: Map[String, String] ={
 //      val res = mutable.Map.empty[String, String]
 //      res += ("project" -> project)
@@ -163,6 +163,22 @@ object PipeManager{
   case class GetPipeESP(docNumber: String, revision: String, bySpool: String, lang: String)
   case class GetSpoolModel(docNumber: String, spool: String, isom: String)
   case class PipeSup(code: String, userId: String)
+  case class GetHvacSegs(docNumber: String)
+
+  case class Pls(typeCode: Int, zone: Int, system: Int, line: String, pls: Int, elem: Int){
+    def equals(that: Pls): Boolean = {
+      typeCode == that.typeCode &&
+      zone == that.zone &&
+      system == that.system &&
+      line == that.line &&
+      pls == that.pls &&
+      (elem == that.elem || elem == 0 || that.elem == 0)
+    }
+  }
+  case class PlsElem(pls: Pls, weight: Double, isomId: Int, spoolId: Int, isPieceId: Int, spPieceId: Int, cType: String, idsq: Int, cmp_oid: Int, cmp_stock: String, zone: String, spool: String, isom: String, classDescr: String, cmpName: String)
+  case class PipeLineSegment(pls: Pls, bdatri: String, oid: Int)
+  case class PlsParam(pls: Pls, paramObj: Int, paramSq: Int, value: Double)
+  case class MaterialQuality(code: String, descr: String, weight: Double, thickness: Double)
 
 }
 class PipeManager extends Actor with Codecs with PipeHelper {
@@ -171,6 +187,7 @@ class PipeManager extends Actor with Codecs with PipeHelper {
   implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
 
   override def preStart(): Unit ={
+    self ! GetPipeSegs("N002", "721-004")
     //self ! GetSpoolModel("210101-545-0001", "032", "0")
   }
 
@@ -200,7 +217,7 @@ class PipeManager extends Actor with Codecs with PipeHelper {
         case Some(value) => value.descr.replace(docNumber, "").trim
         case _ => "NO DESCR"
       }
-      val rev = if (revision == "NO REV")  "" else revision
+      val rev = if (revision == "NO REV") "" else revision
       val file = if (bySpool == "1") genSpoolsListEnPDF(docNumber, systemDescr, rev, pipeSegs, lang) else genSpoolsListEnPDFAll(docNumber, systemDescr, revision, pipeSegs, lang)
       Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
         case url: String => sender() ! url.asJson.noSpaces
@@ -208,6 +225,8 @@ class PipeManager extends Actor with Codecs with PipeHelper {
       }
     case GetSpoolModel(docNumber, spool, isom) =>
       sender() ! getSpoolModel(docNumber, spool, isom.toIntOption.getOrElse(0))
+    case GetHvacSegs(docNumber) =>
+      getHvacSegs(docNumber)
     case _ => None
 
   }

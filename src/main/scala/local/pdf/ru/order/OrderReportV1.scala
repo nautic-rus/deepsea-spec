@@ -11,6 +11,7 @@ import com.itextpdf.layout.properties.{HorizontalAlignment, TextAlignment, Verti
 import deepsea.database.DBManager.GetMongoConnection
 import deepsea.esp.EspManager
 import deepsea.esp.EspManager.GlobalEsp
+import deepsea.materials.MaterialsHelper
 import local.common.DBRequests.MaterialNode
 import local.pdf.UtilsPDF
 import local.pdf.en.common.ReportCommonEN.{DocNameEN, Item11ColumnsEN, border5mm, defaultFontSize, fillStamp, fillStampLandscape, fontHELVETICA, getNnauticLigoEN, stampEN, stampENLandscape}
@@ -30,7 +31,7 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, SECONDS}
 
-object OrderReportV1 extends UtilsPDF {
+object OrderReportV1 extends UtilsPDF with MaterialsHelper{
   private case class DescrTree(pageNum: Int, A1: String, A2: String, isRoot: Boolean = false, offset: Float = 0.0f)
 
   private val rootNames: List[MaterialNode] = {
@@ -77,25 +78,26 @@ object OrderReportV1 extends UtilsPDF {
     val file = File.createTempFile("orderList", ".pdf")
     descrTreeBuffer.clear()
     if (code.length >= 3) {
-      val materialNodes: List[MaterialNode] = {
-        GetMongoConnection() match {
-          case Some(mongoDB: MongoDatabase) => {
-            import org.mongodb.scala.bson.codecs.Macros._
-            val codecRegistry: CodecRegistry = fromRegistries(fromProviders(classOf[MaterialNode]), DEFAULT_CODEC_REGISTRY)
-            val db = mongoDB.withCodecRegistry(codecRegistry)
-            val collectionTasks: MongoCollection[MaterialNode] = db.getCollection("materials-n-nodes")
-            val allelems = collectionTasks.find(equal("project", project)).toFuture()
-            Await.result(allelems, Duration(100, SECONDS))
-            allelems.value.get.getOrElse(Seq.empty[MaterialNode]).toList
-          }
-          case None => List.empty[MaterialNode]
-        }
-
-        /*     val ois = new ObjectInputStream(new FileInputStream("c:\\6\\materialNodes.bin"))
-          val m: List[MaterialNode] = ois.readObject.asInstanceOf[List[MaterialNode]]
-          ois.close()
-          m*/
-      }
+      val materialNodes = getMaterialNodes(project)
+//      val materialNodes: List[MaterialNode] = {
+//        GetMongoConnection() match {
+//          case Some(mongoDB: MongoDatabase) => {
+//            import org.mongodb.scala.bson.codecs.Macros._
+//            val codecRegistry: CodecRegistry = fromRegistries(fromProviders(classOf[MaterialNode]), DEFAULT_CODEC_REGISTRY)
+//            val db = mongoDB.withCodecRegistry(codecRegistry)
+//            val collectionTasks: MongoCollection[MaterialNode] = db.getCollection("materials-n-nodes")
+//            val allelems = collectionTasks.find(equal("project", project)).toFuture()
+//            Await.result(allelems, Duration(100, SECONDS))
+//            allelems.value.get.getOrElse(Seq.empty[MaterialNode]).toList
+//          }
+//          case None => List.empty[MaterialNode]
+//        }
+//
+//        /*     val ois = new ObjectInputStream(new FileInputStream("c:\\6\\materialNodes.bin"))
+//          val m: List[MaterialNode] = ois.readObject.asInstanceOf[List[MaterialNode]]
+//          ois.close()
+//          m*/
+//      }
       materialNodes.find(s => s.data.equals(code)) match {
         case Some(rn) => {
           rootNames.find(s => s.data.equals(rn.data.take(3))) match {
