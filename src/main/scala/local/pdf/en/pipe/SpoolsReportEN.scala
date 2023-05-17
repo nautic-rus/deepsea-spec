@@ -562,9 +562,6 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
 
     rowsQTY.foreach(row => {
       val id = formatSpoolId(row.spool, row.spPieceId.toString)
-      if (id == "200.000"){
-        val jk = 0
-      }
       //val mat = row.material.code+ " "+ row.material.name
       val matName = row.material.name(lang)
       val matDesc = row.material.description(lang)
@@ -626,6 +623,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
   private def formatWGT(ps: PipeSeg): String = {
     ps.typeCode match {
       case "PIPE" => String.format("%.2f", ps.weight)
+      case "HVAC" => String.format("%.2f", ps.weight)
       case _ => {
         val qty = if (ps.length == 0.0) 1 else ps.length
         val w = ps.material.singleWeight * qty

@@ -293,8 +293,6 @@ trait PipeHelper extends Codecs with MaterialsHelper {
       case values: Seq[PipeSegActual] =>
         Await.result(mongo.getCollection[PipeSeg](values.last.name).find(and(equal("project", project), if (system != "") equal("system", system) else notEqual("system", system))).toFuture(), Duration(300, SECONDS)) match {
           case pipeSegs: Seq[PipeSeg] =>
-            val jk = pipeSegs
-            val jkk = jk
             pipeSegs.foreach(x => x.material = materials.find(_.code == x.stock) match {
               case Some(value) => value
               case _ => Material()
