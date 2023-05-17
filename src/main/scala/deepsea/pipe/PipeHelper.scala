@@ -678,6 +678,12 @@ trait PipeHelper extends Codecs with MaterialsHelper {
           if (isComp){
             materials.find(_.code == plsElem.cmp_stock) match {
               case Some(material) =>
+                val l = if (params.nonEmpty){
+                  params.last.value
+                }
+                else{
+                  0
+                }
                 res += PipeSeg(
                   project,
                   plsElem.zone,
@@ -696,7 +702,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                   plsElem.spPieceId,
                   plsElem.isom,
                   plsElem.spool,
-                  0,
+                  l,
                   0,
                   0,
                   plsElem.weight,
@@ -716,6 +722,12 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                   case Some(code) =>
                     materials.find(_.code == code) match {
                       case Some(material) =>
+                        val l = if (params.nonEmpty){
+                          params.last.value
+                        }
+                        else{
+                          0
+                        }
                         val hvacName = plsElem.cType match {
                           case "B" =>
                             if (params.length == 3){
@@ -773,7 +785,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                           plsElem.spPieceId,
                           plsElem.isom,
                           plsElem.spool,
-                          0,
+                          l,
                           0,
                           0,
                           plsElem.weight,
