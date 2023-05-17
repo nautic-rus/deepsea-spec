@@ -562,7 +562,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
 
     rowsQTY.foreach(row => {
       val id = formatSpoolId(row.spool, row.spPieceId.toString)
-      if (id == "001.000"){
+      if (id == "200.000"){
         val jk = 0
       }
       //val mat = row.material.code+ " "+ row.material.name
@@ -616,6 +616,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
               Math.ceil(ps.length).toInt.toString
         }
       }
+      case "166" => String.format("%.2f", ps.weight)
 
       case _ => String.format("%.1f", ps.length)
 
@@ -637,6 +638,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
     mat.units match {
       case "006" => "m"
       case "796" => "pcs"
+      case "166" => "kg"
       case _ => "NA"
     }
   }

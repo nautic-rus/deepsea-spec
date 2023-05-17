@@ -133,6 +133,11 @@ trait PipeHelper extends Codecs with MaterialsHelper {
 
             res ++= valves
 
+
+            if (res.isEmpty){
+              res ++= getHvacSegs(project, system, sqInSystem)
+            }
+
             Await.result(vPipeJointsActualCollection.find().toFuture(), Duration(30, SECONDS)) match {
               case values: Seq[PipeSegActual] =>
                 Await.result(mongo.getCollection[PipeSeg](values.last.name).find(and(equal("project", project), if (system != "") equal("system", system) else notEqual("system", system), if (sqInSystem != -1) equal("sqInSystem", sqInSystem) else notEqual("sqInSystem", sqInSystem))).toFuture(), Duration(300, SECONDS)) match {
@@ -240,7 +245,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
           case _ => List.empty[PipeSeg]
         }
     }
-    if (pipeSegs.nonEmpty) pipeSegs else getHvacSegs(project, system, sqInSystem)
+    pipeSegs
   }
   def getPipeSegsFromMongo(project: String, docNumber: String): List[PipeSeg] ={
 
