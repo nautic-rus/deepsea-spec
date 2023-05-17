@@ -606,6 +606,12 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
           case "FWNR" => "1"
           case "FWRE" => "1"
           case "FLAN" => "1"
+          case "HVAC" =>
+            ps.compType match {
+              case "A" => "1"
+              case "B" => "1"
+              case "P" => String.format("%.1f", ps.length)
+            }
           case _ =>
             if (ps.length < 1.0)
               "1"
@@ -623,7 +629,12 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
   private def formatWGT(ps: PipeSeg): String = {
     ps.typeCode match {
       case "PIPE" => String.format("%.2f", ps.weight)
-      case "HVAC" => String.format("%.2f", ps.weight)
+      case "HVAC" =>
+        ps.compType match {
+          case "A" => String.format("%.2f", ps.material.singleWeight)
+          case "B" => String.format("%.2f", ps.material.singleWeight)
+          case _ => String.format("%.2f", ps.weight)
+        }
       case _ => {
         val qty = if (ps.length == 0.0) 1 else ps.length
         val w = ps.material.singleWeight * qty

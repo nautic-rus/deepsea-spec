@@ -679,7 +679,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
             materials.find(_.code == plsElem.cmp_stock) match {
               case Some(material) =>
                 val l = if (params.nonEmpty){
-                  params.last.value
+                  params.last.value / 1000d
                 }
                 else{
                   0
@@ -723,7 +723,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                     materials.find(_.code == code) match {
                       case Some(material) =>
                         val l = if (params.nonEmpty){
-                          params.last.value
+                          params.last.value / 1000d
                         }
                         else{
                           0
