@@ -562,6 +562,9 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
 
     rowsQTY.foreach(row => {
       val id = formatSpoolId(row.spool, row.spPieceId.toString)
+      if (id == "001.000"){
+        val jk = 0
+      }
       //val mat = row.material.code+ " "+ row.material.name
       val matName = row.material.name(lang)
       val matDesc = row.material.description(lang)
@@ -603,9 +606,9 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
           case "PIPE" => {
             if (ps.length < 0.1) "0.1" else String.format("%.1f", ps.length)
           }
-          case "FWNR" =>{
-            "1"
-          }
+          case "FWNR" => "1"
+          case "FWRE" => "1"
+          case "FLAN" => "1"
           case _ =>
             if (ps.length < 1.0)
               "1"
