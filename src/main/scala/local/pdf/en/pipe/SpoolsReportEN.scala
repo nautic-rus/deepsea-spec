@@ -9,6 +9,7 @@ import deepsea.pipe.PipeHelper
 import deepsea.pipe.PipeManager.{Material, PipeSeg}
 import local.pdf.UtilsPDF
 import local.pdf.en.common.ReportCommonEN.{DocNameEN, Item11ColumnsEN, border5mm, defaultFontSize, fillStamp, fontHELVETICA, getNnauticLigoEN, stampEN}
+import org.davidmoten.text.utils.WordWrap
 
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, OutputStream}
@@ -143,13 +144,44 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
     val pages: ListBuffer[PartListBodyPage] = ListBuffer.empty[PartListBodyPage]
     pages += new PartListBodyPage(docNameEN, lang)
     var currPage = 1
+    var lastA1 = ""
     items.foreach(row => {
-      if (!pages.last.hasRoom(2)) {
-        pages += new PartListBodyPage(docNameEN, lang)
+
+
+      val wrappedRows: List[Item11ColumnsEN] = {
+        val isNeedDummy = (lastA1.nonEmpty && row.A1.nonEmpty && !row.A1.startsWith(lastA1))
+        val ret = generateWrappedRows(row)
+        if (isNeedDummy) {
+          val ret2 = ret.reverse.toBuffer
+          ret2 += Item11ColumnsEN(isHeader = false, A1 = "")
+          ret2.reverse.toList
+        } else {
+          ret
+        }
+      }
+
+      if (!pages.last.hasRoom(wrappedRows.length + 2)) {
+        pages += new PartListBodyPage(docNameEN)
         currPage = currPage + 1
       }
-      pages.last.insertRow(row)
+      pages.last.insertRows(wrappedRows)
+
+      lastA1 = row.A1.split('.').headOption match {
+        case Some(v) => v
+        case None => lastA1
+      }
     })
+    /*
+        items.foreach(row => {
+          if (!pages.last.hasRoom(2)) {
+            pages += new PartListBodyPage(docNameEN, lang)
+            currPage = currPage + 1
+          }
+          pages.last.insertRow(row)
+        })
+
+        */
+
     pages.last.setLastPage()
 
     val retBuff = ListBuffer.empty[PdfDocument]
@@ -547,17 +579,33 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
       currentRow = currentRow + 1
     }
 
+    def insertRows(items: List[Item11ColumnsEN]): Unit = {
+      items.foreach(item => {
+        if (!item.isHeader) {
+          bodyGrid.addCell(generateCellDiffSize(item.A1, 3))
+          bodyGrid.addCell(generateCellLeftAlign(item.A2))
+          bodyGrid.addCell(generateCellLeftAlign(item.A3))
+          bodyGrid.addCell(generateCell(item.A4))
+          bodyGrid.addCell(generateCell(item.A5))
+        }
+        else {
+          bodyGrid.addCell(generateSpannedCellBold(item.A1))
+        }
+        currentRow = currentRow + 1
+      })
+    }
+
   }
 
   private def genRows(rawData: List[PipeSeg], lang: String): List[Item11ColumnsEN] = {
     val rows: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
 
     val rowsQTY: ListBuffer[PipeSeg] = ListBuffer.empty[PipeSeg]
-    rawData.groupBy(s=>(s.spool,s.spPieceId)).foreach(gr=>{
-      val master: PipeSeg =gr._2.head
-      val qty: Double =gr._2.map(_.length).sum
-      val wgt: Double =gr._2.map(_.weight).sum
-      rowsQTY+=(master.copy(length =qty,weight = wgt))
+    rawData.groupBy(s => (s.spool, s.spPieceId)).foreach(gr => {
+      val master: PipeSeg = gr._2.head
+      val qty: Double = gr._2.map(_.length).sum
+      val wgt: Double = gr._2.map(_.weight).sum
+      rowsQTY += (master.copy(length = qty, weight = wgt))
     })
 
     rowsQTY.foreach(row => {
@@ -571,7 +619,6 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
       val weight: String = formatWGT(row)
       rows += Item11ColumnsEN(A1 = id, A2 = mat, A3 = unit, A4 = qty, A5 = weight, A11 = row.typeCode, A12 = row.material.code)
     })
-
 
 
     rows.sortBy(s => s.A1).toList
@@ -656,6 +703,69 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
       buff += Item11ColumnsEN(A1 = "", A2 = ent.A2, A3 = ent.A3, A4 = qty, A5 = wgt)
     })
     buff.sortBy(s => s.A2).toList
+  }
+
+  private def generateWrappedRows(item: Item11ColumnsEN): List[Item11ColumnsEN] = {
+    val A1count = 12
+    val A2count = 74
+    val A3count = 25
+    val A4count = 20
+    val A5count = 16
+    val A6count = 20
+    val A7count = 7
+    val A8count = 10
+    val A9count = 10
+    val A10count = 26
+    val A11count = 26
+    val buff = ListBuffer.empty[Item11ColumnsEN]
+    if (item.isHeader) {
+      buff += item
+    } else {
+      val A1 = WordWrap.from(item.A1).newLine("$").insertHyphens(false).maxWidth(A1count).wrap().split('$')
+      val A2 = WordWrap.from(item.A2).newLine("$").insertHyphens(false).maxWidth(A2count).wrap().split('$')
+      val A3 = WordWrap.from(item.A3).newLine("$").insertHyphens(false).maxWidth(A3count).wrap().split('$')
+      val A4 = WordWrap.from(item.A4).newLine("$").insertHyphens(false).maxWidth(A4count).wrap().split('$')
+      val A5 = WordWrap.from(item.A5).newLine("$").insertHyphens(false).maxWidth(A5count).wrap().split('$')
+      val A6 = WordWrap.from(item.A6).newLine("$").insertHyphens(false).maxWidth(A6count).wrap().split('$')
+      val A7 = WordWrap.from(item.A7).newLine("$").insertHyphens(false).maxWidth(A7count).wrap().split('$')
+      val A8 = WordWrap.from(item.A8).newLine("$").insertHyphens(false).maxWidth(A8count).wrap().split('$')
+      val A9 = WordWrap.from(item.A9).newLine("$").insertHyphens(false).maxWidth(A9count).wrap().split('$')
+      val A10 = WordWrap.from(item.A10).newLine("$").insertHyphens(false).maxWidth(A10count).wrap().split('$')
+      val A11 = WordWrap.from(item.A11).newLine("$").insertHyphens(false).maxWidth(A11count).wrap().split('$')
+
+      val maxRows: Int = {
+        var count = 1
+        if (A1.length > count) count = A1.length
+        if (A2.length > count) count = A2.length
+        if (A3.length > count) count = A3.length
+        if (A4.length > count) count = A4.length
+        if (A5.length > count) count = A5.length
+        if (A6.length > count) count = A6.length
+        if (A7.length > count) count = A7.length
+        if (A8.length > count) count = A8.length
+        if (A9.length > count) count = A9.length
+        if (A10.length > count) count = A10.length
+        if (A11.length > count) count = A11.length
+        count
+      }
+      (0 until maxRows).foreach(i => {
+        buff += new Item11ColumnsEN(
+          isHeader = false,
+          A1.lift(i).getOrElse(""),
+          A2.lift(i).getOrElse(""),
+          A3.lift(i).getOrElse(""),
+          A4.lift(i).getOrElse(""),
+          A5.lift(i).getOrElse(""),
+          A6.lift(i).getOrElse(""),
+          A7.lift(i).getOrElse(""),
+          A8.lift(i).getOrElse(""),
+          A9.lift(i).getOrElse(""),
+          A10.lift(i).getOrElse(""),
+          A11.lift(i).getOrElse(""),
+        )
+      })
+    }
+    buff.toList
   }
 
 
