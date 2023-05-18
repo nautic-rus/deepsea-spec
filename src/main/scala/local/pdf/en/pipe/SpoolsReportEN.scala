@@ -562,6 +562,9 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
 
     rowsQTY.foreach(row => {
       val id = formatSpoolId(row.spool, row.spPieceId.toString)
+      if (id == "200.002"){
+        val jk = 0
+      }
       //val mat = row.material.code+ " "+ row.material.name
       val matName = row.material.name(lang)
       val matDesc = row.material.description(lang)
@@ -588,7 +591,6 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
   }
 
   private def formatQTY(ps: PipeSeg): String = {
-
     ps.material.units match {
       case "006" => {
         if (ps.typeCode.equals("PIPE")) {
@@ -630,10 +632,14 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
     ps.typeCode match {
       case "PIPE" => String.format("%.2f", ps.weight)
       case "HVAC" =>
-        ps.compType match {
-          case "A" => String.format("%.2f", ps.material.singleWeight)
-          case "B" => String.format("%.2f", ps.material.singleWeight)
-          case _ => String.format("%.2f", ps.weight)
+        ps.typeDesc match {
+          case "PLATE" => String.format("%.2f", ps.weight)
+          case _ =>
+            ps.compType match {
+              case "A" => String.format("%.2f", ps.material.singleWeight)
+              case "B" => String.format("%.2f", ps.material.singleWeight)
+              case _ => String.format("%.2f", ps.weight)
+            }
         }
       case _ => {
         val qty = if (ps.length == 0.0) 1 else ps.length
