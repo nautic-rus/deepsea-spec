@@ -145,6 +145,9 @@ trait AccommodationHelper {
                     if (split.length > 2){
                       groups += AccommodationGroup(split.head, split(1) + split(2))
                     }
+                    else if (split.length == 2){
+                      groups += AccommodationGroup(split.head, split.last)
+                    }
                   }
                 })
               }
