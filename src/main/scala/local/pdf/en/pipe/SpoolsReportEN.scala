@@ -610,6 +610,9 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
 
     rowsQTY.foreach(row => {
       val id = formatSpoolId(row.spool, row.spPieceId.toString)
+      if (id == "200.002"){
+        val jk = 0
+      }
       //val mat = row.material.code+ " "+ row.material.name
       val matName = row.material.name(lang)
       val matDesc = row.material.description(lang)
@@ -635,7 +638,6 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
   }
 
   private def formatQTY(ps: PipeSeg): String = {
-
     ps.material.units match {
       case "006" => {
         if (ps.typeCode.equals("PIPE")) {
@@ -650,6 +652,15 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
           case "PIPE" => {
             if (ps.length < 0.1) "0.1" else String.format("%.1f", ps.length)
           }
+          case "FWNR" => "1"
+          case "FWRE" => "1"
+          case "FLAN" => "1"
+          case "HVAC" =>
+            ps.compType match {
+              case "A" => "1"
+              case "B" => "1"
+              case "P" => String.format("%.1f", ps.length)
+            }
           case _ =>
             if (ps.length < 1.0)
               "1"
@@ -657,6 +668,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
               Math.ceil(ps.length).toInt.toString
         }
       }
+      case "166" => String.format("%.2f", ps.weight)
 
       case _ => String.format("%.1f", ps.length)
 
@@ -666,6 +678,16 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
   private def formatWGT(ps: PipeSeg): String = {
     ps.typeCode match {
       case "PIPE" => String.format("%.2f", ps.weight)
+      case "HVAC" =>
+        ps.typeDesc match {
+          case "PLATE" => String.format("%.2f", ps.weight)
+          case _ =>
+            ps.compType match {
+              case "A" => String.format("%.2f", ps.material.singleWeight)
+              case "B" => String.format("%.2f", ps.material.singleWeight)
+              case _ => String.format("%.2f", ps.weight)
+            }
+        }
       case _ => {
         val qty = if (ps.length == 0.0) 1 else ps.length
         val w = ps.material.singleWeight * qty
@@ -678,6 +700,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
     mat.units match {
       case "006" => "m"
       case "796" => "pcs"
+      case "166" => "kg"
       case _ => "NA"
     }
   }

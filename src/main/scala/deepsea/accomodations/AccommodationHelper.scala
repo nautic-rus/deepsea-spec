@@ -112,7 +112,7 @@ trait AccommodationHelper {
           case _ => List.empty[ProjectName]
         }
         val rkdProject = if (docNumber.contains('-')) docNumber.split('-').head else ""
-        val foranProject = projectNames.find(_.rkd == rkdProject) match {
+        val foranProject = if ("""200101-100-10[0-9]""".r.matches(docNumber)) "NT02" else projectNames.find(_.rkd == rkdProject) match {
           case Some(value) => value.foran
           case _ => ""
         }
@@ -144,6 +144,9 @@ trait AccommodationHelper {
                     val split = l.replace("@", "").split('|')
                     if (split.length > 2){
                       groups += AccommodationGroup(split.head, split(1) + split(2))
+                    }
+                    else if (split.length == 2){
+                      groups += AccommodationGroup(split.head, split.last)
                     }
                   }
                 })
@@ -393,7 +396,7 @@ trait AccommodationHelper {
           case _ => List.empty[ProjectName]
         }
         val rkdProject = if (docNumber.contains('-')) docNumber.split('-').head else ""
-        val foranProject = projectNames.find(_.rkd == rkdProject) match {
+        val foranProject = if ("""200101-100-10[0-9]""".r.matches(docNumber)) "NT02" else projectNames.find(_.rkd == rkdProject) match {
           case Some(value) => value.foran
           case _ => ""
         }

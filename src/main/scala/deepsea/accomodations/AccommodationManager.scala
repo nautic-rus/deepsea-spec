@@ -36,7 +36,11 @@ object AccommodationManager{
         zone,
         "accommodation",
         "",
-        if (weight != 0) weight else bsWeight,
+        if (profileStock != ""){
+          profileLength / 1000d * material.singleWeight
+        } else{
+          if (weight != 0) weight else bsWeight
+        },
         material.code,
         0,
         "",
