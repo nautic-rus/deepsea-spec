@@ -759,7 +759,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                               val d1 = Math.round(params(0).value)
                               val d2 = Math.round(params(1).value)
                               val l = Math.round(params(2).value)
-                              s"ВОЗДУХОВОД ${d1}х${d2}, L=$l (${material.name})"
+                              s"ВОЗДУХОВОД ${d2}х${d1}, L=$l (${material.name})"
                             }
                             else{
                               "undefined"
