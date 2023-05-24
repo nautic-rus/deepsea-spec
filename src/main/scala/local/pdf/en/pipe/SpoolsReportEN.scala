@@ -601,7 +601,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
     val rows: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
 
     val rowsQTY: ListBuffer[PipeSeg] = ListBuffer.empty[PipeSeg]
-    rawData.groupBy(s => (s.spool, s.spPieceId)).foreach(gr => {
+    rawData.groupBy(s => (s.spool, s.spPieceId, s.material.code)).foreach(gr => {
       val master: PipeSeg = gr._2.head
       val qty: Double = gr._2.map(_.length).sum
       val wgt: Double = gr._2.map(_.weight).sum
