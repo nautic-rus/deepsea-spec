@@ -170,6 +170,9 @@ trait AccommodationHelper {
               val userId: String = Option(rs.getString("USERID")).getOrElse("")
               val profileStock: String = Option(rs.getString("PROFILE_STOCK")).getOrElse("")
               val plateStock: String = Option(rs.getString("PLATE_STOCK")).getOrElse("")
+              if (plateStock == "COMPPLXXXXXX0005"){
+                val qw = 0
+              }
               val profileLength: Double = Option(rs.getDouble("PROFILE_LENGTH")).getOrElse(0)
               val profileSection: Int = Option(rs.getInt("PROFILE_SECTION")).getOrElse(0)
               val norm: String = Option(rs.getString("NORM")).getOrElse("")
@@ -208,7 +211,7 @@ trait AccommodationHelper {
 //                zones.filter(x => bBoxIntersects(x.BBox, bBox)).map(_.name).mkString(","),
                 profileStock,
                 plateStock,
-                if (normDescr != ""){
+                if (normDescr != "" && materials.exists(_.code == normDescr)){
                   materials.find(_.code == normDescr) match {
                     case Some(value) => value.copy(name = value.name)
                     case _ => Material()
@@ -245,6 +248,9 @@ trait AccommodationHelper {
     }
 
     val res = accommodations.map(_.asDevice).filter(m => m.material.code != "" && !groups.map(_.code).contains(m.material.code + m.zone) && !groups.map(_.code).contains(m.material.code)).tapEach(x => {
+      if (x.material.code == "COMPPLXXXXXX0005") {
+        val q = 0
+      }
       x.units = x.material.units
       if (x.units == x.material.units && x.units == "796"){
         x.weight = x.material.singleWeight
@@ -254,6 +260,9 @@ trait AccommodationHelper {
       }
     }).toList ++
     accommodations.map(_.asDevice).filter(m => m.material.code != "" && groups.map(x => x.code).contains(m.material.code + m.zone)).groupBy(x => x.material.code + x.material.name + x.zone).map(acc => {
+      if (acc._2.head.material.code == "COMPPLXXXXXX0005"){
+        val q = 0
+      }
       acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.head.units match {
         case "006" => acc._2.head.count
         case "055" => acc._2.head.material.singleWeight
@@ -270,6 +279,9 @@ trait AccommodationHelper {
       })
     }).toList ++
     accommodations.map(_.asDevice).filter(m => m.material.code != "" && groups.map(_.code).contains(m.material.code) && !groups.map(_.code).contains(m.material.code + m.zone)).groupBy(x => x.material.code + x.material.name).map(acc => {
+      if (acc._2.head.material.code == "COMPPLXXXXXX0005") {
+        val q = 0
+      }
       acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.head.units match {
         case "006" => acc._2.head.count
         case "055" => acc._2.head.material.singleWeight
