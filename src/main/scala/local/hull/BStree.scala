@@ -1,6 +1,7 @@
 package local.hull
 
 import com.mongodb.BasicDBObject
+import deepsea.database.DBManager
 import deepsea.database.DatabaseManager.GetOracleConnection
 import io.circe.syntax.EncoderOps
 import local.hull.BStree.{Block, BsTreeItem, HullPL, Room}
@@ -79,7 +80,7 @@ trait BStree  extends Codecs{
 
   def genBlocks(project: String): String = {
     val items = ListBuffer.empty[Block]
-    GetOracleConnection(project) match {
+    DBManager.GetOracleConnection(project) match {
       case Some(conn) =>
         val sql = "SELECT OID,CODE,DESCRIPTION FROM BLOCK order by code"
         val stmt: Statement = conn.createStatement()
