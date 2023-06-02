@@ -5,7 +5,6 @@ import deepsea.database.DatabaseManager.RsIterator
 import deepsea.database.{DBManager, DatabaseManager}
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
 import deepsea.pipe.PipeManager.{Material, ProjectName, SystemDef, Units}
-import local.pdf.en.accom.AccomReportEn.getSystemDefs
 import org.mongodb.scala.{MongoCollection, classTagToClassOf}
 import org.mongodb.scala.model.Filters.equal
 
@@ -121,10 +120,10 @@ trait AccommodationHelper {
           case _ => List.empty[Material]
         }
         val docNumberSuffix = docNumber.split('-').drop(1).mkString("-")
-        val zones = getZones(foranProject)
+        val zones = getAccZones(foranProject)
         var counter = 0
 
-        val systemDefs = getSystemDefs(foranProject)
+        val systemDefs = getAccSystemDefs(foranProject)
         val system = systemDefs.find(_.descr.contains(docNumber)) match {
           case Some(value) =>
             value.name
@@ -170,7 +169,7 @@ trait AccommodationHelper {
               val userId: String = Option(rs.getString("USERID")).getOrElse("")
               val profileStock: String = Option(rs.getString("PROFILE_STOCK")).getOrElse("")
               val plateStock: String = Option(rs.getString("PLATE_STOCK")).getOrElse("")
-              if (plateStock == "COMPPLXXXXXX0005"){
+              if (plateStock == "COMPROUSEXXX0005"){
                 val qw = 0
               }
               val profileLength: Double = Option(rs.getDouble("PROFILE_LENGTH")).getOrElse(0)
@@ -373,7 +372,7 @@ trait AccommodationHelper {
       a.zMin <= b.zMax &&
       a.zMax >= b.zMin
   }
-  def getZones(foranProject: String): List[Zone] ={
+  def getAccZones(foranProject: String): List[Zone] ={
     DBManager.GetOracleConnection(foranProject) match {
       case Some(oracleConnection) =>
         val stmt = oracleConnection.createStatement()
@@ -412,7 +411,7 @@ trait AccommodationHelper {
           case Some(value) => value.foran
           case _ => ""
         }
-        val systemDefs = getSystemDefs(foranProject)
+        val systemDefs = getAccSystemDefs(foranProject)
         val system = systemDefs.find(_.descr.contains(docNumber)) match {
           case Some(value) =>
             value.name
@@ -459,4 +458,28 @@ trait AccommodationHelper {
     "success"
   }
 
+
+  def getAccSystemDefs(project: String): List[SystemDef] = {
+    val systemDefs = ListBuffer.empty[SystemDef]
+    DBManager.GetOracleConnection(project) match {
+      case Some(oracleConnection) =>
+        val stmt = oracleConnection.createStatement()
+        val query = "SELECT S.NAME AS NAME, L.DESCR AS DESCR FROM SYSTEMS S, SYSTEMS_LANG L WHERE S.OID = L.SYSTEM AND L.LANG = -2"
+        val rs = stmt.executeQuery(query)
+        while (rs.next()) {
+          systemDefs += SystemDef(project, rs.getString("NAME") match {
+            case value: String => value
+            case _ => ""
+          }, rs.getString("DESCR") match {
+            case value: String => value
+            case _ => ""
+          })
+        }
+        stmt.close()
+        rs.close()
+        oracleConnection.close()
+      case _ =>
+    }
+    systemDefs.toList
+  }
 }

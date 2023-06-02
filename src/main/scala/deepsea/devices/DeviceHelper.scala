@@ -1,5 +1,6 @@
 package deepsea.devices
 
+import deepsea.accomodations.AccommodationHelper
 import deepsea.database.DBManager
 import deepsea.database.DatabaseManager.GetOracleConnection
 import deepsea.devices.DeviceManager.{Device, DeviceAux, SystemLang}
@@ -11,7 +12,7 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, SECONDS}
 
-trait DeviceHelper{
+trait DeviceHelper extends AccommodationHelper {
 
   def getDevices(docNumber: String): List[Device] ={
     val devices = ListBuffer.empty[Device]
@@ -36,7 +37,7 @@ trait DeviceHelper{
           case values: Seq[Material] => values.toList
           case _ => List.empty[Material]
         }
-        val systemDefs = getSystemDefs(foranProject)
+        val systemDefs = getDeviceSystemDefs(foranProject)
         val system = systemDefs.find(_.descr.contains(docNumber)) match {
           case Some(value) =>
             value.name
@@ -234,7 +235,7 @@ trait DeviceHelper{
           case Some(value) => value.foran
           case _ => ""
         }
-        val systemDefs = getSystemDefs(foranProject)
+        val systemDefs = getDeviceSystemDefs(foranProject)
         val system = systemDefs.find(_.descr.contains(docNumber)) match {
           case Some(value) =>
             value.name
@@ -340,7 +341,7 @@ trait DeviceHelper{
           case Some(value) => value.foran
           case _ => ""
         }
-        val systemDefs = getSystemDefs(foranProject)
+        val systemDefs = getDeviceSystemDefs(foranProject)
         val system = systemDefs.find(_.descr.contains(docNumber)) match {
           case Some(value) =>
             value.name
@@ -470,7 +471,7 @@ trait DeviceHelper{
           case Some(value) => value.foran
           case _ => ""
         }
-        val systemDefs = getSystemDefs(foranProject)
+        val systemDefs = getDeviceSystemDefs(foranProject)
         systemDefs.find(_.descr.contains(docNumber)) match {
           case Some(value) =>
             value.descr.replace(docNumber, "").trim
@@ -479,14 +480,53 @@ trait DeviceHelper{
       case _ =>  ""
     }
   }
-  def getSystemDefs(project: String): List[SystemDef] ={
+  def getUnits: List[Units] ={
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val units: MongoCollection[Units] = mongo.getCollection("materials-n-units")
+        Await.result(units.find().toFuture(), Duration(30, SECONDS)) match {
+          case values: Seq[Units] =>
+            values.toList
+          case _ => List.empty[Units]
+        }
+      case _ => List.empty[Units]
+    }
+  }
+  def getDevicesWithAccommodations(docNumber: String): List[Device] = {
+    getDevices(docNumber) ++ getAccommodationsAsDevices(docNumber, "ru")
+  }
+  def getProjectFromDocNumber(docNumber: String): (String, String) = {
+    DBManager.GetMongoConnection() match {
+      case Some(mongoData) =>
+        val projectNamesCollection: MongoCollection[ProjectName] = mongoData.getCollection("project-names")
+        val projectNames = Await.result(projectNamesCollection.find().toFuture(), Duration(30, SECONDS)) match {
+          case values: Seq[ProjectName] => values.toList
+          case _ => List.empty[ProjectName]
+        }
+        """\d{6}(?=-\d{3}\w{0,1}-\d{3,4})""".r.findFirstIn(docNumber) match {
+          case Some(rkdProject) =>
+            projectNames.find(_.rkd == rkdProject) match {
+              case Some(project) =>
+                val systems = getDeviceSystemDefs(project.foran)
+                systems.find(x => x.descr.contains(docNumber)) match {
+                  case Some(system) =>
+                    (project.foran, system.name)
+                  case _ => (project.foran, "")
+                }
+              case _ => ("", "")
+            }
+          case _ => ("", "")
+        }
+    }
+  }
+  def getDeviceSystemDefs(project: String): List[SystemDef] = {
     val systemDefs = ListBuffer.empty[SystemDef]
     DBManager.GetOracleConnection(project) match {
       case Some(oracleConnection) =>
         val stmt = oracleConnection.createStatement()
         val query = "SELECT S.NAME AS NAME, L.DESCR AS DESCR FROM SYSTEMS S, SYSTEMS_LANG L WHERE S.OID = L.SYSTEM AND L.LANG = -2"
         val rs = stmt.executeQuery(query)
-        while (rs.next()){
+        while (rs.next()) {
           systemDefs += SystemDef(project, rs.getString("NAME") match {
             case value: String => value
             case _ => ""
@@ -501,17 +541,5 @@ trait DeviceHelper{
       case _ =>
     }
     systemDefs.toList
-  }
-  def getUnits: List[Units] ={
-    DBManager.GetMongoConnection() match {
-      case Some(mongo) =>
-        val units: MongoCollection[Units] = mongo.getCollection("materials-n-units")
-        Await.result(units.find().toFuture(), Duration(30, SECONDS)) match {
-          case values: Seq[Units] =>
-            values.toList
-          case _ => List.empty[Units]
-        }
-      case _ => List.empty[Units]
-    }
   }
 }

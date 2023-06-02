@@ -6,7 +6,9 @@ import akka.util.Timeout
 import deepsea.accomodations.AccommodationHelper
 import deepsea.actors.ActorManager
 import deepsea.devices.DeviceManager.{AddDeviceToSystem, Device, GetDevices, GetDevicesESP, RemoveDeviceFromSystem}
+import deepsea.esp.EspManager.GetEsp
 import deepsea.files.FileManager.GenerateUrl
+import deepsea.pipe.PipeHelper
 import deepsea.pipe.PipeManager.Material
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
@@ -29,20 +31,26 @@ object DeviceManager{
   case class AddDeviceToSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String = "")
   case class RemoveDeviceFromSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String = "")
 }
-class DeviceManager extends Actor with DeviceHelper with AccommodationHelper with Codecs{
+class DeviceManager extends Actor with DeviceHelper with AccommodationHelper with Codecs {
 
   implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
 
   override def receive: Receive = {
     case GetDevices(docNumber) =>
-      val devices = getDevices(docNumber) ++ getAccommodationsAsDevices(docNumber, "ru")
-      devices.filter(_.userId.contains(".")).filter(x => x.zone == "" || x.zone == "-" || x.zone == "*").foreach(x => {
-        devices.find(y => y.userId == x.userId.split("\\.").head) match {
-          case Some(orig) => x.zone = orig.zone
-          case _ => None
-        }
-      })
-      sender() ! devices.asJson.noSpaces
+      val projectSystem = getProjectFromDocNumber(docNumber)
+      Await.result(ActorManager.esp ? GetEsp(projectSystem._1, "device", docNumber), timeout.duration) match {
+        case res: String => sender() ! res
+        case _ => sender() ! "error".asJson.noSpaces
+      }
+
+//      val devices = getDevices(docNumber) ++ getAccommodationsAsDevices(docNumber, "ru")
+//      devices.filter(_.userId.contains(".")).filter(x => x.zone == "" || x.zone == "-" || x.zone == "*").foreach(x => {
+//        devices.find(y => y.userId == x.userId.split("\\.").head) match {
+//          case Some(orig) => x.zone = orig.zone
+//          case _ => None
+//        }
+//      })
+//      sender() ! devices.asJson.noSpaces
     case GetDevicesESP(docNumber, revision, lang) =>
       val docName: String = getSystemName(docNumber)
       val devices: List[Device] = getDevices(docNumber).tapEach(x => x.userId = removeLeftZeros(x.origUserId)) ++ getAccommodationsAsDevices(docNumber, lang)

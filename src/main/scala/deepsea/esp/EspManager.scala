@@ -3,9 +3,12 @@ package deepsea.esp
 import akka.actor.Actor
 import akka.pattern.ask
 import akka.util.Timeout
+import deepsea.accomodations.AccommodationHelper
 import deepsea.actors.ActorManager
 import deepsea.database.DBManager
-import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, EspObject, GetEsp, GetGlobalEsp, GetGlobalEspPdf, GetHullEsp, GetMaterialPurchases, GlobalEsp, HullEspObject, InitIssues, Issue, MaterialPurchase, PipeEspObject}
+import deepsea.devices.DeviceHelper
+import deepsea.devices.DeviceManager.Device
+import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, DeviceEspObject, EspObject, GetEsp, GetGlobalEsp, GetGlobalEspPdf, GetHullEsp, GetMaterialPurchases, GlobalEsp, HullEspObject, InitIssues, Issue, MaterialPurchase, PipeEspObject}
 import deepsea.files.FileManager.GenerateUrl
 import deepsea.pipe.PipeHelper
 import deepsea.pipe.PipeManager.{Material, PipeSeg, ProjectName}
@@ -53,6 +56,16 @@ object EspManager{
                            override val taskId: Int,
                            var elements: List[PipeSeg]) extends EspObject(id, foranProject, docNumber, rev, date, user, kind, taskId)
 
+  case class DeviceEspObject(override val id: String,
+                           override val foranProject: String,
+                           override val docNumber: String,
+                           override val rev: String,
+                           override val date: Long,
+                           override val user: String,
+                           override val kind: String,
+                           override val taskId: Int,
+                           var elements: List[Device]) extends EspObject(id, foranProject, docNumber, rev, date, user, kind, taskId)
+
   case class EspHistoryObject(override val id: String,
                               override val foranProject: String,
                               override val docNumber: String,
@@ -84,7 +97,7 @@ object EspManager{
   case class IssueProject(id: Int, name: String, pdsp: String, rkd: String, foran: String, managers: String, status: String, factory: String)
 }
 
-class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper {
+class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper with DeviceHelper {
   implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
 
   override def preStart(): Unit = {
@@ -106,6 +119,9 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
         case "pipe" =>
           val projectSystem = getSystemAndProjectFromDocNumber(docNumber)
           addPipeEsp(PipeEspObject(id, foranProject, docNumber, rev, date, user, kind, taskId.toIntOption.getOrElse(0), elements = getPipeSegs(projectSystem._1, projectSystem._2)))
+        case "device" =>
+          val devices = getDevicesWithAccommodations(docNumber)
+          addDevicesEsp(DeviceEspObject(id, foranProject, docNumber, rev, date, user, kind, taskId.toIntOption.getOrElse(0), elements = devices))
         case _ => Option.empty[EspObject]
       }
       sender() ! "success".asJson.noSpaces
@@ -115,6 +131,8 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
           sender() ! getHullLatestEsp(foranProject, kind, docNumber, rev).asJson.noSpaces
         case "pipe" =>
           sender() ! getPipeLatestEsp(foranProject, kind, docNumber, rev).asJson.noSpaces
+        case "device" =>
+          sender() ! getDeviceLatestEsp(foranProject, kind, docNumber, rev).asJson.noSpaces
         case _ =>
           sender() ! "error".asJson.noSpaces
       }

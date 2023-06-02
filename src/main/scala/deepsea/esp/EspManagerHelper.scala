@@ -4,7 +4,7 @@ import akka.pattern.ask
 import com.mongodb.client.model.BsonField
 import deepsea.actors.ActorManager
 import deepsea.database.DBManager
-import deepsea.esp.EspManager.{DocumentWithMaterial, EspElement, EspHistoryObject, EspObject, GlobalEsp, HullEspObject, IssueProject, MaterialPurchase, MaterialSummary, PipeEspObject, espKinds, espObjectsCollectionName}
+import deepsea.esp.EspManager.{DeviceEspObject, DocumentWithMaterial, EspElement, EspHistoryObject, EspObject, GlobalEsp, HullEspObject, IssueProject, MaterialPurchase, MaterialSummary, PipeEspObject, espKinds, espObjectsCollectionName}
 import deepsea.files.FileManager
 import deepsea.files.FileManager.GenerateUrl
 import deepsea.materials.MaterialsHelper
@@ -45,6 +45,15 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
       case _ => None
     }
   }
+  def addDevicesEsp(esp: DeviceEspObject): Unit = {
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val espCollectionName = List(espObjectsCollectionName, esp.foranProject, "device").mkString("-").toLowerCase
+        val espCollection: MongoCollection[DeviceEspObject] = mongo.getCollection(espCollectionName)
+        Await.result(espCollection.insertOne(esp).toFuture(), Duration(10, SECONDS))
+      case _ => None
+    }
+  }
   def getHullLatestEsp(foranProject: String, kind: String, docNumber: String, rev: String): Option[HullEspObject] ={
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
@@ -65,6 +74,47 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
       case _ => None
     }
   }
+  def getPipeLatestEsp(foranProject: String, kind: String, docNumber: String, rev: String): Option[PipeEspObject] = {
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val espCollectionName = List(espObjectsCollectionName, foranProject, kind).mkString("-").toLowerCase
+        val espCollection: MongoCollection[PipeEspObject] = mongo.getCollection(espCollectionName)
+        if (rev == "") {
+          Await.result(espCollection.find(and(equal("docNumber", docNumber))).sort(descending("date")).first().toFuture(), Duration(10, SECONDS)) match {
+            case espObject: PipeEspObject => Option(espObject)
+            case _ => Option.empty[PipeEspObject]
+          }
+        }
+        else {
+          Await.result(espCollection.find(and(equal("docNumber", docNumber), equal("rev", rev))).sort(descending("date")).first().toFuture(), Duration(10, SECONDS)) match {
+            case espObject: PipeEspObject => Option(espObject)
+            case _ => Option.empty[PipeEspObject]
+          }
+        }
+      case _ => None
+    }
+  }
+  def getDeviceLatestEsp(foranProject: String, kind: String, docNumber: String, rev: String): Option[DeviceEspObject] = {
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val espCollectionName = List(espObjectsCollectionName, foranProject, kind).mkString("-").toLowerCase
+        val espCollection: MongoCollection[DeviceEspObject] = mongo.getCollection(espCollectionName)
+        if (rev == "") {
+          Await.result(espCollection.find(and(equal("docNumber", docNumber))).sort(descending("date")).first().toFuture(), Duration(10, SECONDS)) match {
+            case espObject: DeviceEspObject => Option(espObject)
+            case _ => Option.empty[DeviceEspObject]
+          }
+        }
+        else {
+          Await.result(espCollection.find(and(equal("docNumber", docNumber), equal("rev", rev))).sort(descending("date")).first().toFuture(), Duration(10, SECONDS)) match {
+            case espObject: DeviceEspObject => Option(espObject)
+            case _ => Option.empty[DeviceEspObject]
+          }
+        }
+      case _ => None
+    }
+  }
+
   def getAllEspHistory(foranProject: String): List[EspHistoryObject] ={
     val res = ListBuffer.empty[EspHistoryObject]
     espKinds.foreach(kind => {
@@ -146,26 +196,6 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
       case _ => None
     }
     res.toList
-  }
-  def getPipeLatestEsp(foranProject: String, kind: String, docNumber: String, rev: String): Option[PipeEspObject] ={
-    DBManager.GetMongoConnection() match {
-      case Some(mongo) =>
-        val espCollectionName = List(espObjectsCollectionName, foranProject, kind).mkString("-").toLowerCase
-        val espCollection: MongoCollection[PipeEspObject] = mongo.getCollection(espCollectionName)
-        if (rev == ""){
-          Await.result(espCollection.find(and(equal("docNumber", docNumber))).sort(descending("date")).first().toFuture(), Duration(10, SECONDS)) match {
-            case espObject: PipeEspObject => Option(espObject)
-            case _ => Option.empty[PipeEspObject]
-          }
-        }
-        else{
-          Await.result(espCollection.find(and(equal("docNumber", docNumber), equal("rev", rev))).sort(descending("date")).first().toFuture(), Duration(10, SECONDS)) match {
-            case espObject: PipeEspObject => Option(espObject)
-            case _ => Option.empty[PipeEspObject]
-          }
-        }
-      case _ => None
-    }
   }
   def getHullAllLatestEsp(projects: List[String] = List("N002", "N004")): List[HullEspObject] ={
     val res = ListBuffer.empty[HullEspObject]
