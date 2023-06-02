@@ -669,7 +669,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
             case Some(value) => value.bdatri
             case _ => ""
           }
-          val params = plsParams.filter(_.pls.equals(plsElem.pls))
+          val params = plsParams.filter(_.pls.equals(plsElem.pls)).sortBy(_.paramSq)
           val quality = (bdatri + "    ").substring(0, 4).trim
           val insulation = (bdatri + "    ").substring(4, 4).trim
 
@@ -762,9 +762,9 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                             else if (params.length > 10) {
                               val d1 = Math.round(params(0).value)
                               val d2 = Math.round(params(1).value)
-                              val diam = Math.round(params(2).value)
+                              val diam = Math.round(params(2).value * 2)
                               val l = Math.round(params(3).value)
-                              s"ПЕРЕХОД ${d1}x$d2/ДУ$diam, L=$l (${material.name})"
+                              s"ПЕРЕХОД ${d2}x$d1/ДУ$diam, L=$l (${material.name})"
                             }
                             else{
                               "undefined"
