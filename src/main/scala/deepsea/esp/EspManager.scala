@@ -187,7 +187,8 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
     case GetGlobalEsp(projects, kinds) =>
       val hull = if (kinds.contains("hull")) generateHullGlobalEsp(projects.split(",").toList) else List.empty[GlobalEsp]
       val pipe = if (kinds.contains("pipe")) generatePipeGlobalEsp(projects.split(",").toList) else List.empty[GlobalEsp]
-      val globalEsp = hull ++ pipe
+      val device = if (kinds.contains("device")) generateDeviceGlobalEsp(projects.split(",").toList) else List.empty[GlobalEsp]
+      val globalEsp = hull ++ pipe ++ device
       sender() ! globalEsp.asJson.noSpaces
     case GetGlobalEspPdf(project, code, user) =>
       println("BEFORE CREATING ********************")
