@@ -759,6 +759,13 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                               val l = Math.round(params(3).value)
                               s"ПЕРЕХОД ${d1}x$d2/ДУ$diam, L=$l (${material.name})"
                             }
+                            else if (params.length > 10) {
+                              val d1 = Math.round(params(0).value * 2)
+                              val d2 = Math.round(params(2).value * 2)
+                              val diam = Math.round(params(1).value * 2)
+                              val l = Math.round(params(3).value)
+                              s"ПЕРЕХОД ${d1}x$d2/ДУ$diam, L=$l (${material.name})"
+                            }
                             else{
                               "undefined"
                             }
@@ -779,7 +786,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                             }
                           case _ => ""
                         }
-                        if (hvacName == "undefined" && plsElem.cType == "B"){
+                        if (hvacName == "undefined"){
                           val qwe = 0
                         }
 
