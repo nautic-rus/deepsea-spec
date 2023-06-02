@@ -463,7 +463,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
     systemDefs.toList
   }
   def getSystemAndProjectFromDocNumber(docNumber: String): (String, String) = {
-    GetMongoConnection() match {
+    DBManager.GetMongoConnection() match {
       case Some(mongoData) =>
         val projectNamesCollection: MongoCollection[ProjectName] = mongoData.getCollection("project-names")
         val projectNames = Await.result(projectNamesCollection.find().toFuture(), Duration(30, SECONDS)) match {
@@ -478,7 +478,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                 systems.find(x => x.descr.contains(docNumber)) match {
                   case Some(system) =>
                     (project.foran, system.name)
-                  case _ => ("", "")
+                  case _ => (project.foran, "")
                 }
               case _ => ("", "")
             }
@@ -736,6 +736,12 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                               val angle = Math.round(180 / Math.PI * params(2).value)
                               s"ОТВОД $angle, ДУ$diam (${material.name})"
                             }
+                            else if (params.length == 4) {
+                              val d1 = Math.round(params(0).value)
+                              val d2 = Math.round(params(1).value)
+                              val angle = Math.round(180 / Math.PI * params(3).value)
+                              s"ОТВОД $angle, ${d1}x$d2 (${material.name})"
+                            }
                             else{
                               "undefined"
                             }
@@ -765,6 +771,9 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                               "undefined"
                             }
                           case _ => ""
+                        }
+                        if (hvacName == "undefined"){
+                          val qwe = 0
                         }
 
                         res += PipeSeg(
