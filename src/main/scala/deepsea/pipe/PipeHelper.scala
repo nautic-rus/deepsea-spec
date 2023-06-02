@@ -761,8 +761,8 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                             }
                             else if (params.length > 10) {
                               val d1 = Math.round(params(0).value)
-                              val d2 = Math.round(params(2).value)
-                              val diam = Math.round(params(1).value)
+                              val d2 = Math.round(params(1).value)
+                              val diam = Math.round(params(2).value)
                               val l = Math.round(params(3).value)
                               s"ПЕРЕХОД ${d1}x$d2/ДУ$diam, L=$l (${material.name})"
                             }
