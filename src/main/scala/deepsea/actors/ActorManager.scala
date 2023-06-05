@@ -15,7 +15,7 @@ object ActorManager {
   var httpServer: ActorRef = _
   var spec: ActorRef = _
   var hullManager: ActorRef = _
-  var dataBase: ActorRef = _
+  //var dataBase: ActorRef = _
   var elec: ActorRef = _
   var files: ActorRef = _
   var pipe: ActorRef = _

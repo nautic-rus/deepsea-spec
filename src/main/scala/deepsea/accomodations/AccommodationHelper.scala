@@ -1,8 +1,8 @@
 package deepsea.accomodations
 
 import deepsea.accomodations.AccommodationManager.{Accommodation, AccommodationAux, AccommodationGroup, BBox, Zone}
-import deepsea.database.DatabaseManager.RsIterator
-import deepsea.database.{DBManager, DatabaseManager}
+import deepsea.database.DBManager
+import deepsea.database.DBManager._
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
 import deepsea.pipe.PipeManager.{Material, ProjectName, SystemDef, Units}
 import org.mongodb.scala.{MongoCollection, classTagToClassOf}

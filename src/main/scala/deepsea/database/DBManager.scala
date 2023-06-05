@@ -1,7 +1,6 @@
 package deepsea.database
 
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
-import deepsea.database.DatabaseManager.{GetConnectionFromPool, GetMongoCacheConnectionFromPool, GetMongoConnectionFromPool, GetOracleConnectionFromPool, OracleConnection, timeout}
 import local.common.Codecs
 import org.mongodb.scala.{MongoClient, MongoDatabase}
 
@@ -9,6 +8,8 @@ import java.sql.{Connection, ResultSet}
 import scala.collection.mutable.ListBuffer
 
 object DBManager extends Codecs{
+
+  case class OracleConnection(project: String, ds: HikariDataSource)
 
   case class RsIterator(rs: ResultSet) extends Iterator[ResultSet] {
     def hasNext: Boolean = rs.next()

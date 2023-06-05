@@ -1,6 +1,5 @@
 package deepsea.pipe
 
-import deepsea.database.DatabaseManager._
 import deepsea.pipe.PipeManager.{GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSystems, GetZones, Material, MaterialQuality, PipeLineSegment, PipeSeg, PipeSegActual, PipeSegBilling, PipeSup, Pls, PlsElem, PlsParam, ProjectName, SetSpoolLock, SpoolLock, SystemDef, Units, UpdatePipeComp, UpdatePipeJoints}
 import org.mongodb.scala.{Document, MongoClient, MongoCollection, MongoDatabase, bson}
 import org.mongodb.scala.model.Filters.{and, equal, notEqual}
@@ -9,7 +8,8 @@ import akka.pattern.ask
 import akka.util.Timeout
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import deepsea.actors.ActorManager
-import deepsea.database.{DBManager, DatabaseManager}
+import deepsea.database.DBManager
+import deepsea.database.DBManager._
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
 import deepsea.files.FileManager.GenerateUrl
 import deepsea.materials.MaterialsHelper
@@ -414,7 +414,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
     }
   }
   def getSpoolLocks(docNumber: String): List[SpoolLock] ={
-    DatabaseManager.GetMongoConnection() match {
+    DBManager.GetMongoConnection() match {
       case Some(mongo) =>
         val spoolLocks: MongoCollection[SpoolLock] = mongo.getCollection("spoolLocks")
         Await.result(spoolLocks.find(equal("docNumber", docNumber)).toFuture(), Duration(30, SECONDS)) match {
@@ -428,7 +428,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
   def setSpoolLock(json: String): Unit ={
     decode[SpoolLock](json) match {
       case Right(value) =>
-        DatabaseManager.GetMongoConnection() match {
+        DBManager.GetMongoConnection() match {
           case Some(mongo) =>
             val locks: MongoCollection[SpoolLock] = mongo.getCollection("spoolLocks")
             value.lock = if (value.lock == 1) 0 else 1

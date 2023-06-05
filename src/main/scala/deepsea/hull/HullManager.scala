@@ -7,7 +7,6 @@ import com.mongodb.BasicDBObject
 import deepsea.App
 import deepsea.actors.ActorManager
 import deepsea.database.DBManager
-import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnectionFromPool, timeout}
 import deepsea.esp.EspManager.{GetEsp, GetHullEsp}
 import deepsea.files.FileManager.GenerateUrl
 import deepsea.hull.HullManager.{BsDesignNode, GetBsDesignNodes, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, GetHullSystems, HullEsp, HullPartPlateDef, HullPartProfileDef, HullSystem, PlatePart, ProfilePart, RemoveParts}
@@ -730,7 +729,7 @@ class HullManager extends Actor with Codecs{
         c.close()
       case _ =>
     }
-    GetConnection() match {
+    DBManager.GetOracleConnection(project) match {
       case Some(c) =>
         val s = c.createStatement()
         val date = new Date().getTime

@@ -3,14 +3,11 @@ package deepsea.actors
 import akka.actor.{Actor, Props}
 import akka.routing.RoundRobinPool
 import deepsea.accomodations.AccommodationManager
-import deepsea.accomodations.AccommodationManager.Accommodation
 import deepsea.actors.ActorManager.system
 import deepsea.actors.ActorStartupManager.{DatabaseManagerStarted, HTTPManagerStarted, Start}
-import deepsea.database.DatabaseManager
 import deepsea.devices.DeviceManager
-import deepsea.elec.ElecManager
-import deepsea.esp.EspManager
 import deepsea.elec.ElecManager.ElecManager
+import deepsea.esp.EspManager
 import deepsea.files.FileManager
 import deepsea.http.HTTPManager
 import deepsea.hull.HullManager
@@ -27,7 +24,8 @@ object ActorStartupManager{
 class ActorStartupManager extends Actor{
   override def receive: Receive = {
     case Start() =>
-      ActorManager.dataBase = system.actorOf(Props[DatabaseManager])
+      self ! DatabaseManagerStarted()
+      //ActorManager.dataBase = system.actorOf(Props[DatabaseManager])
     case DatabaseManagerStarted() =>
       ActorManager.httpServer = system.actorOf(RoundRobinPool(1).props(Props[HTTPManager]))
     case HTTPManagerStarted() =>
