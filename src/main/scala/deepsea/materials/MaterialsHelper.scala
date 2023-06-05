@@ -1,7 +1,6 @@
 package deepsea.materials
 
 import deepsea.database.DBManager
-import deepsea.database.DatabaseManager.GetMongoConnection
 import deepsea.pipe.PipeManager.{Material, ProjectName}
 import local.common.DBRequests.MaterialNode
 import org.mongodb.scala.MongoCollection

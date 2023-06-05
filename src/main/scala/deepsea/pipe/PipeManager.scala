@@ -1,33 +1,19 @@
 package deepsea.pipe
 
-import akka.actor.{Actor, ActorSystem}
-import akka.http.scaladsl.{Http, HttpExt}
+import akka.actor.Actor
 import akka.pattern.ask
 import akka.util.Timeout
 import deepsea.actors.ActorManager
-import deepsea.database.DatabaseManager
-import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection}
-import deepsea.esp.EspManager.{EspElement, GetEsp, GetHullEsp}
+import deepsea.esp.EspManager.{EspElement, GetEsp}
 import deepsea.files.FileManager.GenerateUrl
-import deepsea.pipe.PipeManager.{GetHvacSegs, GetPipeESP, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSpoolModel, GetSystems, GetZones, Material, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SetSpoolLock, SpoolLock, SystemDef, UpdatePipeComp, UpdatePipeJoints}
-import io.circe.generic.JsonCodec
-import org.mongodb.scala.bson.BsonDocument
-import org.mongodb.scala.model.Filters.{all, and, equal, in, notEqual}
-import org.mongodb.scala.{Document, MongoCollection, bson}
-import io.circe.{Decoder, Encoder}
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import deepsea.pipe.PipeManager._
 import io.circe.syntax.EncoderOps
 import local.common.Codecs
-import org.mongodb.scala.model.Filters
-import io.circe.parser.decode
 import local.pdf.en.pipe.SpoolsReportEN.{genSpoolsListEnPDF, genSpoolsListEnPDFAll}
 
+import java.util.UUID
 import java.util.concurrent.TimeUnit
-import java.util.{Date, UUID}
-import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
-import scala.concurrent.{Await, ExecutionContextExecutor}
-import scala.concurrent.duration.{Duration, DurationInt, SECONDS}
+import scala.concurrent.Await
 
 
 object PipeManager{

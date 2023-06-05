@@ -2,7 +2,6 @@ package deepsea.elec
 
 import breeze.linalg.{DenseMatrix, DenseVector}
 import deepsea.database.DBManager
-import deepsea.database.DatabaseManager.{GetMongoConnection, GetOracleConnection}
 import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, ElecAngle, ElecCable, EquipmentConnection, ForanEq, NodeConnect, TrayBySystem, TraysBySystem}
 import deepsea.esp.EspManagerHelper
 import deepsea.pipe.PipeManager.{Material, ProjectName}

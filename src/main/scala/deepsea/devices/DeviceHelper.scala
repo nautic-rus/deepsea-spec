@@ -2,7 +2,6 @@ package deepsea.devices
 
 import deepsea.accomodations.AccommodationHelper
 import deepsea.database.DBManager
-import deepsea.database.DatabaseManager.GetOracleConnection
 import deepsea.devices.DeviceManager.{Device, DeviceAux, SystemLang}
 import deepsea.pipe.PipeManager.{Material, PipeSeg, ProjectName, SystemDef, Units}
 import org.mongodb.scala.MongoCollection

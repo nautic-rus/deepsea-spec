@@ -1,45 +1,31 @@
 package deepsea.elec
 
 import akka.actor.Actor
-import akka.http.scaladsl.model.{HttpEntity, UniversalEntity}
-import akka.http.scaladsl.server.Directives.complete
 import akka.pattern.ask
 import akka.util.Timeout
-import deepsea.App
 import deepsea.actors.ActorManager
-import deepsea.database.DatabaseManager.GetOracleConnection
-import deepsea.elec.ElecManager._
-import deepsea.files.FileManager.{CloudFile, CreateFile, GenerateUrl}
-import deepsea.pipe.PipeManager.{Material, MaterialTranslation}
-import local.ele.CommonEle.{retrieveAllPartsByComplectNameJSON, retrieveEleComplectsJsonString}
-import local.ele.cb.CableBoxManager.cableBoxBySeqIdJson
-import local.ele.eq.EleEqManager
-import local.ele.trays.TrayManager
-import local.ele.utils.EleUtils.fixFBS
-import local.pdf.ru.ele.EleEqTrayESKDReport.{generatePdfToFileNoRev, generatePdfToFileWithRev}
-import play.api.libs.json.{JsValue, Json}
-
-import java.io.{File, FileOutputStream}
-import java.nio.file.Files
-import java.util.concurrent.TimeUnit
-import java.util.{Date, UUID}
-import java.util.zip.{ZipEntry, ZipOutputStream}
-import scala.collection.mutable.ListBuffer
-import scala.concurrent.Await
-import local.pdf.ru.ele.EleEqTrayESKDReport
-import local.pdf.ru.ele.EleEqTrayESKDReport.{generatePdfToFileNoRev, generatePdfToFileWithRev}
-import local.ele.cl.CableListManager.{cablesByComplectJson, cablesByComplectMagistralVariantJson}
-import io.circe._
+import deepsea.files.FileManager.GenerateUrl
+import deepsea.pipe.PipeManager.Material
 import io.circe.generic.auto._
-import io.circe.parser._
 import io.circe.syntax._
 import local.common.Codecs
 import local.common.DBRequests.MountItem
 import local.domain.WorkShopMaterial
+import local.ele.CommonEle.{retrieveAllPartsByComplectNameJSON, retrieveEleComplectsJsonString}
+import local.ele.cb.CableBoxManager.cableBoxBySeqIdJson
+import local.ele.cl.CableListManager.{cablesByComplectJson, cablesByComplectMagistralVariantJson}
+import local.ele.eq.EleEqManager
+import local.ele.trays.TrayManager
+import local.ele.utils.EleUtils.fixFBS
+import local.pdf.ru.ele.EleEqTrayESKDReport
+import local.pdf.ru.ele.EleEqTrayESKDReport.{generatePdfToFileNoRev, generatePdfToFileWithRev}
 import local.pdf.ru.ele.EleTrayCableBoxReportRu.genTraysAndCBListEnPDF
+import play.api.libs.json.Json
 
-import scala.collection.immutable.Stream.Empty
-import scala.io.Source
+import java.nio.file.Files
+import java.util.concurrent.TimeUnit
+import scala.collection.mutable.ListBuffer
+import scala.concurrent.Await
 
 object ElecManager {
   case class GetTrayLabels(project: String, seqId: String)
