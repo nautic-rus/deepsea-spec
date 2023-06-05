@@ -25,9 +25,10 @@ class AccommodationsTest extends AnyFunSuite with DeviceHelper with Accommodatio
 
   val materials: List[Material] = getMaterials
 
-  val docNumber = "200101-511-303"
+  val docNumber = "200101-100-104"
   val revision = "0"
   val docName: String = getASName(docNumber)
+  val lang = "en"
 
 
   val accommodations: List[Device] = (getDevices(docNumber) ++ getAccommodationsAsDevices(docNumber, lang)).sortBy(_.userId)
@@ -36,8 +37,8 @@ class AccommodationsTest extends AnyFunSuite with DeviceHelper with Accommodatio
 
   //val devices: List[Device] = getDevices(docNumber)
 
-  val lang = "en"
   val ret: String = genAccomListEnPDF(docNumber, docName, revision, accommodations, lang)
+
 
   println(ret)
   val jk = 0
