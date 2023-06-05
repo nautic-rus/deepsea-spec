@@ -6,7 +6,8 @@ import akka.util.Timeout
 import com.mongodb.BasicDBObject
 import deepsea.App
 import deepsea.actors.ActorManager
-import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnection, GetOracleConnectionFromPool, timeout}
+import deepsea.database.DBManager
+import deepsea.database.DatabaseManager.{GetConnection, GetMongoCacheConnection, GetMongoConnection, GetOracleConnectionFromPool, timeout}
 import deepsea.esp.EspManager.{GetEsp, GetHullEsp}
 import deepsea.files.FileManager.GenerateUrl
 import deepsea.hull.HullManager.{BsDesignNode, GetBsDesignNodes, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, GetHullSystems, HullEsp, HullPartPlateDef, HullPartProfileDef, HullSystem, PlatePart, ProfilePart, RemoveParts}
@@ -335,7 +336,7 @@ class HullManager extends Actor with Codecs{
     parts
   }
   def getBsTree(project: String, oids: ListBuffer[Int]): ListBuffer[BsTreeItem] = {
-    GetOracleConnection(project) match {
+    DBManager.GetOracleConnection(project) match {
       case Some(c) =>
         val res = ListBuffer.empty[BsTreeItem]
         val query = Source.fromResource("queries/hullPartsFromBsTree.sql").mkString.replaceAll(":partOids", oids.mkString(","))
@@ -399,7 +400,7 @@ class HullManager extends Actor with Codecs{
   }
   def getHullParts(project: String): ListBuffer[HullPart] = {
     val res = ListBuffer.empty[HullPart]
-    GetOracleConnection(project) match {
+    DBManager.GetOracleConnection(project) match {
       case Some(c) =>
         val s = c.createStatement()
         val query = Source.fromResource("queries/hullParts.sql").mkString
@@ -459,7 +460,7 @@ class HullManager extends Actor with Codecs{
   }
   def getHullParts(project: String, docNumber: String): ListBuffer[HullPart] = {
     val res = ListBuffer.empty[HullPart]
-    GetOracleConnection(project) match {
+    DBManager.GetOracleConnection(project) match {
       case Some(c) =>
         val query = Source.fromResource("queries/hullPartsWithDescription.sql").mkString.replaceAll(":docNumber", "'" + docNumber + "'")
         val s = c.prepareStatement(query)
@@ -518,7 +519,7 @@ class HullManager extends Actor with Codecs{
   def getStdPlates(project: String, plateOids: ListBuffer[Int]): ListBuffer[HullPartPlateDef] = {
     val res = ListBuffer.empty[HullPartPlateDef]
     plateOids.grouped(900).toList.foreach(oids => {
-      GetOracleConnection(project) match {
+      DBManager.GetOracleConnection(project) match {
         case Some(c) =>
           val s = c.createStatement()
           val query = Source.fromResource("queries/hullPartsPlateDefs.sql").mkString.replaceAll("&plateOids", oids.mkString(","))
@@ -545,7 +546,7 @@ class HullManager extends Actor with Codecs{
   def getStdProfiles(project: String, kseOids: ListBuffer[Int]): ListBuffer[HullPartProfileDef] = {
     val res = ListBuffer.empty[HullPartProfileDef]
     kseOids.grouped(900).toList.foreach(oids => {
-      GetOracleConnection(project) match {
+      DBManager.GetOracleConnection(project) match {
         case Some(c) =>
           val s = c.createStatement()
           val query = Source.fromResource("queries/hullPartsProfileDefs.sql").mkString.replaceAll("&profileKse", oids.mkString(","))
@@ -622,7 +623,7 @@ class HullManager extends Actor with Codecs{
   }
   def getSystems(project: String): ListBuffer[HullSystem] = {
     val res = ListBuffer.empty[HullSystem]
-    GetOracleConnection(project) match {
+    DBManager.GetOracleConnection(project) match {
       case Some(c) =>
         val s = c.createStatement()
         val query = "SELECT NAME, DESC1 FROM V_SYSTEM"
@@ -648,7 +649,7 @@ class HullManager extends Actor with Codecs{
   }
   def getPlates(project: String, material: String, thickness: Double): ListBuffer[PlatePart] = {
     val res = ListBuffer.empty[PlatePart]
-    GetOracleConnection(project) match {
+    DBManager.GetOracleConnection(project) match {
       case Some(c) =>
         val s = c.createStatement()
         val query = Source.fromResource("queries/hullPlates.sql").mkString.replaceAll("&thickness", thickness.toString).replaceAll("&material", material)
@@ -681,7 +682,7 @@ class HullManager extends Actor with Codecs{
   }
   def getProfiles(project: String, material: String, kse: Int): ListBuffer[ProfilePart] = {
     val res = ListBuffer.empty[ProfilePart]
-    GetOracleConnection(project) match {
+    DBManager.GetOracleConnection(project) match {
       case Some(c) =>
         val s = c.createStatement()
         val query = Source.fromResource("queries/hullProfiles.sql").mkString.replaceAll("&kse", kse.toString).replaceAll("&material", material)
@@ -720,7 +721,7 @@ class HullManager extends Actor with Codecs{
     res
   }
   def removeParts(project: String, block: String, parts: String, user: String): Unit = {
-    GetOracleConnection(project) match {
+    DBManager.GetOracleConnection(project) match {
       case Some(c) =>
         val s = c.createStatement()
         val query = Source.fromResource("queries/removeParts.sql").mkString.replaceAll("&parts", parts).replaceAll("&block", block)
@@ -742,7 +743,7 @@ class HullManager extends Actor with Codecs{
   }
   def getBsDesignNodes(project: String): ListBuffer[BsDesignNode] = {
     val res = ListBuffer.empty[BsDesignNode]
-    GetOracleConnection(project) match {
+    DBManager.GetOracleConnection(project) match {
       case Some(c) =>
         val s = c.createStatement()
         val query =  Source.fromResource("queries/bsDesignNodes.sql").mkString

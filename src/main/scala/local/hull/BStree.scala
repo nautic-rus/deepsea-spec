@@ -2,7 +2,6 @@ package local.hull
 
 import com.mongodb.BasicDBObject
 import deepsea.database.DBManager
-import deepsea.database.DatabaseManager.GetOracleConnection
 import io.circe.syntax.EncoderOps
 import local.hull.BStree.{Block, BsTreeItem, HullPL, Room}
 import org.bson.types.ObjectId
@@ -101,7 +100,7 @@ trait BStree  extends Codecs{
   }
   def getHullPartListFromBsTree(project: String, docNum: String): Option[HullPL] = {
     val items = ListBuffer.empty[BsTreeItem]
-    GetOracleConnection(project) match {
+    DBManager.GetOracleConnection(project) match {
       case Some(c) =>
         val query = Source.fromResource("queries/hullPartsFromBsTree.sql").mkString
         val s = c.prepareStatement(query)

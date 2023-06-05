@@ -2,7 +2,8 @@ package deepsea.pipe
 
 import akka.actor.{Actor, ActorSystem}
 import akka.util.Timeout
-import deepsea.database.DatabaseManager.{GetMongoCacheConnection, GetOracleConnection}
+import deepsea.database.DBManager
+import deepsea.database.DBManager.GetMongoCacheConnection
 import deepsea.pipe.PipeManager.{PipeSeg, PipeSegActual, UpdatePipeComp, UpdatePipeJoints}
 import org.mongodb.scala.MongoCollection
 import org.mongodb.scala.model.Filters.notEqual
@@ -34,7 +35,7 @@ class PipeCache extends Actor{
   def updatePipeComp(): Unit = {
     val pipeSegs = ListBuffer.empty[PipeSeg]
     List("N002", "N004").foreach(proj => {
-      GetOracleConnection(proj) match {
+      DBManager.GetOracleConnection(proj) match {
         case Some(c) =>
           val s = c.createStatement()
           val query = Source.fromResource("queries/pipeComps.sql").mkString
@@ -145,7 +146,7 @@ class PipeCache extends Actor{
   def updatePipeJoints(): Unit = {
     val pipeSegs = ListBuffer.empty[PipeSeg]
     List("N002", "N004", "TEST").foreach(proj => {
-      GetOracleConnection(proj) match {
+      DBManager.GetOracleConnection(proj) match {
         case Some(c) =>
           val s = c.createStatement()
           val query = s"select * from v_pipejoins"

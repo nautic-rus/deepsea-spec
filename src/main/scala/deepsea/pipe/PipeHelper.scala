@@ -441,7 +441,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
   }
   def getSystemDefs(project: String): List[SystemDef] ={
     val systemDefs = ListBuffer.empty[SystemDef]
-    GetOracleConnection(project) match {
+    DBManager.GetOracleConnection(project) match {
       case Some(oracleConnection) =>
         val stmt = oracleConnection.createStatement()
         val query = "SELECT S.NAME AS NAME, L.DESCR AS DESCR FROM SYSTEMS S, SYSTEMS_LANG L WHERE S.OID = L.SYSTEM AND L.LANG = -2"
