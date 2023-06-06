@@ -356,7 +356,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
             case _ => material.units
           },
           "166",
-          weightTotal,
+          weightTotal.formatted("%.2f").toDouble,
           0,
           weightTotal.formatted("%.2f").toDouble,
           docMaterial.toList,
