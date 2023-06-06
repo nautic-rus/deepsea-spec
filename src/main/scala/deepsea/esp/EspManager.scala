@@ -107,7 +107,7 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
 //    self ! InitIssues()
 //    val qw = getAllLatestEsp()
 //    val jk = qw
-      self ! CreateEsp("N002", "200101-100-104", "0", "isaev", "device", 10330.toString)
+//      self ! CreateEsp("N002", "200101-100-102", "0", "isaev", "device", 10330.toString)
   }
   override def receive: Receive = {
     case CreateEsp(foranProject, docNumber, rev, user, kind, taskId) =>
@@ -121,7 +121,7 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
           addPipeEsp(PipeEspObject(id, foranProject, docNumber, rev, date, user, kind, taskId.toIntOption.getOrElse(0), elements = getPipeSegs(projectSystem._1, projectSystem._2)))
         case "device" =>
           val devices = getDevicesWithAccommodations(docNumber)
-          addDevicesEsp(DeviceEspObject(id, foranProject, docNumber, rev, date, user, kind, taskId.toIntOption.getOrElse(0), elements = devices))
+          addDevicesEsp(DeviceEspObject(id, foranProject.replace("NT02", "N002"), docNumber, rev, date, user, kind, taskId.toIntOption.getOrElse(0), elements = devices))
         case _ => Option.empty[EspObject]
       }
       sender() ! "success".asJson.noSpaces
