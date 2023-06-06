@@ -191,23 +191,7 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
       val globalEsp = hull ++ pipe ++ device
       sender() ! globalEsp.asJson.noSpaces
     case GetGlobalEspPdf(project, code, user) =>
-      println("BEFORE CREATING ********************")
-      println("BEFORE CREATING ********************")
-      println("BEFORE CREATING ********************")
-      println("BEFORE CREATING ********************")
-      println("BEFORE CREATING ********************")
-      println("BEFORE CREATING ********************")
-      println("BEFORE CREATING ********************")
-      println("BEFORE CREATING ********************")
       val file = OrderReportV1.generateOrderPDF(project, code, user)
-      println("FILE CREATED ********************" + file)
-      println("FILE CREATED ********************" + file)
-      println("FILE CREATED ********************" + file)
-      println("FILE CREATED ********************" + file)
-      println("FILE CREATED ********************" + file)
-      println("FILE CREATED ********************" + file)
-      println("FILE CREATED ********************" + file)
-      println("FILE CREATED ********************" + file)
       if (file.nonEmpty){
         Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
           case url: String => sender() ! url.asJson.noSpaces
