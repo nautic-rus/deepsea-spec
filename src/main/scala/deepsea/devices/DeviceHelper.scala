@@ -83,7 +83,7 @@ trait DeviceHelper extends AccommodationHelper {
             while (rs.next()) {
               devicesAux += DeviceAux(
                 Option(rs.getInt("ELEM")).getOrElse(-1),
-                Option(rs.getString("LONG_DESCR")).getOrElse(""),
+                Option(rs.getString("LONG_DESCR")).getOrElse("").replace("\r", ""),
               )
             }
             s.close()
@@ -98,7 +98,7 @@ trait DeviceHelper extends AccommodationHelper {
             while (rs.next()) {
               devicesAuxFromSystem += DeviceAux(
                 Option(rs.getInt("SYSTEM")).getOrElse(-1),
-                Option(rs.getString("LONG_DESCR")).getOrElse(""),
+                Option(rs.getString("LONG_DESCR")).getOrElse("").replace("\r", ""),
               )
             }
             s.close()
