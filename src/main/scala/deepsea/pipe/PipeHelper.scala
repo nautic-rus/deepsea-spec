@@ -774,7 +774,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                               val angle = Math.round(180 / Math.PI * params(3).value)
                               val d3 = Math.round(params(4).value)
                               val d4 = Math.round(params(5).value)
-                              s"ПЕРЕХОД $angle° ${d1}x$d2/${d3}x$d4, R=$r (${material.name})"
+                              s"ОТВОД $angle° R=$r С ПЕРЕХОДОМ ${d1}x$d2/${d3}x$d4 (${material.name})"
                             }
                             else if (params.length > 10) {
                               val d1 = Math.round(params(0).value)
