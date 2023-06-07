@@ -236,6 +236,10 @@ trait PipeHelper extends Codecs with MaterialsHelper {
             res.filter(_.compType == "AUX").filter(_.spPieceId == 0).sortBy(_.spool).foreach(sp => {
               if (sp.spool != spoolValue){
                 spCounter = 0
+                val alreadyIn = res.filter(_.compType != "AUX").filter(_.spool == sp.spool)
+                if (alreadyIn.nonEmpty){
+                  spCounter = alreadyIn.maxBy(_.spPieceId).spPieceId
+                }
                 spoolValue = sp.spool
               }
               spCounter = spCounter + 1
