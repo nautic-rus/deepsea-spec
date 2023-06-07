@@ -105,13 +105,13 @@ object PipeManager{
                        approved: Int = 0){
     def name(lang: String = "en"): String ={
       translations.find(_.lang == lang) match {
-        case Some(translation) => translation.name
+        case Some(translation) => if (translation.name != "") translation.name else name
         case _ => name
       }
     }
     def description(lang: String = "en"): String ={
       translations.find(_.lang == lang) match {
-        case Some(translation) => translation.description
+        case Some(translation) => if (translation.description != "") translation.description else description
         case _ => description
       }
     }

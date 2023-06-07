@@ -806,6 +806,9 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                         if (hvacName == "undefined"){
                           val qwe = 0
                         }
+                        if (plsElem.spool == "017"){
+                          val q = 0
+                        }
 
                         res += PipeSeg(
                           project,
