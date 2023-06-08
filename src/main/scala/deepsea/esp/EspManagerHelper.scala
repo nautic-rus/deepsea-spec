@@ -277,7 +277,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
         projects.foreach(project => {
-          val espCollectionName = List(espObjectsCollectionName, project, "deevice").mkString("-").toLowerCase
+          val espCollectionName = List(espObjectsCollectionName, project, "device").mkString("-").toLowerCase
           val espCollection: MongoCollection[DeviceEspObject] = mongo.getCollection(espCollectionName)
           try {
             Await.result(espCollection.aggregate(
