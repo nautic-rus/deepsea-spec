@@ -16,7 +16,7 @@ import local.common.DBRequests.MaterialNode
 import local.pdf.UtilsPDF
 import local.pdf.en.common.ReportCommonEN.{DocNameEN, Item11ColumnsEN, border5mm, defaultFontSize, fillStamp, fillStampLandscape, fontHELVETICA, getNnauticLigoEN, stampEN, stampENLandscape}
 import local.pdf.en.prd.PrdPartsReportEN.{mmToPt, pageSize, pointColumnWidths}
-import local.pdf.ru.ele.EleTrayCableBoxReportRu.{generateHullGlobalEsp, generatePipeGlobalEsp}
+import local.pdf.ru.ele.EleTrayCableBoxReportRu.{generateDeviceGlobalEsp, generateHullGlobalEsp, generatePipeGlobalEsp}
 import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
 import org.bson.codecs.configuration.CodecRegistry
 import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
@@ -114,7 +114,8 @@ object OrderReportV1 extends UtilsPDF with MaterialsHelper{
               val in: List[GlobalEsp] = {
                 val hull = generateHullGlobalEsp(List(dbProject))
                 val pipe = generatePipeGlobalEsp(List(dbProject))
-                hull ++ pipe
+                val device = generateDeviceGlobalEsp(List(dbProject))
+                hull ++ pipe ++ device
               }.filter(s => s.code.startsWith(code))
               val rows = toRows(rn, in, materialNodes)
               //val filePath: String = Files.createTempDirectory("orderPdf").toAbsolutePath.toString + File.separator + dn.num + "_d" + new Date().getTime.toString + ".pdf"
