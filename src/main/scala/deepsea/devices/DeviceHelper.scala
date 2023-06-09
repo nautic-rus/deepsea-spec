@@ -185,7 +185,7 @@ trait DeviceHelper extends AccommodationHelper {
         devices.foreach(d => {
           if (d.longDesc.contains("|")){
             d.longDesc.split('\n').toList.foreach(l => {
-              val split = l.split('|')
+              val split = l.replace("\r", "").split('|')
               devicesAuxFromComp += Device(
                 d.project,
                 d.id,
