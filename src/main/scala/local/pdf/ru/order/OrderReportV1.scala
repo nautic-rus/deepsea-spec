@@ -31,7 +31,7 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, SECONDS}
 
-object OrderReportV1 extends UtilsPDF with MaterialsHelper{
+object OrderReportV1 extends UtilsPDF with MaterialsHelper {
   private case class DescrTree(pageNum: Int, A1: String, A2: String, isRoot: Boolean = false, offset: Float = 0.0f)
 
   private val rootNames: List[MaterialNode] = {
@@ -79,44 +79,31 @@ object OrderReportV1 extends UtilsPDF with MaterialsHelper{
     descrTreeBuffer.clear()
     if (code.length >= 3) {
       val materialNodes = getMaterialNodes(project)
-//      val materialNodes: List[MaterialNode] = {
-//        GetMongoConnection() match {
-//          case Some(mongoDB: MongoDatabase) => {
-//            import org.mongodb.scala.bson.codecs.Macros._
-//            val codecRegistry: CodecRegistry = fromRegistries(fromProviders(classOf[MaterialNode]), DEFAULT_CODEC_REGISTRY)
-//            val db = mongoDB.withCodecRegistry(codecRegistry)
-//            val collectionTasks: MongoCollection[MaterialNode] = db.getCollection("materials-n-nodes")
-//            val allelems = collectionTasks.find(equal("project", project)).toFuture()
-//            Await.result(allelems, Duration(100, SECONDS))
-//            allelems.value.get.getOrElse(Seq.empty[MaterialNode]).toList
-//          }
-//          case None => List.empty[MaterialNode]
-//        }
-//
-//        /*     val ois = new ObjectInputStream(new FileInputStream("c:\\6\\materialNodes.bin"))
-//          val m: List[MaterialNode] = ois.readObject.asInstanceOf[List[MaterialNode]]
-//          ois.close()
-//          m*/
-//      }
+
       materialNodes.find(s => s.data.equals(code)) match {
         case Some(rn) => {
           rootNames.find(s => s.data.equals(rn.data.take(3))) match {
             case Some(doc) => {
               val dn: DocNameEN = DocNameEN(num = doc.label, name = doc.label_ru, user = user)
 
-              /*        val in: List[EspManager.GlobalEsp] = {
-                        val ois = new ObjectInputStream(new FileInputStream("c:\\6\\GlobalEsp.bin"))
-                        val m: List[EspManager.GlobalEsp] = ois.readObject.asInstanceOf[List[EspManager.GlobalEsp]]
-                        ois.close()
-                        m
-                      }.filter(s => s.code.startsWith(code))
-                      */
               val in: List[GlobalEsp] = {
                 val hull = generateHullGlobalEsp(List(dbProject))
                 val pipe = generatePipeGlobalEsp(List(dbProject))
                 val device = generateDeviceGlobalEsp(List(dbProject))
-                hull ++ pipe ++ device
+
+                val prebuff = hull ++ pipe ++ device
+                val buff=ListBuffer.empty[GlobalEsp]
+                prebuff.groupBy(s => s.code).foreach(gr => {
+                  val qty = gr._2.map(_.qty).sum
+                  val w = gr._2.map(_.weight).sum
+                  val docss = gr._2.flatMap(_.documents)
+                  buff+=gr._2.head.copy(qty = qty,weight = w, documents=docss)
+                })
+
+                buff.toList
               }.filter(s => s.code.startsWith(code))
+
+
               val rows = toRows(rn, in, materialNodes)
               //val filePath: String = Files.createTempDirectory("orderPdf").toAbsolutePath.toString + File.separator + dn.num + "_d" + new Date().getTime.toString + ".pdf"
               processPDF(dn, file.toString, rows)
@@ -220,20 +207,21 @@ object OrderReportV1 extends UtilsPDF with MaterialsHelper{
         case 3 => Level(6)
         case 6 => Level(9)
         case 9 => Level(12)
-        case 12 =>lastLevel()
+        case 12 => lastLevel()
         case _ => {
           List.empty[DS]
         }
       }
     }
 
-    private def lastLevel(): List[DS]={
+    private def lastLevel(): List[DS] = {
       val buff = ListBuffer.empty[DS]
 
       buff += new DS(MaterialNode(project = project, label = "", label_ru = "", data = "", user = "", date = 0), in, materialNodes)
 
       buff.toList
     }
+
     private def Level(f: Int): List[DS] = {
       val buff = ListBuffer.empty[DS]
       in.groupBy(s => s.code.take(f)).foreach(gr => {
@@ -682,13 +670,13 @@ object OrderReportV1 extends UtilsPDF with MaterialsHelper{
     val buff = ListBuffer.empty[Item11ColumnsEN]
     val ds = new DS(rootNode, in, materialNodes)
     ds.nextLevel().foreach(das1 => {
-      if(!das1.rootNode.data.contains("XXX"))buff += Item11ColumnsEN(true, A1 = "(" + das1.rootNode.data + ")" + das1.rootNode.label_ru, A2 = das1.rootNode.data)
+      if (!das1.rootNode.data.contains("XXX")) buff += Item11ColumnsEN(true, A1 = "(" + das1.rootNode.data + ")" + das1.rootNode.label_ru, A2 = das1.rootNode.data)
       das1.nextLevel().foreach(das2 => {
-       if(!das2.rootNode.data.contains("XXX")) buff += Item11ColumnsEN(true, A1 = "(" + das2.rootNode.data + ")" + das2.rootNode.label_ru, A2 = das2.rootNode.data)
+        if (!das2.rootNode.data.contains("XXX")) buff += Item11ColumnsEN(true, A1 = "(" + das2.rootNode.data + ")" + das2.rootNode.label_ru, A2 = das2.rootNode.data)
         das2.nextLevel().foreach(das3 => {
           val header = s"${das3.rootNode.label_ru} ${das2.rootNode.label_ru} ${das3.rootNode.data}"
-          if(!das3.rootNode.data.contains("XXX"))buff += Item11ColumnsEN(true, A1 = header, A2 = das3.rootNode.data)
-          das3.in.sortBy(b=>b.code.takeRight(4)).foreach(d => {
+          if (!das3.rootNode.data.contains("XXX")) buff += Item11ColumnsEN(true, A1 = header, A2 = das3.rootNode.data)
+          das3.in.sortBy(b => b.code.takeRight(4)).foreach(d => {
             buff += Item11ColumnsEN(false, A1 = d.code.takeRight(4), A2 = d.name, A3 = d.material.document, A4 = d.units,
               A5 = "0", A6 = d.qty.toString, A7 = d.weight.toString, A8 = d.weightTotal.toString,
               A9 = d.material.provider, A10 = "", A11 = d.material.note)
