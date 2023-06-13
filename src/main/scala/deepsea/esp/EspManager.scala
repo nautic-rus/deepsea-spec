@@ -192,10 +192,10 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
       val globalEsp = hull ++ pipe ++ device
       val res = ListBuffer.empty[GlobalEsp]
       globalEsp.groupBy(_.code).foreach(gr => {
-        val qtyTotal = gr._2.map(_.qty).sum
-        val weightTotal = gr._2.map(_.weight).sum
+        val qtySum = gr._2.map(_.qty).sum
+        val weightSum = gr._2.map(_.weightTotal).sum
         val docs = gr._2.flatMap(_.documents)
-        res += gr._2.head.copy(qty = qtyTotal, weightTotal = weightTotal, documents = docs)
+        res += gr._2.head.copy(qty = qtySum, weightTotal = weightSum, documents = docs)
       })
 
       sender() ! res.asJson.noSpaces
