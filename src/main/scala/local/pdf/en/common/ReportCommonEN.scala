@@ -306,8 +306,8 @@ object ReportCommonEN extends UtilsPDF {
     doc.add(genTextFixPos("DATE", fontHELVETICA, 2.5f, 185.5f, 21.0f, 10f))
     doc.add(genTextFixPos(date, fontHELVETICA, 4.0f, 188.0f, 17.0f, 20f))
     doc.add(genTextFixPos(docNameEN.lastRev, fontHELVETICA, 5.0f, 188.5f, 7f, 10f))
-    doc.add(genTextFixPos(docNameEN.num, fontCOURIER_BOLD, 12.0f, 32.5f, 0.5f, 150f))
-    doc.add(genTextFixPos(docNameEN.name, fontCOURIER_BOLD, 4f, 6.0f, 18.0f, 150f))
+    doc.add(genTextFixPos(docNameEN.num, fontCOURIER_BOLD, 12.0f, 32.5f, 0.5f, 180f))
+    doc.add(genTextFixPos(docNameEN.name, fontCOURIER_BOLD, 4f, 6.0f, 18.0f, 180f))
   }
 
 
