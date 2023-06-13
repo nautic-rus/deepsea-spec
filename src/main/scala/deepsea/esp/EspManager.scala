@@ -198,7 +198,7 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
         res += gr._2.head.copy(qty = qtyTotal, weightTotal = weightTotal, documents = docs)
       })
 
-      sender() ! globalEsp.asJson.noSpaces
+      sender() ! res.asJson.noSpaces
     case GetGlobalEspPdf(project, code, user) =>
       val file = OrderReportV1.generateOrderPDF(project, code, user)
       if (file.nonEmpty){
