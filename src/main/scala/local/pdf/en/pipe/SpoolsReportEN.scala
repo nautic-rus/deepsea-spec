@@ -32,7 +32,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
   def genSpoolsListEnPDF(docNumber: String, docName: String, rev: String, rawData: List[PipeSeg], lang: String, genAll: Boolean = false): String = {
     val filePath: String = Files.createTempDirectory("spoolPdf").toAbsolutePath.toString + File.separator + docNumber + "ML_rev" + rev + ".pdf"
     val rows: List[Item11ColumnsEN] = genRows(rawData, lang)
-    val totalRows: List[Item11ColumnsEN] = genTotal(rows)
+    val totalRows: List[Item11ColumnsEN] = genTotal(rows, lang)
     val dn = DocNameEN(num = docNumber, name = docName, lastRev = if (rev != "") rev else "0")
     processPDF(dn, filePath, rows, totalRows, genAll)
 
@@ -618,7 +618,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
       val matDesc = row.material.description(lang)
       val mat = if (matDesc != "") matName + " (" + matDesc + ")" else matName
       val qty = formatQTY(row)
-      val unit = formatUnits(row.material)
+      val unit = formatUnits(row.material, lang)
       val weight: String = formatWGT(row)
       rows += Item11ColumnsEN(A1 = id, A2 = mat, A3 = unit, A4 = qty, A5 = weight, A11 = row.typeCode, A12 = row.material.code)
     })
@@ -696,22 +696,22 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
     }
   }
 
-  private def formatUnits(mat: Material): String = {
+  private def formatUnits(mat: Material, lang: String): String = {
     mat.units match {
-      case "006" => "m"
-      case "796" => "pcs"
-      case "166" => "kg"
+      case "006" => if (lang == "ru") "м" else "m"
+      case "796" => if (lang == "ru") "шт" else "pcs"
+      case "166" => if (lang == "ru") "кг" else "kg"
       case _ => "NA"
     }
   }
 
-  private def genTotal(in: List[Item11ColumnsEN]): List[Item11ColumnsEN] = {
+  private def genTotal(in: List[Item11ColumnsEN], lang: String): List[Item11ColumnsEN] = {
     val buff = ListBuffer.empty[Item11ColumnsEN]
     in.groupBy(s => s.A12).foreach(gr => {
       val ent = gr._2.head
       val qty = {
         val w = gr._2.map(_.A4.toDoubleOption.getOrElse(0.0)).sum
-        if (ent.A3.equals("pcs")) {
+        if (ent.A3.equals("pcs") || ent.A3 == "шт") {
           Math.ceil(w).toInt.toString
         } else {
           if (w < 0.01) " 0.01" else String.format("%.2f", w)

@@ -190,7 +190,15 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
       val pipe = if (kinds.contains("pipe")) generatePipeGlobalEsp(projects.split(",").toList) else List.empty[GlobalEsp]
       val device = if (kinds.contains("device")) generateDeviceGlobalEsp(projects.split(",").toList) else List.empty[GlobalEsp]
       val globalEsp = hull ++ pipe ++ device
-      sender() ! globalEsp.asJson.noSpaces
+      val res = ListBuffer.empty[GlobalEsp]
+      globalEsp.groupBy(_.code).foreach(gr => {
+        val qtySum = gr._2.map(_.qty).sum
+        val weightSum = gr._2.map(_.weightTotal).sum
+        val docs = gr._2.flatMap(_.documents)
+        res += gr._2.head.copy(qty = qtySum, weightTotal = weightSum, documents = docs)
+      })
+
+      sender() ! res.asJson.noSpaces
     case GetGlobalEspPdf(project, code, user) =>
       val file = OrderReportV1.generateOrderPDF(project, code, user)
       if (file.nonEmpty){
