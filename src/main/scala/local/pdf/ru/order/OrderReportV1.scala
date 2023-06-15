@@ -36,8 +36,8 @@ object OrderReportV1 extends UtilsPDF with MaterialsHelper {
 
   private val rootNames: List[MaterialNode] = {
     val buf = ListBuffer.empty[MaterialNode]
-    buf += MaterialNode("200101", "200101-101-101", "Ведомость заказа корпусного металла (с сертификатом РС)", "HUL", "", 0)
-    buf += MaterialNode("200101", "200101-101-102", "Ведомость заказа трубного проката и фасонных частей", "SYS", "", 0)
+    buf += MaterialNode("200101", "200101-101-102", "Ведомость заказа корпусного металла (с сертификатом РС)", "HUL", "", 0)
+    buf += MaterialNode("200101", "200101-101-103", "Ведомость заказа трубного проката и фасонных частей", "SYS", "", 0)
     buf += MaterialNode("200101", "200101-101-104", "Ведомость заказа арматуры", "VAL", "", 0)
     buf += MaterialNode("200101", "200101-101-105", "Ведомость ДБА", "XX1", "", 0)
     buf += MaterialNode("200101", "200101-101-106", "Ведомость АСИ и ППИ", "XX2", "", 0)
@@ -48,7 +48,7 @@ object OrderReportV1 extends UtilsPDF with MaterialsHelper {
     buf += MaterialNode("200101", "200101-101-113", "Ведомость ЗИП", "XX5", "", 0)
     buf += MaterialNode("200101", "200101-101-114", "Ведомость заказа изделий МСЧ", "MCH", "", 0)
     buf += MaterialNode("200101", "200101-101-115", "Ведомость заказа общих материалов", "COM", "", 0)
-    buf += MaterialNode("200101", "200101-101-116", "Ведомость заказа оборудования", "EQU", "", 0)
+    buf += MaterialNode("200101", "200101-101-101", "Ведомость заказа оборудования", "EQU", "", 0)
     buf.toList
   }
 
