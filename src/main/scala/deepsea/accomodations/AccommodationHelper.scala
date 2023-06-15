@@ -169,6 +169,7 @@ trait AccommodationHelper {
               val userId: String = Option(rs.getString("USERID")).getOrElse("")
               val profileStock: String = Option(rs.getString("PROFILE_STOCK")).getOrElse("")
               val plateStock: String = Option(rs.getString("PLATE_STOCK")).getOrElse("")
+              val plateStockCont: String = Option(rs.getString("PLATE_STOCK_CONT")).getOrElse("")
               if (plateStock == "COMPROUSEXXX0005"){
                 val qw = 0
               }
@@ -230,7 +231,7 @@ trait AccommodationHelper {
                     }
                   }
                   else{
-                    materials.find(x => x.code == profileStock || x.code == plateStock) match {
+                    materials.find(x => x.code == profileStock || x.code == plateStock || x.code == plateStockCont) match {
                       case Some(value) => value
                       case _ => Material()
                     }
