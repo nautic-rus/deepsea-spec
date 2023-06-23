@@ -37,7 +37,12 @@ object AccommodationManager{
         "accommodation",
         "",
         if (profileStock != ""){
-          profileLength / 1000d * material.singleWeight
+          if (weight != 0){
+            weight
+          }
+          else {
+            profileLength / 1000d * material.singleWeight
+          }
         } else{
           if (weight != 0) weight else bsWeight
         },
