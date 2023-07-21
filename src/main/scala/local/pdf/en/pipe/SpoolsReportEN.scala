@@ -730,7 +730,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
 
   private def generateWrappedRows(item: Item11ColumnsEN): List[Item11ColumnsEN] = {
     val A1count = 12
-    val A2count = 80
+    val A2count = 78
     val A3count = 25
     val A4count = 20
     val A5count = 16
