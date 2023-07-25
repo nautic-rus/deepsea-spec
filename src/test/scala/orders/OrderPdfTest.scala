@@ -9,7 +9,7 @@ import java.io.{FileInputStream, FileOutputStream, ObjectInputStream, ObjectOutp
 
 class OrderPdfTest  extends AnyFunSuite with EspManagerHelper{
 
-  val path: String =OrderReportV1.generateOrderPDF("200101","HUL","user")
+  val path: String =OrderReportV1.generateOrderPDF("200101","MCH","user")
 
   println(path)
   val h=0

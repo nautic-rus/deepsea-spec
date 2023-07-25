@@ -677,7 +677,7 @@ object OrderReportV1 extends UtilsPDF with MaterialsHelper {
           val header = s"${das3.rootNode.label_ru} ${das2.rootNode.label_ru} ${das3.rootNode.data}"
           if (!das3.rootNode.data.contains("XXX")) buff += Item11ColumnsEN(true, A1 = header, A2 = das3.rootNode.data)
           das3.in.sortBy(b => b.code.takeRight(4)).foreach(d => {
-            buff += Item11ColumnsEN(false, A1 = d.code.takeRight(4), A2 = d.name, A3 = d.material.document, A4 = d.units,
+            buff += Item11ColumnsEN(false, A1 = d.code.takeRight(4), A2 = d.name, A3 = d.material.description, A4 = d.units,
               A5 = "0", A6 = d.qty.toString, A7 = d.weight.toString, A8 = d.weightTotal.toString,
               A9 = d.material.provider, A10 = "", A11 = d.material.note)
           })

@@ -8,12 +8,13 @@ import com.itextpdf.layout.properties.{HorizontalAlignment, TextAlignment, Verti
 import deepsea.pipe.PipeHelper
 import deepsea.pipe.PipeManager.{Material, PipeSeg}
 import local.pdf.UtilsPDF
-import local.pdf.en.common.ReportCommonEN.{DocNameEN, Item11ColumnsEN, border5mm, defaultFontSize, fillStamp, fontHELVETICA, getNnauticLigoEN, stampEN}
+import local.pdf.en.common.ReportCommonEN.{DocNameEN, Item11ColumnsEN, border5mm, defaultFontSize, fillStamp, fontHELVETICA, getNnauticLigoEN, rowwrap, stampEN}
 import org.davidmoten.text.utils.WordWrap
 
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, File, OutputStream}
 import java.nio.file.Files
+import java.util
 import scala.collection.mutable.ListBuffer
 
 object SpoolsReportEN extends UtilsPDF with PipeHelper {
@@ -146,7 +147,6 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
     var currPage = 1
     var lastA1 = ""
     items.foreach(row => {
-
 
       val wrappedRows: List[Item11ColumnsEN] = {
         val isNeedDummy = (lastA1.nonEmpty && row.A1.nonEmpty && !row.A1.startsWith(lastA1))
@@ -584,7 +584,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
         if (!item.isHeader) {
           bodyGrid.addCell(generateCellDiffSize(item.A1, 3))
           bodyGrid.addCell(generateCellLeftAlign(item.A2))
-          bodyGrid.addCell(generateCellLeftAlign(item.A3))
+          bodyGrid.addCell(generateCell(item.A3))
           bodyGrid.addCell(generateCell(item.A4))
           bodyGrid.addCell(generateCell(item.A5))
         }
@@ -610,7 +610,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
 
     rowsQTY.foreach(row => {
       val id = formatSpoolId(row.spool, row.spPieceId.toString)
-      if (id == "200.002"){
+      if (id == "200.002") {
         val jk = 0
       }
       //val mat = row.material.code+ " "+ row.material.name
@@ -730,7 +730,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
 
   private def generateWrappedRows(item: Item11ColumnsEN): List[Item11ColumnsEN] = {
     val A1count = 12
-    val A2count = 74
+    val A2count = 78
     val A3count = 25
     val A4count = 20
     val A5count = 16
@@ -744,17 +744,17 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
     if (item.isHeader) {
       buff += item
     } else {
-      val A1 = WordWrap.from(item.A1).newLine("$").insertHyphens(false).maxWidth(A1count).wrap().split('$')
-      val A2 = WordWrap.from(item.A2).newLine("$").insertHyphens(false).maxWidth(A2count).wrap().split('$')
-      val A3 = WordWrap.from(item.A3).newLine("$").insertHyphens(false).maxWidth(A3count).wrap().split('$')
-      val A4 = WordWrap.from(item.A4).newLine("$").insertHyphens(false).maxWidth(A4count).wrap().split('$')
-      val A5 = WordWrap.from(item.A5).newLine("$").insertHyphens(false).maxWidth(A5count).wrap().split('$')
-      val A6 = WordWrap.from(item.A6).newLine("$").insertHyphens(false).maxWidth(A6count).wrap().split('$')
-      val A7 = WordWrap.from(item.A7).newLine("$").insertHyphens(false).maxWidth(A7count).wrap().split('$')
-      val A8 = WordWrap.from(item.A8).newLine("$").insertHyphens(false).maxWidth(A8count).wrap().split('$')
-      val A9 = WordWrap.from(item.A9).newLine("$").insertHyphens(false).maxWidth(A9count).wrap().split('$')
-      val A10 = WordWrap.from(item.A10).newLine("$").insertHyphens(false).maxWidth(A10count).wrap().split('$')
-      val A11 = WordWrap.from(item.A11).newLine("$").insertHyphens(false).maxWidth(A11count).wrap().split('$')
+      val A1 = rowwrap(item.A1, A1count)
+      val A2 = rowwrap(item.A2, A2count)
+      val A3 = rowwrap(item.A3, A3count)
+      val A4 = rowwrap(item.A4, A4count)
+      val A5 = rowwrap(item.A5, A5count)
+      val A6 = rowwrap(item.A6, A6count)
+      val A7 = rowwrap(item.A7, A7count)
+      val A8 = rowwrap(item.A8, A8count)
+      val A9 = rowwrap(item.A9, A9count)
+      val A10 = rowwrap(item.A10, A10count)
+      val A11 = rowwrap(item.A11, A11count)
 
       val maxRows: Int = {
         var count = 1

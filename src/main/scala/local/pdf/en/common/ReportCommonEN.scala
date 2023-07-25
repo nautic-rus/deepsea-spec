@@ -339,4 +339,21 @@ object ReportCommonEN extends UtilsPDF {
     }
   }
 
+  def rowwrap(in: String, maxcount: Int): List[String] = {
+    val buff = ListBuffer.empty[String]
+    var str = ""
+    in.split(" ").foreach(w => {
+      if (str.length + w.length < maxcount) {
+        str = str + w + " "
+      } else {
+
+        buff += str.trim
+        str = w + " "
+      }
+    })
+    if (str.nonEmpty) buff += str.trim
+    buff.toList
+  }
+
+
 }
