@@ -137,7 +137,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
 //            if (res.isEmpty){
 //              res ++= getHvacSegs(project, system, sqInSystem)
 //            }
-            res ++ getHvacSegs(project, system, sqInSystem)
+            res ++= getHvacSegs(project, system, sqInSystem)
 
             Await.result(vPipeJointsActualCollection.find().toFuture(), Duration(30, SECONDS)) match {
               case values: Seq[PipeSegActual] =>
