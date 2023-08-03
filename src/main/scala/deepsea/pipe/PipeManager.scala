@@ -173,7 +173,7 @@ class PipeManager extends Actor with Codecs with PipeHelper {
   implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
 
   override def preStart(): Unit ={
-    //self ! GetPipeSegs("N002", "571-002", 6344943.toString)
+    //self ! GetPipeSegs("N002", "574-010", 7104832.toString)
     //self ! GetSpoolModel("210101-545-0001", "032", "0")
   }
 
