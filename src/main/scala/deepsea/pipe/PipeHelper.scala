@@ -140,6 +140,10 @@ trait PipeHelper extends Codecs with MaterialsHelper {
 
             res ++= getHvacSegs(project, system, sqInSystem)
 
+            if (sqInSystem == -1){
+              res ++= getElecEquips(project, system)
+            }
+
             Await.result(vPipeJointsActualCollection.find().toFuture(), Duration(30, SECONDS)) match {
               case values: Seq[PipeSegActual] =>
                 Await.result(mongo.getCollection[PipeSeg](values.last.name).find(and(equal("project", project), if (system != "") equal("system", system) else notEqual("system", system), if (sqInSystem != -1) equal("sqInSystem", sqInSystem) else notEqual("sqInSystem", sqInSystem))).toFuture(), Duration(300, SECONDS)) match {
