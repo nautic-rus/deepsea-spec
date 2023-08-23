@@ -1,4 +1,5 @@
 
+import deepsea.esp.EspManagerHelper
 import deepsea.pipe.{PipeHelper, PipeManager}
 import local.pdf.en.common.ReportCommonEN.{Item11ColumnsEN, rowwrap}
 import local.pdf.en.pipe.SpoolsReportEN.{genSpoolsListEnPDF, genSpoolsListEnPDFAll}
@@ -8,27 +9,25 @@ import org.scalatest.funsuite.AnyFunSuite
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters._
 
-class SpoolsReportTest extends AnyFunSuite with PipeHelper {
+class SpoolsReportTest extends AnyFunSuite with PipeHelper  with EspManagerHelper{
 
 
-  val txt = "ФЛАНЕЦ СВОБОДНЫЙ НА ПРИВАРНОМ СТАЛЬНОМ КОЛЬЦЕ DN100 PN16 (АЕВШ.302631.003-ФЛАНЕЦ СВОБОДНЫЙ НА ПРИВАРНОМ СТАЛЬНОМ КОЛЬЦЕ DN100 PN16 (АЕВШ.302631.003-"
-
-  val item=Item11ColumnsEN(false,"000",txt)
-
-  val b = generateWrappedRows(item)
-
-  val A2 = WordWrap.from(txt).newLine("$").insertHyphens(false).maxWidth(10).wrapToList().asScala.toList
-
-  val hhh = 0
-
-  val pipeSegs: List[PipeManager.PipeSeg] = getPipeSegsFromMongo("N002", "200101-803-001")
-  //  val jk = pipeSegs.filter(_.spool == "197")
-  //  val jkk = jk
+  //val pipeSegs: List[PipeManager.PipeSeg] = getPipeSegsFromMongo("N002", "200101-574-008")
+  val docNumber = "200101-574-008"
+  val projectSystem = getSystemAndProjectFromDocNumber(docNumber)
+  //from real db
+  val pipeSegs: List[PipeManager.PipeSeg] = getPipeSegs(projectSystem._1, projectSystem._2)
+  //from esp
+  val esp = getPipeLatestEsp(projectSystem._1, "pipe", docNumber, "")
+  val pipeSegs2 = ListBuffer.empty[PipeManager.PipeSeg]
+  if (esp.nonEmpty) {
+    pipeSegs2 ++= esp.get.elements
+  }
 
   //val ret: String = genSpoolsListEnPDF("210101-800-0001", "FUEL SYSTEM", "0", jk, "ru")
 
-  val retAll: String = genSpoolsListEnPDFAll("200101-803-001",
-    "СИСТЕМА ВЕНТИЛЯЦИИ ПОМ. ПРИЕМА ПИТАНИЯ С БЕРЕГА И ПОМ. СПАСАТЕЛЬНОГО ИМУЩЕСТВАЖЖЖЖЖЖЖЖЖЖЖЖ", "0", pipeSegs, "ru")
+  val retAll: String = genSpoolsListEnPDFAll("200101-574-008",
+    "СИСТЕМА ВЕНТИЛЯЦИИ ПОМ. ПРИЕМА ПИТАНИЯ С БЕРЕГА И ПОМ. СПАСАТЕЛЬНОГО ИМУЩЕСТВАЖЖЖЖЖЖЖЖЖЖЖЖ", "0", pipeSegs2.toList, "ru")
 
   // println(ret)
   println(retAll)
