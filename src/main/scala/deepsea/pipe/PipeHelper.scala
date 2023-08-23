@@ -1,6 +1,6 @@
 package deepsea.pipe
 
-import deepsea.pipe.PipeManager.{GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSystems, GetZones, Material, MaterialQuality, PipeLineSegment, PipeSeg, PipeSegActual, PipeSegBilling, PipeSup, Pls, PlsElem, PlsParam, ProjectName, SetSpoolLock, SpoolLock, SystemDef, Units, UpdatePipeComp, UpdatePipeJoints}
+import deepsea.pipe.PipeManager.{ElecEquip, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSystems, GetZones, Material, MaterialQuality, PipeLineSegment, PipeSeg, PipeSegActual, PipeSegBilling, PipeSup, Pls, PlsElem, PlsParam, ProjectName, SetSpoolLock, SpoolLock, SystemDef, Units, UpdatePipeComp, UpdatePipeJoints}
 import org.mongodb.scala.{Document, MongoClient, MongoCollection, MongoDatabase, bson}
 import org.mongodb.scala.model.Filters.{and, equal, notEqual}
 import akka.http.scaladsl.{Http, HttpExt}
@@ -137,6 +137,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
 //            if (res.isEmpty){
 //              res ++= getHvacSegs(project, system, sqInSystem)
 //            }
+
             res ++= getHvacSegs(project, system, sqInSystem)
 
             Await.result(vPipeJointsActualCollection.find().toFuture(), Duration(30, SECONDS)) match {
@@ -678,6 +679,9 @@ trait PipeHelper extends Codecs with MaterialsHelper {
           val quality = (bdatri + "    ").substring(0, 4).trim
           val insulation = (bdatri + "    ").substring(4, 4).trim
 
+          if (plsElem.spool == "040"){
+            val qwe = 0
+          }
           val isComp = plsElem.cmp_oid != 0
 
           if (isComp){
@@ -811,7 +815,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                         if (hvacName == "undefined"){
                           val qwe = 0
                         }
-                        if (plsElem.spool == "017"){
+                        if (plsElem.spool == "040"){
                           val q = 0
                         }
 
@@ -849,6 +853,70 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                 }
               case _ =>
             }
+          }
+        })
+        stmt.close()
+        connection.close()
+      case _ =>
+    }
+    res.toList
+  }
+
+  def getElecEquips(project: String, system: String): List[PipeSeg] = {
+    val res = ListBuffer.empty[PipeSeg]
+    val projects = getProjects
+    val rkdProject = projects.find(_.foran == project) match {
+      case Some(value) => value.rkd
+      case _ => project
+    }
+    val materials = getMaterials.filter(_.project == rkdProject)
+    DBManager.GetOracleConnection(project) match {
+      case Some(connection) =>
+        val stmt = connection.createStatement()
+        val q = Source.fromResource("queries/elecEquips.sql").mkString.replace("&system", system)
+
+        val elems = RsIterator(stmt.executeQuery(q)).map(rs => {
+          ElecEquip(
+            Option(rs.getInt("COMP")).getOrElse(0),
+            Option(rs.getString("USERID")).getOrElse(""),
+            Option(rs.getString("ZONE")).getOrElse(""),
+            Option(rs.getString("STOCK_CODE")).getOrElse(""),
+          )
+        }).toList
+
+
+        elems.foreach(elem => {
+          materials.find(_.code == elem.stock) match {
+            case Some(material) =>
+              res += PipeSeg(
+                project,
+                elem.zone,
+                system,
+                "EQUIP",
+                0,
+                0,
+                "EQUIP",
+                "COMPONENT",
+                "",
+                "EQUIP",
+                elem.userId,
+                "",
+                elem.comp,
+                0,
+                0,
+                elem.userId,
+                elem.userId,
+                0,
+                0,
+                0,
+                material.singleWeight,
+                material.code,
+                "",
+                "NI",
+                "",
+                material
+              )
+            case _ =>
           }
         })
         stmt.close()

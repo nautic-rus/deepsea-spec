@@ -165,7 +165,7 @@ object PipeManager{
   case class PipeLineSegment(pls: Pls, bdatri: String, oid: Int)
   case class PlsParam(pls: Pls, paramObj: Int, paramSq: Int, value: Double)
   case class MaterialQuality(code: String, descr: String, weight: Double, thickness: Double)
-
+  case class ElecEquip(comp: Int, userId: String, zone: String, stock: String)
 }
 class PipeManager extends Actor with Codecs with PipeHelper {
 
@@ -173,7 +173,7 @@ class PipeManager extends Actor with Codecs with PipeHelper {
   implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
 
   override def preStart(): Unit ={
-    //self ! GetPipeSegs("N002", "574-010", 7104832.toString)
+    //self ! GetPipeSegs("N002", "412-020")
     //self ! GetSpoolModel("210101-545-0001", "032", "0")
   }
 
