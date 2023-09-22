@@ -131,13 +131,7 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
         case "hull" =>
           sender() ! getHullLatestEsp(foranProject, kind, docNumber, rev).asJson.noSpaces
         case "pipe" =>
-          val esp = getPipeLatestEsp(foranProject, kind, docNumber, rev)
-          if (esp.isEmpty){
-            "no esp"
-          }
-          else{
-            sender() ! esp.asJson.noSpaces
-          }
+          sender() ! getPipeLatestEsp(foranProject, kind, docNumber, rev).asJson.noSpaces
         case "device" =>
           sender() ! getDeviceLatestEsp(foranProject, kind, docNumber, rev).asJson.noSpaces
         case _ =>

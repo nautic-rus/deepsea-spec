@@ -77,7 +77,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
     }
   }
   def getPipeLatestEsp(foranProject: String, kind: String, docNumber: String, rev: String): Option[PipeEspObject] = {
-    DBManager.GetMongoConnection() match {
+    DBManager.GetMongoNewConnection() match {
       case Some(mongo) =>
         val espCollectionName = List(espObjectsCollectionName, foranProject, kind).mkString("-").toLowerCase
         val espCollection: MongoCollection[PipeEspObject] = mongo.getCollection(espCollectionName)

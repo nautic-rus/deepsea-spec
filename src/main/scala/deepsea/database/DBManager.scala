@@ -51,6 +51,10 @@ object DBManager extends Codecs{
   def GetMongoConnection(): Option[MongoDatabase] = {
     Option(mongoClient.getDatabase("3degdatabase").withCodecRegistry(codecRegistry))
   }
+
+  def GetMongoNewConnection(): Option[MongoDatabase] = {
+    Option(MongoClient("mongodb://192.168.1.36").getDatabase("3degdatabase").withCodecRegistry(codecRegistry))
+  }
   def GetMongoCacheConnection(): Option[MongoDatabase] = {
     Option(mongoClient.getDatabase("cache").withCodecRegistry(codecRegistry))
   }
