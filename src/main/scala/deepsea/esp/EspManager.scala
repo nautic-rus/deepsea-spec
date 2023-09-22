@@ -108,7 +108,7 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
 //    val qw = getAllLatestEsp()
 //    val jk = qw
 //      self ! CreateEsp("N002", "200101-100-102", "0", "isaev", "device", 10330.toString)
-    val q = generateDeviceGlobalEsp(List("N002"))
+   // val q = generateDeviceGlobalEsp(List("N002"))
   }
   override def receive: Receive = {
     case CreateEsp(foranProject, docNumber, rev, user, kind, taskId) =>
@@ -127,16 +127,23 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
       }
       sender() ! "success".asJson.noSpaces
     case GetEsp(foranProject, kind, docNumber, rev) =>
-      kind match {
-        case "hull" =>
-          sender() ! getHullLatestEsp(foranProject, kind, docNumber, rev).asJson.noSpaces
-        case "pipe" =>
-          sender() ! getPipeLatestEsp(foranProject, kind, docNumber, rev).asJson.noSpaces
-        case "device" =>
-          sender() ! getDeviceLatestEsp(foranProject, kind, docNumber, rev).asJson.noSpaces
-        case _ =>
-          sender() ! "error".asJson.noSpaces
+      try {
+        kind match {
+          case "hull" =>
+            sender() ! getHullLatestEsp(foranProject, kind, docNumber, rev).asJson.noSpaces
+          case "pipe" =>
+            sender() ! getPipeLatestEsp(foranProject, kind, docNumber, rev).asJson.noSpaces
+          case "device" =>
+            sender() ! getDeviceLatestEsp(foranProject, kind, docNumber, rev).asJson.noSpaces
+          case _ =>
+            sender() ! "error".asJson.noSpaces
+        }
       }
+      catch {
+        case e: Exception =>
+          sender() ! "exception".asJson.noSpaces
+      }
+
     case InitIssues() =>
       DBManager.GetMongoConnection() match {
         case Some(mongo) =>
