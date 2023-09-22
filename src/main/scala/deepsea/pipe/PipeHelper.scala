@@ -473,7 +473,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
     systemDefs.toList
   }
   def getSystemAndProjectFromDocNumber(docNumber: String): (String, String) = {
-    DBManager.GetMongoConnection() match {
+    DBManager.GetMongoNewConnection() match {
       case Some(mongoData) =>
         val projectNamesCollection: MongoCollection[ProjectName] = mongoData.getCollection("project-names")
         val projectNames = Await.result(projectNamesCollection.find().toFuture(), Duration(30, SECONDS)) match {
