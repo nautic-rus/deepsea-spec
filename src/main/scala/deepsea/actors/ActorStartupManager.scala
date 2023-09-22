@@ -37,6 +37,6 @@ class ActorStartupManager extends Actor{
       ActorManager.pipe = system.actorOf(RoundRobinPool(1).props(Props[PipeManager]))
       ActorManager.devices = system.actorOf(RoundRobinPool(1).props(Props[DeviceManager]))
       ActorManager.accommodations = system.actorOf(RoundRobinPool(1).props(Props[AccommodationManager]))
-      ActorManager.esp = system.actorOf(RoundRobinPool(1).props(Props[EspManager]))
+      ActorManager.esp = system.actorOf(RoundRobinPool(3).props(Props[EspManager]))
   }
 }
