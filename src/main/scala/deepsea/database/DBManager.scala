@@ -44,7 +44,14 @@ object DBManager extends Codecs{
 
   def GetOracleConnection(project: String): Option[Connection] ={
     oracleConnections.find(_.project == project) match {
-      case Some(connection) => Option(connection.ds.getConnection)
+      case Some(connection) =>
+        try{
+          Option(connection.ds.getConnection)
+        }
+        catch {
+          case e: Exception => println(e.toString)
+          Option.empty
+        }
       case _ => Option.empty
     }
   }

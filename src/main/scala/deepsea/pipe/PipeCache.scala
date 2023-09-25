@@ -23,8 +23,8 @@ class PipeCache extends Actor{
 
   override def preStart(): Unit = {
     self ! UpdatePipeJoints()
-    system.scheduler.scheduleWithFixedDelay(0.seconds, 3.minutes, self, UpdatePipeComp())
-    system.scheduler.scheduleWithFixedDelay(0.seconds, 3.minutes, self, UpdatePipeJoints())
+    system.scheduler.scheduleWithFixedDelay(0.seconds, 15.minutes, self, UpdatePipeComp())
+    system.scheduler.scheduleWithFixedDelay(0.seconds, 15.minutes, self, UpdatePipeJoints())
   }
 
   override def receive: Receive = {
