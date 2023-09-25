@@ -465,8 +465,8 @@ trait PipeHelper extends Codecs with MaterialsHelper {
             case _ => ""
           })
         }
-        stmt.close()
         rs.close()
+        stmt.close()
         oracleConnection.close()
       case _ =>
     }
