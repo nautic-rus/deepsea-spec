@@ -457,13 +457,8 @@ trait PipeHelper extends Codecs with MaterialsHelper {
         val query = "SELECT S.NAME AS NAME, L.DESCR AS DESCR FROM SYSTEMS S, SYSTEMS_LANG L WHERE S.OID = L.SYSTEM AND L.LANG = -2"
         val rs = stmt.executeQuery(query)
         while (rs.next()){
-          systemDefs += SystemDef(project, rs.getString("NAME") match {
-            case value: String => value
-            case _ => ""
-          }, rs.getString("DESCR") match {
-            case value: String => value
-            case _ => ""
-          })
+          systemDefs += SystemDef(project, Option(rs.getString("NAME")).getOrElse(""),
+            Option(rs.getString("DESCR")).getOrElse(""))
         }
         rs.close()
         stmt.close()
