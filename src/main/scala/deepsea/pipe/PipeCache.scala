@@ -148,31 +148,37 @@ class PipeCache extends Actor{
     List("N002", "N004", "TEST").foreach(proj => {
       DBManager.GetOracleConnection(proj) match {
         case Some(c) =>
-          val s = c.createStatement()
-          val query = s"select * from v_pipejoins"
-          val rs = s.executeQuery(query)
-          while (rs.next()) {
-            val zoneName = Option(rs.getString("ZONENAME")).getOrElse("")
-            val systemName = Option(rs.getString("SYSTEMNAME")).getOrElse("")
-            val gasket = Option(rs.getString("JOINSTOCKCODE")).getOrElse("")
-            val bolts = Option(rs.getString("BOLTS1STOCKCODE")).getOrElse("")
-            val nuts = Option(rs.getString("NUTS1STOCKCODE")).getOrElse("")
-            val boltsNumber = Option(rs.getInt("BOLTS1NUMBER")).getOrElse(0)
-            val nutsNumber = Option(rs.getInt("NUTS1NUMBER")).getOrElse(0)
-            val jointNumber = Option(rs.getInt("JOINTNUMBER")).getOrElse(0)
-            val isomId = Option(rs.getInt("ISOMID")).getOrElse(0)
-            val isomUserId = Option(rs.getString("ISOMUSERID")).getOrElse("")
-            val spoolUserId = Option(rs.getString("SPOOLUSERID")).getOrElse("")
-            val smat = Option(rs.getString("SMAT")).getOrElse("")
-            val apClass = Option(rs.getString("APCLASS")).getOrElse("")
+          try {
+            val s = c.createStatement()
+            val query = s"select * from v_pipejoins"
+            val rs = s.executeQuery(query)
+            while (rs.next()) {
+              val zoneName = Option(rs.getString("ZONENAME")).getOrElse("")
+              val systemName = Option(rs.getString("SYSTEMNAME")).getOrElse("")
+              val gasket = Option(rs.getString("JOINSTOCKCODE")).getOrElse("")
+              val bolts = Option(rs.getString("BOLTS1STOCKCODE")).getOrElse("")
+              val nuts = Option(rs.getString("NUTS1STOCKCODE")).getOrElse("")
+              val boltsNumber = Option(rs.getInt("BOLTS1NUMBER")).getOrElse(0)
+              val nutsNumber = Option(rs.getInt("NUTS1NUMBER")).getOrElse(0)
+              val jointNumber = Option(rs.getInt("JOINTNUMBER")).getOrElse(0)
+              val isomId = Option(rs.getInt("ISOMID")).getOrElse(0)
+              val isomUserId = Option(rs.getString("ISOMUSERID")).getOrElse("")
+              val spoolUserId = Option(rs.getString("SPOOLUSERID")).getOrElse("")
+              val smat = Option(rs.getString("SMAT")).getOrElse("")
+              val apClass = Option(rs.getString("APCLASS")).getOrElse("")
 
-            pipeSegs += PipeSeg(proj, zoneName, systemName, "", 0, 0, "JOINT", "", apClass, "GASKET", "", smat, 0, 90, 90, isomUserId, spoolUserId, jointNumber, 0, 0, 0, gasket.trim, "", "", "")
-            pipeSegs += PipeSeg(proj, zoneName, systemName, "", 0, 0, "JOINT", "", apClass, "BOLT", "", smat, 0, 91, 91, isomUserId, spoolUserId, boltsNumber, 0, 0, 0, bolts.trim, "", "", "")
-            pipeSegs += PipeSeg(proj, zoneName, systemName, "", 0, 0, "JOINT", "", apClass, "NUT", "", smat, 0, 92, 92, isomUserId, spoolUserId, nutsNumber, 0, 0, 0, nuts.trim, "", "", "")
+              pipeSegs += PipeSeg(proj, zoneName, systemName, "", 0, 0, "JOINT", "", apClass, "GASKET", "", smat, 0, 90, 90, isomUserId, spoolUserId, jointNumber, 0, 0, 0, gasket.trim, "", "", "")
+              pipeSegs += PipeSeg(proj, zoneName, systemName, "", 0, 0, "JOINT", "", apClass, "BOLT", "", smat, 0, 91, 91, isomUserId, spoolUserId, boltsNumber, 0, 0, 0, bolts.trim, "", "", "")
+              pipeSegs += PipeSeg(proj, zoneName, systemName, "", 0, 0, "JOINT", "", apClass, "NUT", "", smat, 0, 92, 92, isomUserId, spoolUserId, nutsNumber, 0, 0, 0, nuts.trim, "", "", "")
 
+            }
+            s.close()
+            c.close()
           }
-          s.close()
-          c.close()
+          catch {
+            case e: Exception => println(e.toString)
+          }
+
         case _ =>
       }
     })
