@@ -41,6 +41,9 @@ class PipeCache extends Actor{
           val query = Source.fromResource("queries/pipeComps.sql").mkString
           val rs = s.executeQuery(query)
           while (rs.next()) {
+            val fcon1 = Option(rs.getString("FCON1")).getOrElse("")
+            val fcon2 = Option(rs.getString("FCON2")).getOrElse("")
+            val fcon3 = Option(rs.getString("FCON3")).getOrElse("")
             pipeSegs += PipeSeg(project = proj, zone = rs.getString("ZONENAME") match {
               case value: String => value
               case _ => ""
@@ -94,23 +97,54 @@ class PipeCache extends Actor{
                 case value: Double => value
                 case _ => 0
               }, weight = rs.getDouble("WEIGHT") match {
-                case value: Double => value
+                case value: Double =>
+                  if (value == 0){
+                    fcon1 match {
+                      case "HTF " => "PP-R"
+                      case value: String => value
+                    }
+                    fcon2 match {
+                      case "H3.0" => "5.5P"
+                      case value: String => value
+                    }
+                    if ((fcon1 + fcon2).trim.nonEmpty) {
+                      DBManager.GetOracleConnection(proj) match {
+                        case Some(subConn) =>
+                          val subStmt = subConn.createStatement()
+                          val subQuery = s"select weight from component where oid in (select comp from component_outf where qmat = '$fcon1' and fcon2 = '$fcon2' and fcon3 = '$fcon3') and rownum = 1"
+                          val subRs = subStmt.executeQuery(subQuery)
+                          val weight = if (subRs.next()) {
+                            subRs.getDouble("weight")
+                          }
+                          else {
+                            0
+                          }
+                          subRs.close()
+                          subStmt.close()
+                          subConn.close()
+                          weight
+                        case _ => 0
+                      }
+                    }
+                    else {
+                      0
+                    }
+                  }
+                  else{
+                    value
+                  }
                 case _ => 0
               }, stock = rs.getString("STOCKCODE") match {
                 case value: String =>
                   if (value.trim == ""){
-                    if (rs.getString("SYSTEMNAME") == "581-002" && rs.getString("SPOOLUSERID") == "050"){
-                      val jk = 0
-                    }
-                    val fcon1 = Option(rs.getString("FCON1")).getOrElse("") match {
+                    fcon1 match {
                       case "HTF " => "PP-R"
                       case value: String => value
                     }
-                    val fcon2 = Option(rs.getString("FCON2")).getOrElse("") match {
+                    fcon2 match {
                       case "H3.0" => "5.5P"
                       case value: String => value
                     }
-                    val fcon3 = Option(rs.getString("FCON3")).getOrElse("")
                     if ((fcon1 + fcon2).trim.nonEmpty){
                       DBManager.GetOracleConnection(proj) match {
                         case Some(subConn) =>
@@ -154,6 +188,9 @@ class PipeCache extends Actor{
         case _ =>
       }
     })
+
+
+
     GetMongoCacheConnection() match {
       case Some(mongo) =>
 
