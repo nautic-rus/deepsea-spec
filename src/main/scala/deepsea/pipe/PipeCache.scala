@@ -41,8 +41,14 @@ class PipeCache extends Actor{
           val query = Source.fromResource("queries/pipeComps.sql").mkString
           val rs = s.executeQuery(query)
           while (rs.next()) {
-            val fcon1 = Option(rs.getString("FCON1")).getOrElse("")
-            val fcon2 = Option(rs.getString("FCON2")).getOrElse("")
+            val fcon1 = Option(rs.getString("FCON1")).getOrElse("") match {
+              case "HTF " => "PP-R"
+              case value: String => value
+            }
+            val fcon2 = Option(rs.getString("FCON2")).getOrElse("") match {
+              case "H3.0" => "5.5P"
+              case value: String => value
+            }
             val fcon3 = Option(rs.getString("FCON3")).getOrElse("")
             pipeSegs += PipeSeg(project = proj, zone = rs.getString("ZONENAME") match {
               case value: String => value
@@ -99,14 +105,6 @@ class PipeCache extends Actor{
               }, weight = rs.getDouble("WEIGHT") match {
                 case value: Double =>
                   if (value == 0){
-                    fcon1 match {
-                      case "HTF " => "PP-R"
-                      case value: String => value
-                    }
-                    fcon2 match {
-                      case "H3.0" => "5.5P"
-                      case value: String => value
-                    }
                     if ((fcon1 + fcon2).trim.nonEmpty) {
                       DBManager.GetOracleConnection(proj) match {
                         case Some(subConn) =>
@@ -137,14 +135,6 @@ class PipeCache extends Actor{
               }, stock = rs.getString("STOCKCODE") match {
                 case value: String =>
                   if (value.trim == ""){
-                    fcon1 match {
-                      case "HTF " => "PP-R"
-                      case value: String => value
-                    }
-                    fcon2 match {
-                      case "H3.0" => "5.5P"
-                      case value: String => value
-                    }
                     if ((fcon1 + fcon2).trim.nonEmpty){
                       DBManager.GetOracleConnection(proj) match {
                         case Some(subConn) =>
