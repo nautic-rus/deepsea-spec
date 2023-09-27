@@ -97,7 +97,46 @@ class PipeCache extends Actor{
                 case value: Double => value
                 case _ => 0
               }, stock = rs.getString("STOCKCODE") match {
-                case value: String => value
+                case value: String =>
+                  if (value.trim == ""){
+                    if (rs.getString("SYSTEMNAME") == "581-002" && rs.getString("SPOOLUSERID") == "050"){
+                      val jk = 0
+                    }
+                    val fcon1 = Option(rs.getString("FCON1")).getOrElse("") match {
+                      case "HTF " => "PP-R"
+                      case value: String => value
+                    }
+                    val fcon2 = Option(rs.getString("FCON2")).getOrElse("") match {
+                      case "H3.0" => "5.5P"
+                      case value: String => value
+                    }
+                    val fcon3 = Option(rs.getString("FCON3")).getOrElse("")
+                    if ((fcon1 + fcon2).trim.nonEmpty){
+                      DBManager.GetOracleConnection(proj) match {
+                        case Some(subConn) =>
+                          val subStmt = subConn.createStatement()
+                          val subQuery = s"select stock_code from component where oid in (select comp from component_outf where qmat = '$fcon1' and fcon2 = '$fcon2' and fcon3 = '$fcon3') and rownum = 1"
+                          val subRs = subStmt.executeQuery(subQuery)
+                          val stock = if (subRs.next()) {
+                            subRs.getString("stock_code")
+                          }
+                          else {
+                            ""
+                          }
+                          subRs.close()
+                          subStmt.close()
+                          subConn.close()
+                          stock
+                        case _ => ""
+                      }
+                    }
+                    else{
+                      ""
+                    }
+                  }
+                  else{
+                    value
+                  }
                 case _ => ""
               }, fcon3 = rs.getString("FCON3") match {
                 case value: String => value
