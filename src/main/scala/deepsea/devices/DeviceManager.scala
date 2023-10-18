@@ -28,8 +28,8 @@ object DeviceManager{
 
   case class GetDevices(docNumber: String)
   case class GetDevicesESP(docNumber: String, revision: String, lang: String = "en")
-  case class AddDeviceToSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String = "")
-  case class RemoveDeviceFromSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String = "")
+  case class AddDeviceToSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String, addText: String)
+  case class RemoveDeviceFromSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String, addText: String)
 }
 class DeviceManager extends Actor with DeviceHelper with AccommodationHelper with Codecs {
 
@@ -60,11 +60,11 @@ class DeviceManager extends Actor with DeviceHelper with AccommodationHelper wit
         case url: String => sender() ! url.asJson.noSpaces
         case _ => sender() ! "error".asJson.noSpaces
       }
-    case AddDeviceToSystem(docNumber, stock, units, count, label, forLabel) =>
-      addDeviceToSystem(docNumber, stock, units, count, label, forLabel)
+    case AddDeviceToSystem(docNumber, stock, units, count, label, forLabel, addText) =>
+      addDeviceToSystem(docNumber, stock, units, count, label, forLabel, addText)
       sender() ! "success".asJson.noSpaces
-    case RemoveDeviceFromSystem(docNumber, stock, units, count, label, forLabel) =>
-      removeDeviceFromSystem(docNumber, stock, units, count, label, forLabel)
+    case RemoveDeviceFromSystem(docNumber, stock, units, count, label, forLabel, addText) =>
+      removeDeviceFromSystem(docNumber, stock, units, count, label, forLabel, addText)
       sender() ! "success".asJson.noSpaces
     case _ => None
   }

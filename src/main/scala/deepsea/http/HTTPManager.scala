@@ -223,11 +223,11 @@ class HTTPManager extends Actor {
       (get & path("devicesEspFiles") & parameter("docNumber") & parameter("revision") & parameter("lang")) { (docNumber, revision, lang) =>
         askFor(ActorManager.devices, GetDevicesESP(docNumber, revision, lang))
       },
-      (get & path("addDeviceToSystem") & parameter("docNumber") & parameter("stock") & parameter("units") & parameter("count") & parameter("label") & parameter("forLabel")) { (docNumber, stock, units, count, label, forLabel) =>
-        askFor(ActorManager.devices, AddDeviceToSystem(docNumber, stock, units, count, label, forLabel))
+      (get & path("addDeviceToSystem") & parameter("docNumber") & parameter("stock") & parameter("units") & parameter("count") & parameter("label") & parameter("forLabel") & parameter("addText")) { (docNumber, stock, units, count, label, forLabel, addText) =>
+        askFor(ActorManager.devices, AddDeviceToSystem(docNumber, stock, units, count, label, forLabel, addText))
       },
-      (get & path("removeDeviceFromSystem") & parameter("docNumber") & parameter("stock") & parameter("units") & parameter("count") & parameter("label") & parameter("forLabel")) { (docNumber, stock, units, count, label, forLabel) =>
-        askFor(ActorManager.devices, RemoveDeviceFromSystem(docNumber, stock, units, count, label, forLabel))
+      (get & path("removeDeviceFromSystem") & parameter("docNumber") & parameter("stock") & parameter("units") & parameter("count") & parameter("label") & parameter("forLabel") & parameter("addText")) { (docNumber, stock, units, count, label, forLabel, addText) =>
+        askFor(ActorManager.devices, RemoveDeviceFromSystem(docNumber, stock, units, count, label, forLabel, addText))
       },
 
       //ACCOMMODATIONS

@@ -221,7 +221,7 @@ trait DeviceHelper extends AccommodationHelper {
     devices ++= devicesAuxFromComp.toList
     devices.filter(_.material.code != "").toList
   }
-  def addDeviceToSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String = ""): Unit ={
+  def addDeviceToSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String, addText: String): Unit ={
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
         val projectNamesCollection: MongoCollection[ProjectName] = mongo.getCollection("project-names")
@@ -241,7 +241,7 @@ trait DeviceHelper extends AccommodationHelper {
           case _ => ""
         }
         val descrs = ListBuffer.empty[SystemLang]
-        val newLabel = List(label, stock, units, count).mkString("|")
+        val newLabel = List(label, stock, units, count, addText).mkString("|")
         if (forLabel == ""){
           DBManager.GetOracleConnection(foranProject) match {
             case Some(oracle) =>
@@ -327,7 +327,7 @@ trait DeviceHelper extends AccommodationHelper {
       case _ =>
     }
   }
-  def removeDeviceFromSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String = ""): Unit ={
+  def removeDeviceFromSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String, addText: String): Unit ={
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
         val projectNamesCollection: MongoCollection[ProjectName] = mongo.getCollection("project-names")
@@ -347,7 +347,7 @@ trait DeviceHelper extends AccommodationHelper {
           case _ => ""
         }
         val descrs = ListBuffer.empty[SystemLang]
-        val newLabel = List(label, stock, units, count).mkString("|")
+        val newLabel = List(label, stock).mkString("|")
         if (forLabel == ""){
           DBManager.GetOracleConnection(foranProject) match {
             case Some(oracle) =>
@@ -372,8 +372,20 @@ trait DeviceHelper extends AccommodationHelper {
             DBManager.GetOracleConnection(foranProject) match {
               case Some(oracle) =>
                 val s = oracle.createStatement()
-                val query = s"update systems_lang set long_descr = replace(long_descr, '$newLabel', '') where system = ${d.systemId} and lang = ${d.lang}"
-                s.execute(query)
+                val qSelect = s"select long_descr from systems_lang systems_lang where system = ${d.systemId} and lang = ${d.lang}"
+                val rs = s.executeQuery(qSelect)
+                val labels = if (rs.next()){
+                  rs.getString("long_descr")
+                }
+                else{
+                  ""
+                }
+                rs.close()
+                if (labels.contains(newLabel)){
+                  val newLabelText = labels.split("\n").filter(_.contains("|")).filter(x => !x.contains(newLabel)).mkString("\n")
+                  val query = s"update systems_lang set long_descr = '$newLabelText' where system = ${d.systemId} and lang = ${d.lang}"
+                  s.execute(query)
+                }
                 s.close()
                 oracle.close()
               case _ =>

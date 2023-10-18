@@ -222,7 +222,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
               d.descr.split('\n').toList.foreach(l => {
                 val split = l.split('|')
                 val pos = split.head
-                if (split.length == 4){
+                if (split.length >= 4){
                   res += PipeSeg(
                     project, "", system, "", 0, 0, "AUX", "", "",
                     "AUX", "Inserted Manually", "", 0, 0, 0, pos, pos, split.last.toDoubleOption.getOrElse(0),
@@ -230,7 +230,13 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                       case Some(value) => value.singleWeight
                       case _ => 0
                     }, split(1), "", "", "", materials.find(_.code == split(1)) match {
-                      case Some(value) => value
+                      case Some(value) =>
+                        if (split.length > 4){
+                          value.copy(name = value.name + ", " + split(4), translations = value.translations.map(x => x.copy(name = x.name + ", " + split(4))))
+                        }
+                        else{
+                          value
+                        }
                       case _ => Material()
                     }
                   )
