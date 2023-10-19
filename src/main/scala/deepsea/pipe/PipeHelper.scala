@@ -225,7 +225,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                 if (split.length >= 4){
                   res += PipeSeg(
                     project, "", system, "", 0, 0, "AUX", "", "",
-                    "AUX", "Inserted Manually", "", 0, 0, 0, pos, pos, split.last.toDoubleOption.getOrElse(0),
+                    "AUX", "Inserted Manually", "", 0, 0, 0, pos, pos, split(3).toDoubleOption.getOrElse(0),
                     0, 0, materials.find(_.code == split(1)) match {
                       case Some(value) => value.singleWeight
                       case _ => 0
