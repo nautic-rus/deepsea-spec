@@ -6,7 +6,9 @@ import akka.util.Timeout
 import deepsea.actors.ActorManager
 import deepsea.files.FileManager.GenerateUrl
 import deepsea.pipe.PipeManager.Material
+import io.circe.{Decoder, Encoder}
 import io.circe.generic.auto._
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax._
 import local.common.Codecs
 import local.common.DBRequests.MountItem
@@ -240,6 +242,27 @@ object ElecManager {
 
                   )
 
+  case class GetElecBlocks(project: String)
+  case class GetElecZones(project: String)
+  case class GetElecSystems(project: String)
+  case class GetEleComplects(project: String)
+  case class AddEleComplect(complect: String)
+  case class DeleteEleComplect(drawing: String)
+  case class UpdateEleComplect(drawing: String)
+  case class Block(code: String, name: String)
+  case class Zone(code: String, name: String)
+  case class System(code: String, name: String)
+
+  implicit val BlockDecoder: Decoder[Block] = deriveDecoder[Block]
+  implicit val BlockEncoder: Encoder[Block] = deriveEncoder[Block]
+
+  implicit val ZoneDecoder: Decoder[Zone] = deriveDecoder[Zone]
+  implicit val ZoneEncoder: Encoder[Zone] = deriveEncoder[Zone]
+
+  implicit val SystemDecoder: Decoder[System] = deriveDecoder[System]
+  implicit val SystemEncoder: Encoder[System] = deriveEncoder[System]
+
+
   class ElecManager extends Actor with ElecHelper with Codecs {
     implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
 
@@ -267,8 +290,6 @@ object ElecManager {
         sender() ! retrieveEleComplectsJsonString(project)
       case FixTrayBundle(project, docNumber) =>
         sender() ! fixFBS(project, docNumber)
-
-
       case GenerateTrayPdf(project, docNumber, revision) =>
         val tempDirectory = Files.createTempDirectory("trayPdf").toAbsolutePath.toString
         val files = revision match {
@@ -301,6 +322,23 @@ object ElecManager {
           case url: String => sender() ! url.asJson.noSpaces
           case _ => sender() ! "error".asJson.noSpaces
         }
+      case GetElecBlocks(project) =>
+        sender() ! getBlocks(project).asJson.noSpaces
+      case GetElecZones(project) =>
+        sender() ! getZones(project).asJson.noSpaces
+      case GetElecSystems(project) =>
+        sender() ! getSystems(project).asJson.noSpaces
+      case GetEleComplects(project) =>
+        getEleComplects(project).asJson.noSpaces
+      case AddEleComplect(complect: String) =>
+        addEleComplect(complect)
+        sender() ! "success".asJson.noSpaces
+      case DeleteEleComplect(drawing: String) =>
+        deleteEleComplect(drawing)
+        sender() ! "success".asJson.noSpaces
+      case UpdateEleComplect(drawing) =>
+        updateEleComplect(drawing)
+        sender() ! "success".asJson.noSpaces
       case _ => None
     }
   }

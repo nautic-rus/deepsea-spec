@@ -118,6 +118,8 @@ trait Codecs {
 
 
 
+
+
   //KOKOVIN
 
   implicit val EleComplectDecoder: Decoder[EleComplect] = deriveDecoder[EleComplect]

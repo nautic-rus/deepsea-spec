@@ -277,6 +277,27 @@ class HTTPManager extends Actor {
         askFor(ActorManager.esp, GetMaterialPurchases(project))
       },
 
+      //NEW ELEC
+      (get & path("blocks") & parameter("project")) { (project) =>
+        askFor(ActorManager.elec, GetElecBlocks(project))
+      },
+      (get & path("zones") & parameter("project")) { (project) =>
+        askFor(ActorManager.elec, GetElecZones(project))
+      },
+      (get & path("systems") & parameter("project")) { (project) =>
+        askFor(ActorManager.elec, GetElecSystems(project))
+      },
+      (post & path("addEleComplect") & entity(as[String])) { (complect) =>
+        askFor(ActorManager.elec, AddEleComplect(complect))
+      },
+      (post & path("updateEleComplect") & entity(as[String])) { (complect) =>
+        askFor(ActorManager.elec, UpdateEleComplect(complect))
+      },
+      (get & path("deleteEleComplect") & parameter("drawing")) { (drawing) =>
+        askFor(ActorManager.elec, DeleteEleComplect(drawing))
+      },
+
+
       (get & path("time")) {
         complete(HttpEntity(new Date().getTime.asJson.noSpaces))
       },

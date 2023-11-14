@@ -1,19 +1,31 @@
 package deepsea.elec
 
-import breeze.linalg.{DenseMatrix, DenseVector}
+import breeze.linalg.DenseMatrix
 import deepsea.database.DBManager
-import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, ElecAngle, ElecCable, EquipmentConnection, ForanEq, NodeConnect, TrayBySystem, TraysBySystem}
+import deepsea.database.DBManager.RsIterator
+import deepsea.elec.ElecManager._
+import deepsea.esp.EspManager.{DeviceEspObject, espObjectsCollectionName}
 import deepsea.esp.EspManagerHelper
-import deepsea.pipe.PipeManager.{Material, ProjectName}
+import deepsea.pipe.PipeManager.{Material, SpoolLock}
 import local.common.Codecs
-import local.common.DBRequests.{MountItem, calculateH, findWorkshopMaterialContains, retrieveAllMaterialsByProject}
+import local.common.DBRequests.{MountItem, findWorkshopMaterialContains, retrieveAllMaterialsByProject}
 import local.domain.WorkShopMaterial
-import local.ele.eq.EleEqManager.EleEq
+import local.ele.CommonEle.EleComplect
 import org.mongodb.scala.MongoCollection
-import org.mongodb.scala.model.Filters.{and, equal, not}
-
+import org.mongodb.scala.model.Filters.{and, equal}
+import io.circe.parser._
+import io.circe.{Decoder, Encoder}
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.syntax.EncoderOps
+import io.circe._
+import io.circe.generic.JsonCodec
+import io.circe.parser._
+import io.circe.generic.auto._
+import io.circe.syntax._
+import io.circe.generic.semiauto._
+import java.util.Date
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.{Duration, SECONDS}
 import scala.io.Source
 
@@ -566,5 +578,100 @@ trait ElecHelper extends Codecs with EspManagerHelper {
       }
     })
     buffer.toList
+  }
+
+  def getBlocks(project: String): List[Block] = {
+    DBManager.GetOracleConnection(project) match {
+      case Some(connection) =>
+        val stmt = connection.createStatement()
+        val q = "select * from block"
+        val res = RsIterator(stmt.executeQuery(q)).map(rs => {
+          Block(
+            Option(rs.getString("CODE")).getOrElse(""),
+            Option(rs.getString("DESCRIPTION")).getOrElse(""),
+          )
+        }).toList
+        stmt.close()
+        connection.close()
+        res
+      case _ => List.empty[Block]
+    }
+  }
+  def getZones(project: String): List[Zone] = {
+    DBManager.GetOracleConnection(project) match {
+      case Some(connection) =>
+        val stmt = connection.createStatement()
+        val q = "select zn.name, zl.descr from zone zn, zone_lang zl where zn.oid = zl.zone and zl.lang = -2"
+        val res = RsIterator(stmt.executeQuery(q)).map(rs => {
+          Zone(
+            Option(rs.getString("NAME")).getOrElse(""),
+            Option(rs.getString("DESCRIPTION")).getOrElse(""),
+          )
+        }).toList
+        stmt.close()
+        connection.close()
+        res
+      case _ => List.empty[Zone]
+    }
+  }
+  def getSystems(project: String): List[System] = {
+    DBManager.GetOracleConnection(project) match {
+      case Some(connection) =>
+        val stmt = connection.createStatement()
+        val q = "select st.name, sl.descr from systems st, systems_lang sl where sl.system = st.oid and sl.lang = -2"
+        val res = RsIterator(stmt.executeQuery(q)).map(rs => {
+          System(
+            Option(rs.getString("NAME")).getOrElse(""),
+            Option(rs.getString("DESCRIPTION")).getOrElse(""),
+          )
+        }).toList
+        stmt.close()
+        connection.close()
+        res
+      case _ => List.empty[System]
+    }
+  }
+  def getEleComplects(project: String): List[EleComplect] = {
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val espCollection: MongoCollection[EleComplect] = mongo.getCollection("eleComplects")
+        Await.result(espCollection.find().toFuture(), Duration(10, SECONDS)) match {
+          case complects: List[EleComplect] => complects
+          case _ => List.empty[EleComplect]
+        }
+      case _ => List.empty[EleComplect]
+    }
+  }
+  def addEleComplect(json: String): Unit = {
+    decode[EleComplect](json) match {
+      case Right(value) =>
+        DBManager.GetMongoConnection() match {
+          case Some(mongo) =>
+            val espCollection: MongoCollection[EleComplect] = mongo.getCollection("eleComplects")
+            Await.result(espCollection.insertOne(value).toFuture(), Duration(10, SECONDS))
+          case _ => None
+        }
+      case Left(value) =>
+    }
+  }
+  def updateEleComplect(json: String): Unit = {
+    decode[EleComplect](json) match {
+      case Right(value) =>
+        DBManager.GetMongoConnection() match {
+          case Some(mongo) =>
+            val espCollection: MongoCollection[EleComplect] = mongo.getCollection("eleComplects")
+            Await.result(espCollection.replaceOne(equal("drawingId", value.drawingId), value).toFuture(), Duration(10, SECONDS))
+          case _ => None
+        }
+      case Left(value) =>
+    }
+  }
+  def deleteEleComplect(drawing: String): Unit = {
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val espCollection: MongoCollection[EleComplect] = mongo.getCollection("eleComplects")
+        Await.result(espCollection.deleteOne(equal("drawingId", drawing)).toFuture(), Duration(10, SECONDS))
+      case _ => None
+    }
   }
 }
