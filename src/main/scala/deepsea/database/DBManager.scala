@@ -19,8 +19,9 @@ object DBManager extends Codecs{
   private val configOracle = new HikariConfig()
   private val oracleConnections = ListBuffer.empty[OracleConnection]
   private val mongoClient: MongoClient = MongoClient("mongodb://192.168.1.36")
+  val foranProjects = List("N002", "N004", "N005", "N007", "SC01", "LV01", "AN01", "P701", "NT02", "KA01")
 
-  List("N002", "N004", "N005", "N007", "SC01", "LV01", "AN01", "P701", "NT02", "KA01").foreach(project => {
+  foranProjects.foreach(project => {
     try{
         configOracle.setDriverClassName("oracle.jdbc.driver.OracleDriver")
         configOracle.setJdbcUrl("jdbc:oracle:thin:@192.168.1.12:1521:ORA3DB")

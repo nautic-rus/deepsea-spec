@@ -2,7 +2,7 @@ package deepsea.elec
 
 import breeze.linalg.DenseMatrix
 import deepsea.database.DBManager
-import deepsea.database.DBManager.RsIterator
+import deepsea.database.DBManager.{RsIterator, foranProjects}
 import deepsea.elec.ElecManager._
 import deepsea.esp.EspManager.{DeviceEspObject, espObjectsCollectionName}
 import deepsea.esp.EspManagerHelper
@@ -23,6 +23,7 @@ import io.circe.parser._
 import io.circe.generic.auto._
 import io.circe.syntax._
 import io.circe.generic.semiauto._
+
 import java.util.Date
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{Await, Future}
@@ -580,6 +581,9 @@ trait ElecHelper extends Codecs with EspManagerHelper {
     buffer.toList
   }
 
+  def getElecProjects: List[String] = {
+    foranProjects
+  }
   def getBlocks(project: String): List[Block] = {
     DBManager.GetOracleConnection(project) match {
       case Some(connection) =>

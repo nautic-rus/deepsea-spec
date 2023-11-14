@@ -246,6 +246,7 @@ object ElecManager {
   case class GetElecZones(project: String)
   case class GetElecSystems(project: String)
   case class GetEleComplects(project: String)
+  case class GetElecProjects()
   case class AddEleComplect(complect: String)
   case class DeleteEleComplect(drawing: String)
   case class UpdateEleComplect(drawing: String)
@@ -322,6 +323,8 @@ object ElecManager {
           case url: String => sender() ! url.asJson.noSpaces
           case _ => sender() ! "error".asJson.noSpaces
         }
+      case GetElecProjects() =>
+        sender() ! getElecProjects.asJson.noSpaces
       case GetElecBlocks(project) =>
         sender() ! getBlocks(project).asJson.noSpaces
       case GetElecZones(project) =>

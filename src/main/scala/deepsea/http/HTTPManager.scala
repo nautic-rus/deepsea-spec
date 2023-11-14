@@ -278,6 +278,9 @@ class HTTPManager extends Actor {
       },
 
       //NEW ELEC
+      (get & path("projects")) { (project) =>
+        askFor(ActorManager.elec, GetElecProjects(project))
+      },
       (get & path("blocks") & parameter("project")) { (project) =>
         askFor(ActorManager.elec, GetElecBlocks(project))
       },
