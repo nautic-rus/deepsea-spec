@@ -290,6 +290,9 @@ class HTTPManager extends Actor {
       (get & path("systems") & parameter("project")) { (project) =>
         askFor(ActorManager.elec, GetElecSystems(project))
       },
+      (get & path("complects") & parameter("drawing")) { (project) =>
+        askFor(ActorManager.elec, GetEleComplects(project))
+      },
       (post & path("addEleComplect") & entity(as[String])) { (complect) =>
         askFor(ActorManager.elec, AddEleComplect(complect))
       },
