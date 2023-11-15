@@ -609,7 +609,7 @@ trait ElecHelper extends Codecs with EspManagerHelper {
         val res = RsIterator(stmt.executeQuery(q)).map(rs => {
           Zone(
             Option(rs.getString("NAME")).getOrElse(""),
-            Option(rs.getString("DESCRIPTION")).getOrElse(""),
+            Option(rs.getString("DESCR")).getOrElse(""),
           )
         }).toList
         stmt.close()
@@ -626,7 +626,7 @@ trait ElecHelper extends Codecs with EspManagerHelper {
         val res = RsIterator(stmt.executeQuery(q)).map(rs => {
           System(
             Option(rs.getString("NAME")).getOrElse(""),
-            Option(rs.getString("DESCRIPTION")).getOrElse(""),
+            Option(rs.getString("DESCR")).getOrElse(""),
           )
         }).toList
         stmt.close()
@@ -639,7 +639,7 @@ trait ElecHelper extends Codecs with EspManagerHelper {
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
         val espCollection: MongoCollection[EleComplect] = mongo.getCollection("eleComplects")
-        Await.result(espCollection.find().toFuture(), Duration(10, SECONDS)) match {
+        Await.result(espCollection.find(equal("project", project)).toFuture(), Duration(10, SECONDS)) match {
           case complects: List[EleComplect] => complects
           case _ => List.empty[EleComplect]
         }
