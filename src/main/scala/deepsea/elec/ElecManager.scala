@@ -332,7 +332,7 @@ object ElecManager {
       case GetElecSystems(project) =>
         sender() ! getSystems(project).asJson.noSpaces
       case GetEleComplects(project) =>
-        getEleComplects(project).asJson.noSpaces
+        sender() ! getEleComplects(project).asJson.noSpaces
       case AddEleComplect(complect: String) =>
         addEleComplect(complect)
         sender() ! "success".asJson.noSpaces
