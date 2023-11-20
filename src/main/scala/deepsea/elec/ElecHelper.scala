@@ -585,55 +585,64 @@ trait ElecHelper extends Codecs with EspManagerHelper {
     foranProjects
   }
   def getBlocks(project: String): List[Block] = {
+    val blocks = ListBuffer.empty[Block]
     DBManager.GetOracleConnection(project) match {
       case Some(connection) =>
         val stmt = connection.createStatement()
         val q = "select * from block"
-        val res = RsIterator(stmt.executeQuery(q)).map(rs => {
-          Block(
+        val rs = stmt.executeQuery(q)
+        while (rs.next()){
+          blocks += Block(
             Option(rs.getString("CODE")).getOrElse(""),
             Option(rs.getString("DESCRIPTION")).getOrElse(""),
           )
-        }).toList
+        }
+        rs.close()
         stmt.close()
         connection.close()
-        res
       case _ => List.empty[Block]
     }
+    blocks.toList
   }
   def getZones(project: String): List[Zone] = {
+    val zones = ListBuffer.empty[Zone]
     DBManager.GetOracleConnection(project) match {
       case Some(connection) =>
         val stmt = connection.createStatement()
         val q = "select zn.name, zl.descr from zone zn, zone_lang zl where zn.oid = zl.zone and zl.lang = -2"
-        val res = RsIterator(stmt.executeQuery(q)).map(rs => {
-          Zone(
+        val rs = stmt.executeQuery(q)
+        while (rs.next()) {
+          zones += Zone(
             Option(rs.getString("NAME")).getOrElse(""),
             Option(rs.getString("DESCR")).getOrElse(""),
           )
-        }).toList
+        }
+        rs.close()
         stmt.close()
         connection.close()
-        res
       case _ => List.empty[Zone]
     }
+    zones.toList
   }
   def getSystems(project: String): List[System] = {
+    val systems = ListBuffer.empty[System]
     DBManager.GetOracleConnection(project) match {
       case Some(connection) =>
         val stmt = connection.createStatement()
         val q = "select st.name, sl.descr from systems st, systems_lang sl where sl.system = st.oid and sl.lang = -2"
-        val res = RsIterator(stmt.executeQuery(q)).map(rs => {
-          System(
+        val rs = stmt.executeQuery(q)
+        while (rs.next()) {
+          systems += System(
             Option(rs.getString("NAME")).getOrElse(""),
             Option(rs.getString("DESCR")).getOrElse(""),
           )
-        }).toList
+        }
+        rs.close()
         stmt.close()
         connection.close()
-        res
       case _ => List.empty[System]
     }
+    systems.toList
   }
   def getEleComplects(project: String): List[EleComplect] = {
     DBManager.GetMongoConnection() match {
