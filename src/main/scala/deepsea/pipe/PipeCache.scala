@@ -173,6 +173,7 @@ class PipeCache extends Actor{
                 case _ => ""
               })
           }
+          rs.close()
           s.close()
           c.close()
         case _ =>
@@ -238,6 +239,7 @@ class PipeCache extends Actor{
               pipeSegs += PipeSeg(proj, zoneName, systemName, "", 0, 0, "JOINT", "", apClass, "NUT", "", smat, 0, 92, 92, isomUserId, spoolUserId, nutsNumber, 0, 0, 0, nuts.trim, "", "", "")
 
             }
+            rs.close()
             s.close()
             c.close()
           }
