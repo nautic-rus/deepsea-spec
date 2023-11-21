@@ -109,7 +109,7 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
 //    val jk = qw
 //      self ! CreateEsp("N002", "200101-100-102", "0", "isaev", "device", 10330.toString)
    // val q = generateDeviceGlobalEsp(List("N002"))
-    self ! GetEsp("N002", "device", "200101-511-102")
+    //self ! GetEsp("N002", "device", "200101-511-102")
   }
   override def receive: Receive = {
     case CreateEsp(foranProject, docNumber, rev, user, kind, taskId) =>
