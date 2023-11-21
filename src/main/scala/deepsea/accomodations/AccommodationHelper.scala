@@ -392,8 +392,8 @@ trait AccommodationHelper {
             )
           )
         }).toList
-        stmt.close()
         rSet.close()
+        stmt.close()
         oracleConnection.close()
         zones
       case _ => List.empty[Zone]

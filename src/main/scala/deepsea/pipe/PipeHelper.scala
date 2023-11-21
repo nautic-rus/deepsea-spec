@@ -612,8 +612,8 @@ trait PipeHelper extends Codecs with MaterialsHelper {
       case Some(connection) =>
         val stmt = connection.createStatement()
         val q = Source.fromResource("queries/plsElem.sql").mkString.replace("&system", system) + s" AND (PLS.IDSQ = $sqInSystem OR $sqInSystem = -1)"
-
-        val plsElems = RsIterator(stmt.executeQuery(q)).map(rs => {
+        val rsIt1 = stmt.executeQuery(q)
+        val plsElems = RsIterator(rsIt1).map(rs => {
           PlsElem(
             Pls(Option(rs.getInt("TYPE")).getOrElse(0),
               Option(rs.getInt("ZONE")).getOrElse(0),
@@ -638,7 +638,8 @@ trait PipeHelper extends Codecs with MaterialsHelper {
           )
         }).toList
 
-        val pipeLineSegments = RsIterator(stmt.executeQuery(s"SELECT * FROM PIPELINE_SEGMENT WHERE SYSTEM IN (SELECT SEQID FROM SYSTEMS WHERE NAME LIKE '$system')")).map(rs => {
+        val rsIt2 = stmt.executeQuery(s"SELECT * FROM PIPELINE_SEGMENT WHERE SYSTEM IN (SELECT SEQID FROM SYSTEMS WHERE NAME LIKE '$system')")
+        val pipeLineSegments = RsIterator(rsIt2).map(rs => {
           PipeLineSegment(
             Pls(Option(rs.getInt("TYPE")).getOrElse(0),
               Option(rs.getInt("ZONE")).getOrElse(0),
@@ -651,7 +652,8 @@ trait PipeHelper extends Codecs with MaterialsHelper {
           )
         }).toList
 
-        val plsParams = RsIterator(stmt.executeQuery(s"SELECT * FROM PLSE_PAROBJ_REALPAR WHERE SYSTEM IN (SELECT SEQID FROM SYSTEMS WHERE NAME LIKE '$system')")).map(rs => {
+        val rsIt3 = stmt.executeQuery(s"SELECT * FROM PLSE_PAROBJ_REALPAR WHERE SYSTEM IN (SELECT SEQID FROM SYSTEMS WHERE NAME LIKE '$system')")
+        val plsParams = RsIterator(rsIt3).map(rs => {
           PlsParam(
             Pls(Option(rs.getInt("TYPE")).getOrElse(0),
               Option(rs.getInt("ZONE")).getOrElse(0),
@@ -665,8 +667,8 @@ trait PipeHelper extends Codecs with MaterialsHelper {
           )
         }).toList
 
-
-        val materialQuality = RsIterator(stmt.executeQuery(s"SELECT * FROM MATERIAL_QUALITY")).map(rs => {
+        val rsIt4 = stmt.executeQuery(s"SELECT * FROM MATERIAL_QUALITY")
+        val materialQuality = RsIterator(rsIt3).map(rs => {
           MaterialQuality(
             Option(rs.getString("CODE")).getOrElse(""),
             Option(rs.getString("DESCR")).getOrElse(""),
@@ -860,6 +862,10 @@ trait PipeHelper extends Codecs with MaterialsHelper {
             }
           }
         })
+        rsIt1.close()
+        rsIt2.close()
+        rsIt3.close()
+        rsIt4.close()
         stmt.close()
         connection.close()
       case _ =>
@@ -880,7 +886,8 @@ trait PipeHelper extends Codecs with MaterialsHelper {
         val stmt = connection.createStatement()
         val q = Source.fromResource("queries/elecEquips.sql").mkString.replace("&system", system)
 
-        val elems = RsIterator(stmt.executeQuery(q)).map(rs => {
+        val rsIt = stmt.executeQuery(q)
+        val elems = RsIterator(rsIt).map(rs => {
           ElecEquip(
             Option(rs.getInt("COMP")).getOrElse(0),
             Option(rs.getString("USERID")).getOrElse(""),
@@ -924,6 +931,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
             case _ =>
           }
         })
+        rsIt.close()
         stmt.close()
         connection.close()
       case _ =>
