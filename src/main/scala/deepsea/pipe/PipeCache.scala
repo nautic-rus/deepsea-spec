@@ -215,10 +215,10 @@ class PipeCache extends Actor{
     List("N002", "N004", "TEST").foreach(proj => {
       DBManager.GetOracleConnection(proj) match {
         case Some(c) =>
+          val s = c.createStatement()
+          val query = s"select * from v_pipejoins"
+          val rs = s.executeQuery(query)
           try {
-            val s = c.createStatement()
-            val query = s"select * from v_pipejoins"
-            val rs = s.executeQuery(query)
             while (rs.next()) {
               val zoneName = Option(rs.getString("ZONENAME")).getOrElse("")
               val systemName = Option(rs.getString("SYSTEMNAME")).getOrElse("")
@@ -244,7 +244,11 @@ class PipeCache extends Actor{
             c.close()
           }
           catch {
-            case e: Exception => println(e.toString)
+            case e: Exception =>
+              println(e.toString)
+              rs.close()
+              s.close()
+              c.close()
           }
 
         case _ =>
