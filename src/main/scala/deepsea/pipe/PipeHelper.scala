@@ -668,7 +668,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
         }).toList
 
         val rsIt4 = stmt.executeQuery(s"SELECT * FROM MATERIAL_QUALITY")
-        val materialQuality = RsIterator(rsIt3).map(rs => {
+        val materialQuality = RsIterator(rsIt4).map(rs => {
           MaterialQuality(
             Option(rs.getString("CODE")).getOrElse(""),
             Option(rs.getString("DESCR")).getOrElse(""),
