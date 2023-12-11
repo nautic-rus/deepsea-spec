@@ -27,7 +27,7 @@ object DBManager extends Codecs{
         configOracle.setJdbcUrl("jdbc:oracle:thin:@192.168.1.12:1521:ORA3DB")
         configOracle.setUsername("C" + project)
         configOracle.setPassword("Whatab0utus")
-        configOracle.setMaximumPoolSize(3)
+        configOracle.setMaximumPoolSize(5)
         oracleConnections += OracleConnection(project, new HikariDataSource(configOracle))
     }
     catch {
