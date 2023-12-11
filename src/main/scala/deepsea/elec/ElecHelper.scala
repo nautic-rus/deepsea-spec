@@ -59,8 +59,8 @@ trait ElecHelper extends Codecs with EspManagerHelper {
             Option(rs.getString("F_ROUT")).getOrElse(""),
           )
         }
-        stmt.close()
         rs.close()
+        stmt.close()
         oracleConnection.close()
         cables.toList
       case _ =>

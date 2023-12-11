@@ -151,6 +151,7 @@ trait AccommodationHelper {
                 })
               }
             }
+            rs.close()
             s.close()
             oracle.close()
           case _ => List.empty[Device]
@@ -240,6 +241,7 @@ trait AccommodationHelper {
                 profileLength,
                 profileSection)
             }
+            rs.close()
             s.close()
             oracle.close()
           case _ => List.empty[Accommodation]
@@ -356,8 +358,8 @@ trait AccommodationHelper {
             else{
               ""
             }
-            stmt.close()
             rs.close()
+            stmt.close()
             oracleConnection.close()
             descr
           case _ => ""
@@ -476,8 +478,8 @@ trait AccommodationHelper {
             case _ => ""
           })
         }
-        stmt.close()
         rs.close()
+        stmt.close()
         oracleConnection.close()
       case _ =>
     }

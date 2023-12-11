@@ -71,6 +71,7 @@ trait DeviceHelper extends AccommodationHelper {
                 Option(rs.getString("USERID")).getOrElse(""),
                 "")
             }
+            rs.close()
             s.close()
             oracle.close()
           case _ => List.empty[Device]
@@ -86,6 +87,7 @@ trait DeviceHelper extends AccommodationHelper {
                 Option(rs.getString("LONG_DESCR")).getOrElse("").replace("\r", ""),
               )
             }
+            rs.close()
             s.close()
             oracle.close()
           case _ => List.empty[Device]
@@ -101,6 +103,7 @@ trait DeviceHelper extends AccommodationHelper {
                 Option(rs.getString("LONG_DESCR")).getOrElse("").replace("\r", ""),
               )
             }
+            rs.close()
             s.close()
             oracle.close()
           case _ => List.empty[Device]
@@ -257,6 +260,7 @@ trait DeviceHelper extends AccommodationHelper {
                     Option(rs.getString("long_descr")).getOrElse("")
                   )
               }
+              rs.close()
               s.close()
               oracle.close()
             case _ =>
@@ -285,6 +289,7 @@ trait DeviceHelper extends AccommodationHelper {
                       s.execute(s"insert into foran_language values ($oid, '$abbrev', '$abbrev')")
                     }
                   }
+                  rs.close()
                   s.close()
                   oracle.close()
                 case _ =>
@@ -363,6 +368,7 @@ trait DeviceHelper extends AccommodationHelper {
                     Option(rs.getString("long_descr")).getOrElse("")
                   )
               }
+              rs.close()
               s.close()
               oracle.close()
             case _ =>
@@ -433,6 +439,7 @@ trait DeviceHelper extends AccommodationHelper {
                   Option(rs.getString("USERID")).getOrElse(""),
                   "")
               }
+              rs.close()
               s.close()
               oracle.close()
             case _ => List.empty[Device]
@@ -546,6 +553,7 @@ trait DeviceHelper extends AccommodationHelper {
             case _ => ""
           })
         }
+        rs.close()
         stmt.close()
         rs.close()
         oracleConnection.close()

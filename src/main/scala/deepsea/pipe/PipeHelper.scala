@@ -182,6 +182,8 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                     Option(rs.getString("USERID")).getOrElse("")
                   )
                 }
+                rs.close()
+                stmt.close()
                 conn.close()
               case _ => None
             }
@@ -214,6 +216,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                     Option(rs.getString("LONG_DESCR")).getOrElse(""),
                   )
                 }
+                rs.close()
                 s.close()
                 oracle.close()
               case _ => List.empty[Device]
@@ -357,6 +360,8 @@ trait PipeHelper extends Codecs with MaterialsHelper {
         while (rs.next()){
           sups += Option(rs.getString("STOCK_CODE")).getOrElse("")
         }
+        rs.close()
+        stmt.close()
         conn.close()
       case _ => None
     }
