@@ -378,10 +378,10 @@ trait DeviceHelper extends AccommodationHelper {
             DBManager.GetOracleConnection(foranProject) match {
               case Some(oracle) =>
                 val s = oracle.createStatement()
-                val qSelect = s"select long_descr from systems_lang systems_lang where system = ${d.systemId} and lang = ${d.lang}"
+                val qSelect = s"select long_descr from systems_lang where system = ${d.systemId} and lang = ${d.lang}"
                 val rs = s.executeQuery(qSelect)
                 val labels = if (rs.next()){
-                  rs.getString("long_descr")
+                  Option(rs.getString("long_descr")).getOrElse("")
                 }
                 else{
                   ""
