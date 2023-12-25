@@ -322,7 +322,7 @@ from
             PA.MATQ as MATERIAL,
             RPT_AS_GET_PLT_DIMENSIONS (P.OID, 0) * 1000 as LENGTH,
             RPT_AS_GET_PLT_DIMENSIONS (P.OID, 1) * 1000 as WIDTH,
-            PA.THICKNESS,
+            ROUND (PA.THICKNESS) AS THICKNESS,
             PE.WEIGHT as WEIGHT_UNIT,
             PE.WEIGHT as TOTAL_WEIGHT,
             SUBSTR (GET_NEST_ID (GET_PRD_EXPL_NESTING_OID(PE.OID), P.BLOCK_OID), 1, 15)  as NEST_ID,
@@ -331,7 +331,7 @@ from
             GET_NEST_WIDTH (GET_PRD_EXPL_NESTING_OID(PE.OID)) as NEST_WIDTH,
             GET_NUM_EQ_NEST (GET_PRD_EXPL_NESTING_OID(PE.OID)) as NUM_EQ_NEST,
             0 as WH,
-            PA.THICKNESS as WT,
+            ROUND(PA.THICKNESS) as WT,
             0 as FH,
             0 as FT,
             (select STORAGE_CODE from STD_PLATE where MATERIAL_OID=M.OID and THICKNESS=PA.THICKNESS and STORAGE_CODE is not null fetch first 1 row only) as STOCK
