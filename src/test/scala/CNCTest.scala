@@ -17,7 +17,7 @@ class CNCTest extends AnyFunSuite {
 
 
   val listIn: List[String] = List(
-    "C-LV01-DB-001"
+    "DB_129_0"
   )
 
 

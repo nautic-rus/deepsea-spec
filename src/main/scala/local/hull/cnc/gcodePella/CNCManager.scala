@@ -8,7 +8,8 @@ import scala.collection.mutable.ListBuffer
 object CNCManager extends ForanFileUtil {
 
 
-  def doCNCStrings(in: List[String], username: String): List[String] = {
+  def doCNCStrings(input: List[String], username: String): List[String] = {
+    val in = fixCUTL(input)
     val offsetCorrection: Point = in.find(s => s.startsWith("STAR")) match {
       case Some(value) => {
         val arr = value.split(" ")
@@ -20,9 +21,7 @@ object CNCManager extends ForanFileUtil {
       }
       case None => Point(0, 0)
     }
-
     val buff = ListBuffer.empty[String]
-
     val clp: List[CNC] = procForanCLPfromList(in)
     val machineOpts: List[PseudoMachineOps] = genPseudoMachineOps(clp)
 
@@ -354,6 +353,30 @@ object CNCManager extends ForanFileUtil {
 
     pw.close()
     pathOut
+  }
+
+  private def fixCUTL(in: List[String]): List[String] = {
+    val out = ListBuffer.empty[String]
+    var cutl = ""
+    var jmp = ""
+    in.foreach(str => {
+      if (str.contains("JUMP")) {
+        jmp = str.replace("JUMP ", "")
+      }
+      if (str.contains("CUTL")) {
+        cutl = str.replace("CUTL ", "")
+      }
+      if (str.contains("CUT ") && cutl.nonEmpty) {
+        val groups = str.split("  ")
+        val nstr = groups(0) + "  " + groups(1) + "  " + jmp + " 999999 999999 " + groups(2)
+        out += nstr
+        cutl = ""
+        jmp = ""
+      } else {
+        out += str
+      }
+    })
+    out.toList
   }
 
 }
