@@ -334,7 +334,7 @@ from
             ROUND(PA.THICKNESS) as WT,
             0 as FH,
             0 as FT,
-            (select STORAGE_CODE from STD_PLATE where MATERIAL_OID=M.OID and THICKNESS=PA.THICKNESS and STORAGE_CODE is not null fetch first 1 row only) as STOCK
+            (select STORAGE_CODE from STD_PLATE where MATERIAL_OID = M.OID and THICKNESS = ROUND(PA.THICKNESS) and STORAGE_CODE is not null fetch first 1 row only) as STOCK
         FROM
             PRD_PART               P,
             AS_PART_CONT_PLATE     PA,
