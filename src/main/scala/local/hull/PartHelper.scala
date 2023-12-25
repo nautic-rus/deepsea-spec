@@ -5,6 +5,7 @@ import local.sql.ConnectionManager
 
 import java.sql.{ResultSet, Statement}
 import scala.collection.mutable.ListBuffer
+import scala.io.Source
 
 trait PartHelper {
 
@@ -96,7 +97,8 @@ trait PartHelper {
         try {
           connection.setAutoCommit(false)
           val stmt: Statement = connection.createStatement()
-          val sql = partsByDrawingNum(drNum)
+          //val sql = partsByDrawingNum(drNum)
+          val sql = Source.fromResource("queries/parts-by-dr-num.sql").mkString.replace("&drawingNumber", drNum)
           val rs: ResultSet = stmt.executeQuery(sql)
           val ret = ListBuffer.empty[PrdPart]
           while (rs.next()) {
