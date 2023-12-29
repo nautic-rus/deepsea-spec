@@ -116,7 +116,7 @@ trait PartHelper {
               Option(rs.getString("MATERIAL")).getOrElse(""),
               Option(rs.getDouble("LENGTH")).getOrElse(0.0),
               Option(rs.getDouble("WIDTH")).getOrElse(0.0),
-              Math.round(Option(rs.getDouble("THICKNESS")).getOrElse(0.0)),
+              Math.round(Option(rs.getDouble("THICKNESS")).getOrElse(0.0) * 10) / 10d,
               Option(rs.getDouble("WEIGHT_UNIT")).getOrElse(0.0),
               Option(rs.getDouble("TOTAL_WEIGHT")).getOrElse(0.0),
               Option(rs.getString("NEST_ID")).getOrElse(""),
