@@ -46,7 +46,8 @@ trait DeviceHelper extends AccommodationHelper {
           case Some(oracle) =>
             val s = oracle.createStatement()
             //val query = s"select * from v_element_desc where syst_userid = '$system'"
-            val query = s"select \n    oid, \n    comp, \n    userid, \n    syst_userid, \n    zone_userid, \n    type, \n    comp_abbrev, \n    weight, \n    stock_code, \n    elem_class,\n    elem_desc1, \n    elem_desc2, \n    stock_code, \n    (select long_descr from COMPONENT_LANG cl where lang = -2 and cl.comp = elemdesc.comp and rownum = 1) as long_desc\nfrom \n    v_element_desc  elemdesc\nwhere \n    syst_userid = '$system'"
+            //val query = s"select \n    oid, \n    comp, \n    userid, \n    syst_userid, \n    zone_userid, \n    type, \n    comp_abbrev, \n    weight, \n    stock_code, \n    elem_class,\n    elem_desc1, \n    elem_desc2, \n    stock_code, \n    (select long_descr from COMPONENT_LANG cl where lang = -2 and cl.comp = elemdesc.comp and rownum = 1) as long_desc\nfrom \n    v_element_desc  elemdesc\nwhere \n    syst_userid = '$system'"
+            val query = s"select \n    oid, \n    comp, \n    userid, \n    syst_userid, \n    zone_userid, \n    type, \n    comp_abbrev, \n    weight, \n    stock_code, \n    elem_class,\n    elem_desc1, \n    elem_desc2, \n    stock_code, \n    (select long_descr from COMPONENT_LANG cl where lang = -2 and cl.comp = elemdesc.comp and rownum = 1) as long_desc,\n    (select long_descr from element_lang cl where lang = -2 and cl.elem = elemdesc.oid and rownum = 1) as long_desc_elem\nfrom \n    v_element_desc  elemdesc\nwhere \n    syst_userid = '$system'"
             val rs = s.executeQuery(query)
             while (rs.next()) {
               devices += Device(
@@ -64,6 +65,7 @@ trait DeviceHelper extends AccommodationHelper {
                 Option(rs.getString("ELEM_DESC1")).getOrElse(""),
                 Option(rs.getString("ELEM_DESC2")).getOrElse(""),
                 Option(rs.getString("LONG_DESC")).getOrElse(""),
+                Option(rs.getString("LONG_DESC_ELEM")).getOrElse(""),
                 materials.find(_.code == Option(rs.getString("STOCK_CODE")).getOrElse("")) match {
                   case Some(value) => value
                   case _ => Material()
@@ -135,6 +137,7 @@ trait DeviceHelper extends AccommodationHelper {
                     "",
                     "",
                     "",
+                    "",
                     materials.find(_.code == split(1)) match {
                       case Some(value) => value
                       case _ => Material()
@@ -172,6 +175,7 @@ trait DeviceHelper extends AccommodationHelper {
                 "",
                 "",
                 "",
+                "",
                 materials.find(_.code == split(1)) match {
                   case Some(value) => value
                   case _ => Material()
@@ -204,6 +208,7 @@ trait DeviceHelper extends AccommodationHelper {
                 },
                 split(1),
                 d.elemClass,
+                "",
                 "",
                 "",
                 "",
@@ -417,7 +422,8 @@ trait DeviceHelper extends AccommodationHelper {
             case Some(oracle) =>
               val s = oracle.createStatement()
               //val query = s"select * from v_element_desc where syst_userid = '$system'"
-              val query = s"select \n    oid, \n    comp, \n    userid, \n    syst_userid, \n    zone_userid, \n    type, \n    comp_abbrev, \n    weight, \n    stock_code, \n    elem_class,\n    elem_desc1, \n    elem_desc2, \n    stock_code, \n    (select long_descr from COMPONENT_LANG cl where lang = -2 and cl.comp = elemdesc.comp and rownum = 1) as long_desc\nfrom \n    v_element_desc  elemdesc\nwhere \n    syst_userid = '$system'"
+              //val query = s"select \n    oid, \n    comp, \n    userid, \n    syst_userid, \n    zone_userid, \n    type, \n    comp_abbrev, \n    weight, \n    stock_code, \n    elem_class,\n    elem_desc1, \n    elem_desc2, \n    stock_code, \n    (select long_descr from COMPONENT_LANG cl where lang = -2 and cl.comp = elemdesc.comp and rownum = 1) as long_desc\nfrom \n    v_element_desc  elemdesc\nwhere \n    syst_userid = '$system'"
+              val query = s"select \n    oid, \n    comp, \n    userid, \n    syst_userid, \n    zone_userid, \n    type, \n    comp_abbrev, \n    weight, \n    stock_code, \n    elem_class,\n    elem_desc1, \n    elem_desc2, \n    stock_code, \n    (select long_descr from COMPONENT_LANG cl where lang = -2 and cl.comp = elemdesc.comp and rownum = 1) as long_desc,\n    (select long_descr from element_lang cl where lang = -2 and cl.elem = elemdesc.oid and rownum = 1) as long_desc_elem\nfrom \n    v_element_desc  elemdesc\nwhere \n    syst_userid = '$system'"
               val rs = s.executeQuery(query)
               while (rs.next()) {
                 devices += Device(
@@ -435,6 +441,7 @@ trait DeviceHelper extends AccommodationHelper {
                   Option(rs.getString("ELEM_DESC1")).getOrElse(""),
                   Option(rs.getString("ELEM_DESC2")).getOrElse(""),
                   Option(rs.getString("LONG_DESC")).getOrElse(""),
+                  Option(rs.getString("LONG_DESC_ELEM")).getOrElse(""),
                   Material(),
                   Option(rs.getString("USERID")).getOrElse(""),
                   "")
