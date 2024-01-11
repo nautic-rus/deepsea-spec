@@ -65,7 +65,7 @@ trait DeviceHelper extends AccommodationHelper {
                 Option(rs.getString("ELEM_DESC1")).getOrElse(""),
                 Option(rs.getString("ELEM_DESC2")).getOrElse(""),
                 Option(rs.getString("LONG_DESC")).getOrElse(""),
-                Option(rs.getString("LONG_DESC_ELEM")).getOrElse(""),
+//                Option(rs.getString("LONG_DESC_ELEM")).getOrElse(""),
                 materials.find(_.code == Option(rs.getString("STOCK_CODE")).getOrElse("")) match {
                   case Some(value) => value
                   case _ => Material()
@@ -137,7 +137,7 @@ trait DeviceHelper extends AccommodationHelper {
                     "",
                     "",
                     "",
-                    "",
+//                    "",
                     materials.find(_.code == split(1)) match {
                       case Some(value) => value
                       case _ => Material()
@@ -175,7 +175,7 @@ trait DeviceHelper extends AccommodationHelper {
                 "",
                 "",
                 "",
-                "",
+//                "",
                 materials.find(_.code == split(1)) match {
                   case Some(value) => value
                   case _ => Material()
@@ -211,7 +211,7 @@ trait DeviceHelper extends AccommodationHelper {
                 "",
                 "",
                 "",
-                "",
+//                "",
                 materials.find(_.code == split(1)) match {
                   case Some(value) => value
                   case _ => Material()
@@ -441,7 +441,7 @@ trait DeviceHelper extends AccommodationHelper {
                   Option(rs.getString("ELEM_DESC1")).getOrElse(""),
                   Option(rs.getString("ELEM_DESC2")).getOrElse(""),
                   Option(rs.getString("LONG_DESC")).getOrElse(""),
-                  Option(rs.getString("LONG_DESC_ELEM")).getOrElse(""),
+//                  Option(rs.getString("LONG_DESC_ELEM")).getOrElse(""),
                   Material(),
                   Option(rs.getString("USERID")).getOrElse(""),
                   "")

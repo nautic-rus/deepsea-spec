@@ -51,7 +51,7 @@ object AccommodationManager{
         "",
         "",
         "",
-        "",
+//        "",
         if (material.code == "REQPRTGRDNON0001"){
           material.copy(name = material.name + ", " + pars.take(3).map(x => new DecimalFormat("0.#").format(Math.round(x * 1000 * 10) / 10.toDouble)).mkString("x"))
         }
