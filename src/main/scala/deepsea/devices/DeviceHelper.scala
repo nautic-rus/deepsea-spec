@@ -525,7 +525,7 @@ trait DeviceHelper extends AccommodationHelper {
       val accom = devices.filter(_.elemType == "accommodation").filter(x => ids.contains(x.userId))
       accom.foreach(x => x.userId = d.userId + "." + x.userId)
     })
-    devices
+    devices.sortBy(_.userId)
   }
   def getProjectFromDocNumber(docNumber: String): (String, String) = {
     DBManager.GetMongoConnection() match {
