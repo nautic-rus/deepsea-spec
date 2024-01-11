@@ -519,7 +519,13 @@ trait DeviceHelper extends AccommodationHelper {
     }
   }
   def getDevicesWithAccommodations(docNumber: String): List[Device] = {
-    getDevices(docNumber) ++ getAccommodationsAsDevices(docNumber, "ru")
+    val devices = getDevices(docNumber) ++ getAccommodationsAsDevices(docNumber, "ru")
+    devices.filter(_.desc2.contains("&")).foreach(d => {
+      val ids = d.desc2.split("&")
+      val accom = devices.filter(_.elemType == "accommodation").filter(x => ids.contains(x.userId))
+      accom.foreach(x => x.userId = d.userId + "." + x.userId)
+    })
+    devices
   }
   def getProjectFromDocNumber(docNumber: String): (String, String) = {
     DBManager.GetMongoConnection() match {
