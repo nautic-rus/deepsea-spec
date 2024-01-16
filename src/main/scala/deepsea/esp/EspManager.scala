@@ -108,7 +108,12 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
 //    val qw = getAllLatestEsp()
 //    val jk = qw
 //      self ! CreateEsp("N002", "200101-100-102", "0", "isaev", "device", 10330.toString)
-   // val q = generateDeviceGlobalEsp(List("N002"))
+//    val q = generateDeviceGlobalEsp(List("N002"))
+//    val jk = q.find(_.material.code == "COMFSNSTUXXX0031")
+//    if (jk.nonEmpty){
+//
+//    }
+//    val qj = 0
     //self ! GetEsp("N002", "device", "200101-511-102")
   }
   override def receive: Receive = {

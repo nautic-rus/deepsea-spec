@@ -565,7 +565,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
               },
               pos.material.units,
               material.units match {
-                case "796" => 1
+                case "796" => if (pos.count != 0) pos.count else 1
                 case "006" => pos.weight
                 case "166" => pos.weight
                 case _ => group._2.length
@@ -587,8 +587,8 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
           },
           material.units,
           qty.formatted("%.2f").toDouble,
-          weight.formatted("%.2f").toDouble,
-          weightTotal.formatted("%.2f").toDouble,
+          weight.formatted("%.3f").toDouble,
+          weightTotal.formatted("%.3f").toDouble,
           docMaterial.toList,
           material
         )
