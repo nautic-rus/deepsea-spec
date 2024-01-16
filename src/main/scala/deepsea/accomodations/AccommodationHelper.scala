@@ -330,6 +330,54 @@ trait AccommodationHelper {
     }
     res
   }
+  def updateAccomodationUserId(docNumber: String, prevUserIdValue: String, newUserIdValue: String): String = {
+    val prevUserId = addLeftZeros(prevUserIdValue, 8)
+    val newUserId = addLeftZeros(newUserIdValue, 8)
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        val projectNamesCollection: MongoCollection[ProjectName] = mongo.getCollection("project-names")
+        val projectNames = Await.result(projectNamesCollection.find().toFuture(), Duration(30, SECONDS)) match {
+          case values: Seq[ProjectName] => values.toList
+          case _ => List.empty[ProjectName]
+        }
+        val rkdProject = if (docNumber.contains('-')) docNumber.split('-').head else ""
+        val foranProject = if ("""200101-100-10[0-9]""".r.matches(docNumber)) "NT02" else projectNames.find(_.rkd == rkdProject) match {
+          case Some(value) => value.foran
+          case _ => ""
+        }
+        val systemDefs = getAccSystemDefs(foranProject)
+        val system = systemDefs.find(_.descr.contains(docNumber)) match {
+          case Some(value) =>
+            value.name
+          case _ => ""
+        }
+        DBManager.GetOracleConnection(foranProject) match {
+          case Some(oracle) =>
+            val s = oracle.createStatement()
+            val q1 = s"SELECT USERID FROM AS_ELEM WHERE AS_OID IN (SELECT OID FROM AS_LIST WHERE USERID = '$system') AND USERID = '$newUserId'"
+            val rs = s.executeQuery(q1)
+            val userIds = ListBuffer.empty[String]
+            while (rs.next()){
+              userIds += rs.getString(0)
+            }
+            val res = if (userIds.isEmpty){
+              val q2 = s"UPDATE AS_ELEM SET USERID = '$newUserId' WHERE AS_OID IN (SELECT OID FROM AS_LIST WHERE USERID = '$system') AND USERID = '$prevUserId'"
+              s.execute(q2)
+              "success"
+            }
+            else{
+              "already exists"
+            }
+            rs.close()
+            s.close()
+            oracle.close()
+            res
+          case _ => "error: no db connection"
+        }
+      case _ => "error: no db connection"
+    }
+  }
+
   def getASName(docNumber: String): String ={
     val docNumberSuffix = docNumber.split('-').drop(1).mkString("-")
     DBManager.GetMongoConnection() match {

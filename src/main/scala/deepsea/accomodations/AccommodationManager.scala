@@ -3,7 +3,7 @@ package deepsea.accomodations
 import akka.actor.Actor
 import akka.pattern.ask
 import akka.util.Timeout
-import deepsea.accomodations.AccommodationManager.{AddAccommodationGroup, GetAccommodations, GetAccommodationsESP, SetAccommodationLabel}
+import deepsea.accomodations.AccommodationManager.{AddAccommodationGroup, GetAccommodations, GetAccommodationsESP, SetAccommodationLabel, UpdateAccommodationUserId}
 import deepsea.actors.ActorManager
 import deepsea.devices.DeviceManager.{Device, GetDevicesESP}
 import deepsea.files.FileManager.GenerateUrl
@@ -23,7 +23,7 @@ object AccommodationManager{
   case class Zone(name: String, BBox: BBox)
   case class AddAccommodationGroup(docNumber: String, stock: String, userId: String)
   case class SetAccommodationLabel(docNumber: String, userId: String, oid: String)
-
+  case class UpdateAccommodationUserId(docNumber: String, prev: String, next: String)
   case class AccommodationGroup(userId: String, code: String)
   case class Accommodation(project: String, modelOid: Int, asOid: Int, weight: Double, surface: Double, userId: String, materialCode: String, materialDescription: String, objType: Int, pars: List[Double], bsWeight: Double, zone: String, profileStock: String, plateStock: String, var material: Material = Material(), profileLength: Double, profileSection: Int){
     def asDevice: Device ={
@@ -110,6 +110,8 @@ class AccommodationManager extends Actor with AccommodationHelper with Codecs {
       sender() ! "success".asJson.noSpaces
     case SetAccommodationLabel(docNumber, userId, oid) =>
       sender() ! setAccommodationLabel(docNumber, userId, oid.toIntOption.getOrElse(0)).asJson.noSpaces
+    case UpdateAccommodationUserId(docNumber, prev, next) =>
+      sender() ! updateAccomodationUserId(docNumber, prev, next)
     case _ => None
   }
 }
