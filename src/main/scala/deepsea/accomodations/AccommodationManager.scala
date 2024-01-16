@@ -111,7 +111,7 @@ class AccommodationManager extends Actor with AccommodationHelper with Codecs {
     case SetAccommodationLabel(docNumber, userId, oid) =>
       sender() ! setAccommodationLabel(docNumber, userId, oid.toIntOption.getOrElse(0)).asJson.noSpaces
     case UpdateAccommodationUserId(docNumber, prev, next) =>
-      sender() ! updateAccomodationUserId(docNumber, prev, next)
+      sender() ! updateAccomodationUserId(docNumber, prev, next).asJson.noSpaces
     case _ => None
   }
 }
