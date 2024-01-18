@@ -25,6 +25,7 @@ object AccommodationManager{
   case class SetAccommodationLabel(docNumber: String, userId: String, oid: String)
   case class UpdateAccommodationUserId(docNumber: String, prev: String, next: String)
   case class AccommodationGroup(userId: String, code: String)
+  case class AccomUserIdReplace(userId: String, userIdNew: String)
   case class Accommodation(project: String, modelOid: Int, asOid: Int, weight: Double, surface: Double, userId: String, materialCode: String, materialDescription: String, objType: Int, pars: List[Double], bsWeight: Double, zone: String, profileStock: String, plateStock: String, var material: Material = Material(), profileLength: Double, profileSection: Int){
     def asDevice: Device ={
       Device(

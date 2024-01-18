@@ -1,6 +1,6 @@
 package deepsea.accomodations
 
-import deepsea.accomodations.AccommodationManager.{Accommodation, AccommodationAux, AccommodationGroup, BBox, Zone}
+import deepsea.accomodations.AccommodationManager.{AccomUserIdReplace, Accommodation, AccommodationAux, AccommodationGroup, BBox, Zone}
 import deepsea.database.DBManager
 import deepsea.database.DBManager._
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
@@ -321,6 +321,15 @@ trait AccommodationHelper {
       }
       userIds += userId
     })
+
+    val userIdsReplace = getAccommodationUserIds(docNumber)
+    res.filter(_.elemType == "accommodation").foreach(x => {
+      userIdsReplace.find(_.userId == x.userId) match {
+        case Some(value) => x.userId = value.userIdNew
+        case _ => None
+      }
+    })
+
     res.tapEach(x => x.units = x.material.units).filter(_.material.code != "").toList
   }
   def addLeftZeros(input: String, length: Int = 5): String ={
@@ -331,51 +340,47 @@ trait AccommodationHelper {
     res
   }
   def updateAccomodationUserId(docNumber: String, prevUserIdValue: String, newUserIdValue: String): String = {
-    val prevUserId = addLeftZeros(prevUserIdValue, 8)
-    val newUserId = addLeftZeros(newUserIdValue, 8)
-    DBManager.GetMongoConnection() match {
-      case Some(mongo) =>
-        val projectNamesCollection: MongoCollection[ProjectName] = mongo.getCollection("project-names")
-        val projectNames = Await.result(projectNamesCollection.find().toFuture(), Duration(30, SECONDS)) match {
-          case values: Seq[ProjectName] => values.toList
-          case _ => List.empty[ProjectName]
+//    val prevUserId = addLeftZeros(prevUserIdValue, 8)
+//    val newUserId = addLeftZeros(newUserIdValue, 8)
+    val prevUserId = prevUserIdValue
+    val newUserId = newUserIdValue
+    DBManager.GetPGConnection() match {
+      case Some(c) =>
+        val s = c.createStatement()
+        val rs = s.executeQuery(s"select * from accom_userid_replace where doc_number = '$docNumber' and userid = '$prevUserId'")
+        val userIds = ListBuffer.empty[String]
+        while (rs.next()) {
+          userIds += rs.getString("userid")
         }
-        val rkdProject = if (docNumber.contains('-')) docNumber.split('-').head else ""
-        val foranProject = if ("""200101-100-10[0-9]""".r.matches(docNumber)) "NT02" else projectNames.find(_.rkd == rkdProject) match {
-          case Some(value) => value.foran
-          case _ => ""
+        if (userIds.nonEmpty){
+          s.execute(s"update accom_userid_replace set userid_new = '$newUserId' where doc_number = '$docNumber' and userid = '$prevUserId'")
         }
-        val systemDefs = getAccSystemDefs(foranProject)
-        val system = systemDefs.find(_.descr.contains(docNumber)) match {
-          case Some(value) =>
-            value.name
-          case _ => ""
+        else{
+          s.execute(s"insert into accom_userid_replace values ('$prevUserId', '$newUserId', '$docNumber')")
         }
-        DBManager.GetOracleConnection(foranProject) match {
-          case Some(oracle) =>
-            val s = oracle.createStatement()
-            val q1 = s"SELECT USERID FROM AS_ELEM WHERE AS_OID IN (SELECT OID FROM AS_LIST WHERE USERID = '$system') AND USERID = '$newUserId'"
-            val rs = s.executeQuery(q1)
-            val userIds = ListBuffer.empty[String]
-            while (rs.next()){
-              userIds += rs.getString(0)
-            }
-            val res = if (userIds.isEmpty){
-              val q2 = s"UPDATE AS_ELEM SET USERID = '$newUserId' WHERE AS_OID IN (SELECT OID FROM AS_LIST WHERE USERID = '$system') AND USERID = '$prevUserId'"
-              s.execute(q2)
-              "success"
-            }
-            else{
-              "already exists"
-            }
-            rs.close()
-            s.close()
-            oracle.close()
-            res
-          case _ => "error: no db connection"
-        }
-      case _ => "error: no db connection"
+        rs.close()
+        s.close()
+        c.close()
+      case _ => None
     }
+    "success"
+  }
+
+  def getAccommodationUserIds(docNumber: String): List[AccomUserIdReplace] = {
+    val res = ListBuffer.empty[AccomUserIdReplace]
+    DBManager.GetPGConnection() match {
+      case Some(c) =>
+        val s = c.createStatement()
+        val rs = s.executeQuery(s"select * from accom_userid_replace where doc_number = '$docNumber'")
+        while (rs.next()) {
+          res += AccomUserIdReplace(rs.getString("userid"), rs.getString("userid_new"))
+        }
+        rs.close()
+        s.close()
+        c.close()
+      case _ => None
+    }
+    res.toList
   }
 
   def getASName(docNumber: String): String ={
