@@ -18,7 +18,7 @@ import deepsea.spec.SpecManager._
 import org.apache.log4j.{LogManager, Logger}
 import play.api.libs.json.{JsValue, Json}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
-import deepsea.accomodations.AccommodationManager.{AddAccommodationGroup, GetAccommodations, GetAccommodationsESP, SetAccommodationLabel, UpdateAccommodationUserId}
+import deepsea.accomodations.AccommodationManager.{AddAccommodationGroup, GetAccommodations, GetAccommodationsESP, SetAccommodationLabel, UpdateAccommodationUserId, GetAccomUserIdReplace}
 import deepsea.devices.DeviceManager.{AddDeviceToSystem, GetDevices, GetDevicesESP, RemoveDeviceFromSystem}
 import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, GetGlobalEsp, GetGlobalEspPdf, GetMaterialPurchases}
 import deepsea.pipe.PipeManager.{GetPipeESP, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSpoolModel, GetSystems, GetZones, SetSpoolLock}
@@ -246,7 +246,9 @@ class HTTPManager extends Actor {
       (get & path("updateAccommodataionUserId") & parameter("docNumber") & parameter("prev") & parameter("next")) { (docNumber, prev, next) =>
         askFor(ActorManager.accommodations, UpdateAccommodationUserId(docNumber, prev, next))
       },
-
+      (get & path("accomUserIdReplace") & parameter("docNumber")) { (docNumber) =>
+        askFor(ActorManager.accommodations, GetAccomUserIdReplace(docNumber))
+      },
 
       (get & path("qrCode") & parameter("url")) { (url) =>
         askFor(ActorManager.spec, GenerateQRCode(url))
