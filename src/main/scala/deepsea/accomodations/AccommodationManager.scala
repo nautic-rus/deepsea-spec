@@ -3,11 +3,14 @@ package deepsea.accomodations
 import akka.actor.Actor
 import akka.pattern.ask
 import akka.util.Timeout
-import deepsea.accomodations.AccommodationManager.{AddAccommodationGroup, GetAccommodations, GetAccommodationsESP, SetAccommodationLabel, UpdateAccommodationUserId}
+import deepsea.accomodations.AccommodationManager.{AddAccommodationGroup, GetAccomUserIdReplace, GetAccommodations, GetAccommodationsESP, SetAccommodationLabel, UpdateAccommodationUserId}
 import deepsea.actors.ActorManager
 import deepsea.devices.DeviceManager.{Device, GetDevicesESP}
+import deepsea.elec.ElecManager.Block
 import deepsea.files.FileManager.GenerateUrl
 import deepsea.pipe.PipeManager.Material
+import io.circe.{Decoder, Encoder}
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
 import local.common.Codecs
 import local.pdf.en.accom.AccomReportEn.genAccomListEnPDF
@@ -25,7 +28,11 @@ object AccommodationManager{
   case class SetAccommodationLabel(docNumber: String, userId: String, oid: String)
   case class UpdateAccommodationUserId(docNumber: String, prev: String, next: String)
   case class AccommodationGroup(userId: String, code: String)
+  case class GetAccomUserIdReplace(docNumber: String)
   case class AccomUserIdReplace(userId: String, userIdNew: String)
+  implicit val AccomUserIdReplaceDecoder: Decoder[AccomUserIdReplace] = deriveDecoder[AccomUserIdReplace]
+  implicit val AccomUserIdReplaceEncoder: Encoder[AccomUserIdReplace] = deriveEncoder[AccomUserIdReplace]
+
   case class Accommodation(project: String, modelOid: Int, asOid: Int, weight: Double, surface: Double, userId: String, materialCode: String, materialDescription: String, objType: Int, pars: List[Double], bsWeight: Double, zone: String, profileStock: String, plateStock: String, var material: Material = Material(), profileLength: Double, profileSection: Int){
     def asDevice: Device ={
       Device(
@@ -113,6 +120,8 @@ class AccommodationManager extends Actor with AccommodationHelper with Codecs {
       sender() ! setAccommodationLabel(docNumber, userId, oid.toIntOption.getOrElse(0)).asJson.noSpaces
     case UpdateAccommodationUserId(docNumber, prev, next) =>
       sender() ! updateAccomodationUserId(docNumber, prev, next).asJson.noSpaces
+    case GetAccomUserIdReplace(docNumber) =>
+      sender() ! getAccommodationUserIds(docNumber).asJson.noSpaces
     case _ => None
   }
 }

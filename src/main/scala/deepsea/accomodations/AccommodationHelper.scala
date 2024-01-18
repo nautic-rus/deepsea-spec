@@ -347,18 +347,24 @@ trait AccommodationHelper {
     DBManager.GetPGConnection() match {
       case Some(c) =>
         val s = c.createStatement()
-        val rs = s.executeQuery(s"select * from accom_userid_replace where doc_number = '$docNumber' and userid = '$prevUserId'")
-        val userIds = ListBuffer.empty[String]
-        while (rs.next()) {
-          userIds += rs.getString("userid")
-        }
-        if (userIds.nonEmpty){
-          s.execute(s"update accom_userid_replace set userid_new = '$newUserId' where doc_number = '$docNumber' and userid = '$prevUserId'")
+        if (newUserIdValue == "0"){
+          s.execute(s"delete from accom_userid_replace where doc_number = '$docNumber' and userid = '$prevUserId'")
         }
         else{
-          s.execute(s"insert into accom_userid_replace values ('$prevUserId', '$newUserId', '$docNumber')")
+          val rs = s.executeQuery(s"select * from accom_userid_replace where doc_number = '$docNumber' and userid = '$prevUserId'")
+          val userIds = ListBuffer.empty[String]
+          while (rs.next()) {
+            userIds += rs.getString("userid")
+          }
+          if (userIds.nonEmpty) {
+            s.execute(s"update accom_userid_replace set userid_new = '$newUserId' where doc_number = '$docNumber' and userid = '$prevUserId'")
+          }
+          else {
+            s.execute(s"insert into accom_userid_replace values ('$prevUserId', '$newUserId', '$docNumber')")
+          }
+          rs.close()
         }
-        rs.close()
+
         s.close()
         c.close()
       case _ => None
