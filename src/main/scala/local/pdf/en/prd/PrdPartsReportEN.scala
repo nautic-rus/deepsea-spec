@@ -20,23 +20,38 @@ import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 object PrdPartsReportEN extends UtilsPDF {
   private val pageSize: PageSize = PageSize.A4
+//  private val pointColumnWidths = Array(
+//    mmToPt(10),
+//    mmToPt(10),
+//    mmToPt(10),
+//    mmToPt(26),
+//    mmToPt(15),
+//
+//    mmToPt(10),
+//    mmToPt(15),
+//    mmToPt(15),
+//    mmToPt(81),
+//
+//
+//    mmToPt(15) + 2 //
+//  )
   private val pointColumnWidths = Array(
     mmToPt(10),
     mmToPt(10),
     mmToPt(10),
-    mmToPt(26),
+    mmToPt(86),
     mmToPt(15),
 
     mmToPt(10),
     mmToPt(15),
     mmToPt(15),
-    mmToPt(81),
+    mmToPt(21),
 
 
     mmToPt(15) + 2 //
   )
 
-  def genHullPartListEnPDF(project: String, docNumber: String, docName: String, revision: String, path: String): Unit = {
+  def genHullPartListEnPDF(project: String, docNumber: String, docName: String, revision: String, path: String, additional: List[PrdPart]): Unit = {
     val parts: List[PrdPart] = genForanPartsByDrawingNum(project, docNumber)
     val chess: CommonTypes.DrawingChess = {
       val l = findChess(docNumber, revision)
@@ -74,6 +89,11 @@ object PrdPartsReportEN extends UtilsPDF {
           }
         }
         buff += Item11ColumnsEN(A1 = id, A2 = symm, A3 = elemType, A4 = kpl_kse, A5 = mat, A6 = qty.toString, A7 = weight, A8 = totWeight, A9 = nestids, A12 = findChessPos(id + "-" + symm, chess))
+      })
+      additional.foreach(part => {
+        buff += (Item11ColumnsEN(
+          false, part.PART_CODE, "", "M", part.DESCRIPTION, part.PART_DESC, part.QTY.toString, part.WEIGHT_UNIT.toString, part.TOTAL_WEIGHT.toString, "", "", "", "", "")
+        )
       })
       buff.sortBy(s => s.A1).toList
     }

@@ -13,12 +13,12 @@ import deepsea.App
 import deepsea.actors.ActorManager
 import deepsea.actors.ActorStartupManager.HTTPManagerStarted
 import deepsea.elec.ElecManager._
-import deepsea.hull.HullManager.{GetBsDesignNodes, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, GetHullSystems, RemoveParts}
+import deepsea.hull.HullManager.{AddIssueMaterial, GetBsDesignNodes, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, GetHullSystems, RemoveParts}
 import deepsea.spec.SpecManager._
 import org.apache.log4j.{LogManager, Logger}
 import play.api.libs.json.{JsValue, Json}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
-import deepsea.accomodations.AccommodationManager.{AddAccommodationGroup, GetAccommodations, GetAccommodationsESP, SetAccommodationLabel, UpdateAccommodationUserId, GetAccomUserIdReplace}
+import deepsea.accomodations.AccommodationManager.{AddAccommodationGroup, GetAccomUserIdReplace, GetAccommodations, GetAccommodationsESP, SetAccommodationLabel, UpdateAccommodationUserId}
 import deepsea.devices.DeviceManager.{AddDeviceToSystem, GetDevices, GetDevicesESP, RemoveDeviceFromSystem}
 import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, GetGlobalEsp, GetGlobalEspPdf, GetMaterialPurchases}
 import deepsea.pipe.PipeManager.{GetPipeESP, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSpoolModel, GetSystems, GetZones, SetSpoolLock}
@@ -281,6 +281,9 @@ class HTTPManager extends Actor {
       },
       (get & path("materialPurchases") & parameter("project")) { (project) =>
         askFor(ActorManager.esp, GetMaterialPurchases(project))
+      },
+      (get & path("addIssueMaterial") & parameter("pos", "units", "weight", "count", "stock", "userId", "docNumber", "issueId", "department")) { (pos, units, weight, count, stock, userId, docNumber, issueId, department) =>
+        askFor(ActorManager.hullManager, AddIssueMaterial(pos, units, weight, count, stock, userId, docNumber, issueId, department))
       },
 
       //NEW ELEC

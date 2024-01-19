@@ -9,8 +9,9 @@ import deepsea.actors.ActorManager
 import deepsea.database.DBManager
 import deepsea.esp.EspManager.{GetEsp, GetHullEsp}
 import deepsea.files.FileManager.GenerateUrl
-import deepsea.hull.HullManager.{BsDesignNode, GetBsDesignNodes, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, GetHullSystems, HullEsp, HullPartPlateDef, HullPartProfileDef, HullSystem, PlatePart, ProfilePart, RemoveParts}
+import deepsea.hull.HullManager.{AddIssueMaterial, BsDesignNode, GetBsDesignNodes, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, GetHullSystems, HullEsp, HullPartPlateDef, HullPartProfileDef, HullSystem, IssueMaterial, PlatePart, ProfilePart, RemoveParts}
 import deepsea.hull.classes.HullPart
+import deepsea.materials.MaterialsHelper
 import deepsea.pipe.PipeManager.{Material, PipeSeg, PipeSegActual, ProjectName}
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
@@ -84,9 +85,22 @@ object HullManager {
   case class PlatePart(code: String, block: String, name: String, description: String, weight: Double, thickness: Double, material: String, struct: String)
   case class ProfilePart(name: String, description: String, kse: Int, section: String, material: String, w_h: Double, w_t: Double, f_h: Double, f_t: Double, block: String, length: Double, area: Double, stock: String, density: Double, weight: Double, struct: String)
   case class HullSystem(code: String, name: String)
+  case class AddIssueMaterial(pos: String, units: String, weight: String, count: String, stock: String, userId: String, docNumber: String, issueId: String, department: String)
+
+  case class IssueMaterial(id: Int, pos: String, units: String, weight: Double, count: Double, stock: String, userId: Int, dateIns: Long, docNumber: String, issueId: Int, dep: String){
+    def toHullPart(materials: List[Material], lang: String = "ru"): PrdPart = {
+      materials.find(_.code == stock) match {
+        case Some(material) =>
+          PrdPart(id, count.toInt, pos, "", 0, "", material.name(lang), 0, material.description(lang), "MANUAL", "", 0, 0, 0, weight, weight * count, "", 0, 0, 0, 0, 0, 0, 0, "", stock)
+        case _ =>
+          PrdPart(id, count.toInt, pos, "", 0, "", "MATERIAL NOT FOUND", 0, "MATERIAL NOT FOUND", "MANUAL", "", 0, 0, 0, weight, weight * count, "", 0, 0, 0, 0, 0, 0, 0, "", stock)
+      }
+    }
+  }
+
 }
 
-class HullManager extends Actor with Codecs{
+class HullManager extends Actor with Codecs with HullHelper with MaterialsHelper {
   implicit val timeout: Timeout = Timeout(300, TimeUnit.SECONDS)
 
   private val espCollectionName = "hullEsp"
@@ -287,7 +301,9 @@ class HullManager extends Actor with Codecs{
     case GetHullEspFiles(project, docNumber, docName, revision) =>
       val rev = if (revision == "NO REV")  "" else revision
       val file: String = Files.createTempDirectory("hullPdf").toAbsolutePath.toString + "/" + docNumber + "_rev" + rev + ".pdf"
-      genHullPartListEnPDF(project, docNumber, docName, rev, file)
+      val rkdProject = docNumber.split("-").head
+      val materials = getMaterials.filter(_.project == rkdProject)
+      genHullPartListEnPDF(project, docNumber, docName, rev, file, getHullIssueMaterials(docNumber, materials))
       Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
         case url: String => sender() ! url.asJson.noSpaces
         case _ => sender() ! "error".asJson.noSpaces
@@ -307,6 +323,10 @@ class HullManager extends Actor with Codecs{
       sender() ! getSystems(project).asJson.noSpaces
 
     case GetBsDesignNodes(project) => sender() ! getBsDesignNodes(project).asJson.noSpaces
+
+    case AddIssueMaterial(pos, units, weight, count, stock, userId, docNumber, issueId, department) =>
+      addMaterial(pos, units, weight.toDoubleOption.getOrElse(0), count.toDoubleOption.getOrElse(0), stock, userId.toIntOption.getOrElse(0), docNumber, issueId.toIntOption.getOrElse(0), department)
+      sender() ! "success".asJson.noSpaces
 
   }
 

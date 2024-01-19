@@ -10,6 +10,7 @@ import deepsea.devices.DeviceHelper
 import deepsea.devices.DeviceManager.Device
 import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, DeviceEspObject, EspObject, GetEsp, GetGlobalEsp, GetGlobalEspPdf, GetHullEsp, GetMaterialPurchases, GlobalEsp, HullEspObject, InitIssues, Issue, MaterialPurchase, PipeEspObject}
 import deepsea.files.FileManager.GenerateUrl
+import deepsea.hull.HullHelper
 import deepsea.pipe.PipeHelper
 import deepsea.pipe.PipeManager.{Material, PipeSeg, ProjectName}
 import io.circe.generic.JsonCodec
@@ -97,7 +98,7 @@ object EspManager{
   case class IssueProject(id: Int, name: String, pdsp: String, rkd: String, foran: String, managers: String, status: String, factory: String)
 }
 
-class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper with DeviceHelper {
+class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper with DeviceHelper with HullHelper {
   implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
 
   override def preStart(): Unit = {
@@ -115,14 +116,21 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
 //    }
 //    val qj = 0
     //self ! GetEsp("N002", "device", "200101-511-102")
+    //self ! CreateEsp("N002", "200101-222-104", "C", "isaev", "hull", 24.toString)
   }
   override def receive: Receive = {
     case CreateEsp(foranProject, docNumber, rev, user, kind, taskId) =>
       val id = UUID.randomUUID().toString
       val date = new Date().getTime
+      val projects = getIssueProjects
+      val rkdProject = projects.find(_.foran == foranProject) match {
+        case Some(value) => value
+        case _ => ""
+      }
+      val materials = getMaterials.filter(_.project == rkdProject)
       kind match {
         case "hull" =>
-          addHullEsp(HullEspObject(id, foranProject, docNumber, rev, date, user, kind, taskId.toIntOption.getOrElse(0), elements = ForanPartsByDrawingNum(foranProject, docNumber)))
+          addHullEsp(HullEspObject(id, foranProject, docNumber, rev, date, user, kind, taskId.toIntOption.getOrElse(0), elements = ForanPartsByDrawingNum(foranProject, docNumber) ++ getHullIssueMaterials(docNumber, materials)))
         case "pipe" =>
           val projectSystem = getSystemAndProjectFromDocNumber(docNumber)
           addPipeEsp(PipeEspObject(id, foranProject, docNumber, rev, date, user, kind, taskId.toIntOption.getOrElse(0), elements = getPipeSegs(projectSystem._1, projectSystem._2)))
