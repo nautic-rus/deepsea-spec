@@ -124,7 +124,7 @@ trait PartHelper {
               Option(rs.getDouble("NEST_WIDTH")).getOrElse(0.0),
               Option(rs.getInt("NUM_EQ_NEST")).getOrElse(0),
               Option(rs.getDouble("WH")).getOrElse(0.0),
-              Math.round(Option(rs.getDouble("WT")).getOrElse(0.0)),
+              Math.round(Option(rs.getDouble("WT")).getOrElse(0.0) * 10) / 10d,
               Option(rs.getDouble("FH")).getOrElse(0.0),
               Option(rs.getDouble("FT")).getOrElse(0.0),
               Option(rs.getString("STRGROUP")).getOrElse(""),
