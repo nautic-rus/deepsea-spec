@@ -124,7 +124,7 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
       val date = new Date().getTime
       val projects = getIssueProjects
       val rkdProject = projects.find(_.foran == foranProject) match {
-        case Some(value) => value
+        case Some(value) => value.rkd
         case _ => ""
       }
       val materials = getMaterials.filter(_.project == rkdProject)
