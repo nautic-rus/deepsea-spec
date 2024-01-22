@@ -525,6 +525,13 @@ trait DeviceHelper extends AccommodationHelper {
       val accom = devices.filter(_.elemType == "accommodation").filter(x => ids.contains(x.userId) && x.zone == d.zone)
       accom.foreach(x => x.userId = d.userId + "." + x.userId)
     })
+    val userIdsReplace = getAccommodationUserIds(docNumber)
+    devices.filter(_.elemType == "accommodation").foreach(x => {
+      userIdsReplace.find(_.userId == x.userId) match {
+        case Some(value) => x.userId = value.userIdNew
+        case _ => None
+      }
+    })
     devices.sortBy(_.userId)
   }
   def getProjectFromDocNumber(docNumber: String): (String, String) = {

@@ -321,15 +321,6 @@ trait AccommodationHelper {
       }
       userIds += userId
     })
-
-    val userIdsReplace = getAccommodationUserIds(docNumber)
-    res.filter(_.elemType == "accommodation").foreach(x => {
-      userIdsReplace.find(_.userId == x.userId) match {
-        case Some(value) => x.userId = value.userIdNew
-        case _ => None
-      }
-    })
-
     res.tapEach(x => x.units = x.material.units).filter(_.material.code != "").toList
   }
   def addLeftZeros(input: String, length: Int = 5): String ={

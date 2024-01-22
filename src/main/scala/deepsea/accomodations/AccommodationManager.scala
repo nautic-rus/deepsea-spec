@@ -108,6 +108,18 @@ class AccommodationManager extends Actor with AccommodationHelper with Codecs {
     case GetAccommodationsESP(docNumber, revision, lang) =>
       val docName: String = getASName(docNumber)
       val devices: List[Device] = getAccommodationsAsDevices(docNumber, lang)
+      devices.filter(_.desc2.contains("&")).foreach(d => {
+        val ids = d.desc2.split("&")
+        val accom = devices.filter(_.elemType == "accommodation").filter(x => ids.contains(x.userId) && x.zone == d.zone)
+        accom.foreach(x => x.userId = d.userId + "." + x.userId)
+      })
+      val userIdsReplace = getAccommodationUserIds(docNumber)
+      devices.filter(_.elemType == "accommodation").foreach(x => {
+        userIdsReplace.find(_.userId == x.userId) match {
+          case Some(value) => x.userId = value.userIdNew
+          case _ => None
+        }
+      })
       val file = genAccomListEnPDF(docNumber, docName, revision, devices, lang)
       Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
         case url: String => sender() ! url.asJson.noSpaces
