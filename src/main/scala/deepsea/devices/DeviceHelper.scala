@@ -522,7 +522,7 @@ trait DeviceHelper extends AccommodationHelper {
     val devices = getDevices(docNumber) ++ getAccommodationsAsDevices(docNumber, "ru")
     devices.filter(_.desc2.contains("&")).foreach(d => {
       val ids = d.desc2.split("&")
-      val accom = devices.filter(_.elemType == "accommodation").filter(x => ids.contains(x.userId))
+      val accom = devices.filter(_.elemType == "accommodation").filter(x => ids.contains(x.userId) && x.zone == d.zone)
       accom.foreach(x => x.userId = d.userId + "." + x.userId)
     })
     devices.sortBy(_.userId)

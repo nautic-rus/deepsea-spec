@@ -57,7 +57,7 @@ class DeviceManager extends Actor with DeviceHelper with AccommodationHelper wit
 
       devices.filter(_.desc2.contains("&")).foreach(d => {
         val ids = d.desc2.split("&")
-        val accom = devices.filter(_.elemType == "accommodation").filter(x => ids.contains(x.userId))
+        val accom = devices.filter(_.elemType == "accommodation").filter(x => ids.contains(x.userId) && x.zone == d.zone)
         accom.foreach(x => x.userId = d.userId + "." + x.userId)
       })
 
