@@ -164,7 +164,10 @@ trait DeviceHelper extends AccommodationHelper {
                 0,
                 split(0),
                 system,
-                "",
+                devices.find(x => split(0).contains(x.userId)) match {
+                  case Some(value) => value.zone
+                  case _ => ""
+                },
                 "",
                 "",
                 materials.find(_.code == split(1)) match {
@@ -321,8 +324,6 @@ trait DeviceHelper extends AccommodationHelper {
               oracle.close()
             case _ =>
           }
-
-
         }
         else{
           DBManager.GetOracleConnection(foranProject) match {
