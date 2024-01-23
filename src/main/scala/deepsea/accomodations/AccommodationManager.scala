@@ -85,6 +85,7 @@ object AccommodationManager{
         material.units match {
           case "006" => material.singleWeight
           case "055" => material.singleWeight
+          case "796" => 1
           case _ => surface / 2
         }
       )
