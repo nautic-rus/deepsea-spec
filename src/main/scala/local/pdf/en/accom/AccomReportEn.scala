@@ -708,7 +708,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
     })
 
 
-    rows.sortBy(s => s.A1).toList
+    rows.sortBy(s => s.A2).toList
   }
 
   private def formatUnits(mat: Material): String = {
