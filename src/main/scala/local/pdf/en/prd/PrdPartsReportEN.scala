@@ -92,7 +92,7 @@ object PrdPartsReportEN extends UtilsPDF {
       })
       additional.foreach(part => {
         buff += (Item11ColumnsEN(
-          false, part.PART_CODE, "", "M", part.DESCRIPTION, part.PART_DESC, part.QTY.toString, part.WEIGHT_UNIT.toString, part.TOTAL_WEIGHT.toString, "", "", "", "", "")
+          false, part.PART_CODE, "", "M", part.DESCRIPTION, part.PART_DESC, part.QTY.toString, part.WEIGHT_UNIT.toString, (Math.round(part.TOTAL_WEIGHT * 100) / 100d).toString, part.NEST_ID, "", "", "", "")
         )
       })
       buff.sortBy(s => s.A1).toList
