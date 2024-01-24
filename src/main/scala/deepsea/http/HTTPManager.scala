@@ -13,7 +13,7 @@ import deepsea.App
 import deepsea.actors.ActorManager
 import deepsea.actors.ActorStartupManager.HTTPManagerStarted
 import deepsea.elec.ElecManager._
-import deepsea.hull.HullManager.{AddIssueMaterial, GetBsDesignNodes, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, GetHullSystems, RemoveParts}
+import deepsea.hull.HullManager.{AddIssueMaterial, DeleteIssueMaterial, GetBsDesignNodes, GetHullEspFiles, GetHullPart, GetHullPartsByDocNumber, GetHullPartsExcel, GetHullPlatesForMaterial, GetHullProfilesForMaterial, GetHullSystems, RemoveParts}
 import deepsea.spec.SpecManager._
 import org.apache.log4j.{LogManager, Logger}
 import play.api.libs.json.{JsValue, Json}
@@ -284,6 +284,9 @@ class HTTPManager extends Actor {
       },
       (get & path("addIssueMaterial") & parameter("pos", "units", "weight", "count", "stock", "userId", "docNumber", "issueId", "department")) { (pos, units, weight, count, stock, userId, docNumber, issueId, department) =>
         askFor(ActorManager.hullManager, AddIssueMaterial(pos, units, weight, count, stock, userId, docNumber, issueId, department))
+      },
+      (get & path("deleteIssueMaterial") & parameter("pos", "docNumber", "department")) { (pos, docNumber, department) =>
+        askFor(ActorManager.hullManager, DeleteIssueMaterial(pos, docNumber, department))
       },
 
       //NEW ELEC

@@ -22,12 +22,23 @@ trait HullHelper {
     }
   }
 
-  def deleteHullMaterial(id: Int): String = {
+  def deleteMaterial(id: Int): String = {
     DBManager.GetPGConnection() match {
       case Some(c) =>
         val s = c.createStatement()
-        val d = new Date().getTime
         s.execute(s"delete from issue_materials where id = $id")
+        s.close()
+        c.close()
+      case _ => None
+    }
+    "success"
+  }
+
+  def deleteMaterial(pos: String, docNumber: String, department: String): String = {
+    DBManager.GetPGConnection() match {
+      case Some(c) =>
+        val s = c.createStatement()
+        s.execute(s"delete from issue_materials where pos = '$pos' and doc_number = '$docNumber' and department = '$department'")
         s.close()
         c.close()
       case _ => None
