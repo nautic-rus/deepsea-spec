@@ -573,7 +573,7 @@ object PrdPartsReportEN extends UtilsPDF {
         bodyGrid.addCell(generateCell(item.A7))
         bodyGrid.addCell(generateCell(item.A8))
         bodyGrid.addCell(generateCell(item.A9))
-        bodyGrid.addCell(generateCell(""))
+        //bodyGrid.addCell(generateCell(""))
         bodyGrid.addCell(generateCell(item.A12))
       }
       else {
