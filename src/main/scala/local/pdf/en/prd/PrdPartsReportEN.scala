@@ -88,11 +88,12 @@ object PrdPartsReportEN extends UtilsPDF {
             case _ => String.format("%.1f", gr._2.head.WIDTH) + "x" + String.format("%.1f", gr._2.head.THICKNESS)
           }
         }
-        buff += Item11ColumnsEN(A1 = id, A2 = symm, A3 = elemType, A4 = kpl_kse, A5 = mat, A6 = qty.toString, A7 = weight, A8 = totWeight, A9 = nestids, A12 = findChessPos(id + "-" + symm, chess))
+        //buff += Item11ColumnsEN(A1 = id, A2 = symm, A3 = elemType, A4 = kpl_kse, A5 = mat, A6 = qty.toString, A7 = weight, A8 = totWeight, A9 = nestids, A12 = findChessPos(id + "-" + symm, chess))
+        buff += Item11ColumnsEN(A1 = id, A2 = symm, A3 = elemType, A4 = kpl_kse, A5 = mat, A6 = qty.toString, A7 = weight, A8 = totWeight, A12 = findChessPos(id + "-" + symm, chess))
       })
       additional.foreach(part => {
         buff += (Item11ColumnsEN(
-          false, part.PART_CODE, "", "M", part.DESCRIPTION, part.PART_DESC, part.QTY.toString, part.WEIGHT_UNIT.toString, (Math.round(part.TOTAL_WEIGHT * 100) / 100d).toString, part.NEST_ID, "1", "2", "3", "4")
+          false, part.PART_CODE, "", "M", part.DESCRIPTION, part.PART_DESC, part.QTY.toString, part.WEIGHT_UNIT.toString, (Math.round(part.TOTAL_WEIGHT * 100) / 100d).toString, part.NEST_ID, "", "", "", "")
         )
       })
       buff.sortBy(s => s.A1).toList
@@ -571,7 +572,7 @@ object PrdPartsReportEN extends UtilsPDF {
 
         bodyGrid.addCell(generateCell(item.A7))
         bodyGrid.addCell(generateCell(item.A8))
-        //bodyGrid.addCell(generateCell(item.A9))
+        bodyGrid.addCell(generateCell(item.A9))
         bodyGrid.addCell(generateCell(""))
         bodyGrid.addCell(generateCell(item.A12))
       }
