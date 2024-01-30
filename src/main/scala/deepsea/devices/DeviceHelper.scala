@@ -201,7 +201,7 @@ trait DeviceHelper extends AccommodationHelper {
                 d.project,
                 d.id,
                 d.comp,
-                d.userId + "." + split(0),
+                d.userId.replace("#", "") + "." + split(0),
                 d.system,
                 d.zone,
                 d.elemType,
@@ -231,7 +231,7 @@ trait DeviceHelper extends AccommodationHelper {
       case _ => List.empty[Device]
     }
     devices ++= devicesAuxFromComp.toList
-    devices.filter(_.material.code != "").toList
+    devices.filter(_.material.code != "").filter(!_.userId.contains("#")).toList
   }
   def addDeviceToSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String, addText: String): Unit ={
     DBManager.GetMongoConnection() match {
