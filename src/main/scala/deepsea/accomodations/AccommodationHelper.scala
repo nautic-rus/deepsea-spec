@@ -334,12 +334,15 @@ trait AccommodationHelper {
 //    val prevUserId = addLeftZeros(prevUserIdValue, 8)
 //    val newUserId = addLeftZeros(newUserIdValue, 8)
     val prevUserId = prevUserIdValue
-    val newUserId = newUserIdValue
+    val newUserId = newUserIdValue.replace("#", "")
     DBManager.GetPGConnection() match {
       case Some(c) =>
         val s = c.createStatement()
-        if (newUserIdValue == "0"){
+        if (newUserIdValue == "0" || newUserIdValue == "0#"){
           s.execute(s"delete from accom_userid_replace where doc_number = '$docNumber' and userid = '$prevUserId'")
+        }
+        else if (newUserIdValue.contains("#")){
+          s.execute(s"update accom_userid_replace set userid_new = '$newUserId' where doc_number = '$docNumber' and userid_new = '$prevUserId'")
         }
         else{
           val rs = s.executeQuery(s"select * from accom_userid_replace where doc_number = '$docNumber' and userid = '$prevUserId'")
