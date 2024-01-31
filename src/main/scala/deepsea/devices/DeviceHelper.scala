@@ -165,7 +165,7 @@ trait DeviceHelper extends AccommodationHelper {
                 0,
                 split(0),
                 system,
-                devices.find(x => split(0).contains(x.userId)) match {
+                devices.find(x => split(0).contains(x.userId + ".")) match {
                   case Some(value) => value.zone
                   case _ => zone
                 },
