@@ -223,8 +223,8 @@ class HTTPManager extends Actor {
       (get & path("devicesEspFiles") & parameter("docNumber") & parameter("revision") & parameter("lang")) { (docNumber, revision, lang) =>
         askFor(ActorManager.devices, GetDevicesESP(docNumber, revision, lang))
       },
-      (get & path("addDeviceToSystem") & parameter("docNumber") & parameter("stock") & parameter("units") & parameter("count") & parameter("label") & parameter("forLabel") & parameter("addText")) { (docNumber, stock, units, count, label, forLabel, addText) =>
-        askFor(ActorManager.devices, AddDeviceToSystem(docNumber, stock, units, count, label, forLabel, addText))
+      (get & path("addDeviceToSystem") & parameter("docNumber") & parameter("stock") & parameter("units") & parameter("count") & parameter("label") & parameter("forLabel") & parameter("addText") & parameter("zone")) { (docNumber, stock, units, count, label, forLabel, addText, zone) =>
+        askFor(ActorManager.devices, AddDeviceToSystem(docNumber, stock, units, count, label, forLabel, addText, zone))
       },
       (get & path("removeDeviceFromSystem") & parameter("docNumber") & parameter("stock") & parameter("units") & parameter("count") & parameter("label") & parameter("forLabel") & parameter("addText")) { (docNumber, stock, units, count, label, forLabel, addText) =>
         askFor(ActorManager.devices, RemoveDeviceFromSystem(docNumber, stock, units, count, label, forLabel, addText))

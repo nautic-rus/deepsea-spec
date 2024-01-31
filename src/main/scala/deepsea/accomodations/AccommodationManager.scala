@@ -3,15 +3,14 @@ package deepsea.accomodations
 import akka.actor.Actor
 import akka.pattern.ask
 import akka.util.Timeout
-import deepsea.accomodations.AccommodationManager.{AddAccommodationGroup, GetAccomUserIdReplace, GetAccommodations, GetAccommodationsESP, SetAccommodationLabel, UpdateAccommodationUserId}
+import deepsea.accomodations.AccommodationManager.{AddAccommodationGroup, GetAccomUserIdReplace, GetAccommodationsESP, SetAccommodationLabel, UpdateAccommodationUserId}
 import deepsea.actors.ActorManager
-import deepsea.devices.DeviceManager.{Device, GetDevicesESP}
-import deepsea.elec.ElecManager.Block
+import deepsea.devices.DeviceManager.Device
 import deepsea.files.FileManager.GenerateUrl
 import deepsea.pipe.PipeManager.Material
-import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 import io.circe.syntax.EncoderOps
+import io.circe.{Decoder, Encoder}
 import local.common.Codecs
 import local.pdf.en.accom.AccomReportEn.genAccomListEnPDF
 

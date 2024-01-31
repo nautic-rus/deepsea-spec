@@ -116,7 +116,7 @@ trait DeviceHelper extends AccommodationHelper {
             val split = l.split('|')
             devices.find(x => x.id == d.id && x.fromAux == 0) match {
               case Some(deviceBase) =>
-                if (split.length == 4){
+                if (split.length >= 4){
                   devices += Device(
                     deviceBase.project,
                     d.id,
@@ -157,7 +157,8 @@ trait DeviceHelper extends AccommodationHelper {
         devicesAuxFromSystem.filter(_.descr.contains("|")).foreach(d => {
           d.descr.split('\n').toList.foreach(l => {
             val split = l.split('|')
-            if (split.length == 4){
+            if (split.length >= 4){
+              val zone = if (split.length > 5) split(5) else ""
               devices += Device(
                 rkdProject,
                 d.id,
@@ -166,7 +167,7 @@ trait DeviceHelper extends AccommodationHelper {
                 system,
                 devices.find(x => split(0).contains(x.userId)) match {
                   case Some(value) => value.zone
-                  case _ => ""
+                  case _ => zone
                 },
                 "",
                 "",
@@ -233,7 +234,7 @@ trait DeviceHelper extends AccommodationHelper {
     devices ++= devicesAuxFromComp.toList
     devices.filter(_.material.code != "").filter(!_.userId.contains("#")).toList
   }
-  def addDeviceToSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String, addText: String): Unit ={
+  def addDeviceToSystem(docNumber: String, stock: String, units: String, count: String, label: String, forLabel: String, addText: String, zone: String): Unit ={
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
         val projectNamesCollection: MongoCollection[ProjectName] = mongo.getCollection("project-names")
@@ -253,7 +254,7 @@ trait DeviceHelper extends AccommodationHelper {
           case _ => ""
         }
         val descrs = ListBuffer.empty[SystemLang]
-        val newLabel = List(label, stock, units, count, addText).mkString("|")
+        val newLabel = List(label, stock, units, count, addText, zone).mkString("|")
         if (forLabel == ""){
           DBManager.GetOracleConnection(foranProject) match {
             case Some(oracle) =>
