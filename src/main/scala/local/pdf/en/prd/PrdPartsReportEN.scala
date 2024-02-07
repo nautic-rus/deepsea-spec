@@ -39,8 +39,8 @@ object PrdPartsReportEN extends UtilsPDF {
     mmToPt(10),
     mmToPt(10),
     mmToPt(10),
-    mmToPt(80),
-    mmToPt(26),
+    mmToPt(81),
+    mmToPt(20),
 
     mmToPt(10),
     mmToPt(15),
