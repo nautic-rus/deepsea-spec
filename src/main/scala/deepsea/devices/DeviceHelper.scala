@@ -5,7 +5,7 @@ import deepsea.database.DBManager
 import deepsea.devices.DeviceManager.{Device, DeviceAux, SystemLang}
 import deepsea.pipe.PipeManager.{Material, PipeSeg, ProjectName, SystemDef, Units}
 import org.mongodb.scala.MongoCollection
-import org.mongodb.scala.model.Filters.{and, equal, notEqual}
+import org.mongodb.scala.model.Filters.{all, and, equal, notEqual}
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Await
@@ -50,6 +50,10 @@ trait DeviceHelper extends AccommodationHelper {
             val query = s"select \n    oid, \n    comp, \n    userid, \n    syst_userid, \n    zone_userid, \n    type, \n    comp_abbrev, \n    weight, \n    stock_code, \n    elem_class,\n    elem_desc1, \n    elem_desc2, \n    stock_code, \n    (select long_descr from COMPONENT_LANG cl where lang = -2 and cl.comp = elemdesc.comp and rownum = 1) as long_desc,\n    (select long_descr from element_lang cl where lang = -2 and cl.elem = elemdesc.oid and rownum = 1) as long_desc_elem\nfrom \n    v_element_desc  elemdesc\nwhere \n    syst_userid = '$system'"
             val rs = s.executeQuery(query)
             while (rs.next()) {
+              val m = materials.find(_.code == Option(rs.getString("STOCK_CODE")).getOrElse("")) match {
+                case Some(value) => value
+                case _ => Material()
+              }
               devices += Device(
                 foranProject,
                 Option(rs.getInt("OID")).getOrElse(-1),
@@ -67,12 +71,12 @@ trait DeviceHelper extends AccommodationHelper {
                 Option(rs.getString("LONG_DESC_ELEM")).getOrElse(""),
                 Option(rs.getString("LONG_DESC")).getOrElse(""),
 //                Option(rs.getString("LONG_DESC_ELEM")).getOrElse(""),
-                materials.find(_.code == Option(rs.getString("STOCK_CODE")).getOrElse("")) match {
-                  case Some(value) => value
-                  case _ => Material()
-                },
+                m,
                 Option(rs.getString("USERID")).getOrElse(""),
-                "")
+                "", m.units, m.units match {
+                  case "055" => Option(rs.getDouble("WEIGHT")).getOrElse(0)
+                  case _ => 0
+                })
             }
             rs.close()
             s.close()
@@ -522,6 +526,10 @@ trait DeviceHelper extends AccommodationHelper {
   }
   def getDevicesWithAccommodations(docNumber: String): List[Device] = {
     val devices = getDevices(docNumber) ++ getAccommodationsAsDevices(docNumber, "ru")
+    val d = getDevices(docNumber)
+    val a = getAccommodationsAsDevices(docNumber, "ru")
+    val dd = a
+    val aa = d
     devices.filter(_.desc2.contains("&")).foreach(d => {
       val ids = d.desc2.split("&")
       val accom = devices.filter(_.elemType == "accommodation").filter(x => ids.contains(x.userId) && x.zone == d.zone)
