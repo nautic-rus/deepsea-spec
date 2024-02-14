@@ -118,6 +118,9 @@ trait DeviceHelper extends AccommodationHelper {
         }
         devicesAux.filter(_.descr.contains("|")).foreach(d => {
           d.descr.split('\n').toList.foreach(l => {
+            if (l.contains("HULPROBULXXX0009")){
+              val qwe  = 0
+            }
             val split = l.split('|')
             devices.find(x => x.id == d.id && x.fromAux == 0) match {
               case Some(deviceBase) =>
@@ -161,6 +164,9 @@ trait DeviceHelper extends AccommodationHelper {
         })
         devicesAuxFromSystem.filter(_.descr.contains("|")).foreach(d => {
           d.descr.split('\n').toList.foreach(l => {
+            if (l.contains("HULPROBULXXX0009")) {
+              val qwe = 0
+            }
             val split = l.split('|')
             if (split.length >= 4){
               val zone = if (split.length > 5) split(5) else ""
@@ -176,9 +182,12 @@ trait DeviceHelper extends AccommodationHelper {
                 },
                 "",
                 "",
-                materials.find(_.code == split(1)) match {
-                  case Some(value) => value.singleWeight
-                  case _ => 0
+                split(2) match {
+                  case "166" => split(3).toDoubleOption.getOrElse(0)
+                  case _ => materials.find(_.code == split(1)) match {
+                    case Some(value) => value.singleWeight
+                    case _ => 0
+                  }
                 },
                 split(1),
                 0,
