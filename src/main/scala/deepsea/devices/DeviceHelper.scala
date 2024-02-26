@@ -76,6 +76,7 @@ trait DeviceHelper extends AccommodationHelper {
                 Option(rs.getString("USERID")).getOrElse(""),
                 "", m.units, m.units match {
                   case "055" => Option(rs.getDouble("WEIGHT")).getOrElse(0)
+                  case "796" => 1
                   case _ => 0
                 })
             }
