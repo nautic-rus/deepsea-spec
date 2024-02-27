@@ -30,20 +30,20 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
   )
 
 
-  def genSpoolsListEnPDF(docNumber: String, docName: String, rev: String, rawData: List[PipeSeg], lang: String, genAll: Boolean = false): String = {
+  def genSpoolsListEnPDF(docNumber: String, docName: String, rev: String, rawData: List[PipeSeg], lang: String, genAll: Boolean = false, materials: List[Material]): String = {
     val filePath: String = Files.createTempDirectory("spoolPdf").toAbsolutePath.toString + File.separator + docNumber + "ML_rev" + rev + ".pdf"
     val rows: List[Item11ColumnsEN] = genRows(rawData, lang)
-    val totalRows: List[Item11ColumnsEN] = genTotal(rows, lang)
+    val totalRows: List[Item11ColumnsEN] = genTotal(rows, lang, materials)
     val dn = DocNameEN(num = docNumber, name = docName, lastRev = if (rev != "") rev else "0")
     processPDF(dn, filePath, rows, totalRows, genAll)
 
     filePath
   }
 
-  def genSpoolsListEnPDFAll(docNumber: String, docName: String, rev: String, rawData: List[PipeSeg], lang: String): String = {
+  def genSpoolsListEnPDFAll(docNumber: String, docName: String, rev: String, rawData: List[PipeSeg], lang: String, materials: List[Material]): String = {
     val filePath: String = Files.createTempDirectory("spoolPdf").toAbsolutePath.toString + File.separator + docNumber + "ML_rev" + rev + ".pdf"
     val rows: List[Item11ColumnsEN] = genRows(rawData, lang)
-    val totalRows: List[Item11ColumnsEN] = genTotal(rows, lang)
+    val totalRows: List[Item11ColumnsEN] = genTotal(rows, lang, materials)
     val dn = DocNameEN(num = docNumber, name = docName, lastRev = if (rev != "") rev else "0")
     processPDF(dn, filePath, rows, totalRows, genAll = true, lang)
     filePath
@@ -601,18 +601,18 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
     val rows: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
 
     val rowsQTY: ListBuffer[PipeSeg] = ListBuffer.empty[PipeSeg]
-    rawData.groupBy(s => (s.spool, s.spPieceId, s.material.code)).foreach(gr => {
+    rawData.groupBy(s => (s.spool, s.spPieceId, s.material.code, s.material.name)).foreach(gr => {
       val master: PipeSeg = gr._2.head
       val qty: Double = gr._2.map(_.length).sum
       val wgt: Double = gr._2.map(_.weight).sum
       rowsQTY += (master.copy(length = qty, weight = wgt))
     })
 
-    rowsQTY.foreach(row => {
-      val id = formatSpoolId(row.spool, row.spPieceId.toString)
-      if (id == "200.002") {
-        val jk = 0
-      }
+    val spoolsCount = ListBuffer.empty[String]
+    rowsQTY.sortBy(x => x.spool + "-" + x.material.name).foreach(row => {
+      spoolsCount += row.spool
+      val id = formatSpoolId(row.spool, spoolsCount.count(_ == row.spool).toString)
+      //val id = formatSpoolId(row.spool, row.spPieceId.toString)
       //val mat = row.material.code+ " "+ row.material.name
       val matName = row.material.name(lang)
       val matDesc = row.material.description(lang)
@@ -705,7 +705,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
     }
   }
 
-  private def genTotal(in: List[Item11ColumnsEN], lang: String): List[Item11ColumnsEN] = {
+  private def genTotal(in: List[Item11ColumnsEN], lang: String, materials: List[Material]): List[Item11ColumnsEN] = {
     val buff = ListBuffer.empty[Item11ColumnsEN]
     in.groupBy(s => s.A12).foreach(gr => {
       val ent = gr._2.head
@@ -716,14 +716,19 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
         } else {
           if (w < 0.01) " 0.01" else String.format("%.2f", w)
         }
-
-
       }
       val wgt = {
         val w = gr._2.map(_.A5.toDoubleOption.getOrElse(0.0)).sum
         if (w < 0.01) " 0.01" else String.format("%.2f", w)
       }
-      buff += Item11ColumnsEN(A1 = "", A2 = ent.A2, A3 = ent.A3, A4 = qty, A5 = wgt)
+      if (ent.A12 == "HULPPLSTSXXX0001"){
+        val q1 = 0
+      }
+      val materialName = materials.find(_.code == ent.A12) match {
+        case Some(value) => value.name(lang)
+        case _ => ent.A2
+      }
+      buff += Item11ColumnsEN(A1 = "", A2 = materialName, A3 = ent.A3, A4 = qty, A5 = wgt)
     })
     buff.sortBy(s => s.A2).toList
   }
