@@ -603,7 +603,10 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
     val rowsQTY: ListBuffer[PipeSeg] = ListBuffer.empty[PipeSeg]
     rawData.groupBy(s => (s.spool, s.spPieceId, s.material.code, s.material.name)).foreach(gr => {
       val master: PipeSeg = gr._2.head
-      val qty: Double = gr._2.map(_.length).sum
+      val qty: Double = master.material.units match {
+        case "796" => gr._2.length
+        case _ => gr._2.map(_.length).sum
+      }
       val wgt: Double = gr._2.map(_.weight).sum
       rowsQTY += (master.copy(length = qty, weight = wgt))
     })
@@ -720,9 +723,6 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
       val wgt = {
         val w = gr._2.map(_.A5.toDoubleOption.getOrElse(0.0)).sum
         if (w < 0.01) " 0.01" else String.format("%.2f", w)
-      }
-      if (ent.A12 == "HULPPLSTSXXX0001"){
-        val q1 = 0
       }
       val materialName = materials.find(_.code == ent.A12) match {
         case Some(value) => value.name(lang)
