@@ -658,12 +658,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
           case "FWNR" => "1"
           case "FWRE" => "1"
           case "FLAN" => "1"
-          case "HVAC" =>
-            ps.compType match {
-              case "A" => "1"
-              case "B" => "1"
-              case "P" => String.format("%.1f", ps.length)
-            }
+          case "HVAC" => ps.length.toString
           case _ =>
             if (ps.length < 1.0)
               "1"
