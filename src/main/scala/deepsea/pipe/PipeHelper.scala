@@ -691,7 +691,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
           val quality = (bdatri + "    ").substring(0, 4).trim
           val insulation = (bdatri + "    ").substring(4, 4).trim
 
-          if (plsElem.spool == "001"){
+          if (plsElem.spool == "026"){
             val qwe = 0
           }
           val isComp = plsElem.cmp_oid != 0
@@ -752,10 +752,10 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                         val hvacName = plsElem.cType match {
                           case "B" =>
                             if (params.length == 3){
-                              val radius = Math.round(params(0).value)
+                              val radius = Math.round(params(0).value * 2)
                               val diam = Math.round(params(1).value)
                               val angle = Math.round(180 / Math.PI * params(2).value)
-                              s"ОТВОД $angle°, ДУ$diam (${material.name})"
+                              s"ОТВОД $angle°, ДУ$radius (${material.name})"
                             }
                             else if (params.length == 4) {
                               val d1 = Math.round(params(0).value)
