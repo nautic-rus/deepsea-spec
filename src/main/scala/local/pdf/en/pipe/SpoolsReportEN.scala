@@ -604,7 +604,10 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
     rawData.groupBy(s => (s.spool, s.spPieceId, s.material.code, s.material.name)).foreach(gr => {
       val master: PipeSeg = gr._2.head
       val qty: Double = master.material.units match {
-        case "796" => gr._2.length
+        case "796" => master.typeCode match {
+          case "HVAC" => gr._2.length
+          case _ => gr._2.map(_.length).sum
+        }
         case _ => gr._2.map(_.length).sum
       }
       val wgt: Double = gr._2.map(_.weight).sum
