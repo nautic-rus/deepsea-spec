@@ -75,7 +75,7 @@ object HullManager {
 
   case class GetBsDesignNodes(project: String)
   case class GetHullSystems(project: String)
-  case class BsDesignNode(OID: Int, TYPE: String, NAME: String, DESCRIPTION: String, PARENT_NODE: Int, ATOM_TYPE: Int, BLOCK_OID: Int, WEIGHT: Double, X_COG: Double, Y_COG: Double, Z_COG: Double, ATOM_NAME: String, DNA: String, DATE: Long, BLOCK: String, ZONE: String, USERID: String, ELEC: Int, POS: Int)
+  case class BsDesignNode(OID: Int, TYPE: String, NAME: String, DESCRIPTION: String, PARENT_NODE: Int, ATOM_TYPE: Int, BLOCK_OID: Int, WEIGHT: Double, X_COG: Double, Y_COG: Double, Z_COG: Double, ATOM_NAME: String, DNA: String, DATE: Long, BLOCK: String, ZONE: String, USERID: String, ELEC: Int, POS: Int, Xmin: Double, Ymin: Double, Zmin: Double, Xmax: Double, Ymax: Double, Zmax: Double)
 
   implicit val HullEspDecoder: Decoder[HullEsp] = deriveDecoder[HullEsp]
   implicit val HullEspEncoder: Encoder[HullEsp] = deriveEncoder[HullEsp]
@@ -845,6 +845,30 @@ class HullManager extends Actor with Codecs with HullHelper with MaterialsHelper
             },
             rs.getInt("POS") match {
               case value: Int => value
+              case _ => 0
+            },
+            rs.getDouble("X_MIN") match {
+              case value: Double => value
+              case _ => 0
+            },
+            rs.getDouble("Y_MIN") match {
+              case value: Double => value
+              case _ => 0
+            },
+            rs.getDouble("Z_MIN") match {
+              case value: Double => value
+              case _ => 0
+            },
+            rs.getDouble("X_MAX") match {
+              case value: Double => value
+              case _ => 0
+            },
+            rs.getDouble("Y_MAX") match {
+              case value: Double => value
+              case _ => 0
+            },
+            rs.getDouble("Z_MAX") match {
+              case value: Double => value
               case _ => 0
             }
           )
