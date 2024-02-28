@@ -601,12 +601,12 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
     val rows: ListBuffer[Item11ColumnsEN] = ListBuffer.empty[Item11ColumnsEN]
 
     val rowsQTY: ListBuffer[PipeSeg] = ListBuffer.empty[PipeSeg]
-    rawData.groupBy(s => (s.spool, s.spPieceId, s.material.code, s.material.name)).foreach(gr => {
+    rawData.groupBy(s => (s.spool, s.material.code, s.material.name)).foreach(gr => {
       val master: PipeSeg = gr._2.head
       val qty: Double = master.material.units match {
         case "796" => master.typeCode match {
-          case "HVAC" => gr._2.length
-          case _ => gr._2.map(_.length).sum
+          case "JOINT" => gr._2.map(_.length).sum
+          case _ => gr._2.length
         }
         case _ => gr._2.map(_.length).sum
       }
