@@ -617,9 +617,14 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
 
     val spoolsCount = ListBuffer.empty[String]
     rowsQTY.sortBy(x => x.spool + "-" + x.material.name).foreach(row => {
-      spoolsCount += row.spool
-      val spoolId = formatSpoolId(row.spool, spoolsCount.count(_ == row.spool).toString)
-      val id = if (spoolId.contains(".")) spoolId.split('.').head else spoolId
+      val id = if (row.compType != "AUX"){
+        spoolsCount += row.spool
+        val spoolId = formatSpoolId(row.spool, spoolsCount.count(_ == row.spool).toString)
+        if (spoolId.contains(".")) spoolId.split('.').head else spoolId
+      }
+      else{
+        row.spool
+      }
       //val id = formatSpoolId(row.spool, row.spPieceId.toString)
       //val mat = row.material.code+ " "+ row.material.name
       val matName = row.material.name(lang)
