@@ -30,17 +30,17 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
   )
 
 
-  def genSpoolsListEnPDF(docNumber: String, docName: String, rev: String, rawData: List[PipeSeg], lang: String, genAll: Boolean = false, materials: List[Material]): String = {
+  def genSpoolsListEnPDF(docNumber: String, docName: String, rev: String, rawData: List[PipeSeg], lang: String = "ru", genAll: Boolean = false, materials: List[Material]): String = {
     val filePath: String = Files.createTempDirectory("spoolPdf").toAbsolutePath.toString + File.separator + docNumber + "ML_rev" + rev + ".pdf"
     val rows: List[Item11ColumnsEN] = genRows(rawData, lang)
     val totalRows: List[Item11ColumnsEN] = genTotal(rows, lang, materials)
     val dn = DocNameEN(num = docNumber, name = docName, lastRev = if (rev != "") rev else "0")
-    processPDF(dn, filePath, rows, totalRows, genAll)
+    processPDF(dn, filePath, rows, totalRows, genAll, lang)
 
     filePath
   }
 
-  def genSpoolsListEnPDFAll(docNumber: String, docName: String, rev: String, rawData: List[PipeSeg], lang: String, materials: List[Material]): String = {
+  def genSpoolsListEnPDFAll(docNumber: String, docName: String, rev: String, rawData: List[PipeSeg], lang: String = "ru", materials: List[Material]): String = {
     val filePath: String = Files.createTempDirectory("spoolPdf").toAbsolutePath.toString + File.separator + docNumber + "ML_rev" + rev + ".pdf"
     val rows: List[Item11ColumnsEN] = genRows(rawData, lang)
     val totalRows: List[Item11ColumnsEN] = genTotal(rows, lang, materials)
@@ -161,7 +161,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
       }
 
       if (!pages.last.hasRoom(wrappedRows.length + 2)) {
-        pages += new PartListBodyPage(docNameEN)
+        pages += new PartListBodyPage(docNameEN, lang)
         currPage = currPage + 1
       }
       pages.last.insertRows(wrappedRows)
@@ -617,7 +617,8 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
     val spoolsCount = ListBuffer.empty[String]
     rowsQTY.sortBy(x => x.spool + "-" + x.material.name).foreach(row => {
       spoolsCount += row.spool
-      val id = formatSpoolId(row.spool, spoolsCount.count(_ == row.spool).toString)
+      val spoolId = formatSpoolId(row.spool, spoolsCount.count(_ == row.spool).toString)
+      val id = if (spoolId.contains(".")) spoolId.split('.').head else spoolId
       //val id = formatSpoolId(row.spool, row.spPieceId.toString)
       //val mat = row.material.code+ " "+ row.material.name
       val matName = row.material.name(lang)

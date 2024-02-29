@@ -287,23 +287,23 @@ object ReportCommonEN extends UtilsPDF {
     table
   }
 
-  def fillStampLandscape(doc: Document, docNameEN: DocNameEN, date: String = dateNow): Unit = {
+  def fillStampLandscape(doc: Document, docNameEN: DocNameEN, date: String = dateNow, lang: String = "ru"): Unit = {
     val offset = 210.0f
-    doc.add(genTextFixPos("SFI-DRAWING NO.", fontHELVETICA, 3.0f, offset + 35f, 14f, 50f))
-    doc.add(genTextFixPos("REV.", fontHELVETICA, 3.0f, offset + 187.5f, 14f, 10f))
-    doc.add(genTextFixPos("SHEET", fontHELVETICA, 3.0f, offset + 196.5f, 14f, 10f))
-    doc.add(genTextFixPos("DATE", fontHELVETICA, 2.5f, offset + 185.5f, 21.0f, 10f))
+    doc.add(genTextFixPos(if (lang == "ru") "НОМЕР ЧЕРТЕЖА" else "SFI-DRAWING NO.", fontHELVETICA, 3.0f, offset + 35f, 14f, 50f))
+    doc.add(genTextFixPos(if (lang == "ru") "РЕВ." else "REV.", fontHELVETICA, 3.0f, offset + 187.5f, 14f, 10f))
+    doc.add(genTextFixPos(if (lang == "ru") "ЛИСТ" else "SHEET", fontHELVETICA, 3.0f, offset + 196.5f, 14f, 10f))
+    doc.add(genTextFixPos(if (lang == "ru") "ДАТА" else "DATE", fontHELVETICA, 2.5f, offset + 185.5f, 21.0f, 10f))
     doc.add(genTextFixPos(date, fontHELVETICA, 4.0f, offset + 188.0f, 17.0f, 20f))
     doc.add(genTextFixPos(docNameEN.lastRev, fontHELVETICA, 5.0f, offset + 188.5f, 7f, 10f))
     doc.add(genTextFixPos(docNameEN.num, fontCOURIER_BOLD, 12.0f, offset + 32.5f, 0.5f, 150f))
     doc.add(genTextFixPos(docNameEN.name, fontCOURIER_BOLD, 4f, offset + 6.0f, 18.0f, 150f))
   }
 
-  def fillStamp(doc: Document, docNameEN: DocNameEN, date: String = dateNow): Unit = {
-    doc.add(genTextFixPos("SFI-DRAWING NO.", fontHELVETICA, 3.0f, 35f, 14f, 50f))
-    doc.add(genTextFixPos("REV.", fontHELVETICA, 3.0f, 187.5f, 14f, 10f))
-    doc.add(genTextFixPos("SHEET", fontHELVETICA, 3.0f, 196.5f, 14f, 10f))
-    doc.add(genTextFixPos("DATE", fontHELVETICA, 2.5f, 185.5f, 21.0f, 10f))
+  def fillStamp(doc: Document, docNameEN: DocNameEN, date: String = dateNow, lang: String = "ru"): Unit = {
+    doc.add(genTextFixPos(if (lang == "ru") "НОМЕР ЧЕРТЕЖА" else "SFI-DRAWING NO.", fontHELVETICA, 3.0f, 35f, 14f, 50f))
+    doc.add(genTextFixPos(if (lang == "ru") "РЕВ." else "REV.", fontHELVETICA, 3.0f, 187.5f, 14f, 10f))
+    doc.add(genTextFixPos(if (lang == "ru") "ЛИСТ" else "SHEET", fontHELVETICA, 3.0f, 196.5f, 14f, 10f))
+    doc.add(genTextFixPos(if (lang == "ru") "ДАТА" else "DATE", fontHELVETICA, 2.5f, 185.5f, 21.0f, 10f))
     doc.add(genTextFixPos(date, fontHELVETICA, 4.0f, 188.0f, 17.0f, 20f))
     doc.add(genTextFixPos(docNameEN.lastRev, fontHELVETICA, 5.0f, 188.5f, 7f, 10f))
     doc.add(genTextFixPos(docNameEN.num, fontCOURIER_BOLD, 12.0f, 32.5f, 0.5f, 180f))
