@@ -606,6 +606,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
       val qty: Double = master.material.units match {
         case "796" => master.typeCode match {
           case "JOINT" => gr._2.map(_.length).sum
+          case "AUX" => gr._2.map(_.length).sum
           case _ => gr._2.length
         }
         case _ => gr._2.map(_.length).sum
