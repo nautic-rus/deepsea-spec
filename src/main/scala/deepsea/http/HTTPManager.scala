@@ -20,7 +20,7 @@ import play.api.libs.json.{JsValue, Json}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
 import deepsea.accomodations.AccommodationManager.{AddAccommodationGroup, GetAccomUserIdReplace, GetAccommodations, GetAccommodationsESP, SetAccommodationLabel, UpdateAccommodationUserId}
 import deepsea.devices.DeviceManager.{AddDeviceToSystem, GetDevices, GetDevicesESP, RemoveDeviceFromSystem}
-import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, GetGlobalEsp, GetGlobalEspPdf, GetMaterialPurchases}
+import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, GetEsp, GetGlobalEsp, GetGlobalEspPdf, GetMaterialPurchases}
 import deepsea.pipe.PipeManager.{GetPipeESP, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSpoolModel, GetSystems, GetZones, SetSpoolLock}
 import io.circe.syntax.EncoderOps
 
@@ -316,6 +316,9 @@ class HTTPManager extends Actor {
       },
       (get & path("deleteEleComplect") & parameter("drawing")) { (drawing) =>
         askFor(ActorManager.elec, DeleteEleComplect(drawing))
+      },
+      (get & path("eleEsp") & parameter("foranProject", "kind", "docNumber", "rev")) { (foranProject, kind, docNumber, rev) =>
+        askFor(ActorManager.esp, GetEsp(foranProject, kind, docNumber, rev))
       },
 
 
