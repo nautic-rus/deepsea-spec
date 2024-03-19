@@ -604,7 +604,7 @@ trait ElecHelper extends Codecs with EspManagerHelper {
     }
     blocks.toList
   }
-  def getZones(project: String): List[Zone] = {
+  def getElecZones(project: String): List[Zone] = {
     val zones = ListBuffer.empty[Zone]
     DBManager.GetOracleConnection(project) match {
       case Some(connection) =>
@@ -624,7 +624,7 @@ trait ElecHelper extends Codecs with EspManagerHelper {
     }
     zones.toList
   }
-  def getSystems(project: String): List[System] = {
+  def getElecSystems(project: String): List[System] = {
     val systems = ListBuffer.empty[System]
     DBManager.GetOracleConnection(project) match {
       case Some(connection) =>
@@ -686,5 +686,84 @@ trait ElecHelper extends Codecs with EspManagerHelper {
         Await.result(espCollection.deleteOne(equal("drawingId", drawing)).toFuture(), Duration(10, SECONDS))
       case _ => None
     }
+  }
+  def getEleTrays(project: String, systems: List[String], materials: List[Material]): List[EleTray] = {
+    val res = ListBuffer.empty[EleTray]
+    DBManager.GetOracleConnection(project) match {
+      case Some(connection) =>
+        val stmt = connection.createStatement()
+        try{
+          val query = Source.fromResource("queries/eleTrays.sql").mkString.replaceAll("&systemList", systems.map(x => '\'' + x + '\'').mkString(","))
+          val rs = stmt.executeQuery(query)
+          while (rs.next()){
+            val stock = Option(rs.getString("STOCK_CODE")).getOrElse("")
+            val userId = Option(rs.getString("USERID")).getOrElse("")
+            res += EleTray(
+              userId,
+              stock,
+              rs.getDouble("WEIGHT"),
+              rs.getString("CTYPE"),
+              rs.getInt("IDSQ"),
+              rs.getInt("NODE1"),
+              rs.getInt("NODE2"),
+              materials.find(_.code == stock) match {
+                case Some(value) => value
+                case _ => Material().copy(name = "No stock code, userId " + userId)
+              }
+            )
+          }
+          rs.close()
+          stmt.close()
+          connection.close()
+        }
+        catch {
+          case e: Exception =>
+            stmt.close()
+            connection.close()
+        }
+      case _ =>
+    }
+    res.toList
+  }
+  def getEleEquips(project: String, zones: List[String], materials: List[Material]): List[EleEquip] = {
+    val res = ListBuffer.empty[EleEquip]
+    DBManager.GetOracleConnection(project) match {
+      case Some(connection) =>
+        val stmt = connection.createStatement()
+        try {
+          val query = Source.fromResource("queries/eleEquips.sql").mkString.replaceAll("&zoneList", zones.map(x => '\'' + x + '\'').mkString(","))
+          val rs = stmt.executeQuery(query)
+          while (rs.next()) {
+            val stock = Option(rs.getString("STOCK_CODE")).getOrElse("")
+            val userId = Option(rs.getString("USERID")).getOrElse("")
+            val abbrev = Option(rs.getString("ABBREV")).getOrElse("")
+            res += EleEquip(
+              userId,
+              stock,
+              abbrev,
+              rs.getDouble("WEIGHT"),
+              materials.find(_.code == stock) match {
+                case Some(value) => value
+                case _ => Material().copy(name = "No stock code, " + abbrev)
+              }
+            )
+          }
+          rs.close()
+          stmt.close()
+          connection.close()
+        }
+        catch {
+          case e: Exception =>
+            stmt.close()
+            connection.close()
+        }
+      case _ =>
+    }
+    res.toList
+  }
+  def getEleEsp(foranProject: String, systems: List[String], zones: List[String], materials: List[Material]): List[EleElement] = {
+    val trays = getEleTrays(foranProject, systems, materials).map(x => EleElement(x.userId, "TRAY", "796", x.weight, x.stock, x.material))
+    val equips = getEleEquips(foranProject, zones, materials).map(x => EleElement(x.userId, "EQUIP", "796", x.weight, x.stock, x.material))
+    trays ++ equips
   }
 }

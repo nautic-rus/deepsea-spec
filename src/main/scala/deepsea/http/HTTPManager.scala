@@ -270,6 +270,9 @@ class HTTPManager extends Actor {
       (get & path("createDeviceEsp") & parameter("project", "docNumber", "rev", "user", "kind", "taskId")) { (project, docNumber, rev, user, kind, taskId) =>
         askFor(ActorManager.esp, CreateEsp(project, docNumber, rev, user, kind, taskId))
       },
+      (get & path("createEleEsp") & parameter("project", "docNumber", "rev", "user", "kind", "taskId")) { (project, docNumber, rev, user, kind, taskId) =>
+        askFor(ActorManager.esp, CreateEsp(project, docNumber, rev, user, kind, taskId))
+      },
       (get & path("materialsSummary") & parameter("projects", "kinds")) { (projects, kinds) =>
         askFor(ActorManager.esp, GetGlobalEsp(projects, kinds))
       },

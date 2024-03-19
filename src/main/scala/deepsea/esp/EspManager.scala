@@ -8,7 +8,9 @@ import deepsea.actors.ActorManager
 import deepsea.database.DBManager
 import deepsea.devices.DeviceHelper
 import deepsea.devices.DeviceManager.Device
-import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, DeviceEspObject, EspObject, GetEsp, GetGlobalEsp, GetGlobalEspPdf, GetHullEsp, GetMaterialPurchases, GlobalEsp, HullEspObject, InitIssues, Issue, MaterialPurchase, PipeEspObject}
+import deepsea.elec.ElecHelper
+import deepsea.elec.ElecManager.EleElement
+import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, DeviceEspObject, EleEspObject, EspObject, GetEsp, GetGlobalEsp, GetGlobalEspPdf, GetHullEsp, GetMaterialPurchases, GlobalEsp, HullEspObject, InitIssues, Issue, MaterialPurchase, PipeEspObject}
 import deepsea.files.FileManager.GenerateUrl
 import deepsea.hull.HullHelper
 import deepsea.pipe.PipeHelper
@@ -22,7 +24,7 @@ import io.circe._
 import io.circe.generic.JsonCodec
 import io.circe.parser.decode
 import io.circe.syntax._
-import local.ele.CommonEle.EleComplectParts
+import local.ele.CommonEle.{EleComplect, EleComplectParts}
 import local.hull.PartManager.{ForanPartsByDrawingNum, PrdPart}
 import local.pdf.ru.order.OrderReportV1
 import org.mongodb.scala.MongoCollection
@@ -67,6 +69,16 @@ object EspManager{
                            override val taskId: Int,
                            var elements: List[Device]) extends EspObject(id, foranProject, docNumber, rev, date, user, kind, taskId)
 
+  case class EleEspObject(override val id: String,
+                             override val foranProject: String,
+                             override val docNumber: String,
+                             override val rev: String,
+                             override val date: Long,
+                             override val user: String,
+                             override val kind: String,
+                             override val taskId: Int,
+                             var elements: List[EleElement]) extends EspObject(id, foranProject, docNumber, rev, date, user, kind, taskId)
+
   case class EspHistoryObject(override val id: String,
                               override val foranProject: String,
                               override val docNumber: String,
@@ -98,7 +110,7 @@ object EspManager{
   case class IssueProject(id: Int, name: String, pdsp: String, rkd: String, foran: String, managers: String, status: String, factory: String)
 }
 
-class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper with DeviceHelper with HullHelper {
+class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper with DeviceHelper with HullHelper with ElecHelper {
   implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
 
   override def preStart(): Unit = {
@@ -137,6 +149,14 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
         case "device" =>
           val devices = getDevicesWithAccommodations(docNumber)
           addDevicesEsp(DeviceEspObject(id, foranProject.replace("NT02", "N002"), docNumber, rev, date, user, kind, taskId.toIntOption.getOrElse(0), elements = devices))
+        case "ele" =>
+          val complects = getEleComplects(foranProject)
+          val complect = complects.find(_.drawingId == docNumber) match {
+            case Some(value) => value
+            case _ => EleComplect(docNumber, "", "", foranProject, List.empty[String], List.empty[String])
+          }
+          val eleEsp = EleEspObject(id, foranProject, docNumber, rev, date, user, kind, taskId.toIntOption.getOrElse(0), elements = getEleEsp(foranProject, complect.systemNames, complect.zoneNames, materials))
+          addEleEsp(eleEsp)
         case _ => Option.empty[EspObject]
       }
       sender() ! "success".asJson.noSpaces
@@ -149,6 +169,8 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
             sender() ! getPipeLatestEsp(foranProject, kind, docNumber, rev).asJson.noSpaces
           case "device" =>
             sender() ! getDeviceLatestEsp(foranProject, kind, docNumber, rev).asJson.noSpaces
+          case "ele" =>
+            sender() ! getEleLatestEsp(foranProject, kind, docNumber, rev).asJson.noSpaces
           case _ =>
             sender() ! "error".asJson.noSpaces
         }

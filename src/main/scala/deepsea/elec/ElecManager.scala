@@ -264,8 +264,16 @@ object ElecManager {
   implicit val SystemEncoder: Encoder[System] = deriveEncoder[System]
 
 
+  case class EleTray(userId: String, stock: String, weight: Double, cType: String, idsq: Int, node1: Int, node2: Int, material: Material)
+  case class EleEquip(userId: String, abbrev: String, stock: String, weight: Double, material: Material)
+  case class EleElement(userId: String, typeName: String, units: String, weight: Double, code: String, material: Material)
+
   class ElecManager extends Actor with ElecHelper with Codecs {
     implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
+
+    override def preStart(): Unit = {
+
+    }
 
     override def receive: Receive = {
       case GetTrayLabels(project, seqId) => sender() ! Json.toJson(TrayManager.trayLabels(project, seqId))
@@ -328,9 +336,9 @@ object ElecManager {
       case GetElecBlocks(project) =>
         sender() ! getBlocks(project).asJson.noSpaces
       case GetElecZones(project) =>
-        sender() ! getZones(project).asJson.noSpaces
+        sender() ! getElecZones(project).asJson.noSpaces
       case GetElecSystems(project) =>
-        sender() ! getSystems(project).asJson.noSpaces
+        sender() ! getElecSystems(project).asJson.noSpaces
       case GetEleComplects(project) =>
         sender() ! getEleComplects(project).asJson.noSpaces
       case AddEleComplect(complect: String) =>
