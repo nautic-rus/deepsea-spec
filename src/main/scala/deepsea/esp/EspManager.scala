@@ -150,13 +150,7 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
           val devices = getDevicesWithAccommodations(docNumber)
           addDevicesEsp(DeviceEspObject(id, foranProject.replace("NT02", "N002"), docNumber, rev, date, user, kind, taskId.toIntOption.getOrElse(0), elements = devices))
         case "ele" =>
-          val complects = getEleComplects(foranProject)
-          val complect = complects.find(_.drawingId == docNumber) match {
-            case Some(value) => value
-            case _ => EleComplect(docNumber, "", "", foranProject, List.empty[String], List.empty[String])
-          }
-          val eleEsp = EleEspObject(id, foranProject, docNumber, rev, date, user, kind, taskId.toIntOption.getOrElse(0), elements = getEleEsp(foranProject, complect.systemNames, complect.zoneNames, materials))
-          addEleEsp(eleEsp)
+          addEleEsp(generateEleEsp(foranProject, docNumber, rev, user, taskId))
         case _ => Option.empty[EspObject]
       }
       sender() ! "success".asJson.noSpaces

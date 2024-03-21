@@ -4,7 +4,7 @@ import breeze.linalg.DenseMatrix
 import deepsea.database.DBManager
 import deepsea.database.DBManager.{RsIterator, foranProjects}
 import deepsea.elec.ElecManager._
-import deepsea.esp.EspManager.{DeviceEspObject, espObjectsCollectionName}
+import deepsea.esp.EspManager.{DeviceEspObject, EleEspObject, espObjectsCollectionName}
 import deepsea.esp.EspManagerHelper
 import deepsea.pipe.PipeManager.{Material, SpoolLock}
 import local.common.Codecs
@@ -24,7 +24,7 @@ import io.circe.generic.auto._
 import io.circe.syntax._
 import io.circe.generic.semiauto._
 
-import java.util.Date
+import java.util.{Date, UUID}
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.{Duration, SECONDS}
@@ -765,5 +765,21 @@ trait ElecHelper extends Codecs with EspManagerHelper {
     val trays = getEleTrays(foranProject, systems, materials).map(x => EleElement(x.userId, "TRAY", "796", x.weight, x.stock, x.material))
     val equips = getEleEquips(foranProject, zones, materials).map(x => EleElement(x.userId, "EQUIP", "796", x.weight, x.stock, x.material))
     trays ++ equips
+  }
+  def generateEleEsp(foranProject: String, docNumber: String, rev: String, user: String, taskId: String): EleEspObject = {
+    val id = UUID.randomUUID().toString
+    val date = new Date().getTime
+    val projects = getIssueProjects
+    val rkdProject = projects.find(_.foran == foranProject) match {
+      case Some(value) => value.rkd
+      case _ => ""
+    }
+    val materials = getMaterials.filter(_.project == rkdProject)
+    val complects = getEleComplects(foranProject)
+    val complect = complects.find(_.drawingId == docNumber) match {
+      case Some(value) => value
+      case _ => EleComplect(docNumber, "", "", foranProject, List.empty[String], List.empty[String])
+    }
+    EleEspObject(id, foranProject, docNumber, rev, date, user, "ele", taskId.toIntOption.getOrElse(0), elements = getEleEsp(foranProject, complect.systemNames, complect.zoneNames, materials))
   }
 }

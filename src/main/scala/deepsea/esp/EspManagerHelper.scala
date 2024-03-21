@@ -125,7 +125,6 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
       case _ => None
     }
   }
-
   def getEleLatestEsp(foranProject: String, kind: String, docNumber: String, rev: String): Option[EleEspObject] = {
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>

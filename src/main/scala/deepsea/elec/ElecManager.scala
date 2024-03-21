@@ -4,6 +4,7 @@ import akka.actor.Actor
 import akka.pattern.ask
 import akka.util.Timeout
 import deepsea.actors.ActorManager
+import deepsea.esp.EspManager.CreateEsp
 import deepsea.files.FileManager.GenerateUrl
 import deepsea.pipe.PipeManager.Material
 import io.circe.{Decoder, Encoder}
@@ -19,6 +20,7 @@ import local.ele.cl.CableListManager.{cablesByComplectJson, cablesByComplectMagi
 import local.ele.eq.EleEqManager
 import local.ele.trays.TrayManager
 import local.ele.utils.EleUtils.fixFBS
+import local.pdf.en.accom.AccomReportEn.genAccomListEnPDF
 import local.pdf.ru.ele.EleEqTrayESKDReport
 import local.pdf.ru.ele.EleEqTrayESKDReport.{generatePdfToFileNoRev, generatePdfToFileWithRev}
 import local.pdf.ru.ele.EleTrayCableBoxReportRu.genTraysAndCBListEnPDF
@@ -268,6 +270,9 @@ object ElecManager {
   case class EleEquip(userId: String, abbrev: String, stock: String, weight: Double, material: Material)
   case class EleElement(userId: String, typeName: String, units: String, weight: Double, code: String, material: Material)
 
+  case class GetEleEspFiles(foranProject: String, docNumber: String, rev: String, user: String, taskId: String)
+  case class GetEleCurrent(foranProject: String, docNumber: String, rev: String, user: String, taskId: String)
+
   class ElecManager extends Actor with ElecHelper with Codecs {
     implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
 
@@ -350,6 +355,19 @@ object ElecManager {
       case UpdateEleComplect(drawing) =>
         updateEleComplect(drawing)
         sender() ! "success".asJson.noSpaces
+      case GetEleEspFiles(foranProject, docNumber, rev, user, taskId) =>
+        Await.result(ActorManager.esp ? CreateEsp(foranProject, docNumber, rev, user, "ele", taskId), timeout.duration) match {
+          case res: String =>
+            val eleEsp = getEleLatestEsp(foranProject, "ele", docNumber, rev)
+            val file = ???
+            Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
+              case url: String => sender() ! url.asJson.noSpaces
+              case _ => sender() ! "error: cant upload esp".asJson.noSpaces
+            }
+          case _ => sender() ! "error: cant create esp".asJson.noSpaces
+        }
+      case GetEleCurrent(foranProject, docNumber, rev, user, taskId) =>
+        sender() ! generateEleEsp(foranProject, docNumber, rev, user, taskId).asJson.noSpaces
       case _ => None
     }
   }
