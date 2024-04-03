@@ -687,8 +687,40 @@ trait ElecHelper extends Codecs with EspManagerHelper {
       case _ => None
     }
   }
+
+  def getMaterialsLabels: List[MaterialLabel] = {
+    val res = ListBuffer.empty[MaterialLabel]
+    DBManager.GetPGConnection() match {
+      case Some(c) =>
+        val s = c.createStatement()
+        val query = "select stock_code, default_label from materials where default_label is not null"
+        try {
+          val rs = s.executeQuery(query)
+          while (rs.next()) {
+            res += MaterialLabel(
+              rs.getString("stock_code"),
+              rs.getString("default_label"),
+            )
+          }
+          rs.close()
+          s.close()
+          c.close()
+        }
+        catch {
+          case e: Exception =>
+            s.close()
+            c.close()
+        }
+      case _ =>
+    }
+    res.toList
+  }
+
   def getEleTrays(project: String, systems: List[String], materials: List[Material]): List[EleTray] = {
     val res = ListBuffer.empty[EleTray]
+
+    val materialsLabels = getMaterialsLabels
+
     DBManager.GetOracleConnection(project) match {
       case Some(connection) =>
         val stmt = connection.createStatement()
@@ -696,8 +728,18 @@ trait ElecHelper extends Codecs with EspManagerHelper {
           val query = Source.fromResource("queries/eleTrays.sql").mkString.replaceAll("&systemList", systems.map(x => '\'' + x + '\'').mkString(","))
           val rs = stmt.executeQuery(query)
           while (rs.next()){
-            val stock = Option(rs.getString("STOCK_CODE")).getOrElse("")
             val userId = Option(rs.getString("USERID")).getOrElse("")
+            val trayFit = Option(rs.getInt("TRAY_FITTING")).getOrElse(0)
+            val kind = if (trayFit == 0) "TRAY" else "TRANSIT"
+            val stock = if (kind == "TRAY") {
+              Option(rs.getString("STOCK_CODE")).getOrElse("")
+            } else {
+              Option(rs.getString("COMP_STOCK")).getOrElse("")
+            }
+            val pos = materialsLabels.find(_.code == stock) match {
+              case Some(value) => value.label
+              case _ => userId
+            }
             res += EleTray(
               userId,
               stock,
@@ -706,6 +748,12 @@ trait ElecHelper extends Codecs with EspManagerHelper {
               rs.getInt("IDSQ"),
               rs.getInt("NODE1"),
               rs.getInt("NODE2"),
+              kind,
+              Cog(
+                rs.getDouble("X_COG"),
+                rs.getDouble("Y_COG"),
+                rs.getDouble("Z_COG"),
+              ),
               materials.find(_.code == stock) match {
                 case Some(value) => value
                 case _ => Material().copy(name = "No stock code, userId " + userId)
@@ -742,6 +790,11 @@ trait ElecHelper extends Codecs with EspManagerHelper {
               stock,
               abbrev,
               rs.getDouble("WEIGHT"),
+              Cog(
+                rs.getDouble("COG_X"),
+                rs.getDouble("COG_Y"),
+                rs.getDouble("COG_Z"),
+              ),
               materials.find(_.code == stock) match {
                 case Some(value) => value
                 case _ => Material().copy(name = "No stock code, " + abbrev)
@@ -762,8 +815,8 @@ trait ElecHelper extends Codecs with EspManagerHelper {
     res.toList
   }
   def getEleEsp(foranProject: String, systems: List[String], zones: List[String], materials: List[Material]): List[EleElement] = {
-    val trays = getEleTrays(foranProject, systems, materials).map(x => EleElement(x.userId, "TRAY", "796", x.weight, x.stock, x.material))
-    val equips = getEleEquips(foranProject, zones, materials).map(x => EleElement(x.userId, "EQUIP", "796", x.weight, x.stock, x.material))
+    val trays = getEleTrays(foranProject, systems, materials).map(x => EleElement(x.userId, x.kind, "796", x.weight, x.stock, x.material, x.cog))
+    val equips = getEleEquips(foranProject, zones, materials).map(x => EleElement(x.userId, "EQUIP", "796", x.weight, x.stock, x.material, x.cog))
     trays ++ equips
   }
   def generateEleEsp(foranProject: String, docNumber: String, rev: String, user: String, taskId: String): EleEspObject = {

@@ -2,7 +2,7 @@ package local.common
 
 import deepsea.accomodations.AccommodationManager.{Accommodation, BBox}
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
-import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, EleElement, ElecAngle, ElecCable, EquipmentConnection, TrayBySystem}
+import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, Cog, EleElement, ElecAngle, ElecCable, EquipmentConnection, TrayBySystem}
 import deepsea.esp.EspManager.{DeviceEspObject, DocumentWithMaterial, EleEspObject, EspElement, EspObject, GlobalEsp, HullEspObject, MaterialPurchase, PipeEspObject}
 import deepsea.hull.HullManager._
 import deepsea.pipe.PipeManager.{Material, MaterialTranslation, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SpoolLock, SystemDef, UnitTranslation, Units}
@@ -108,6 +108,9 @@ trait Codecs {
 
   implicit val EleElementDecoder: Decoder[EleElement] = deriveDecoder[EleElement]
   implicit val EleElementEncoder: Encoder[EleElement] = deriveEncoder[EleElement]
+
+  implicit val CogDecoder: Decoder[Cog] = deriveDecoder[Cog]
+  implicit val CogEncoder: Encoder[Cog] = deriveEncoder[Cog]
 
 
   implicit val MaterialPurchaseDecoder: Decoder[MaterialPurchase] = deriveDecoder[MaterialPurchase]

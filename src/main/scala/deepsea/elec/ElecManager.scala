@@ -266,12 +266,15 @@ object ElecManager {
   implicit val SystemEncoder: Encoder[System] = deriveEncoder[System]
 
 
-  case class EleTray(userId: String, stock: String, weight: Double, cType: String, idsq: Int, node1: Int, node2: Int, material: Material)
-  case class EleEquip(userId: String, abbrev: String, stock: String, weight: Double, material: Material)
-  case class EleElement(userId: String, typeName: String, units: String, weight: Double, code: String, material: Material)
+  case class EleTray(userId: String, stock: String, weight: Double, cType: String, idsq: Int, node1: Int, node2: Int, kind: String, cog: Cog, material: Material)
+  case class EleEquip(userId: String, abbrev: String, stock: String, weight: Double, cog: Cog, material: Material)
+  case class EleElement(userId: String, typeName: String, units: String, weight: Double, code: String, material: Material, cog: Cog)
+  case class Cog(x: Double, y: Double, z: Double)
 
   case class GetEleEspFiles(foranProject: String, docNumber: String, rev: String, user: String, taskId: String)
   case class GetEleCurrent(foranProject: String, docNumber: String, rev: String, user: String, taskId: String)
+
+  case class MaterialLabel(code: String, label: String)
 
   class ElecManager extends Actor with ElecHelper with Codecs {
     implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
