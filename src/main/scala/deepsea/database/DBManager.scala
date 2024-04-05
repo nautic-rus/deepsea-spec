@@ -3,6 +3,8 @@ package deepsea.database
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import local.common.Codecs
 import org.mongodb.scala.{MongoClient, MongoDatabase}
+import slick.jdbc.JdbcBackend
+import slick.jdbc.JdbcBackend.Database
 
 import java.sql.{Connection, ResultSet}
 import scala.collection.mutable.ListBuffer
@@ -42,6 +44,9 @@ object DBManager extends Codecs{
   configPG.setPassword("Ship1234")
   configPG.setMaximumPoolSize(5)
   val dsPG = new HikariDataSource(configPG)
+
+  val PostgresSQL: JdbcBackend.Database = Database.forDataSource(dsPG, Option(5))
+
 
   def GetOracleConnection(project: String): Option[Connection] ={
     oracleConnections.find(_.project == project) match {

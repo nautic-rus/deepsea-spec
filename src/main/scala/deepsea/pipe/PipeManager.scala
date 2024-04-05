@@ -7,13 +7,19 @@ import deepsea.actors.ActorManager
 import deepsea.esp.EspManager.{EspElement, GetEsp}
 import deepsea.files.FileManager.GenerateUrl
 import deepsea.pipe.PipeManager._
+import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.{Decoder, Encoder}
 import io.circe.syntax.EncoderOps
 import local.common.Codecs
 import local.pdf.en.pipe.SpoolsReportEN.{genSpoolsListEnPDF, genSpoolsListEnPDFAll}
+import slick.lifted.Tag
 
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import scala.concurrent.Await
+import scala.language.postfixOps
+import slick.jdbc.PostgresProfile.api._
+import slick.lifted.{ProvenShape, TableQuery}
 
 
 object PipeManager{
@@ -22,66 +28,6 @@ object PipeManager{
                      pls: Int, elem: Int, typeCode: String, typeDesc: String, classAlpha: String, compType: String, compUserId: String, smat: String,
                      sqInSystem: Int, isPieceId: Int, var spPieceId: Int, isom: String, spool: String, var length: Double, radius: Double, angle: Double,
                      weight: Double, stock: String, fcon3: String, insul: String, classDescription: String, var material: Material = Material(), var systemDescr: String = "") extends EspElement {
-//    def toEspElement: Map[String, String] ={
-//      val res = mutable.Map.empty[String, String]
-//      res += ("project" -> project)
-//      res += ("zone" -> zone)
-//      res += ("system" -> system)
-//      res += ("line" -> line)
-//      res += ("pls" -> pls)
-//      res += ("elem" -> elem)
-//      res += ("typeCode" -> typeCode)
-//      res += ("typeDesc" -> typeDesc)
-//      res += ("classAlpha" -> classAlpha)
-//      res += ("compType" -> compType)
-//      res += ("compUserId" -> compUserId)
-//      res += ("smat" -> smat)
-//      res += ("sqInSystem" -> sqInSystem)
-//      res += ("isPieceId" -> isPieceId)
-//      res += ("spPieceId" -> spPieceId)
-//      res += ("isom" -> isom)
-//      res += ("spool" -> spool)
-//      res += ("length" -> length)
-//      res += ("radius" -> radius)
-//      res += ("angle" -> angle)
-//      res += ("weight" -> weight)
-//      res += ("stock" -> stock)
-//      res += ("fcon3" -> fcon3)
-//      res += ("insul" -> insul)
-//      res += ("material" -> material)
-//      res += ("systemDescr" -> systemDescr)
-//      res.toMap
-//    }
-//    def fromEspElement(map: Map[String, String]): PipeSeg ={
-//      PipeSeg(
-//        map.getOrElse("project", ""),
-//        map.getOrElse("zone", ""),
-//        map.getOrElse("system", ""),
-//        map.getOrElse("line", ""),
-//        map.getOrElse("pls", "0").toIntOption.getOrElse(0),
-//        map.getOrElse("elem", "0").toIntOption.getOrElse(0),
-//        map.getOrElse("typeCode", ""),
-//        map.getOrElse("typeDesc", ""),
-//        map.getOrElse("classAlpha", ""),
-//        map.getOrElse("compType", ""),
-//        map.getOrElse("compUserId", ""),
-//        map.getOrElse("smat", ""),
-//        map.getOrElse("sqInSystem", "0").toIntOption.getOrElse(0),
-//        map.getOrElse("isPieceId", "0").toIntOption.getOrElse(0),
-//        map.getOrElse("spPieceId", "0").toIntOption.getOrElse(0),
-//        map.getOrElse("isom", ""),
-//        map.getOrElse("spool", ""),
-//        map.getOrElse("length", "0").toDoubleOption.getOrElse(0),
-//        map.getOrElse("radius", "0").toDoubleOption.getOrElse(0),
-//        map.getOrElse("angle", "0").toIntOption.getOrElse(0),
-//        map.getOrElse("weight", "0").toDoubleOption.getOrElse(0),
-//        map.getOrElse("stock", ""),
-//        map.getOrElse("fcon3", "0"),
-//        map.getOrElse("insul", "0"),
-//        map.getOrElse("material", ""),
-//        map.getOrElse("systemDescr", ""),
-//      )
-//    }
   }
   case class PipeSegBilling(zone: String, system: String, typeCode: String, typeDesc: String, classAlpha: String, compType: String, compUserId: String, smat: String, length: Double, weight: Double, stock: String, insul: String, material: Material = Material(), systemDescr: String = "", count: Int = 1)
   case class PipeSegActual(name: String, date: Long)
@@ -150,6 +96,42 @@ object PipeManager{
   case class GetSpoolModel(docNumber: String, spool: String, isom: String)
   case class PipeSup(code: String, userId: String)
   case class GetHvacSegs(docNumber: String)
+
+
+  case class SpecMaterial(code: String, name: String, descr: String, units: String, weight: Double, supplier: String, statem_id: Int, dir_id: Int, user_id: Int, label: String, last_upd: Long, note: String, manufacturer: String, coef: Double, id: Int, removed: Int)
+  class SpecMaterialTable(tag: Tag) extends Table[SpecMaterial](tag, "materials") {
+    val code = column[String]("stock_code")
+    val name = column[String]("name")
+    val descr = column[String]("description")
+    val units = column[String]("unit")
+    val weight = column[Double]("weight")
+    val supplier = column[String]("supplier")
+    val statem_id = column[Int]("statement_id")
+    val dir_id = column[Int]("directory_id")
+    val user_id = column[Int]("user_id")
+    val label = column[String]("default_label")
+    val last_upd = column[Long]("last_update")
+    val note = column[String]("note")
+    val manufacturer = column[String]("manufacturer")
+    val coef = column[Double]("coef")
+    val id = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    val removed = column[Int]("removed")
+    override def * = (code, name, descr, units, weight, supplier, statem_id, dir_id, user_id, label, last_upd, note, manufacturer, coef, id, removed) <> ((SpecMaterial.apply _).tupled, SpecMaterial.unapply)
+  }
+  implicit val SpecMaterialDecoder: Decoder[SpecMaterial] = deriveDecoder[SpecMaterial]
+  implicit val SpecMaterialEncoder: Encoder[SpecMaterial] = deriveEncoder[SpecMaterial]
+
+  case class MaterialStatement(id: Int, name: String, project_id: Int, code: String, parent_id: Int)
+  class MaterialStatementTable(tag: Tag) extends Table[MaterialStatement](tag, "materials_statements") {
+    val id = column[Int]("id", O.AutoInc)
+    val name = column[String]("name")
+    val project_id = column[Int]("project_id")
+    val code = column[String]("code")
+    val parent_id = column[Int]("parent_id")
+    override def * = (id, name, project_id, code, parent_id) <> ((MaterialStatement.apply _).tupled, MaterialStatement.unapply)
+  }
+  implicit val MaterialStatementDecoder: Decoder[MaterialStatement] = deriveDecoder[MaterialStatement]
+  implicit val MaterialStatementEncoder: Encoder[MaterialStatement] = deriveEncoder[MaterialStatement]
 
   case class Pls(typeCode: Int, zone: Int, system: Int, line: String, pls: Int, elem: Int){
     def equals(that: Pls): Boolean = {
