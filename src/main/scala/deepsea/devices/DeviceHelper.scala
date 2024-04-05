@@ -38,8 +38,7 @@ trait DeviceHelper extends AccommodationHelper {
         }
         val systemDefs = getDeviceSystemDefs(foranProject)
         val system = systemDefs.find(_.descr.contains(docNumber)) match {
-          case Some(value) =>
-            value.name
+          case Some(value) => value.name
           case _ => "XXX"
         }
         DBManager.GetOracleConnection(foranProject) match {
