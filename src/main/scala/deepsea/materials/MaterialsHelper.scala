@@ -19,7 +19,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, SECONDS}
 
 trait MaterialsHelper {
-  def getMaterials1: List[Material] = {
+  def getMaterials: List[Material] = {
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
         Await.result(mongo.getCollection("materials-n").find[Material]().toFuture(), Duration(30, SECONDS)) match {
@@ -50,7 +50,7 @@ trait MaterialsHelper {
       case _ => List.empty[ProjectName]
     }
   }
-  def getMaterials: List[Material] = {
+  def getMaterials1: List[Material] = {
     val statements = (Await.result(DBManager.PostgresSQL.run(TableQuery[MaterialStatementTable].result).map(_.toList), Duration(5, SECONDS)) match {
       case response: List[MaterialStatement] => response
       case _ => List.empty[MaterialStatement]

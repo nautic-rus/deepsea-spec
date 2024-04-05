@@ -40,7 +40,7 @@ trait DeviceHelper extends AccommodationHelper {
         val system = systemDefs.find(_.descr.contains(docNumber)) match {
           case Some(value) =>
             value.name
-          case _ => ""
+          case _ => "XXX"
         }
         DBManager.GetOracleConnection(foranProject) match {
           case Some(oracle) =>
@@ -537,10 +537,6 @@ trait DeviceHelper extends AccommodationHelper {
   }
   def getDevicesWithAccommodations(docNumber: String): List[Device] = {
     val devices = getDevices(docNumber) ++ getAccommodationsAsDevices(docNumber, "ru")
-    val d = getDevices(docNumber)
-    val a = getAccommodationsAsDevices(docNumber, "ru")
-    val dd = a
-    val aa = d
     devices.filter(_.desc2.contains("&")).foreach(d => {
       val ids = d.desc2.split("&")
       val accom = devices.filter(_.elemType == "accommodation").filter(x => ids.contains(x.userId) && x.zone == d.zone)
