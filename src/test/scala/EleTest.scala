@@ -1,26 +1,26 @@
+import deepsea.elec.{ElePdf, ElecHelper}
 import local.ele.CommonEle._
 import local.ele.eq.EleEqManager.eqToJson
 import local.pdf.ru.ele.EleTrayCableBoxReportRu.getTraysBySystem
 import org.scalatest.funsuite.AnyFunSuite
 
-class EleTest extends AnyFunSuite{
-  //170701-884-6009
-  org.apache.log4j.BasicConfigurator.configure()
-  //val b=eqsByComplect("P701","170701-884-6004")
+import java.awt.Desktop
+import java.io.File
+import java.nio.file.Files
 
-//  val complects: String =retrieveEleComplectsJsonString("P701")
-//  val jjj: EleComplectParts = retrieveAllPartsByComplectName("P701","170701-884-5007")//"170701-884-1001"
+class EleTest extends AnyFunSuite with ElecHelper with ElePdf{
+  val foranProject = "N002"
+  val docNumber = "200101-884-101"
+  val rev = "0"
+  val user = ""
+  val taskId = "7431"
+  val qq = 0
+  val file: String = Files.createTempDirectory("hullPdf").toAbsolutePath.toString + "/" + docNumber + "_rev" + rev + ".pdf"
 
-  val qq = getTraysBySystem("N002", "200101-871-101")
-  val qq1 = qq
+  val ele = generateEleEsp(foranProject, docNumber, rev, user, taskId)
+  genElePdf(ele, "NAME OF DRAWING", file)
 
+  println(file)
 
-
-   //170701-884-2008 1
-  //val jj2=retrieveAllParts("P701","170701-884-2001")
-
-  val bb=0
-
-
-
+  Desktop.getDesktop.open(new File(file))
 }

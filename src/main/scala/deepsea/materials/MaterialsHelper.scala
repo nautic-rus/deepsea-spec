@@ -1,8 +1,9 @@
 package deepsea.materials
 
 import deepsea.database.DBManager
-import deepsea.esp.EspManager.IssueProject
-import deepsea.pipe.PipeManager.{Material, MaterialStatement, MaterialStatementTable, MaterialTranslation, ProjectName, SpecMaterial, SpecMaterialTable}
+import deepsea.esp.EspManager.{GlobalEsp, GlobalEspSpec, IssueProject}
+import deepsea.esp.EspManagerHelper
+import deepsea.pipe.PipeManager.{Material, MaterialDirectory, MaterialDirectoryTable, MaterialStatement, MaterialStatementTable, MaterialTranslation, ProjectName, SpecMaterial, SpecMaterialTable}
 import io.circe.syntax.EncoderOps
 import local.common.DBRequests.MaterialNode
 import org.mongodb.scala.MongoCollection
@@ -15,11 +16,11 @@ import slick.lifted.{ProvenShape, TableQuery}
 
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Await
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.{Duration, SECONDS}
 
 trait MaterialsHelper {
-  def getMaterials: List[Material] = {
+  def getMaterials1: List[Material] = {
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
         Await.result(mongo.getCollection("materials-n").find[Material]().toFuture(), Duration(30, SECONDS)) match {
@@ -50,7 +51,7 @@ trait MaterialsHelper {
       case _ => List.empty[ProjectName]
     }
   }
-  def getMaterials1: List[Material] = {
+  def getMaterials: List[Material] = {
     val statements = (Await.result(DBManager.PostgresSQL.run(TableQuery[MaterialStatementTable].result).map(_.toList), Duration(5, SECONDS)) match {
       case response: List[MaterialStatement] => response
       case _ => List.empty[MaterialStatement]
@@ -116,5 +117,22 @@ trait MaterialsHelper {
     }
     res
   }
-
+  def getMaterialStatements: List[MaterialStatement] = {
+    (Await.result(DBManager.PostgresSQL.run(TableQuery[MaterialStatementTable].result).map(_.toList), Duration(5, SECONDS)) match {
+      case response: List[MaterialStatement] => response
+      case _ => List.empty[MaterialStatement]
+    })
+  }
+  def getSpecMaterials: List[SpecMaterial] = {
+    (Await.result(DBManager.PostgresSQL.run(TableQuery[SpecMaterialTable].filter(_.removed === 0).result).map(_.toList), Duration(5, SECONDS)) match {
+      case response: List[SpecMaterial] => response
+      case _ => List.empty[SpecMaterial]
+    })
+  }
+  def getMaterialDirectories: List[MaterialDirectory] = {
+    (Await.result(DBManager.PostgresSQL.run(TableQuery[MaterialDirectoryTable].filter(_.removed === 0).result).map(_.toList), Duration(5, SECONDS)) match {
+      case response: List[MaterialDirectory] => response
+      case _ => List.empty[MaterialDirectory]
+    })
+  }
 }

@@ -10,11 +10,12 @@ import deepsea.devices.DeviceHelper
 import deepsea.devices.DeviceManager.Device
 import deepsea.elec.ElecHelper
 import deepsea.elec.ElecManager.EleElement
-import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, DeviceEspObject, EleEspObject, EspObject, GetEsp, GetGlobalEsp, GetGlobalEspPdf, GetHullEsp, GetMaterialPurchases, GlobalEsp, HullEspObject, InitIssues, Issue, MaterialPurchase, PipeEspObject}
+import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, DeviceEspObject, EleEspObject, EspObject, GetEsp, GetGlobalEsp, GetGlobalEspPdf, GetGlobalEspPdfSpec, GetGlobalEspSpec, GetHullEsp, GetMaterialPurchases, GlobalEsp, HullEspObject, InitIssues, Issue, MaterialPurchase, PipeEspObject}
 import deepsea.files.FileManager.GenerateUrl
 import deepsea.hull.HullHelper
+import deepsea.materials.MaterialPdf
 import deepsea.pipe.PipeHelper
-import deepsea.pipe.PipeManager.{Material, PipeSeg, ProjectName}
+import deepsea.pipe.PipeManager.{Material, PipeSeg, ProjectName, SpecMaterial}
 import io.circe.generic.JsonCodec
 import io.circe.{Decoder, Encoder}
 import io.circe.syntax.EncoderOps
@@ -29,6 +30,7 @@ import local.hull.PartManager.{ForanPartsByDrawingNum, PrdPart}
 import local.pdf.ru.order.OrderReportV1
 import org.mongodb.scala.MongoCollection
 
+import java.nio.file.Files
 import java.util.concurrent.TimeUnit
 import java.util.{Date, UUID}
 import scala.collection.mutable.ListBuffer
@@ -99,6 +101,8 @@ object EspManager{
   case class Issue(id: Int, project: String, issue_type: String, doc_number: String, revision: String, department: String)
   case class InitIssues()
   case class GetGlobalEsp(projects: String, kinds: String)
+  case class GetGlobalEspSpec(projectId: String)
+  case class GetGlobalEspPdfSpec(projectId: String, statemId: String)
   case class MaterialPurchase(code: String, project: String, date: Long, user: String, qty: Double, contract: String)
   case class AddMaterialPurchase(materialPurchase: String)
   case class GetMaterialPurchases(project: String)
@@ -106,11 +110,12 @@ object EspManager{
   case class GetGlobalEspPdf(project: String, code: String, user: String)
   case class ExportPipeFittings()
   case class GlobalEsp(code: String, name: String, desc: String, units: String, unitsValue: String, qty: Double, weight: Double, weightTotal: Double, documents: List[DocumentWithMaterial], material: Material)
+  case class GlobalEspSpec(code: String, name: String, desc: String, units: String, unitsValue: String, qty: Double, weight: Double, weightTotal: Double, documents: List[DocumentWithMaterial], material: SpecMaterial)
   case class DocumentWithMaterial(docNumber: String, rev: String, user: String, date: Long, units: String, unitsValue: String, qty: Double, weight: Double, totalWeight: Double, label: String)
   case class IssueProject(id: Int, name: String, pdsp: String, rkd: String, foran: String, managers: String, status: String, factory: String)
 }
 
-class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper with DeviceHelper with HullHelper with ElecHelper {
+class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper with DeviceHelper with HullHelper with ElecHelper with MaterialPdf {
   implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
 
   override def preStart(): Unit = {
@@ -236,8 +241,21 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
       })
 
       sender() ! res.asJson.noSpaces
+    case GetGlobalEspSpec(projectId) =>
+      sender() ! getSummaryMaterials(projectId.toIntOption.getOrElse(0)).asJson.noSpaces
     case GetGlobalEspPdf(project, code, user) =>
       val file = OrderReportV1.generateOrderPDF(project, code, user)
+      if (file.nonEmpty){
+        Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
+          case url: String => sender() ! url.asJson.noSpaces
+          case _ => sender() ! "error".asJson.noSpaces
+        }
+      }
+      else{
+        sender() ! "error".asJson.noSpaces
+      }
+    case GetGlobalEspPdfSpec(projectId, statemId) =>
+      val file = createMaterialsSummaryPdf(projectId.toIntOption.getOrElse(0), statemId.toIntOption.getOrElse(0), getSummaryMaterials(projectId.toIntOption.getOrElse(0)))
       if (file.nonEmpty){
         Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
           case url: String => sender() ! url.asJson.noSpaces

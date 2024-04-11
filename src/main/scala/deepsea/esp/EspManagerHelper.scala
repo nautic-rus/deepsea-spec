@@ -4,9 +4,10 @@ import akka.pattern.ask
 import com.mongodb.client.model.BsonField
 import deepsea.actors.ActorManager
 import deepsea.database.DBManager
-import deepsea.esp.EspManager.{DeviceEspObject, DocumentWithMaterial, EleEspObject, EspElement, EspHistoryObject, EspObject, GlobalEsp, HullEspObject, IssueProject, MaterialPurchase, MaterialSummary, PipeEspObject, espKinds, espObjectsCollectionName}
+import deepsea.esp.EspManager.{DeviceEspObject, DocumentWithMaterial, EleEspObject, EspElement, EspHistoryObject, EspObject, GlobalEsp, GlobalEspSpec, HullEspObject, IssueProject, MaterialPurchase, MaterialSummary, PipeEspObject, espKinds, espObjectsCollectionName}
 import deepsea.files.FileManager
 import deepsea.files.FileManager.GenerateUrl
+import deepsea.materials.MaterialManager.{getMaterialStatements, getSpecMaterials}
 import deepsea.materials.MaterialsHelper
 import deepsea.pipe.PipeManager.{Material, Units}
 import io.circe.syntax.EncoderOps
@@ -341,6 +342,13 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
   def generateGlobalEsp(projects: List[String]): String = {
     (generateHullGlobalEsp(projects) ++ generatePipeGlobalEsp(projects) ++ generateDeviceGlobalEsp(projects)).asJson.noSpaces
   }
+  def getGlobalEsp(projectId: Int): List[GlobalEsp] = {
+    val projects = getIssueProjects.find(_.id == projectId) match {
+      case Some(value) => List(value.foran)
+      case _ => List.empty[String]
+    }
+    (generateHullGlobalEsp(projects) ++ generatePipeGlobalEsp(projects) ++ generateDeviceGlobalEsp(projects))
+  }
 
   def generateHullGlobalEsp(projects: List[String]): List[GlobalEsp] ={
     val res = ListBuffer.empty[GlobalEsp]
@@ -673,4 +681,37 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
     }
     res
   }
+
+  def getSummaryMaterials(projectId: Int): List[GlobalEspSpec] = {
+    val globalEsp = getGlobalEsp(projectId)
+    val grouped = ListBuffer.empty[GlobalEsp]
+    globalEsp.groupBy(_.code).foreach(gr => {
+      val qtySum = gr._2.map(_.qty).sum
+      val weightSum = gr._2.map(_.weightTotal).sum
+      val docs = gr._2.flatMap(_.documents)
+      grouped += gr._2.head.copy(qty = qtySum, weightTotal = weightSum, documents = docs)
+    })
+    val stmts = getMaterialStatements.filter(x => x.project_id == projectId)
+    val stmtsIds = stmts.map(_.id)
+    val materials = getSpecMaterials.filter(x => stmtsIds.contains(x.statem_id))
+    grouped.flatMap(inMaterial => {
+      materials.find(_.code == inMaterial.code) match {
+        case Some(sMaterial) =>
+          Option(GlobalEspSpec(
+            inMaterial.code,
+            sMaterial.name,
+            sMaterial.descr,
+            inMaterial.units,
+            inMaterial.unitsValue,
+            inMaterial.qty,
+            sMaterial.weight,
+            inMaterial.weightTotal,
+            inMaterial.documents,
+            sMaterial
+          ))
+        case _ => Option.empty[GlobalEspSpec]
+      }
+    }).toList
+  }
+
 }

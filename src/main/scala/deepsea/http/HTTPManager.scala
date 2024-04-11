@@ -20,7 +20,7 @@ import play.api.libs.json.{JsValue, Json}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
 import deepsea.accomodations.AccommodationManager.{AddAccommodationGroup, GetAccomUserIdReplace, GetAccommodations, GetAccommodationsESP, SetAccommodationLabel, UpdateAccommodationUserId}
 import deepsea.devices.DeviceManager.{AddDeviceToSystem, GetDevices, GetDevicesESP, RemoveDeviceFromSystem}
-import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, GetEsp, GetGlobalEsp, GetGlobalEspPdf, GetMaterialPurchases}
+import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, GetEsp, GetGlobalEsp, GetGlobalEspPdf, GetGlobalEspPdfSpec, GetGlobalEspSpec, GetMaterialPurchases}
 import deepsea.pipe.PipeManager.{GetPipeESP, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSpoolModel, GetSystems, GetZones, SetSpoolLock}
 import io.circe.syntax.EncoderOps
 
@@ -278,6 +278,12 @@ class HTTPManager extends Actor {
       },
       (get & path("materialsSummaryPdf") & parameter("project", "code", "user")) { (project, code, user) =>
         askFor(ActorManager.esp, GetGlobalEspPdf(project, code, user))
+      },
+      (get & path("materialsSummarySpec") & parameter("projectId")) { (projectId) =>
+        askFor(ActorManager.esp, GetGlobalEspSpec(projectId))
+      },
+      (get & path("materialsSummaryPdfSpec") & parameter("projectId", "statemId")) { (projectId, statemId) =>
+        askFor(ActorManager.esp, GetGlobalEspPdfSpec(projectId, statemId))
       },
       (post & path("materialPurchase") & entity(as[String])) { (purchase) =>
         askFor(ActorManager.esp, AddMaterialPurchase(purchase))

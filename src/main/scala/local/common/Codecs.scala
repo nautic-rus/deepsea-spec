@@ -3,9 +3,9 @@ package local.common
 import deepsea.accomodations.AccommodationManager.{Accommodation, BBox}
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
 import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, Cog, EleElement, ElecAngle, ElecCable, EquipmentConnection, TrayBySystem}
-import deepsea.esp.EspManager.{DeviceEspObject, DocumentWithMaterial, EleEspObject, EspElement, EspObject, GlobalEsp, HullEspObject, MaterialPurchase, PipeEspObject}
+import deepsea.esp.EspManager.{DeviceEspObject, DocumentWithMaterial, EleEspObject, EspElement, EspObject, GlobalEsp, GlobalEspSpec, HullEspObject, MaterialPurchase, PipeEspObject}
 import deepsea.hull.HullManager._
-import deepsea.pipe.PipeManager.{Material, MaterialTranslation, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SpoolLock, SystemDef, UnitTranslation, Units}
+import deepsea.pipe.PipeManager.{Material, MaterialTranslation, PipeSeg, PipeSegActual, PipeSegBilling, ProjectName, SpecMaterial, SpoolLock, SystemDef, UnitTranslation, Units}
 import io.circe.{Decoder, Encoder}
 import io.circe.parser._
 import io.circe.{Decoder, Encoder}
@@ -64,6 +64,10 @@ trait Codecs {
   implicit val MaterialDecoder: Decoder[Material] = deriveDecoder[Material]
   implicit val MaterialEncoder: Encoder[Material] = deriveEncoder[Material]
 
+  implicit val SpecMaterialDecoder: Decoder[SpecMaterial] = deriveDecoder[SpecMaterial]
+  implicit val SpecMaterialEncoder: Encoder[SpecMaterial] = deriveEncoder[SpecMaterial]
+
+
   implicit val ProjectNameDecoder: Decoder[ProjectName] = deriveDecoder[ProjectName]
   implicit val ProjectNameEncoder: Encoder[ProjectName] = deriveEncoder[ProjectName]
 
@@ -118,6 +122,9 @@ trait Codecs {
 
   implicit val GlobalEspDecoder: Decoder[GlobalEsp] = deriveDecoder[GlobalEsp]
   implicit val GlobalEspEncoder: Encoder[GlobalEsp] = deriveEncoder[GlobalEsp]
+
+  implicit val GlobalEspSpecDecoder: Decoder[GlobalEspSpec] = deriveDecoder[GlobalEspSpec]
+  implicit val GlobalEspSpecEncoder: Encoder[GlobalEspSpec] = deriveEncoder[GlobalEspSpec]
 
   implicit val DocumentWithMaterialDecoder: Decoder[DocumentWithMaterial] = deriveDecoder[DocumentWithMaterial]
   implicit val DocumentWithMaterialEncoder: Encoder[DocumentWithMaterial] = deriveEncoder[DocumentWithMaterial]

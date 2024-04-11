@@ -121,17 +121,33 @@ object PipeManager{
   implicit val SpecMaterialDecoder: Decoder[SpecMaterial] = deriveDecoder[SpecMaterial]
   implicit val SpecMaterialEncoder: Encoder[SpecMaterial] = deriveEncoder[SpecMaterial]
 
-  case class MaterialStatement(id: Int, name: String, project_id: Int, code: String, parent_id: Int)
+  case class MaterialStatement(id: Int, name: String, project_id: Int, code: String, parent_id: Int, doc_number: String)
   class MaterialStatementTable(tag: Tag) extends Table[MaterialStatement](tag, "materials_statements") {
     val id = column[Int]("id", O.AutoInc)
     val name = column[String]("name")
     val project_id = column[Int]("project_id")
     val code = column[String]("code")
     val parent_id = column[Int]("parent_id")
-    override def * = (id, name, project_id, code, parent_id) <> ((MaterialStatement.apply _).tupled, MaterialStatement.unapply)
+    val doc_number = column[String]("doc_number")
+    override def * = (id, name, project_id, code, parent_id, doc_number) <> ((MaterialStatement.apply _).tupled, MaterialStatement.unapply)
   }
   implicit val MaterialStatementDecoder: Decoder[MaterialStatement] = deriveDecoder[MaterialStatement]
   implicit val MaterialStatementEncoder: Encoder[MaterialStatement] = deriveEncoder[MaterialStatement]
+
+  case class MaterialDirectory(id: Int, name: String, parent_id: Int, user_id: Int, date: Long, old_code: String, project_id: Int, removed: Int)
+  class MaterialDirectoryTable(tag: Tag) extends Table[MaterialDirectory](tag, "materials_directory") {
+    val id = column[Int]("id", O.AutoInc, O.PrimaryKey)
+    val name = column[String]("name")
+    val parent_id = column[Int]("parent_id")
+    val user_id = column[Int]("user_id")
+    val date = column[Long]("date")
+    val old_code = column[String]("old_code")
+    val project_id = column[Int]("project_id")
+    val removed = column[Int]("removed")
+    override def * = (id, name, parent_id, user_id, date, old_code, project_id, removed) <> ((MaterialDirectory.apply _).tupled, MaterialDirectory.unapply)
+  }
+  implicit val MaterialDirectoryDecoder: Decoder[MaterialDirectory] = deriveDecoder[MaterialDirectory]
+  implicit val MaterialDirectoryEncoder: Encoder[MaterialDirectory] = deriveEncoder[MaterialDirectory]
 
   case class Pls(typeCode: Int, zone: Int, system: Int, line: String, pls: Int, elem: Int){
     def equals(that: Pls): Boolean = {
