@@ -136,12 +136,12 @@ object PrdPartsReportEN extends UtilsPDF {
         val pa = new Paragraph("1/" + pdfDoc.getNumberOfPages.toString)
         pa.setFontSize(mmToPt(5))
         pa.setFont(fontHELVETICA)
-        doc.showTextAligned(pa, mmToPt(204f), mmToPt(14), i, TextAlignment.RIGHT, VerticalAlignment.TOP, 0)
+        doc.showTextAligned(pa, mmToPt(203f), mmToPt(12.5), i, TextAlignment.RIGHT, VerticalAlignment.TOP, 0)
       } else {
         val pa = new Paragraph(i.toString)
         pa.setFontSize(mmToPt(5))
         pa.setFont(fontHELVETICA)
-        doc.showTextAligned(pa, mmToPt(200f), mmToPt(14), i, TextAlignment.RIGHT, VerticalAlignment.TOP, 0)
+        doc.showTextAligned(pa, mmToPt(201f), mmToPt(12.5), i, TextAlignment.RIGHT, VerticalAlignment.TOP, 0)
       }
     })
 
