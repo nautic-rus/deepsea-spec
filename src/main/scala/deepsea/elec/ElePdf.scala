@@ -13,10 +13,11 @@ import local.hull.PartManager.{PrdPart, genForanPartsByDrawingNum}
 import local.pdf.UtilsPDF
 import local.pdf.en.accom.AccomReportEn.dateNow
 import local.pdf.en.common.ReportCommonEN
-import local.pdf.en.common.ReportCommonEN.{DocNameEN, Item11ColumnsEN, border5mm, defaultFontSize, fillStamp, fontHELVETICA, getNnauticLigoEN, stampEN}
+import local.pdf.en.common.ReportCommonEN.{DocNameEN, Item11ColumnsEN, addZeros, border5mm, defaultFontSize, fillStamp, fillStampH, fontHELVETICA, getNnauticLigoEN, stampEN, stampENH}
 import local.pdf.ru.ele.EleEqTrayESKDReport.{findChessPos, pageSize}
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, OutputStream}
+import java.nio.file.Files
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import scala.collection.mutable.ListBuffer
@@ -41,7 +42,19 @@ trait ElePdf extends UtilsPDF {
     mmToPt(20),
   )
 
-  def genElePdf(ele: EleEspObject, docName: String, path: String): Unit = {
+  private val pointColumnWidthsSummary = Array(
+    mmToPt(20),
+    mmToPt(94),
+    mmToPt(60),
+    mmToPt(20),
+    mmToPt(20),
+    mmToPt(20),
+    mmToPt(20),
+    mmToPt(39),
+  )
+
+  def genElePdf(ele: EleEspObject, docName: String): String = {
+    val path = Files.createTempDirectory("hullPdf").toAbsolutePath.toString + "/" + ele.docNumber + "_rev" + ele.rev + ".pdf"
     val chess: CommonTypes.DrawingChess = {
       val l = findChess(ele.docNumber, ele.rev)
       if (l.nonEmpty) {
@@ -50,30 +63,33 @@ trait ElePdf extends UtilsPDF {
         CommonTypes.DrawingChess()
       }
     }
-    val rows: List[Item11ColumnsEN] =
-      ele.elements.map(e => {Item11ColumnsEN(
-          false,
-          e.userId,
-          e.material.name,
-          e.material.description,
-          e.units,
-          "",
-          e.weight.toString,
-          e.weight.toString,
-          "",
-          e.material.code
-        )})
-      .sortBy(s => s.A1)
 
     val dn: DocNameEN = DocNameEN(num = ele.docNumber, name = docName)
-
     val elems = ele.elements
+    val count = ListBuffer.empty[String]
     val pdfElem = PdfElems(
-      elems.map(e => PdfElemPartList(e.userId, e.material.name, e.material.description, e.units, 1, e.weight, e.weight, "", "")),
-      elems.map(e => PdfElemSummary(e.userId, e.material.name, e.material.description, e.units, 1, e.weight, e.weight, "", "")),
+      elems.map(e => PdfElemPartList(e.userId, e.material.name, e.material.description, e.units, 1, e.weight, e.weight, e.zone, "")),
+      elems.groupBy(_.material.code).map(gr => {
+        count += gr._1
+        val label = (("0" * 10) + count.length.toString).takeRight(4)
+        val m = gr._2.head.material
+        val qty = gr._2.length
+        val wgt = gr._2.map(_.weight).sum
+        PdfElemSummary(
+          label,
+          m.name,
+          m.description,
+          m.units,
+          qty,
+          m.singleWeight,
+          wgt,
+          m.category,
+          m.code
+        )
+      }).toList
     )
-
     processPDF(dn, path, pdfElem)
+    path
   }
 
   private def processPDF(docNameEN: DocNameEN, path: String, items: PdfElems): Unit = {
@@ -91,6 +107,10 @@ trait ElePdf extends UtilsPDF {
     titul.copyPagesTo(1, 1, pdfDoc)
 
     generatePartListPages(docNameEN, items.partList).foreach(page => {
+      page.copyPagesTo(1, 1, pdfDoc)
+    })
+
+    generatePartListPagesSummary(docNameEN, items.summary).foreach(page => {
       page.copyPagesTo(1, 1, pdfDoc)
     })
 
@@ -123,8 +143,8 @@ trait ElePdf extends UtilsPDF {
     val logo = getNnauticLigoEN.scaleToFit(72, 20).setFixedPosition(mmToPt(96), mmToPt(8))
     doc.add(logo)
     border5mm(pdfDoc.getPage(1))
-    val stamp: Table = stampEN()
-    fillStamp(doc, docNameEN)
+    val stamp: Table = stampENH()
+    fillStampH(doc, docNameEN)
     doc.add(stamp)
     doc.close()
     os.flush()
@@ -182,6 +202,56 @@ trait ElePdf extends UtilsPDF {
     })
     retBuff.toList
   }
+  private def generatePartListPagesSummary(docNameEN: DocNameEN, items: List[PdfElemSummary]): List[PdfDocument] = {
+    val pages: ListBuffer[PartListBodyPageSummary] = ListBuffer.empty[PartListBodyPageSummary]
+    pages += new PartListBodyPageSummary(docNameEN)
+    var currPage = 1
+    items.foreach(row => {
+      val rowLimit = 55
+      if (row.title.length > rowLimit){
+        val split = row.title.split(' ')
+        var firstRow = ""
+        var secondRow = ""
+        for (x <- 1.to(split.length)){
+          val splitRow = split.take(x).mkString(" ")
+          if (splitRow.length < rowLimit){
+            firstRow = splitRow
+            secondRow = row.title.replace(firstRow, "")
+          }
+        }
+
+
+        if (!pages.last.hasRoom(2)) {
+          pages += new PartListBodyPageSummary(docNameEN)
+          currPage = currPage + 1
+        }
+        pages.last.insertRowSummary(row.copy(title = firstRow))
+        if (!pages.last.hasRoom(2)) {
+          pages += new PartListBodyPageSummary(docNameEN)
+          currPage = currPage + 1
+        }
+        pages.last.insertTitleRowSummary(secondRow)
+      }
+      else{
+        if (!pages.last.hasRoom(2)) {
+          pages += new PartListBodyPageSummary(docNameEN)
+          currPage = currPage + 1
+        }
+        pages.last.insertRowSummary(row)
+      }
+    })
+    pages.last.setLastPage()
+
+    val retBuff = ListBuffer.empty[PdfDocument]
+    pages.foreach(p => {
+      p.doc.close()
+      p.os.flush()
+      p.os.close()
+      val ba = new ByteArrayInputStream(p.os.asInstanceOf[ByteArrayOutputStream].toByteArray)
+      retBuff += new PdfDocument(new PdfReader(ba))
+    })
+    retBuff.toList
+  }
 
 
   private class PartListBodyPage(docNameEN: DocNameEN) {
@@ -202,8 +272,8 @@ trait ElePdf extends UtilsPDF {
     val logo = getNnauticLigoEN.scaleToFit(72, 20).setFixedPosition(mmToPt(96), mmToPt(8))
     doc.add(logo)
 
-    val stamp: Table = stampEN()
-    fillStamp(doc, docNameEN)
+    val stamp: Table = stampENH()
+    fillStampH(doc, docNameEN)
 
     doc.add(stamp)
 
@@ -565,6 +635,15 @@ trait ElePdf extends UtilsPDF {
       }
       doc.add(bodyGrid)
     }
+    def setLastPageSummary(): Unit = {
+      while (currentRow != maxRow) {
+        (1.to(pointColumnWidthsSummary.length)).foreach(i => {
+          bodyGrid.addCell(generateDummyCell())
+        })
+        currentRow = currentRow + 1
+      }
+      doc.add(bodyGrid)
+    }
 
     def generateSpannedCellBold(in: String): Cell = {
       new Cell(2, 11).setVerticalAlignment(VerticalAlignment.MIDDLE)
@@ -603,6 +682,17 @@ trait ElePdf extends UtilsPDF {
       bodyGrid.addCell(generateCell(item.place))
       currentRow = currentRow + 1
     }
+    def insertRow(item: PdfElemSummary): Unit = {
+      bodyGrid.addCell(generateCell(item.label))
+      bodyGrid.addCell(generateCell(item.title))
+      bodyGrid.addCell(generateCell(item.descr))
+      bodyGrid.addCell(generateCell(item.units))
+      bodyGrid.addCell(generateCell((Math.round(item.qty * 100) / 100).toString))
+      bodyGrid.addCell(generateCell((Math.round(item.tWgt * 100) / 100).toString))
+      bodyGrid.addCell(generateCell(item.stmt))
+      bodyGrid.addCell(generateCell(item.matCode))
+      currentRow = currentRow + 1
+    }
     def insertTitleRow(title: String): Unit = {
       bodyGrid.addCell(generateCell(""))
       bodyGrid.addCell(generateCell(title))
@@ -617,5 +707,458 @@ trait ElePdf extends UtilsPDF {
     }
 
   }
+
+  private class PartListBodyPageSummary(docNameEN: DocNameEN) {
+
+    private val maxRow = 32
+    private var currentRow = 0
+
+    val os: OutputStream = new ByteArrayOutputStream()
+    val pdfWriter = new PdfWriter(os)
+    val pdfDoc = new PdfDocument(pdfWriter)
+    val doc: Document = {
+      val d = new Document(pdfDoc, pageSize)
+      d.setMargins(0, 0, 0, 0)
+      d
+    }
+    val width: Float = doc.getPdfDocument.getDefaultPageSize.getWidth
+    val height: Float = doc.getPdfDocument.getDefaultPageSize.getHeight
+    val logo = getNnauticLigoEN.scaleToFit(72, 20).setFixedPosition(mmToPt(96), mmToPt(8))
+    doc.add(logo)
+
+    val stamp: Table = stampENH()
+    fillStampH(doc, docNameEN)
+
+    doc.add(stamp)
+
+    border5mm(pdfDoc.getPage(1))
+
+    val pHeader: Table = pageHeaderSummary()
+
+    val header: Table = headerSummary("BILLING OF MATERIALS | ЗАКАЗ МАТЕРИАЛОВ")
+
+    val bodyGrid: Table = {
+      val table = new Table(pointColumnWidthsSummary)
+      val tableWidthPt = pointColumnWidthsSummary.sum
+      val tableHeightPt = mmToPt(maxRow * 5)
+      table.setWidth(tableWidthPt)
+      table.setHeight(tableHeightPt)
+      table.setFixedLayout()
+      table.setHorizontalAlignment(HorizontalAlignment.CENTER)
+      table.setVerticalAlignment(VerticalAlignment.MIDDLE)
+      table
+    }
+
+    header.setFixedPosition(1, mmToPt(5), height - mmToPt(12), bodyGrid.getWidth)
+    doc.add(header)
+
+    pHeader.setFixedPosition(1, mmToPt(5), height - mmToPt(18), bodyGrid.getWidth)
+    doc.add(pHeader)
+
+    bodyGrid.setFixedPosition(1, mmToPt(5), height - mmToPt(maxRow * 5) - mmToPt(18), bodyGrid.getWidth)
+
+    def pageHeaderSummary(): Table = {
+      val defaultFontSize = mmToPt(3.0)
+      val cellBuff = ListBuffer.empty[Cell]
+
+      val table = new Table(pointColumnWidthsSummary)
+      val tableWidthPt = pointColumnWidthsSummary.sum
+      val tableHeightPt = mmToPt(7)
+      table.setWidth(tableWidthPt)
+      table.setHeight(tableHeightPt)
+      table.setHorizontalAlignment(HorizontalAlignment.CENTER)
+      table.setVerticalAlignment(VerticalAlignment.MIDDLE)
+      table.setFixedLayout()
+
+      def generateRows(): Unit = {
+        cellBuff += {
+          new Cell(0, 0)
+            .setVerticalAlignment(VerticalAlignment.MIDDLE)
+            .setHorizontalAlignment(HorizontalAlignment.CENTER)
+            .add(new Paragraph("")
+              .setTextAlignment(TextAlignment.CENTER)
+              .setFontSize(defaultFontSize)
+              .setFont(fontHELVETICA)
+            )
+            .setPadding(0).setMargin(0)
+            .setHeight(mmToPt(5))
+        }
+        cellBuff += {
+          new Cell(0, 0)
+            .setVerticalAlignment(VerticalAlignment.MIDDLE)
+            .setHorizontalAlignment(HorizontalAlignment.CENTER)
+            .add(new Paragraph("")
+              .setTextAlignment(TextAlignment.CENTER)
+              .setFontSize(defaultFontSize)
+              .setFont(fontHELVETICA)
+            )
+            .setPadding(0).setMargin(0)
+            .setHeight(mmToPt(5))
+        }
+        cellBuff += {
+          new Cell(0, 0)
+            .setVerticalAlignment(VerticalAlignment.MIDDLE)
+            .setHorizontalAlignment(HorizontalAlignment.CENTER)
+            .add(new Paragraph("")
+              .setTextAlignment(TextAlignment.CENTER)
+              .setFontSize(defaultFontSize)
+              .setFont(fontHELVETICA)
+            )
+            .setPadding(0).setMargin(0)
+            .setHeight(mmToPt(5))
+        }
+        cellBuff += {
+          new Cell(0, 0)
+            .setVerticalAlignment(VerticalAlignment.MIDDLE)
+            .setHorizontalAlignment(HorizontalAlignment.CENTER)
+            .add(new Paragraph("")
+              .setTextAlignment(TextAlignment.CENTER)
+              .setFontSize(defaultFontSize)
+              .setFont(fontHELVETICA)
+            )
+            .setPadding(0).setMargin(0)
+            .setHeight(mmToPt(5))
+        }
+        cellBuff += {
+          new Cell(0, 0)
+            .setVerticalAlignment(VerticalAlignment.MIDDLE)
+            .setHorizontalAlignment(HorizontalAlignment.CENTER)
+            .add(new Paragraph("")
+              .setTextAlignment(TextAlignment.CENTER)
+              .setFontSize(defaultFontSize)
+              .setFont(fontHELVETICA)
+            )
+            .setPadding(0).setMargin(0)
+            .setHeight(mmToPt(5))
+        }
+        cellBuff += {
+          new Cell(0, 0)
+            .setVerticalAlignment(VerticalAlignment.MIDDLE)
+            .setHorizontalAlignment(HorizontalAlignment.CENTER)
+            .add(new Paragraph("")
+              .setTextAlignment(TextAlignment.CENTER)
+              .setFontSize(defaultFontSize)
+              .setFont(fontHELVETICA)
+            )
+            .setPadding(0).setMargin(0)
+            .setHeight(mmToPt(5))
+        }
+        cellBuff += {
+          new Cell(0, 0)
+            .setVerticalAlignment(VerticalAlignment.MIDDLE)
+            .setHorizontalAlignment(HorizontalAlignment.CENTER)
+            .add(new Paragraph("")
+              .setTextAlignment(TextAlignment.CENTER)
+              .setFontSize(defaultFontSize)
+              .setFont(fontHELVETICA)
+            )
+            .setPadding(0).setMargin(0)
+            .setHeight(mmToPt(5))
+        }
+        cellBuff += {
+          new Cell(0, 0)
+            .setVerticalAlignment(VerticalAlignment.MIDDLE)
+            .setHorizontalAlignment(HorizontalAlignment.CENTER)
+            .add(new Paragraph("")
+              .setTextAlignment(TextAlignment.CENTER)
+              .setFontSize(defaultFontSize)
+              .setFont(fontHELVETICA)
+            )
+            .setPadding(0).setMargin(0)
+            .setHeight(mmToPt(5))
+        }
+      }
+
+      generateRows()
+
+      cellBuff.foreach(cell => {
+        table.addCell(cell)
+      })
+
+      processStaticText()
+
+      def processStaticText(): Unit = {
+        setStampText(cellBuff(0), "LABEL / ПОЗ.", italic = false, bold = true)
+        setStampText(cellBuff(1), "TITLE / НАИМЕНОВАНИЕ", italic = false, bold = true)
+        setStampText(cellBuff(2), "DESCRIPTION / ОБОЗНАЧЕНИЕ", italic = false, bold = true)
+        setStampText(cellBuff(3), "UNITS / ЕД.", italic = false, bold = true)
+        setStampText(cellBuff(4), "QTY / К-ВО", italic = false, bold = true)
+        setStampText(cellBuff(5), "WGT / ВЕС", italic = false, bold = true)
+        setStampText(cellBuff(6), "ST.CODE / К.ВЕД.", italic = false, bold = true)
+        setStampText(cellBuff(7), "MAT.CODE / КОД МАТ.", italic = false, bold = true)
+      }
+
+      def setStampText(cell: Cell, text: String,
+                       italic: Boolean = false,
+                       bold: Boolean = false,
+                       textAlignment: TextAlignment = TextAlignment.CENTER,
+                       fontSize: Float = 3.0f): Cell = {
+        cell.setFontSize(mmToPt(fontSize))
+        val p: Paragraph = cell.getChildren.asScala.head.asInstanceOf[Paragraph]
+        p.setTextAlignment(textAlignment)
+        if (textAlignment == TextAlignment.CENTER) {
+          cell.setPaddingLeft(mmToPt(1.5))
+        }
+        val t: Text = p.getChildren.asScala.head.asInstanceOf[Text]
+        t.setText(text)
+        if (italic) t.setItalic()
+        if (bold) t.setBold()
+        cell
+      }
+
+      table
+    }
+    def headerSummary(text: String): Table = {
+      val defaultFontSize = mmToPt(3.2)
+      val cellBuff = ListBuffer.empty[Cell]
+
+      val table = new Table(1)
+      val tableWidthPt = pointColumnWidthsSummary.sum
+      val tableHeightPt = mmToPt(7)
+      table.setWidth(tableWidthPt)
+      table.setHeight(tableHeightPt)
+      table.setHorizontalAlignment(HorizontalAlignment.CENTER)
+      table.setVerticalAlignment(VerticalAlignment.MIDDLE)
+      table.setFixedLayout()
+
+      cellBuff += {
+        new Cell(0, 0)
+          .setVerticalAlignment(VerticalAlignment.MIDDLE)
+          .setHorizontalAlignment(HorizontalAlignment.CENTER)
+          .add(new Paragraph("")
+            .setTextAlignment(TextAlignment.CENTER)
+            .setFontSize(defaultFontSize)
+            .setFont(fontHELVETICA)
+          )
+          .setPadding(0).setMargin(0)
+          .setHeight(mmToPt(5))
+      }
+
+      cellBuff.foreach(cell => {
+        table.addCell(cell)
+      })
+      setStampText(cellBuff.head, text, italic = false, bold = true)
+
+      def setStampText(cell: Cell, text: String,
+                       italic: Boolean = false,
+                       bold: Boolean = false,
+                       textAlignment: TextAlignment = TextAlignment.CENTER,
+                       fontSize: Float = 3.0f): Cell = {
+        cell.setFontSize(mmToPt(fontSize))
+        val p: Paragraph = cell.getChildren.asScala.head.asInstanceOf[Paragraph]
+        p.setTextAlignment(textAlignment)
+        if (textAlignment == TextAlignment.CENTER) {
+          cell.setPaddingLeft(mmToPt(1.5))
+        }
+        val t: Text = p.getChildren.asScala.head.asInstanceOf[Text]
+        t.setText(text)
+        if (italic) t.setItalic()
+        if (bold) t.setBold()
+        cell
+      }
+
+      table
+    }
+
+    def insertDummyRow(): Unit = {
+      bodyGrid.addCell(generateCell(""))
+      bodyGrid.addCell(generateCell(""))
+      bodyGrid.addCell(generateCell(""))
+      bodyGrid.addCell(generateCell(""))
+      bodyGrid.addCell(generateCell(""))
+      bodyGrid.addCell(generateCell(""))
+      bodyGrid.addCell(generateCell(""))
+      bodyGrid.addCell(generateCell(""))
+      bodyGrid.addCell(generateCell(""))
+      bodyGrid.addCell(generateCell(""))
+
+      currentRow = currentRow + 1
+    }
+
+    def generateDummyCell(): Cell = {
+
+      new Cell(2, 0).setVerticalAlignment(VerticalAlignment.MIDDLE)
+        .setHorizontalAlignment(HorizontalAlignment.CENTER)
+        .add(new Paragraph("")
+          .setTextAlignment(TextAlignment.CENTER)
+          .setFontSize(defaultFontSize)
+          .setFont(fontHELVETICA)
+        )
+        .setPadding(0).setMargin(0)
+        .setHeight(mmToPt(5))
+    }
+
+    def generateCellDiffSize(in: String, maxLen: Int): Cell = {
+      val par = new Paragraph(in) {
+        setFont(fontHELVETICA)
+      }
+
+      if (in.length >= maxLen) {
+        par.setTextAlignment(TextAlignment.CENTER)
+        par.setFontSize(mmToPt(3.0))
+      } else {
+        par.setTextAlignment(TextAlignment.CENTER)
+        par.setFontSize(defaultFontSize)
+        par.setFont(fontHELVETICA)
+      }
+
+      new Cell(2, 0).setVerticalAlignment(VerticalAlignment.MIDDLE)
+        .setHorizontalAlignment(HorizontalAlignment.CENTER)
+        .add(par)
+        .setPadding(0).setMargin(0)
+        .setHeight(mmToPt(5))
+    }
+
+    def generateBoldCellDiffSize(in: String, maxLen: Int): Cell = {
+      val par = new Paragraph(in) {
+        setFont(fontHELVETICA)
+      }
+
+      if (in.length >= maxLen) {
+        par.setTextAlignment(TextAlignment.CENTER)
+        par.setFontSize(mmToPt(3.0))
+          .setBold()
+      } else {
+        par.setTextAlignment(TextAlignment.CENTER)
+        par.setFontSize(defaultFontSize)
+        par.setFont(fontHELVETICA)
+          .setBold()
+      }
+
+      new Cell(2, 0).setVerticalAlignment(VerticalAlignment.MIDDLE)
+        .setHorizontalAlignment(HorizontalAlignment.CENTER)
+        .add(par)
+        .setPadding(0).setMargin(0)
+        .setHeight(mmToPt(5))
+    }
+
+    def generateCell(in: String): Cell = {
+      new Cell(2, 0).setVerticalAlignment(VerticalAlignment.MIDDLE)
+        .setHorizontalAlignment(HorizontalAlignment.CENTER)
+        .add(new Paragraph(in)
+          .setTextAlignment(TextAlignment.CENTER)
+          .setFontSize(defaultFontSize)
+          .setFont(fontHELVETICA)
+        )
+        .setPadding(0).setMargin(0)
+        .setHeight(mmToPt(5))
+    }
+
+    def generateBoldCell(in: String): Cell = {
+      new Cell(2, 0).setVerticalAlignment(VerticalAlignment.MIDDLE)
+        .setHorizontalAlignment(HorizontalAlignment.CENTER)
+        .add(new Paragraph(in)
+          .setTextAlignment(TextAlignment.CENTER)
+          .setFontSize(defaultFontSize)
+          .setFont(fontHELVETICA)
+          .setBold()
+        )
+        .setPadding(0).setMargin(0)
+        .setHeight(mmToPt(5))
+    }
+
+    def hasRoom(rows: Int): Boolean = {
+      if (currentRow + rows < maxRow) {
+        true
+      } else {
+        doc.add(bodyGrid)
+        false
+      }
+    }
+
+    def setLastPage(): Unit = {
+      while (currentRow != maxRow) {
+        (1.to(pointColumnWidthsSummary.length)).foreach(i => {
+          bodyGrid.addCell(generateDummyCell())
+        })
+        currentRow = currentRow + 1
+      }
+      doc.add(bodyGrid)
+    }
+
+    def generateSpannedCellBold(in: String): Cell = {
+      new Cell(2, 11).setVerticalAlignment(VerticalAlignment.MIDDLE)
+        .setHorizontalAlignment(HorizontalAlignment.CENTER)
+        .add(new Paragraph(in)
+          .setTextAlignment(TextAlignment.CENTER)
+          .setFontSize(defaultFontSize)
+          .setFont(fontHELVETICA)
+          .setBold()
+        )
+        .setPadding(0).setMargin(0)
+        .setHeight(mmToPt(5))
+    }
+
+    def generateSpannedCell(in: String): Cell = {
+      new Cell(2, 11).setVerticalAlignment(VerticalAlignment.MIDDLE)
+        .setHorizontalAlignment(HorizontalAlignment.CENTER)
+        .add(new Paragraph(in)
+          .setTextAlignment(TextAlignment.CENTER)
+          .setFontSize(defaultFontSize)
+          .setFont(fontHELVETICA)
+        )
+        .setPadding(0).setMargin(0)
+        .setHeight(mmToPt(5))
+    }
+
+    def insertRow(item: PdfElemPartList): Unit = {
+      bodyGrid.addCell(generateCell(item.label))
+      bodyGrid.addCell(generateCell(item.title))
+      bodyGrid.addCell(generateCell(item.descr))
+      bodyGrid.addCell(generateCell(item.units))
+      bodyGrid.addCell(generateCell((Math.round(item.qty * 100) / 100).toString))
+      bodyGrid.addCell(generateCell((Math.round(item.wgt * 100) / 100).toString))
+      bodyGrid.addCell(generateCell((Math.round(item.tWgt * 100) / 100).toString))
+      bodyGrid.addCell(generateCell(item.room))
+      bodyGrid.addCell(generateCell(item.place))
+      currentRow = currentRow + 1
+    }
+    def insertRow(item: PdfElemSummary): Unit = {
+      bodyGrid.addCell(generateCell(item.label))
+      bodyGrid.addCell(generateCell(item.title))
+      bodyGrid.addCell(generateCell(item.descr))
+      bodyGrid.addCell(generateCell(item.units))
+      bodyGrid.addCell(generateCell((Math.round(item.qty * 100) / 100).toString))
+      bodyGrid.addCell(generateCell((Math.round(item.tWgt * 100) / 100).toString))
+      bodyGrid.addCell(generateCell(item.stmt))
+      bodyGrid.addCell(generateCell(item.matCode))
+      currentRow = currentRow + 1
+    }
+    def insertRowSummary(item: PdfElemSummary): Unit = {
+      bodyGrid.addCell(generateCell(item.label))
+      bodyGrid.addCell(generateCell(item.title))
+      bodyGrid.addCell(generateCell(item.descr))
+      bodyGrid.addCell(generateCell(item.units))
+      bodyGrid.addCell(generateCell((Math.round(item.qty * 100) / 100).toString))
+      bodyGrid.addCell(generateCell((Math.round(item.tWgt * 100) / 100).toString))
+      bodyGrid.addCell(generateCell(item.stmt))
+      bodyGrid.addCell(generateCell(item.matCode))
+      currentRow = currentRow + 1
+    }
+    def insertTitleRow(title: String): Unit = {
+      bodyGrid.addCell(generateCell(""))
+      bodyGrid.addCell(generateCell(title))
+      bodyGrid.addCell(generateCell(""))
+      bodyGrid.addCell(generateCell(""))
+      bodyGrid.addCell(generateCell(""))
+      bodyGrid.addCell(generateCell(""))
+      bodyGrid.addCell(generateCell(""))
+      bodyGrid.addCell(generateCell(""))
+      bodyGrid.addCell(generateCell(""))
+      currentRow = currentRow + 1
+    }
+    def insertTitleRowSummary(title: String): Unit = {
+      bodyGrid.addCell(generateCell(""))
+      bodyGrid.addCell(generateCell(title))
+      bodyGrid.addCell(generateCell(""))
+      bodyGrid.addCell(generateCell(""))
+      bodyGrid.addCell(generateCell(""))
+      bodyGrid.addCell(generateCell(""))
+      bodyGrid.addCell(generateCell(""))
+      bodyGrid.addCell(generateCell(""))
+      currentRow = currentRow + 1
+    }
+  }
+
 
 }

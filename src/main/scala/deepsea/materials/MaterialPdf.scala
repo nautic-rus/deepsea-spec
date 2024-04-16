@@ -40,7 +40,7 @@ trait MaterialPdf extends UtilsPDF with MaterialsHelper {
     val stmts = getMaterialStatements.filter(_.project_id == projectId)
     val rows = fillRows(materials, statemId, stmts, first = true)
     val dn: DocNameEN = stmts.find(_.id == statemId) match {
-      case Some(statement) =>  DocNameEN(num = statement.code, name = statement.name)
+      case Some(statement) =>  DocNameEN(num = statement.doc_number, name = statement.name)
       case _ =>  DocNameEN(num = "NO DOC NUMBER", name = "NO DOC NAME")
     }
     val path: String = stmts.find(_.id == statemId) match {

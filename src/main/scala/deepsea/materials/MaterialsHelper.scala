@@ -20,7 +20,7 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.{Duration, SECONDS}
 
 trait MaterialsHelper {
-  def getMaterials1: List[Material] = {
+  def getMaterialsAux: List[Material] = {
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
         Await.result(mongo.getCollection("materials-n").find[Material]().toFuture(), Duration(30, SECONDS)) match {

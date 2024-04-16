@@ -754,6 +754,7 @@ trait ElecHelper extends Codecs with EspManagerHelper {
                 rs.getDouble("Y_COG"),
                 rs.getDouble("Z_COG"),
               ),
+              Option(rs.getString(41)).getOrElse(""),
               materials.find(_.code == stock) match {
                 case Some(value) => value
                 case _ => Material().copy(name = "No stock code, userId " + userId)
@@ -795,6 +796,7 @@ trait ElecHelper extends Codecs with EspManagerHelper {
                 rs.getDouble("COG_Y"),
                 rs.getDouble("COG_Z"),
               ),
+              Option(rs.getString(37)).getOrElse(""),
               materials.find(_.code == stock) match {
                 case Some(value) => value
                 case _ => Material().copy(name = "No stock code, " + abbrev)
@@ -815,8 +817,8 @@ trait ElecHelper extends Codecs with EspManagerHelper {
     res.toList
   }
   def getEleEsp(foranProject: String, systems: List[String], zones: List[String], materials: List[Material]): List[EleElement] = {
-    val trays = getEleTrays(foranProject, systems, materials).map(x => EleElement(x.userId, x.kind, "796", x.weight, x.stock, x.material, x.cog))
-    val equips = getEleEquips(foranProject, zones, materials).map(x => EleElement(x.userId, "EQUIP", "796", x.weight, x.stock, x.material, x.cog))
+    val trays = getEleTrays(foranProject, systems, materials).map(x => EleElement(x.userId, x.kind, "796", x.weight, x.stock, x.material, x.cog, x.zone))
+    val equips = getEleEquips(foranProject, zones, materials).map(x => EleElement(x.userId, "EQUIP", "796", x.weight, x.stock, x.material, x.cog, x.zone))
     trays ++ equips
   }
   def generateEleEsp(foranProject: String, docNumber: String, rev: String, user: String, taskId: String): EleEspObject = {
@@ -834,5 +836,20 @@ trait ElecHelper extends Codecs with EspManagerHelper {
       case _ => EleComplect(docNumber, "", "", foranProject, List.empty[String], List.empty[String])
     }
     EleEspObject(id, foranProject, docNumber, rev, date, user, "ele", taskId.toIntOption.getOrElse(0), elements = getEleEsp(foranProject, complect.systemNames, complect.zoneNames, materials))
+  }
+  def getIssueName(id: Int): String = {
+    val res = ListBuffer.empty[String]
+    DBManager.GetPGConnection() match {
+      case Some(connection) =>
+        val stmt = connection.createStatement()
+        val rs = stmt.executeQuery(s"select issue_name from issue where id = $id")
+        while (rs.next()){
+          res += rs.getString("issue_name")
+        }
+        stmt.close()
+        connection.close()
+      case _ => None
+    }
+    res.headOption.getOrElse("")
   }
 }

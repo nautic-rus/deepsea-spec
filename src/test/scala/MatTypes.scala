@@ -1,32 +1,64 @@
 import deepsea.database.DBManager
+import deepsea.esp.EspManagerHelper
 import deepsea.pipe.PipeHelper
 import deepsea.pipe.PipeManager.{PipeSeg, Pls, PlsElem, PlsParam}
 import org.scalatest.funsuite.AnyFunSuite
 
 import scala.collection.mutable.ListBuffer
 
-class MatTypes extends AnyFunSuite with PipeHelper{
+class MatTypes extends AnyFunSuite with PipeHelper with EspManagerHelper{
   val project = "P701"
 
+  val sections = List(ProfileSection(0, "FS"),
+                      ProfileSection(1, "AS"),
+                      ProfileSection(2, "IS"),
+                      ProfileSection(3, "TS"),
+                      ProfileSection(4, "US"),
+                      ProfileSection(5, "BS"),
+                      ProfileSection(6, "ST"),
+                      ProfileSection(7, "AT"),
+                      ProfileSection(8, "OS"),
+                      ProfileSection(9, "PS"),
+                      ProfileSection(10, "RS"),
+                      ProfileSection(11, "MC"),
+                      ProfileSection(12, "DB"),
+                      ProfileSection(13, "SR"),
+                      ProfileSection(14, "HR"),
+                      ProfileSection(15, "LI"),
+                      ProfileSection(16, "ZL"),
+                      ProfileSection(17, "TL"))
+  case class ProfileSection(code: Int, section: String)
   case class HullSpec(descr: String, partType: String, thickness: Double, kse: Double, hullKse: HullKse)
   case class PipeSpec(t: String, tDesc: String, nd: Double, outD: Double, thick: Double)
   case class HvacSpec(name: String, cType: String, oid: Double, params: List[HvacParam])
   case class HvacPlates(name: String, oid: Int)
   case class HvacParam(oid: Double, name: String, pType: String, value: String)
-  case class HullKse(kse: Double, wH: Double, wT: Double, fH: Double, fT: Double)
+  case class HullKse(kse: Double, section: Int, wH: Double, wT: Double, fH: Double, fT: Double)
   case class NameDim(name: String, dim: String)
   case class CabSpec(code: String, spec: String, addData: String, oDiam: Double, nomSect: Double)
   case class TraySpec(descr: String, w: Double, h: Double, diam: Double, fillRule: String, nomSize: String, cabWidth: Double, cabHeight: Double, trayComp: String)
   case class PipeJoin(nomDiam: Double, joinSpec: String, joinPressure: String, joinThick: Double, nuts: Double, nutsPressure: String, boltLength: Double, boltPressure: String, bolts: Double)
 
-  printHull(getHull(project))
+  //printHullWithCount(getHull(project))
+  //printHull(getHullByBlock(project, "U0107"))
   //printPipe(getPipe(project))
   //printHvac(getHvac(project))
   //printCables(getCables(project))
   //printCableTrays(getCableTrays(project))
   //printPipeJoins(getPipeJoins(project))
   //printHvacPlates(getHvacPlates(project))
+  //printPipeWithCount(getPipeBySystem(project, "813-1001"))
 
+  //val materials = getMaterialsAux.filter(_.project == "200101")
+//  val esps = getGlobalEsp(1)
+//  esps.sortBy(_.name).foreach(m => {
+//    println(List(m.code, m.name.replace(",", ""), m.weight, m.units, m.qty, m.weightTotal).mkString(","))
+//  })
+  //val espMaterials = getGlobalEsp(1).map(_.code)
+
+//  materials.filter(x => espMaterials.contains(x.code)).sortBy(_.name).foreach(m => {
+//    println(List(m.code, m.name("ru").replace(",", "").trim, m.units, m.singleWeight).mkString(","))
+//  })
 
   val q = 0
 
@@ -47,7 +79,33 @@ class MatTypes extends AnyFunSuite with PipeHelper{
             kse,
             kses.find(_.kse == kse) match {
               case Some(value) => value
-              case _ => HullKse(0, 0, 0, 0, 0)
+              case _ => HullKse(0, 0, 0, 0, 0, 0)
+            }
+          )
+        }
+        stmt.close()
+        conn.close()
+      case _ => None
+    }
+    res.toList
+  }
+  def getHullByBlock(project: String, block: String): List[HullSpec] = {
+    val kses = getKse(project)
+    val res = ListBuffer.empty[HullSpec]
+    DBManager.GetOracleConnection(project) match {
+      case Some(conn) =>
+        val stmt = conn.createStatement()
+        val rs = stmt.executeQuery("select * from v_inp_single_part where block = '" + block + "'")
+        while (rs.next()){
+          val kse: Double = Option(rs.getDouble("KSE")).getOrElse(0)
+          res += HullSpec(
+            rs.getString("DESCRIPTION"),
+            rs.getString("PART_TYPE"),
+            rs.getDouble("THICKNESS"),
+            kse,
+            kses.find(_.kse == kse) match {
+              case Some(value) => value
+              case _ => HullKse(0, 0, 0, 0, 0, 0)
             }
           )
         }
@@ -66,6 +124,7 @@ class MatTypes extends AnyFunSuite with PipeHelper{
         while (rs.next()){
           res += HullKse(
             Option(rs.getDouble("KSE")).getOrElse(0),
+            Option(rs.getInt("SECTION")).getOrElse(0),
             Option(rs.getDouble("WEB_HEIGHT")).getOrElse(0),
             Option(rs.getDouble("WEB_THICKNESS")).getOrElse(0),
             Option(rs.getDouble("FLANGE_HEIGHT")).getOrElse(0),
@@ -82,12 +141,32 @@ class MatTypes extends AnyFunSuite with PipeHelper{
     hull.groupBy(x => (x.descr, x.thickness, x.kse)).map(group => {
       val thick = if (group._1._3 != 0){
         val k = group._2.head.hullKse
-        List(k.wH, k.wT, k.fH, k.fT).map(_.toInt).filter(_ > 0).mkString("x")
+        val s = sections.find(_.code == k.section) match {
+          case Some(value) => value.section
+          case _ => ""
+        }
+        (List(s) ++ List(k.wH, k.wT, k.fH, k.fT).map(_.toInt).filter(_ > 0)).mkString("x")
       }
       else{
         "s" + group._1._2.toInt.toString
       }
       List(group._1._1, thick).mkString(",")
+    }).toList.sortBy(x => x).foreach(println)
+  }
+  def printHullWithCount(hull: List[HullSpec]): Unit = {
+    hull.groupBy(x => (x.descr, x.thickness, x.kse)).map(group => {
+      val thick = if (group._1._3 != 0){
+        val k = group._2.head.hullKse
+        val s = sections.find(_.code == k.section) match {
+          case Some(value) => value.section
+          case _ => ""
+        }
+        (List(s) ++ List(k.wH, k.wT, k.fH, k.fT).map(_.toInt).filter(_ > 0)).mkString("x")
+      }
+      else{
+        "s" + group._1._2.toInt.toString
+      }
+      List(group._1._1, thick, group._2.length).mkString(",")
     }).toList.sortBy(x => x).foreach(println)
   }
   def getPipe(project: String): List[PipeSpec] = {
@@ -114,6 +193,32 @@ class MatTypes extends AnyFunSuite with PipeHelper{
   def printPipe(pipe: List[PipeSpec]): Unit = {
     pipe.groupBy(x => (x.t, x.tDesc, x.nd, x.outD, x.thick)).toList.sortBy(x => x._1._2 + "-" + x._1._3 + "-" + x._1._4 + "-" + x._1._5).foreach(g => {
       println(List(g._1._2, g._1._3, g._1._4, g._1._5).mkString(","))
+    })
+  }
+  def getPipeBySystem(project: String, system: String): List[PipeSpec] = {
+    val res = ListBuffer.empty[PipeSpec]
+    DBManager.GetOracleConnection(project) match {
+      case Some(conn) =>
+        val stmt = conn.createStatement()
+        val rs = stmt.executeQuery("select * from V_PIPECOMP where systemname = '" + system + "'")
+        while (rs.next()){
+          res += PipeSpec(
+            rs.getString("TYPECODE"),
+            rs.getString("TYPEDESC"),
+            rs.getDouble("ND1MM"),
+            rs.getDouble("OUTDIAMETER"),
+            rs.getDouble("THICKNESS"),
+          )
+        }
+        stmt.close()
+        conn.close()
+      case _ => None
+    }
+    res.toList
+  }
+  def printPipeWithCount(pipe: List[PipeSpec]): Unit = {
+    pipe.groupBy(x => (x.t, x.tDesc, x.nd, x.outD, x.thick)).toList.sortBy(x => x._1._2 + "-" + x._1._3 + "-" + x._1._4 + "-" + x._1._5).foreach(g => {
+      println(List(g._1._2, g._1._3, g._1._4, g._1._5, g._2.length).mkString(","))
     })
   }
   def getHvac(project: String): List[HvacSpec] = {

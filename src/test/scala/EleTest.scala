@@ -15,10 +15,9 @@ class EleTest extends AnyFunSuite with ElecHelper with ElePdf{
   val user = ""
   val taskId = "7431"
   val qq = 0
-  val file: String = Files.createTempDirectory("hullPdf").toAbsolutePath.toString + "/" + docNumber + "_rev" + rev + ".pdf"
 
   val ele = generateEleEsp(foranProject, docNumber, rev, user, taskId)
-  genElePdf(ele, "NAME OF DRAWING", file)
+  val file = genElePdf(ele, "NAME OF DRAWING")
 
   println(file)
 

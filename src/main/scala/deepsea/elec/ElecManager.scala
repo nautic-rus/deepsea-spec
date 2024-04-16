@@ -266,9 +266,9 @@ object ElecManager {
   implicit val SystemEncoder: Encoder[System] = deriveEncoder[System]
 
 
-  case class EleTray(userId: String, stock: String, weight: Double, cType: String, idsq: Int, node1: Int, node2: Int, kind: String, cog: Cog, material: Material)
-  case class EleEquip(userId: String, abbrev: String, stock: String, weight: Double, cog: Cog, material: Material)
-  case class EleElement(userId: String, typeName: String, units: String, weight: Double, code: String, material: Material, cog: Cog)
+  case class EleTray(userId: String, stock: String, weight: Double, cType: String, idsq: Int, node1: Int, node2: Int, kind: String, cog: Cog, zone: String, material: Material)
+  case class EleEquip(userId: String, abbrev: String, stock: String, weight: Double, cog: Cog, zone: String, material: Material)
+  case class EleElement(userId: String, typeName: String, units: String, weight: Double, code: String, material: Material, cog: Cog, zone: String)
   case class Cog(x: Double, y: Double, z: Double)
 
   case class GetEleEspFiles(foranProject: String, docNumber: String, rev: String, user: String, taskId: String)
@@ -276,7 +276,7 @@ object ElecManager {
 
   case class MaterialLabel(code: String, label: String)
 
-  class ElecManager extends Actor with ElecHelper with Codecs {
+  class ElecManager extends Actor with ElecHelper with Codecs with ElePdf {
     implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
 
     override def preStart(): Unit = {
@@ -359,15 +359,12 @@ object ElecManager {
         updateEleComplect(drawing)
         sender() ! "success".asJson.noSpaces
       case GetEleEspFiles(foranProject, docNumber, rev, user, taskId) =>
-        Await.result(ActorManager.esp ? CreateEsp(foranProject, docNumber, rev, user, "ele", taskId), timeout.duration) match {
-          case res: String =>
-            val eleEsp = getEleLatestEsp(foranProject, "ele", docNumber, rev)
-            val file = ???
-            Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
-              case url: String => sender() ! url.asJson.noSpaces
-              case _ => sender() ! "error: cant upload esp".asJson.noSpaces
-            }
-          case _ => sender() ! "error: cant create esp".asJson.noSpaces
+        val taskName = getIssueName(taskId.toIntOption.getOrElse(0))
+        val eleEsp = generateEleEsp(foranProject, docNumber, rev, user, taskId)
+        val file = genElePdf(eleEsp, taskName)
+        Await.result(ActorManager.files ? GenerateUrl(file), timeout.duration) match {
+          case url: String => sender() ! url.asJson.noSpaces
+          case _ => sender() ! "error: cant upload esp".asJson.noSpaces
         }
       case GetEleCurrent(foranProject, docNumber, rev, user, taskId) =>
         sender() ! generateEleEsp(foranProject, docNumber, rev, user, taskId).asJson.noSpaces
