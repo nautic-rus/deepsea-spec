@@ -46,7 +46,7 @@ class MatTypes extends AnyFunSuite with PipeHelper with EspManagerHelper{
   //printCables(getCables(project))
   //printCableTrays(getCableTrays(project))
   //printPipeJoins(getPipeJoins(project))
-  //printHvacPlates(getHvacPlates(project))
+  printHvacPlates(getHvacPlates(project))
   //printPipeWithCount(getPipeBySystem(project, "813-1001"))
 
   //val materials = getMaterialsAux.filter(_.project == "200101")
@@ -464,13 +464,13 @@ class MatTypes extends AnyFunSuite with PipeHelper with EspManagerHelper{
           if (params.length == 2){
             val d = Math.round(params(0).value * 2)
             val l = Math.round(params(1).value)
-            s"ВОЗДУХОВОД ДУ$d"
+            s"ВОЗДУХОВОД ДУ$d" + "&l=" + l
           }
           else if (params.length == 3){
             val d1 = Math.round(params(0).value)
             val d2 = Math.round(params(1).value)
             val l = Math.round(params(2).value)
-            s"ВОЗДУХОВОД ${d2}х${d1}"
+            s"ВОЗДУХОВОД ${d2}х${d1}" + "&l=" + l
           }
           else{
             "undefined"
@@ -482,7 +482,20 @@ class MatTypes extends AnyFunSuite with PipeHelper with EspManagerHelper{
     res.toList.filter(_ != "undefined").distinct
   }
   def printHvacPlates(hvac: List[String]): Unit = {
-    hvac.sortBy(x => x).foreach(println)
+    val print = ListBuffer.empty[Tuple2[String, Double]]
+    hvac.foreach(h => {
+      if (h.contains("&l=")){
+        val s: Array[String] = h.split("&")
+        val l: Double = s.last.replace("l=", "").toDoubleOption.getOrElse(0)
+        print += Tuple2(s.head, l)
+      }
+      else{
+        print += Tuple2(h, 0)
+      }
+    })
+    print.groupBy(_._1).toList.sortBy(_._1).map(gr => {
+      List(gr._1, gr._2.map(_._2).sum).mkString(",")
+    }).foreach(println)
   }
   def getPipeJoins(project: String): List[PipeJoin] = {
     val res = ListBuffer.empty[PipeJoin]
