@@ -3,6 +3,7 @@ package deepsea.devices
 import deepsea.accomodations.AccommodationHelper
 import deepsea.database.DBManager
 import deepsea.devices.DeviceManager.{Device, DeviceAux, SystemLang}
+import deepsea.pipe.PipeHelper
 import deepsea.pipe.PipeManager.{Material, PipeSeg, ProjectName, SystemDef, Units}
 import org.mongodb.scala.MongoCollection
 import org.mongodb.scala.model.Filters.{all, and, equal, notEqual}
@@ -11,7 +12,7 @@ import scala.collection.mutable.ListBuffer
 import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, SECONDS}
 
-trait DeviceHelper extends AccommodationHelper {
+trait DeviceHelper extends AccommodationHelper with PipeHelper{
 
   def getDevices(docNumber: String): List[Device] ={
     val devices = ListBuffer.empty[Device]
@@ -32,10 +33,11 @@ trait DeviceHelper extends AccommodationHelper {
           case Some(value) => value.foran
           case _ => ""
         }
-        val materials = Await.result(materialsCollection.find(equal("project", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
-          case values: Seq[Material] => values.toList
-          case _ => List.empty[Material]
-        }
+        val materials = getMaterials
+//        val materials = Await.result(materialsCollection.find(equal("project", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
+//          case values: Seq[Material] => values.toList
+//          case _ => List.empty[Material]
+//        }
         val systemDefs = getDeviceSystemDefs(foranProject)
         val system = systemDefs.find(_.descr.contains(docNumber)) match {
           case Some(value) => value.name
@@ -118,7 +120,7 @@ trait DeviceHelper extends AccommodationHelper {
         }
         devicesAux.filter(_.descr.contains("|")).foreach(d => {
           d.descr.split('\n').toList.foreach(l => {
-            if (l.contains("HULPROBULXXX0009")){
+            if (l.contains("NR00000000021317")){
               val qwe  = 0
             }
             val split = l.split('|')

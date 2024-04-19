@@ -4,6 +4,7 @@ import deepsea.accomodations.AccommodationManager.{AccomUserIdReplace, Accommoda
 import deepsea.database.DBManager
 import deepsea.database.DBManager._
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
+import deepsea.pipe.PipeHelper
 import deepsea.pipe.PipeManager.{Material, ProjectName, SystemDef, Units}
 import org.mongodb.scala.{MongoCollection, classTagToClassOf}
 import org.mongodb.scala.model.Filters.equal
@@ -13,7 +14,7 @@ import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, SECONDS}
 import scala.io.Source
 
-trait AccommodationHelper {
+trait AccommodationHelper extends PipeHelper{
 //  def getAccommodations(docNumber: String): List[Accommodation] ={
 //    val accommodations = ListBuffer.empty[Accommodation]
 //    //val devicesAux = ListBuffer.empty[AccommodationAux]
@@ -115,10 +116,11 @@ trait AccommodationHelper {
           case Some(value) => value.foran
           case _ => ""
         }
-        val materials = Await.result(materialsCollection.find(equal("project", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
-          case values: Seq[Material] => values.toList
-          case _ => List.empty[Material]
-        }
+        val materials = getMaterials
+//        val materials = Await.result(materialsCollection.find(equal("project", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
+//          case values: Seq[Material] => values.toList
+//          case _ => List.empty[Material]
+//        }
         val docNumberSuffix = docNumber.split('-').drop(1).mkString("-")
         val zones = getAccZones(foranProject)
         var counter = 0
@@ -250,7 +252,7 @@ trait AccommodationHelper {
     }
 
     val res = accommodations.map(_.asDevice).filter(m => m.material.code != "" && !groups.map(_.code).contains(m.material.code + m.zone) && !groups.map(_.code).contains(m.material.code)).tapEach(x => {
-      if (x.material.code == "HULPROBULXXX0009") {
+      if (x.material.code == "NR00000000021317") {
         val q = 0
       }
       x.units = x.material.units

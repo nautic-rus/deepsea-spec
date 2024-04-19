@@ -741,7 +741,7 @@ trait ElecHelper extends Codecs with EspManagerHelper {
               case _ => userId
             }
             res += EleTray(
-              userId,
+              pos,
               stock,
               rs.getDouble("WEIGHT"),
               rs.getString("CTYPE"),

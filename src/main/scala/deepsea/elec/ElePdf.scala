@@ -68,7 +68,22 @@ trait ElePdf extends UtilsPDF {
     val elems = ele.elements
     val count = ListBuffer.empty[String]
     val pdfElem = PdfElems(
-      elems.map(e => PdfElemPartList(e.userId, e.material.name, e.material.description, e.units, 1, e.weight, e.weight, e.zone, "")),
+      elems.groupBy(_.userId).map(gr => {
+        val h = gr._2.head
+        val units = h.material.units
+        val wgt = gr._2.map(_.weight).sum
+        val qty = units match {
+          case "006" => if (h.material.singleWeight != 0){
+            (wgt / h.material.singleWeight)
+          }
+          else{
+            0
+          }
+          case _ => gr._2.length
+        }
+        gr._2.head.copy(weight = qty)
+        PdfElemPartList(h.userId, h.material.name, h.material.description, h.units, 1, h.weight, h.weight, h.zone, "")
+      }).toList,
       elems.groupBy(_.material.code).map(gr => {
         count += gr._1
         val label = (("0" * 10) + count.length.toString).takeRight(4)
