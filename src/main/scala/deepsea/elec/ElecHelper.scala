@@ -754,7 +754,7 @@ trait ElecHelper extends Codecs with EspManagerHelper {
                 rs.getDouble("Y_COG"),
                 rs.getDouble("Z_COG"),
               ),
-              Option(rs.getString(41)).getOrElse(""),
+              Option(rs.getString(42)).getOrElse(""),
               materials.find(_.code == stock) match {
                 case Some(value) => value
                 case _ => Material().copy(name = "No stock code, userId " + userId)
@@ -786,21 +786,23 @@ trait ElecHelper extends Codecs with EspManagerHelper {
             val stock = Option(rs.getString("STOCK_CODE")).getOrElse("")
             val userId = Option(rs.getString("USERID")).getOrElse("")
             val abbrev = Option(rs.getString("ABBREV")).getOrElse("")
+            val wgt = rs.getDouble("WEIGHT")
+            val material = materials.find(_.code == stock) match {
+              case Some(value) => value
+              case _ => Material().copy(name = "No stock code, " + abbrev)
+            }
             res += EleEquip(
               userId,
               stock,
               abbrev,
-              rs.getDouble("WEIGHT"),
+              if (wgt == 0) material.singleWeight else wgt,
               Cog(
                 rs.getDouble("COG_X"),
                 rs.getDouble("COG_Y"),
                 rs.getDouble("COG_Z"),
               ),
-              Option(rs.getString(37)).getOrElse(""),
-              materials.find(_.code == stock) match {
-                case Some(value) => value
-                case _ => Material().copy(name = "No stock code, " + abbrev)
-              }
+              Option(rs.getString(38)).getOrElse(""),
+              material
             )
           }
           rs.close()

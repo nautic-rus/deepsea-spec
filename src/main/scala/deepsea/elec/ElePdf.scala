@@ -82,7 +82,7 @@ trait ElePdf extends UtilsPDF {
           case _ => gr._2.length
         }
         gr._2.head.copy(weight = qty)
-        PdfElemPartList(h.userId, h.material.name, h.material.description, h.units, 1, h.weight, h.weight, h.zone, "")
+        PdfElemPartList(h.userId, h.material.name, h.material.description, units, qty, h.material.singleWeight, wgt, h.zone, "")
       }).toList,
       elems.groupBy(_.material.code).map(gr => {
         count += gr._1
@@ -690,9 +690,9 @@ trait ElePdf extends UtilsPDF {
       bodyGrid.addCell(generateCell(item.title))
       bodyGrid.addCell(generateCell(item.descr))
       bodyGrid.addCell(generateCell(item.units))
-      bodyGrid.addCell(generateCell((Math.round(item.qty * 100) / 100).toString))
-      bodyGrid.addCell(generateCell((Math.round(item.wgt * 100) / 100).toString))
-      bodyGrid.addCell(generateCell((Math.round(item.tWgt * 100) / 100).toString))
+      bodyGrid.addCell(generateCell((Math.round(item.qty * 100) / 100d).toString))
+      bodyGrid.addCell(generateCell((Math.round(item.wgt * 100) / 100d).toString))
+      bodyGrid.addCell(generateCell((Math.round(item.tWgt * 100) / 100d).toString))
       bodyGrid.addCell(generateCell(item.room))
       bodyGrid.addCell(generateCell(item.place))
       currentRow = currentRow + 1
@@ -702,8 +702,8 @@ trait ElePdf extends UtilsPDF {
       bodyGrid.addCell(generateCell(item.title))
       bodyGrid.addCell(generateCell(item.descr))
       bodyGrid.addCell(generateCell(item.units))
-      bodyGrid.addCell(generateCell((Math.round(item.qty * 100) / 100).toString))
-      bodyGrid.addCell(generateCell((Math.round(item.tWgt * 100) / 100).toString))
+      bodyGrid.addCell(generateCell((Math.round(item.qty * 100) / 100d).toString))
+      bodyGrid.addCell(generateCell((Math.round(item.tWgt * 100) / 100d).toString))
       bodyGrid.addCell(generateCell(item.stmt))
       bodyGrid.addCell(generateCell(item.matCode))
       currentRow = currentRow + 1
