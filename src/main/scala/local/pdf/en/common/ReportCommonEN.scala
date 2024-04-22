@@ -274,6 +274,120 @@ object ReportCommonEN extends UtilsPDF {
 
     table
   }
+  def stampW(): Table = {
+    val cellBuff = ListBuffer.empty[Cell]
+    val pointColumnWidths = Array(mmToPt(27), mmToPt(151), mmToPt(13), mmToPt(13))
+    val table = new Table(pointColumnWidths)
+    val tableWidthPt = mmToPt(200)
+    val tableHeightPt = mmToPt(21)
+    table.setWidth(tableWidthPt)
+    table.setHeight(tableHeightPt)
+    table.setHorizontalAlignment(HorizontalAlignment.CENTER)
+    table.setVerticalAlignment(VerticalAlignment.MIDDLE)
+
+    cellBuff += {
+      new Cell(0, 2)
+        .setVerticalAlignment(VerticalAlignment.MIDDLE)
+        .setHorizontalAlignment(HorizontalAlignment.CENTER)
+        .add(new Paragraph("")
+          .setTextAlignment(TextAlignment.CENTER)
+          .setFontSize(defaultFontSize)
+          .setFont(gostFont)
+        )
+        .setPadding(0).setMargin(0)
+        .setHeight(mmToPt(7))
+    }
+    cellBuff += {
+      new Cell(0, 2)
+        .setVerticalAlignment(VerticalAlignment.MIDDLE)
+        .setHorizontalAlignment(HorizontalAlignment.CENTER)
+        .add(new Paragraph("")
+          .setTextAlignment(TextAlignment.CENTER)
+          .setFontSize(defaultFontSize)
+          .setFont(gostFont)
+        )
+        .setPadding(0).setMargin(0)
+        .setHeight(mmToPt(7))
+    }
+    cellBuff += {
+      new Cell(2, 0)
+        .setVerticalAlignment(VerticalAlignment.MIDDLE)
+        .setHorizontalAlignment(HorizontalAlignment.CENTER)
+        .add(new Paragraph("")
+          .setTextAlignment(TextAlignment.CENTER)
+          .setFontSize(defaultFontSize)
+          .setFont(gostFont)
+        )
+        .setPadding(0).setMargin(0)
+        .setHeight(mmToPt(14))
+    }
+    cellBuff += {
+      new Cell(2, 0)
+        .setVerticalAlignment(VerticalAlignment.MIDDLE)
+        .setHorizontalAlignment(HorizontalAlignment.CENTER)
+        .add(new Paragraph("")
+          .setTextAlignment(TextAlignment.CENTER)
+          .setFontSize(defaultFontSize)
+          .setFont(gostFont)
+        )
+        .setPadding(0).setMargin(0)
+        .setHeight(mmToPt(14))
+    }
+    cellBuff += {
+      new Cell(0, 0)
+        .setVerticalAlignment(VerticalAlignment.MIDDLE)
+        .setHorizontalAlignment(HorizontalAlignment.CENTER)
+        .add(new Paragraph("")
+          .setTextAlignment(TextAlignment.CENTER)
+          .setFontSize(defaultFontSize)
+          .setFont(gostFont)
+        )
+        .setPadding(0).setMargin(0)
+        .setHeight(mmToPt(5))
+    }
+    cellBuff += {
+      new Cell(0, 0)
+        .setVerticalAlignment(VerticalAlignment.MIDDLE)
+        .setHorizontalAlignment(HorizontalAlignment.CENTER)
+        .add(new Paragraph("")
+          .setTextAlignment(TextAlignment.CENTER)
+          .setFontSize(defaultFontSize)
+          .setFont(gostFont)
+        )
+        .setPadding(0).setMargin(0)
+        .setHeight(mmToPt(5))
+    }
+    cellBuff += {
+      new Cell(0, 0)
+        .setVerticalAlignment(VerticalAlignment.MIDDLE)
+        .setHorizontalAlignment(HorizontalAlignment.CENTER)
+        .add(new Paragraph("")
+          .setTextAlignment(TextAlignment.CENTER)
+          .setFontSize(defaultFontSize)
+          .setFont(gostFont)
+        )
+        .setPadding(0).setMargin(0)
+        .setHeight(mmToPt(9))
+    }
+    cellBuff += {
+      new Cell(0, 0)
+        .setVerticalAlignment(VerticalAlignment.MIDDLE)
+        .setHorizontalAlignment(HorizontalAlignment.CENTER)
+        .add(new Paragraph("")
+          .setTextAlignment(TextAlignment.CENTER)
+          .setFontSize(defaultFontSize)
+          .setFont(gostFont)
+        )
+        .setPadding(0).setMargin(0)
+        .setHeight(mmToPt(9))
+    }
+
+    cellBuff.foreach(cell => {
+      table.addCell(cell)
+    })
+
+    table
+  }
 
   def stampEN(): Table = {
     val table = stamp()
@@ -281,7 +395,7 @@ object ReportCommonEN extends UtilsPDF {
     table
   }
   def stampENH(): Table = {
-    val table = stamp()
+    val table = stampW()
     table.setFixedPosition(1, mmToPt(92), mmToPt(5), table.getWidth.getValue + 4)
     table
   }
@@ -316,13 +430,13 @@ object ReportCommonEN extends UtilsPDF {
   }
 
   def fillStampH(doc: Document, docNameEN: DocNameEN, date: String = dateNow, lang: String = "ru"): Unit = {
-    doc.add(genTextFixPos(if (lang == "ru") "НОМЕР ЧЕРТЕЖА" else "SFI-DRAWING NO.", fontHELVETICA, 3.0f, 120f, 14f, 50f))
-    doc.add(genTextFixPos(if (lang == "ru") "РЕВ." else "REV.", fontHELVETICA, 3.0f, 274.5f, 13f, 10f))
-    doc.add(genTextFixPos(if (lang == "ru") "ЛИСТ" else "SHEET", fontHELVETICA, 3.0f, 284f, 13f, 10f))
-    doc.add(genTextFixPos(if (lang == "ru") "ДАТА" else "DATE", fontHELVETICA, 2.5f, 273f, 21.0f, 10f))
+    doc.add(genTextFixPos("DRAWING NUMBER / НОМЕР ЧЕРТЕЖА", fontHELVETICA, 3.0f, 120f, 14f, 50f))
+    doc.add(genTextFixPos("REV. / РЕВ.", fontHELVETICA, 2.5f, 269.3f, 13.5f, 20f))
+    doc.add(genTextFixPos("PAGE / ЛИСТ", fontHELVETICA, 2.5f, 280.8f, 13.5f, 25f))
+    doc.add(genTextFixPos("DATE / ДАТА", fontHELVETICA, 2.5f, 269f, 21.0f, 25f))
 
-    doc.add(genTextFixPos(date, fontHELVETICA, 4.0f, 276f, 17.0f, 20f))
-    doc.add(genTextFixPos(docNameEN.lastRev, fontHELVETICA, 5.0f, 276f, 5f, 10f))
+    doc.add(genTextFixPos(date, fontHELVETICA, 4.0f, 274f, 17.0f, 20f))
+    doc.add(genTextFixPos(docNameEN.lastRev, fontHELVETICA, 5.0f, 273f, 5f, 10f))
     doc.add(genTextFixPos(docNameEN.num, fontCOURIER_BOLD, 12.0f, 120.5f, 0.5f, 180f))
     doc.add(genTextFixPos(docNameEN.name, fontCOURIER_BOLD, 4f, 94f, 18.0f, 180f))
   }

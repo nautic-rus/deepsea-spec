@@ -25,36 +25,37 @@ import scala.jdk.CollectionConverters.CollectionHasAsScala
 
 trait ElePdf extends UtilsPDF {
   case class PdfElems(partList: List[PdfElemPartList], summary: List[PdfElemSummary])
-  case class PdfElemPartList(label: String, title: String, descr: String, units: String, qty: Double, wgt: Double, tWgt: Double, room: String, place: String)
+  case class PdfElemPartList(label: String, title: String, descr: String, units: String, qty: Double, wgt: Double, tWgt: Double, room: String, place: String, matCode: String)
   case class PdfElemSummary(label: String, title: String, descr: String, units: String, qty: Double, wgt: Double, tWgt: Double, stmt: String, matCode: String)
 
 
   private val pageSize: PageSize = PageSize.A4.rotate()
   private val pointColumnWidths = Array(
     mmToPt(20),
-    mmToPt(94),
-    mmToPt(60),
+    mmToPt(85),
+    mmToPt(45),
+    mmToPt(20),
+    mmToPt(15),
     mmToPt(20),
     mmToPt(20),
+    mmToPt(15),
     mmToPt(20),
-    mmToPt(20),
-    mmToPt(20),
-    mmToPt(20),
+    mmToPt(34.8),
   )
 
   private val pointColumnWidthsSummary = Array(
     mmToPt(20),
-    mmToPt(94),
+    mmToPt(98.6),
     mmToPt(60),
+    mmToPt(15),
     mmToPt(20),
     mmToPt(20),
-    mmToPt(20),
-    mmToPt(20),
-    mmToPt(39),
+    mmToPt(25),
+    mmToPt(34.8),
   )
 
   def genElePdf(ele: EleEspObject, docName: String): String = {
-    val path = Files.createTempDirectory("hullPdf").toAbsolutePath.toString + "/" + ele.docNumber + "_rev" + ele.rev + ".pdf"
+    val path = Files.createTempDirectory("elePdf").toAbsolutePath.toString + "/" + ele.docNumber + "_rev" + ele.rev + ".pdf"
     val chess: CommonTypes.DrawingChess = {
       val l = findChess(ele.docNumber, ele.rev)
       if (l.nonEmpty) {
@@ -82,7 +83,7 @@ trait ElePdf extends UtilsPDF {
           case _ => gr._2.length
         }
         gr._2.head.copy(weight = qty)
-        PdfElemPartList(h.userId, h.material.name, h.material.description, units, qty, h.material.singleWeight, wgt, h.zone, "")
+        PdfElemPartList(h.userId, h.material.name, h.material.description, units, qty, h.material.singleWeight, wgt, h.zone, "", h.material.code)
       }).toList,
       elems.groupBy(_.material.code).map(gr => {
         count += gr._1
@@ -441,6 +442,18 @@ trait ElePdf extends UtilsPDF {
             .setPadding(0).setMargin(0)
             .setHeight(mmToPt(5))
         }
+        cellBuff += {
+          new Cell(0, 0)
+            .setVerticalAlignment(VerticalAlignment.MIDDLE)
+            .setHorizontalAlignment(HorizontalAlignment.CENTER)
+            .add(new Paragraph("")
+              .setTextAlignment(TextAlignment.CENTER)
+              .setFontSize(defaultFontSize)
+              .setFont(fontHELVETICA)
+            )
+            .setPadding(0).setMargin(0)
+            .setHeight(mmToPt(5))
+        }
       }
 
       generateRows()
@@ -452,7 +465,7 @@ trait ElePdf extends UtilsPDF {
       processStaticText()
 
       def processStaticText(): Unit = {
-        setStampText(cellBuff(0), "LABEL / ПОЗ.", italic = false, bold = true)
+        setStampText(cellBuff(0), "№", italic = false, bold = true)
         setStampText(cellBuff(1), "TITLE / НАИМЕНОВАНИЕ", italic = false, bold = true)
         setStampText(cellBuff(2), "DESCRIPTION / ОБОЗНАЧЕНИЕ", italic = false, bold = true)
         setStampText(cellBuff(3), "UNITS / КЕИ", italic = false, bold = true)
@@ -461,6 +474,7 @@ trait ElePdf extends UtilsPDF {
         setStampText(cellBuff(6), "T.WGT / О.ВЕС", italic = false, bold = true)
         setStampText(cellBuff(7), "ROOM / ПОМ.", italic = false, bold = true)
         setStampText(cellBuff(8), "PLACE / АДРЕС", italic = false, bold = true)
+        setStampText(cellBuff(9), "MAT.CODE / КОД МАТ.", italic = false, bold = true)
       }
 
       def setStampText(cell: Cell, text: String,
@@ -695,6 +709,7 @@ trait ElePdf extends UtilsPDF {
       bodyGrid.addCell(generateCell((Math.round(item.tWgt * 100) / 100d).toString))
       bodyGrid.addCell(generateCell(item.room))
       bodyGrid.addCell(generateCell(item.place))
+      bodyGrid.addCell(generateCell(item.matCode))
       currentRow = currentRow + 1
     }
     def insertRow(item: PdfElemSummary): Unit = {
@@ -711,6 +726,7 @@ trait ElePdf extends UtilsPDF {
     def insertTitleRow(title: String): Unit = {
       bodyGrid.addCell(generateCell(""))
       bodyGrid.addCell(generateCell(title))
+      bodyGrid.addCell(generateCell(""))
       bodyGrid.addCell(generateCell(""))
       bodyGrid.addCell(generateCell(""))
       bodyGrid.addCell(generateCell(""))
@@ -893,7 +909,7 @@ trait ElePdf extends UtilsPDF {
       processStaticText()
 
       def processStaticText(): Unit = {
-        setStampText(cellBuff(0), "LABEL / ПОЗ.", italic = false, bold = true)
+        setStampText(cellBuff(0), "№", italic = false, bold = true)
         setStampText(cellBuff(1), "TITLE / НАИМЕНОВАНИЕ", italic = false, bold = true)
         setStampText(cellBuff(2), "DESCRIPTION / ОБОЗНАЧЕНИЕ", italic = false, bold = true)
         setStampText(cellBuff(3), "UNITS / ЕД.", italic = false, bold = true)
@@ -1144,8 +1160,8 @@ trait ElePdf extends UtilsPDF {
       bodyGrid.addCell(generateCell(item.title))
       bodyGrid.addCell(generateCell(item.descr))
       bodyGrid.addCell(generateCell(item.units))
-      bodyGrid.addCell(generateCell((Math.round(item.qty * 100) / 100).toString))
-      bodyGrid.addCell(generateCell((Math.round(item.tWgt * 100) / 100).toString))
+      bodyGrid.addCell(generateCell((Math.round(item.qty * 100) / 100d).toString))
+      bodyGrid.addCell(generateCell((Math.round(item.tWgt * 100) / 100d).toString))
       bodyGrid.addCell(generateCell(item.stmt))
       bodyGrid.addCell(generateCell(item.matCode))
       currentRow = currentRow + 1
