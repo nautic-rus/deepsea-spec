@@ -72,15 +72,13 @@ trait ElePdf extends UtilsPDF {
       elems.groupBy(_.userId).map(gr => {
         val h = gr._2.head
         val units = h.material.units
-        val wgt = gr._2.map(_.weight).sum
         val qty = units match {
-          case "006" => if (h.material.singleWeight != 0){
-            (wgt / h.material.singleWeight)
-          }
-          else{
-            0
-          }
+          case "006" => gr._2.map(_.weight).sum
           case _ => gr._2.length
+        }
+        val wgt = units match {
+          case "006" => qty * h.material.singleWeight
+          case _ => gr._2.map(_.weight).sum
         }
         gr._2.head.copy(weight = qty)
         PdfElemPartList(h.userId, h.material.name, h.material.description, units, qty, h.material.singleWeight, wgt, h.zone, "", h.material.code)
@@ -89,8 +87,14 @@ trait ElePdf extends UtilsPDF {
         count += gr._1
         val label = (("0" * 10) + count.length.toString).takeRight(4)
         val m = gr._2.head.material
-        val qty = gr._2.length
-        val wgt = gr._2.map(_.weight).sum
+        val qty = m.units match {
+          case "006" => gr._2.map(_.weight).sum
+          case _ => gr._2.length
+        }
+        val wgt = m.units match {
+          case "006" => qty * m.singleWeight
+          case _ => gr._2.map(_.weight).sum
+        }
         PdfElemSummary(
           label,
           m.name,

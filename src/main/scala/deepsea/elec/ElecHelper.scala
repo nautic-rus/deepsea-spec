@@ -6,7 +6,7 @@ import deepsea.database.DBManager.{RsIterator, foranProjects}
 import deepsea.elec.ElecManager._
 import deepsea.esp.EspManager.{DeviceEspObject, EleEspObject, espObjectsCollectionName}
 import deepsea.esp.EspManagerHelper
-import deepsea.pipe.PipeManager.{Material, SpoolLock}
+import deepsea.pipe.PipeManager.{Material, Pls, PlsParam, SpoolLock}
 import local.common.Codecs
 import local.common.DBRequests.{MountItem, findWorkshopMaterialContains, retrieveAllMaterialsByProject}
 import local.domain.WorkShopMaterial
@@ -725,7 +725,26 @@ trait ElecHelper extends Codecs with EspManagerHelper {
       case Some(connection) =>
         val stmt = connection.createStatement()
         try{
-          val query = Source.fromResource("queries/eleTrays.sql").mkString.replaceAll("&systemList", systems.map(x => '\'' + x + '\'').mkString(","))
+
+          val systemsList = systems.map(x => '\'' + x + '\'').mkString(",")
+
+          val plsParams = ListBuffer.empty[PlsParam]
+          val rsParams = stmt.executeQuery(s"SELECT * FROM PLSE_PAROBJ_REALPAR WHERE SYSTEM IN (SELECT SEQID FROM SYSTEMS WHERE NAME IN ($systemsList))")
+          while (rsParams.next()){
+            plsParams += PlsParam(
+              Pls(Option(rsParams.getInt("TYPE")).getOrElse(0),
+                Option(rsParams.getInt("ZONE")).getOrElse(0),
+                Option(rsParams.getInt("SYSTEM")).getOrElse(0),
+                Option(rsParams.getString("LINE")).getOrElse(""),
+                Option(rsParams.getInt("PLS")).getOrElse(0),
+                Option(rsParams.getInt("ELEM")).getOrElse(0)),
+              Option(rsParams.getInt("PARAM_OBJ")).getOrElse(0),
+              Option(rsParams.getInt("PARAM_SQ")).getOrElse(0),
+              Option(rsParams.getDouble("VALUE")).getOrElse(0),
+            )
+          }
+
+          val query = Source.fromResource("queries/eleTrays.sql").mkString.replaceAll("&systemList", systemsList)
           val rs = stmt.executeQuery(query)
           while (rs.next()){
             val userId = Option(rs.getString("USERID")).getOrElse("")
@@ -740,10 +759,21 @@ trait ElecHelper extends Codecs with EspManagerHelper {
               case Some(value) => value.label
               case _ => userId
             }
+            val pls = Pls(Option(rs.getInt("TYPE")).getOrElse(0),
+              Option(rs.getInt("ZONE")).getOrElse(0),
+              Option(rs.getInt("SYSTEM")).getOrElse(0),
+              Option(rs.getString("LINE")).getOrElse(""),
+              Option(rs.getInt("PLS")).getOrElse(0),
+              Option(rs.getInt("ELEM")).getOrElse(0))
+
+            val params = plsParams.filter(_.pls.equals(pls))
+
+            val length = if (params.nonEmpty) params.last.value / 1000d else 0
+
             res += EleTray(
               pos,
               stock,
-              rs.getDouble("WEIGHT"),
+              length,
               rs.getString("CTYPE"),
               rs.getInt("IDSQ"),
               rs.getInt("NODE1"),
@@ -819,7 +849,7 @@ trait ElecHelper extends Codecs with EspManagerHelper {
     res.toList
   }
   def getEleEsp(foranProject: String, systems: List[String], zones: List[String], materials: List[Material]): List[EleElement] = {
-    val trays = getEleTrays(foranProject, systems, materials).map(x => EleElement(x.userId, x.kind, "796", x.weight, x.stock, x.material, x.cog, x.zone))
+    val trays = getEleTrays(foranProject, systems, materials).map(x => EleElement(x.userId, x.kind, "006", x.weight, x.stock, x.material, x.cog, x.zone))
     val equips = getEleEquips(foranProject, zones, materials).map(x => EleElement(x.userId, "EQUIP", "796", x.weight, x.stock, x.material, x.cog, x.zone))
     trays ++ equips
   }
