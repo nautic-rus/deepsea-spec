@@ -332,7 +332,9 @@ class HTTPManager extends Actor {
       (get & path("createEleEspWithFiles") & parameter("foranProject", "docNumber", "rev", "user", "taskId")) { (foranProject, docNumber, rev, user, taskId) =>
         askFor(ActorManager.elec, GetEleEspFiles(foranProject, docNumber, rev, user, taskId))
       },
-
+      (get & path("elePos") & parameter("project", "index", "kind")) { (project, index, kind) =>
+        askFor(ActorManager.esp, GetEsp(foranProject, kind, docNumber, rev))
+      },
 
       (get & path("time")) {
         complete(HttpEntity(new Date().getTime.asJson.noSpaces))

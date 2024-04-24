@@ -129,6 +129,12 @@ trait MaterialsHelper {
       case _ => List.empty[SpecMaterial]
     })
   }
+  def getSpecMaterial(code: String): List[SpecMaterial] = {
+    (Await.result(DBManager.PostgresSQL.run(TableQuery[SpecMaterialTable].filter(_.removed === 0).filter(_.code === code).result).map(_.toList), Duration(5, SECONDS)) match {
+      case response: List[SpecMaterial] => response
+      case _ => List.empty[SpecMaterial]
+    })
+  }
   def getMaterialDirectories: List[MaterialDirectory] = {
     (Await.result(DBManager.PostgresSQL.run(TableQuery[MaterialDirectoryTable].filter(_.removed === 0).result).map(_.toList), Duration(5, SECONDS)) match {
       case response: List[MaterialDirectory] => response

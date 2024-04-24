@@ -6,7 +6,8 @@ import deepsea.database.DBManager.{RsIterator, foranProjects}
 import deepsea.elec.ElecManager._
 import deepsea.esp.EspManager.{DeviceEspObject, EleEspObject, espObjectsCollectionName}
 import deepsea.esp.EspManagerHelper
-import deepsea.pipe.PipeManager.{Material, Pls, PlsParam, SpoolLock}
+import deepsea.materials.MaterialsHelper
+import deepsea.pipe.PipeManager.{Material, Pls, PlsParam, SpecMaterial, SpoolLock}
 import local.common.Codecs
 import local.common.DBRequests.{MountItem, findWorkshopMaterialContains, retrieveAllMaterialsByProject}
 import local.domain.WorkShopMaterial
@@ -30,7 +31,7 @@ import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.{Duration, SECONDS}
 import scala.io.Source
 
-trait ElecHelper extends Codecs with EspManagerHelper {
+trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
   def getCablesInfo(project: String): List[ElecCable] = {
     val cables = ListBuffer.empty[ElecCable]
     DBManager.GetOracleConnection(project) match {
@@ -884,4 +885,54 @@ trait ElecHelper extends Codecs with EspManagerHelper {
     }
     res.headOption.getOrElse("")
   }
+  def getElePos(project: String, kind: String, index: Int): ElePos = {
+    kind match {
+      case "tray" => getTray(project, index, kind).getOrElse(ElePos(project, kind, "NO STOCK", "TRAY ERROR", "", ""))
+      case "transit" => getTransit(project, index, kind).getOrElse(ElePos(project, kind, "NO STOCK", "TRANSIT ERROR", "", ""))
+      case _ => ElePos(project, kind, "NO STOCK", "UNKNOWN LABEL TYPE", "", "")
+    }
+  }
+  private def getTray(project: String, index: Int, kind: String): Option[ElePos] = {
+    DBManager.GetOracleConnection(project) match {
+      case Some(connection) =>
+        val stmt = connection.createStatement()
+        val query = "select * from pls_elem pls\nleft join v_cabletray_stockcode vcs on vcs.system = pls.system and vcs.zone = pls.zone and vcs.line = pls.line and vcs.pls = pls.pls and vcs.elem = pls.elem\nwhere pls.idsq = " + index.toString
+        val rs = stmt.executeQuery(query)
+        val codes = Iterator.continually(rs.next()).takeWhile(identity).map(_ => rs.getString("STOCK_CODE")).toList
+        rs.close()
+        stmt.close()
+        connection.close()
+        val stock = codes.headOption.getOrElse("")
+        val label = getSpecMaterial(stock).headOption match {
+          case Some(material) => material.label
+          case _ => "MATERIAL NOT FOUND"
+        }
+        Option(ElePos(project, kind, stock, label, "", ""))
+      case _ => Option.empty[ElePos]
+    }
+  }
+  private def getTransit(project: String, index: Int, kind: String): Option[ElePos] = {
+    DBManager.GetOracleConnection(project) match {
+      case Some(connection) =>
+        val stmt = connection.createStatement()
+        val query = "select * from pls_elem pls\nleft join v_transit tr on tr.oid = pls.tray_fitting and tr.zone = pls.ZONE and tr.syst = pls.system\nleft join v_node_type_conn nd on nd.SEQID = pls.node1\nwhere pls.idsq = " + index.toString
+        val rs = stmt.executeQuery(query)
+        val elePos = Iterator.continually(rs.next()).takeWhile(identity).map(_ => {
+          val stock = rs.getString("COMP_STOCK")
+          val descr = rs.getString("COMP_DESCR")
+          val node = rs.getString("CODE")
+          val label = getSpecMaterial(stock).headOption match {
+            case Some(material) => material.label
+            case _ => "MATERIAL NOT FOUND"
+          }
+          ElePos(project, kind, stock, label, node, descr)
+        }).toList
+        rs.close()
+        stmt.close()
+        connection.close()
+        elePos.headOption
+      case _ => Option.empty[ElePos]
+    }
+  }
+
 }

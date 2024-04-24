@@ -271,8 +271,14 @@ object ElecManager {
   case class EleElement(userId: String, typeName: String, units: String, weight: Double, code: String, material: Material, cog: Cog, zone: String)
   case class Cog(x: Double, y: Double, z: Double)
 
+  case class ElePos(project: String, kind: String, stock: String, label: String, node: String, descr: String)
+  implicit val ElecPosDecoder: Decoder[ElePos] = deriveDecoder[ElePos]
+  implicit val ElecPosEncoder: Encoder[ElePos] = deriveEncoder[ElePos]
+
   case class GetEleEspFiles(foranProject: String, docNumber: String, rev: String, user: String, taskId: String)
   case class GetEleCurrent(foranProject: String, docNumber: String, rev: String, user: String, taskId: String)
+
+  case class GetElePos(project: String, index: String, kind: String)
 
   case class MaterialLabel(code: String, label: String)
 
@@ -368,6 +374,8 @@ object ElecManager {
         }
       case GetEleCurrent(foranProject, docNumber, rev, user, taskId) =>
         sender() ! generateEleEsp(foranProject, docNumber, rev, user, taskId).asJson.noSpaces
+      case GetElePos(project, index, kind) =>
+        sender() ! getElePos(project, index, kind.toIntOption.getOrElse(0)).asJson.noSpaces
       case _ => None
     }
   }
