@@ -375,7 +375,7 @@ object ElecManager {
       case GetEleCurrent(foranProject, docNumber, rev, user, taskId) =>
         sender() ! generateEleEsp(foranProject, docNumber, rev, user, taskId).asJson.noSpaces
       case GetElePos(project, index, kind) =>
-        sender() ! getElePos(project, index, kind.toIntOption.getOrElse(0)).asJson.noSpaces
+        sender() ! getElePos(project, kind, index.toIntOption.getOrElse(0)).asJson.noSpaces
       case _ => None
     }
   }
