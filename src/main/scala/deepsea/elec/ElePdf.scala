@@ -78,9 +78,9 @@ trait ElePdf extends UtilsPDF {
         }
         val wgt = units match {
           case "006" => qty * h.material.singleWeight
+          case "796" => qty * h.material.singleWeight
           case _ => gr._2.map(_.weight).sum
         }
-        gr._2.head.copy(weight = qty)
         PdfElemPartList(h.userId, h.material.name, h.material.description, units, qty, h.material.singleWeight, wgt, h.zone, "", h.material.code)
       }).toList,
       elems.groupBy(_.material.code).map(gr => {
@@ -126,7 +126,7 @@ trait ElePdf extends UtilsPDF {
 
     titul.copyPagesTo(1, 1, pdfDoc)
 
-    generatePartListPages(docNameEN, items.partList).foreach(page => {
+    generatePartListPages(docNameEN, items.partList.sortBy(_.label)).foreach(page => {
       page.copyPagesTo(1, 1, pdfDoc)
     })
 
