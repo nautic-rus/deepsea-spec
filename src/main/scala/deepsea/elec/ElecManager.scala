@@ -268,7 +268,7 @@ object ElecManager {
 
   case class EleTray(userId: String, stock: String, weight: Double, cType: String, idsq: Int, node1: Int, node2: Int, kind: String, cog: Cog, zone: String, material: Material)
   case class EleEquip(userId: String, abbrev: String, stock: String, weight: Double, cog: Cog, zone: String, material: Material)
-  case class EleElement(userId: String, typeName: String, units: String, weight: Double, code: String, material: Material, cog: Cog, zone: String)
+  case class EleElement(userId: String, typeName: String, units: String, weight: Double, code: String, material: Material, cog: Cog, zone: String, count: Double)
   case class Cog(x: Double, y: Double, z: Double)
 
   case class ElePos(project: String, kind: String, stock: String, label: String, node: String, descr: String)
