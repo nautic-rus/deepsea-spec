@@ -829,9 +829,9 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
               abbrev,
               if (wgt == 0) material.singleWeight else wgt,
               Cog(
-                rs.getDouble("COG_X"),
-                rs.getDouble("COG_Y"),
-                rs.getDouble("COG_Z"),
+                (rs.getDouble("XMIN") + rs.getDouble("XMAX")) / 2d,
+                (rs.getDouble("YMIN") + rs.getDouble("YMAX")) / 2d,
+                (rs.getDouble("ZMIN") + rs.getDouble("ZMAX")) / 2d
               ),
               Option(rs.getString(38)).getOrElse(""),
               material
