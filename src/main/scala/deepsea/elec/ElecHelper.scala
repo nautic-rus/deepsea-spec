@@ -786,7 +786,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
                 rs.getDouble("Y_COG"),
                 rs.getDouble("Z_COG"),
               ),
-              Option(rs.getString(84)).getOrElse(""),
+              Option(rs.getString("zone_name")).getOrElse(""),
               materials.find(_.code == stock) match {
                 case Some(value) => value
                 case _ => Material().copy(name = "No stock code, userId " + userId)
