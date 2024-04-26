@@ -785,7 +785,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
               case _ => 0
             }
 
-            if (length < 0.05){
+            if (length < 0.015){
               val q = 0
             }
 
