@@ -126,7 +126,7 @@ trait ElePdf extends UtilsPDF {
 
     titul.copyPagesTo(1, 1, pdfDoc)
 
-    generatePartListPages(docNameEN, items.partList.sortBy(_.label)).foreach(page => {
+    generatePartListPages(docNameEN, items.partList.sortBy(x => orderDot(x.label))).foreach(page => {
       page.copyPagesTo(1, 1, pdfDoc)
     })
 
@@ -152,7 +152,12 @@ trait ElePdf extends UtilsPDF {
 
     doc.close()
   }
-
+  def orderDot(input: String): String = {
+    input.split("\\.").map(alz(_)).mkString
+  }
+  def alz(input: String, length: Int = 10) = {
+    ("0" * length + input).takeRight(length)
+  }
   private def genTitulA4(docNameEN: DocNameEN): PdfDocument = {
     val os: OutputStream = new ByteArrayOutputStream()
     val pdfWriter = new PdfWriter(os)
