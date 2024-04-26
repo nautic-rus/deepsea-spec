@@ -6,6 +6,7 @@ import deepsea.database.DBManager.{RsIterator, foranProjects}
 import deepsea.elec.ElecManager._
 import deepsea.esp.EspManager.{DeviceEspObject, EleEspObject, espObjectsCollectionName}
 import deepsea.esp.EspManagerHelper
+import deepsea.hull.HullManager.IssueMaterial
 import deepsea.materials.MaterialsHelper
 import deepsea.pipe.PipeManager.{Material, Pls, PlsParam, SpecMaterial, SpoolLock}
 import local.common.Codecs
@@ -849,10 +850,41 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
     }
     res.toList
   }
-  def getEleEsp(foranProject: String, systems: List[String], zones: List[String], materials: List[Material]): List[EleElement] = {
+  def getEleEsp(foranProject: String, systems: List[String], zones: List[String], materials: List[Material], issueId: Int): List[EleElement] = {
     val trays = getEleTrays(foranProject, systems, materials).map(x => EleElement(x.userId, x.kind, "006", x.weight, x.stock, x.material, x.cog, x.zone))
     val equips = getEleEquips(foranProject, zones, materials).map(x => EleElement(x.userId, "EQUIP", "796", x.weight, x.stock, x.material, x.cog, x.zone))
-    trays ++ equips
+    val manual = getEleIssueMaterials(issueId).map(x => EleElement(x.pos, "MANUAL", x.units, x.weight, x.stock, materials.find(_.code == x.stock).getOrElse(Material()), Cog(0, 0, 0), x.zone))
+    trays ++ equips ++ manual
+  }
+  def getEleIssueMaterials(issueId: Int): List[IssueMaterial] = {
+    val res = ListBuffer.empty[IssueMaterial]
+    DBManager.GetPGConnection() match {
+      case Some(c) =>
+        val s = c.createStatement()
+        val rs = s.executeQuery(s"select * from issue_materials where issue_id = $issueId")
+        while (rs.next()) {
+          res += IssueMaterial(
+            rs.getInt("id"),
+            rs.getString("pos"),
+            rs.getString("units"),
+            rs.getDouble("weight"),
+            rs.getDouble("count"),
+            rs.getString("material_stock_code"),
+            rs.getInt("user_id"),
+            rs.getLong("date_inserted"),
+            rs.getString("doc_number"),
+            rs.getInt("issue_id"),
+            rs.getString("add_text"),
+            rs.getString("department"),
+            rs.getString("zone"),
+          )
+        }
+        rs.close()
+        s.close()
+        c.close()
+      case _ => None
+    }
+    res.toList
   }
   def generateEleEsp(foranProject: String, docNumber: String, rev: String, user: String, taskId: String): EleEspObject = {
     val id = UUID.randomUUID().toString
@@ -868,7 +900,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
       case Some(value) => value
       case _ => EleComplect(docNumber, "", "", foranProject, List.empty[String], List.empty[String])
     }
-    EleEspObject(id, foranProject, docNumber, rev, date, user, "ele", taskId.toIntOption.getOrElse(0), elements = getEleEsp(foranProject, complect.systemNames, complect.zoneNames, materials))
+    EleEspObject(id, foranProject, docNumber, rev, date, user, "ele", taskId.toIntOption.getOrElse(0), elements = getEleEsp(foranProject, complect.systemNames, complect.zoneNames, materials, taskId.toIntOption.getOrElse(0)))
   }
   def getIssueName(id: Int): String = {
     val res = ListBuffer.empty[String]
