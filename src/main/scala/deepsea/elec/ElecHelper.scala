@@ -761,6 +761,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
               case Some(value) => value.label
               case _ => userId
             }
+            val cType = rs.getString("CTYPE")
             val pls = Pls(Option(rs.getInt("TYPE")).getOrElse(0),
               Option(rs.getInt("ZONE")).getOrElse(0),
               Option(rs.getInt("SYSTEM")).getOrElse(0),
@@ -770,13 +771,26 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
 
             val params = plsParams.filter(_.pls.equals(pls))
 
-            val length = if (params.nonEmpty) params.last.value / 1000d else 0
+            val length = cType match {
+              case "B" =>
+                if (params.length == 4) {
+                  Math.PI * params(2).value * params(3).value / 180 / 1000d
+                }
+                else{
+                  0
+                }
+              case "P" =>
+                if (params.nonEmpty) params.last.value / 1000d else 0
+              case _ => 0
+            }
+
+
 
             res += EleTray(
               pos,
               stock,
               length,
-              rs.getString("CTYPE"),
+              cType,
               rs.getInt("IDSQ"),
               rs.getInt("NODE1"),
               rs.getInt("NODE2"),

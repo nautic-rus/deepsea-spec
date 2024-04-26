@@ -3,23 +3,16 @@ package deepsea.elec
 import com.itextpdf.kernel.geom.PageSize
 import com.itextpdf.kernel.pdf.{PdfDocument, PdfReader, PdfWriter, WriterProperties}
 import com.itextpdf.layout.Document
-import com.itextpdf.layout.element.{Cell, Div, Paragraph, Table, Text}
+import com.itextpdf.layout.element.{Cell, Paragraph, Table, Text}
 import com.itextpdf.layout.properties.{HorizontalAlignment, TextAlignment, VerticalAlignment}
-import deepsea.elec.ElecManager.EleElement
 import deepsea.esp.EspManager.EleEspObject
 import local.common.DBRequests.findChess
 import local.domain.CommonTypes
-import local.hull.PartManager.{PrdPart, genForanPartsByDrawingNum}
 import local.pdf.UtilsPDF
-import local.pdf.en.accom.AccomReportEn.dateNow
-import local.pdf.en.common.ReportCommonEN
-import local.pdf.en.common.ReportCommonEN.{DocNameEN, Item11ColumnsEN, addZeros, border5mm, defaultFontSize, fillStamp, fillStampH, fontHELVETICA, getNnauticLigoEN, stampEN, stampENH}
-import local.pdf.ru.ele.EleEqTrayESKDReport.{findChessPos, pageSize}
+import local.pdf.en.common.ReportCommonEN._
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream, OutputStream}
 import java.nio.file.Files
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import scala.collection.mutable.ListBuffer
 import scala.jdk.CollectionConverters.CollectionHasAsScala
 
@@ -54,10 +47,10 @@ trait ElePdf extends UtilsPDF {
     mmToPt(34.8),
   )
 
-  def genElePdf(ele: EleEspObject, docName: String): String = {
-    val path = Files.createTempDirectory("elePdf").toAbsolutePath.toString + "/" + ele.docNumber + "_rev" + ele.rev + ".pdf"
+  def genElePdf(espObject: EleEspObject, docName: String): String = {
+    val path = Files.createTempDirectory("elePdf").toAbsolutePath.toString + "/" + espObject.docNumber + "_rev" + espObject.rev + ".pdf"
     val chess: CommonTypes.DrawingChess = {
-      val l = findChess(ele.docNumber, ele.rev)
+      val l = findChess(espObject.docNumber, espObject.rev)
       if (l.nonEmpty) {
         l.head
       } else {
@@ -65,8 +58,8 @@ trait ElePdf extends UtilsPDF {
       }
     }
 
-    val dn: DocNameEN = DocNameEN(num = ele.docNumber, name = docName)
-    val elems = ele.elements
+    val dn: DocNameEN = DocNameEN(num = espObject.docNumber, name = docName)
+    val elems = espObject.elements
     val count = ListBuffer.empty[String]
     val pdfElem = PdfElems(
       elems.groupBy(_.userId).map(gr => {
@@ -126,7 +119,7 @@ trait ElePdf extends UtilsPDF {
 
     titul.copyPagesTo(1, 1, pdfDoc)
 
-    generatePartListPages(docNameEN, items.partList.sortBy(x => orderDot(x.label))).foreach(page => {
+    generatePartListPages(docNameEN, items.partList.sortBy(x => orderEleDot(x.label))).foreach(page => {
       page.copyPagesTo(1, 1, pdfDoc)
     })
 
@@ -152,10 +145,10 @@ trait ElePdf extends UtilsPDF {
 
     doc.close()
   }
-  def orderDot(input: String): String = {
-    input.split("\\.").map(alz(_)).mkString
+  def orderEleDot(input: String): String = {
+    input.split("\\.").map(alzEle(_)).mkString
   }
-  def alz(input: String, length: Int = 10) = {
+  def alzEle(input: String, length: Int = 10) = {
     ("0" * length + input).takeRight(length)
   }
   private def genTitulA4(docNameEN: DocNameEN): PdfDocument = {
