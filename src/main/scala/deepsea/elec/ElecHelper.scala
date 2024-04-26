@@ -774,7 +774,8 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
             val length = cType match {
               case "B" =>
                 if (params.length == 4) {
-                  Math.PI * params(2).value * params(3).value / 180 / 1000d
+                  val angle = params(3).value * 180 / Math.PI
+                  Math.PI * params(2).value * angle / 180 / 1000d
                 }
                 else{
                   0
@@ -784,7 +785,9 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
               case _ => 0
             }
 
-
+            if (length < 0.05){
+              val q = 0
+            }
 
             res += EleTray(
               pos,
