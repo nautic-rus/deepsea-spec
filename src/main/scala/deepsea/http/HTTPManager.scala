@@ -332,8 +332,8 @@ class HTTPManager extends Actor {
       (get & path("createEleEspWithFiles") & parameter("foranProject", "docNumber", "rev", "user", "taskId")) { (foranProject, docNumber, rev, user, taskId) =>
         askFor(ActorManager.elec, GetEleEspFiles(foranProject, docNumber, rev, user, taskId))
       },
-      (get & path("elePos") & parameter("project", "index", "kind")) { (project, index, kind) =>
-        askFor(ActorManager.elec, GetElePos(project, index, kind))
+      (get & path("elePos") & parameter("project", "index", "kind", "taskId")) { (project, index, kind, taskId) =>
+        askFor(ActorManager.elec, GetElePos(project, index, kind, taskId))
       },
 
       (get & path("time")) {

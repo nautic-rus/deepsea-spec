@@ -934,10 +934,11 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
     }
     res.headOption.getOrElse("")
   }
-  def getElePos(project: String, kind: String, index: Int): ElePos = {
+  def getElePos(project: String, kind: String, index: Int, taskId: Int): ElePos = {
     kind match {
       case "tray" => getTray(project, index, kind).getOrElse(ElePos(project, kind, "NO STOCK", "TRAY ERROR", "", ""))
       case "transit" => getTransit(project, index, kind).getOrElse(ElePos(project, kind, "NO STOCK", "TRANSIT ERROR", "", ""))
+      case "equip" => getEquip(project, index, kind, taskId).getOrElse(ElePos(project, kind, "NO STOCK", "TRANSIT ERROR", "", ""))
       case _ => ElePos(project, kind, "NO STOCK", "UNKNOWN LABEL TYPE", "", "")
     }
   }
@@ -975,6 +976,34 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
             case _ => "MATERIAL NOT FOUND"
           }
           ElePos(project, kind, stock, label, node, descr)
+        }).toList
+        rs.close()
+        stmt.close()
+        connection.close()
+        elePos.headOption
+      case _ => Option.empty[ElePos]
+    }
+  }
+  private def getEquip(project: String, oid: Int, kind: String, taskId: Int): Option[ElePos] = {
+    val issueMaterials = getEleIssueMaterials(taskId)
+    DBManager.GetOracleConnection(project) match {
+      case Some(connection) =>
+        val stmt = connection.createStatement()
+        val query = "select userid from element where oid = " + oid.toString
+        val rs = stmt.executeQuery(query)
+        val elePos = Iterator.continually(rs.next()).takeWhile(identity).map(_ => {
+          val userId = rs.getString("userid")
+          val materials = issueMaterials.filter(_.pos.contains(userId)).sortBy(_.pos.length).reverse
+          val materialLabel = if (materials.nonEmpty){
+            getSpecMaterial(materials.head.stock).headOption match {
+              case Some(material) => material.label
+              case _ => "MATERIAL NOT FOUND"
+            }
+          }
+          else{
+            "NO MATERIAL"
+          }
+          ElePos(project, kind, "", userId, materialLabel, "")
         }).toList
         rs.close()
         stmt.close()

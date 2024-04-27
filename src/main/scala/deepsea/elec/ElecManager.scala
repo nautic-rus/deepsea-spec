@@ -278,7 +278,7 @@ object ElecManager {
   case class GetEleEspFiles(foranProject: String, docNumber: String, rev: String, user: String, taskId: String)
   case class GetEleCurrent(foranProject: String, docNumber: String, rev: String, user: String, taskId: String)
 
-  case class GetElePos(project: String, index: String, kind: String)
+  case class GetElePos(project: String, index: String, kind: String, taskId: String)
 
   case class MaterialLabel(code: String, label: String)
 
@@ -374,8 +374,8 @@ object ElecManager {
         }
       case GetEleCurrent(foranProject, docNumber, rev, user, taskId) =>
         sender() ! generateEleEsp(foranProject, docNumber, rev, user, taskId).asJson.noSpaces
-      case GetElePos(project, index, kind) =>
-        sender() ! getElePos(project, kind, index.toIntOption.getOrElse(0)).asJson.noSpaces
+      case GetElePos(project, index, kind, taskId) =>
+        sender() ! getElePos(project, kind, index.toIntOption.getOrElse(0), taskId.toIntOption.getOrElse(0)).asJson.noSpaces
       case _ => None
     }
   }
