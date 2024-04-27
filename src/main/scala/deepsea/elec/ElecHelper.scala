@@ -936,9 +936,9 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
   }
   def getElePos(project: String, kind: String, index: Int, taskId: Int): ElePos = {
     kind match {
-      case "tray" => getTray(project, index, kind).getOrElse(ElePos(project, kind, "NO STOCK", "TRAY ERROR", "", ""))
-      case "transit" => getTransit(project, index, kind).getOrElse(ElePos(project, kind, "NO STOCK", "TRANSIT ERROR", "", ""))
-      case "equip" => getEquip(project, index, kind, taskId).getOrElse(ElePos(project, kind, "NO STOCK", "EQUIP ERROR", "", ""))
+      case "tray" => getTray(project, index, kind).getOrElse(ElePos(project, kind, "NO STOCK", "TRAY NOT FOUND", "", ""))
+      case "transit" => getTransit(project, index, kind).getOrElse(ElePos(project, kind, "NO STOCK", "TRANSIT NOT FOUND", "", ""))
+      case "equip" => getEquip(project, index, kind, taskId).getOrElse(ElePos(project, kind, "NO STOCK", "EQUIP NOT FOUND", "", ""))
       case _ => ElePos(project, kind, "NO STOCK", "UNKNOWN LABEL TYPE", "", "")
     }
   }
