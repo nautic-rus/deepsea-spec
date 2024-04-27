@@ -953,9 +953,9 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
         stmt.close()
         connection.close()
         val stock = codes.headOption.getOrElse("")
-        val label = getSpecMaterial(stock).headOption match {
+        val label = if (stock == "") "NO STOCK CODE" else getSpecMaterial(stock).headOption match {
           case Some(material) => material.label
-          case _ => "MATERIAL NOT FOUND"
+          case _ => "MATERIAL NOT FOUND FOR STOCK CODE " + stock
         }
         Option(ElePos(project, kind, stock, label, "", ""))
       case _ => Option.empty[ElePos]
@@ -971,9 +971,9 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
           val stock = rs.getString("COMP_STOCK")
           val descr = rs.getString("COMP_DESCR")
           val node = rs.getString("CODE")
-          val label = getSpecMaterial(stock).headOption match {
+          val label = if (stock == "") "NO STOCK CODE" else getSpecMaterial(stock).headOption match {
             case Some(material) => material.label
-            case _ => "MATERIAL NOT FOUND"
+            case _ => "MATERIAL NOT FOUND FOR STOCK CODE " + stock
           }
           ElePos(project, kind, stock, label, node, descr)
         }).toList
