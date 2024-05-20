@@ -574,8 +574,8 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
           case _ => Material()
         }
         val qty = material.units match {
-          case "796" => group._2.length
-          case "006" => group._2.map(_.weight).sum
+          case "796" => group._2.map(_.count).sum
+          case "006" => group._2.map(_.count).sum
           case "166" => group._2.map(_.weight).sum
           case "055" => group._2.map(_.weight).sum / material.singleWeight
           case _ => group._2.length
@@ -585,6 +585,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
         }
         val weightTotal = material.units match {
           case "796" => qty * material.singleWeight
+          case "006" => qty * material.singleWeight
           case _ => group._2.map(_.weight).sum
         }
 
