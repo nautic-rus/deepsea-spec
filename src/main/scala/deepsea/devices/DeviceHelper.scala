@@ -352,6 +352,22 @@ trait DeviceHelper extends AccommodationHelper with PipeHelper{
               oracle.close()
             case _ =>
           }
+          val deviceLabelValue = if (label.contains(forLabel + ".")){
+            label.replace(forLabel + ".", "")
+          }
+          else{
+            label
+          }
+          val deviceLabel = List(deviceLabelValue, stock, units, count, addText, zone).mkString("|")
+          DBManager.GetOracleConnection(foranProject) match {
+            case Some(oracle) =>
+              val s = oracle.createStatement()
+              val query = s"update component_lang set long_descr = concat(long_descr, chr(10) || '$deviceLabel') where lang = -2 and comp in (select comp from v_element_desc where userid = '$forLabel')"
+              s.execute(query)
+              s.close()
+              oracle.close()
+            case _ =>
+          }
         }
       case _ =>
     }
@@ -436,6 +452,7 @@ trait DeviceHelper extends AccommodationHelper with PipeHelper{
 
 
           var removeOid = 0
+          var newLabelId = ""
           val devices = ListBuffer.empty[Device]
           DBManager.GetOracleConnection(foranProject) match {
             case Some(oracle) =>
@@ -472,21 +489,25 @@ trait DeviceHelper extends AccommodationHelper with PipeHelper{
           }
           devices.foreach(d => {
             d.longDesc.split('\n').foreach(l => {
-              if (system + '.' + l == newLabel){
+              if ((d.userId + '.' + l).contains(newLabel)){
                 removeOid = d.comp
+                newLabelId = d.longDesc.split('\n').filter(x => x != l).map(x => x.replace("\n", "")).mkString("\n")
               }
             })
           })
 
-          DBManager.GetOracleConnection(foranProject) match {
-            case Some(oracle) =>
-              val s = oracle.createStatement()
-              val query = s"update component_lang set long_descr = replace(long_descr, '${newLabel.replace(system + ".", "")}', '') where comp = $removeOid and lang = -2"
-              s.execute(query)
-              s.close()
-              oracle.close()
-            case _ =>
+          if (removeOid != 0){
+            DBManager.GetOracleConnection(foranProject) match {
+              case Some(oracle) =>
+                val s = oracle.createStatement()
+                val query = s"update component_lang set long_descr = '$newLabelId' where comp = $removeOid and lang = -2"
+                s.execute(query)
+                s.close()
+                oracle.close()
+              case _ =>
+            }
           }
+
         }
         else{
           DBManager.GetOracleConnection(foranProject) match {
