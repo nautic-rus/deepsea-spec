@@ -214,34 +214,36 @@ trait DeviceHelper extends AccommodationHelper with PipeHelper{
           if (d.longDesc.contains("|")){
             d.longDesc.split('\n').toList.foreach(l => {
               val split = l.replace("\r", "").split('|')
-              devicesAuxFromComp += Device(
-                d.project,
-                d.id,
-                d.comp,
-                d.userId.replace("#", "") + "." + split(0),
-                d.system,
-                d.zone,
-                d.elemType,
-                d.compAbbrev,
-                materials.find(_.code == split(1)) match {
-                  case Some(value) => value.singleWeight
-                  case _ => 0
-                },
-                split(1),
-                d.elemClass,
-                "",
-                "",
-                "",
-//                "",
-                materials.find(_.code == split(1)) match {
-                  case Some(value) => value
-                  case _ => Material()
-                },
-                d.userId + "." + split(0),
-                d.userId + "." + split(0),
-                split(2),
-                split(3).toDoubleOption.getOrElse(0),
-                1)
+              if (split.length >= 4){
+                devicesAuxFromComp += Device(
+                  d.project,
+                  d.id,
+                  d.comp,
+                  d.userId.replace("#", "") + "." + split(0),
+                  d.system,
+                  d.zone,
+                  d.elemType,
+                  d.compAbbrev,
+                  materials.find(_.code == split(1)) match {
+                    case Some(value) => value.singleWeight
+                    case _ => 0
+                  },
+                  split(1),
+                  d.elemClass,
+                  "",
+                  "",
+                  "",
+                  //                "",
+                  materials.find(_.code == split(1)) match {
+                    case Some(value) => value
+                    case _ => Material()
+                  },
+                  d.userId + "." + split(0),
+                  d.userId + "." + split(0),
+                  split(2),
+                  split(3).toDoubleOption.getOrElse(0),
+                  1)
+              }
             })
           }
         })
