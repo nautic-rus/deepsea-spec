@@ -345,9 +345,14 @@ trait DeviceHelper extends AccommodationHelper with PipeHelper{
           }
         }
         else{
+          var elementLang = 0
           DBManager.GetOracleConnection(foranProject) match {
             case Some(oracle) =>
               val s = oracle.createStatement()
+              val rs = s.executeQuery("select count(*) from element_lang where elem in (select oid from v_element_desc where userid = '$forLabel') and lang = -1")
+              while (rs.next()){
+                elementLang = Option(rs.getInt(0)).getOrElse(0)
+              }
               val query = s"update element_lang set long_descr = concat(long_descr, chr(10) || '$newLabel') where elem in (select oid from v_element_desc where userid = '$forLabel') and lang = -1"
               s.execute(query)
               s.close()
@@ -360,15 +365,17 @@ trait DeviceHelper extends AccommodationHelper with PipeHelper{
           else{
             label
           }
-          val deviceLabel = List(deviceLabelValue, stock, units, count, addText, zone).mkString("|")
-          DBManager.GetOracleConnection(foranProject) match {
-            case Some(oracle) =>
-              val s = oracle.createStatement()
-              val query = s"update component_lang set long_descr = concat(long_descr, chr(10) || '$deviceLabel') where lang = -2 and comp in (select comp from v_element_desc where userid = '$forLabel')"
-              s.execute(query)
-              s.close()
-              oracle.close()
-            case _ =>
+          if (elementLang == 0){
+            val deviceLabel = List(deviceLabelValue, stock, units, count, addText, zone).mkString("|")
+            DBManager.GetOracleConnection(foranProject) match {
+              case Some(oracle) =>
+                val s = oracle.createStatement()
+                val query = s"update component_lang set long_descr = concat(long_descr, chr(10) || '$deviceLabel') where lang = -2 and comp in (select comp from v_element_desc where userid = '$forLabel')"
+                s.execute(query)
+                s.close()
+                oracle.close()
+              case _ =>
+            }
           }
         }
       case _ =>
