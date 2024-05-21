@@ -349,12 +349,16 @@ trait DeviceHelper extends AccommodationHelper with PipeHelper{
           DBManager.GetOracleConnection(foranProject) match {
             case Some(oracle) =>
               val s = oracle.createStatement()
-              val rs = s.executeQuery("select count(*) from element_lang where elem in (select oid from v_element_desc where userid = '$forLabel') and lang = -1")
+              val qSelect = s"select * from element_lang where elem in (select oid from v_element_desc where userid = '$forLabel') and lang = -1"
+              val rs = s.executeQuery(qSelect)
               while (rs.next()){
-                elementLang = Option(rs.getInt(0)).getOrElse(0)
+                elementLang += 1
               }
+              rs.close()
               val query = s"update element_lang set long_descr = concat(long_descr, chr(10) || '$newLabel') where elem in (select oid from v_element_desc where userid = '$forLabel') and lang = -1"
-              s.execute(query)
+              if (elementLang > 0){
+                s.execute(query)
+              }
               s.close()
               oracle.close()
             case _ =>
@@ -450,7 +454,21 @@ trait DeviceHelper extends AccommodationHelper with PipeHelper{
           DBManager.GetOracleConnection(foranProject) match {
             case Some(oracle) =>
               val s = oracle.createStatement()
-              val query = s"update element_lang set long_descr = replace(long_descr, '${newLabel}', '') where elem in (select oid from v_element_desc where syst_userid = '$system') and lang = -1"
+              val sQuery = s"select long_descr from element_lang where lang = -1 and long_descr is not null and long_descr like '%$newLabel%'"
+              val rs = s.executeQuery(sQuery)
+              var removeId = ""
+              var removeRow = ""
+              while (rs.next()){
+                removeRow = rs.getString("LONG_DESCR")
+              }
+              if (removeRow.nonEmpty){
+                removeRow.split("\n").foreach(s => {
+                  if (s.contains(newLabel)){
+                    removeId = s.replace("\n", "").trim
+                  }
+                })
+              }
+              val query = s"update element_lang set long_descr = replace(long_descr, '${removeId}', '') where lang = -1 and long_descr is not null and long_descr like '%$newLabel%'"
               s.execute(query)
               s.close()
               oracle.close()
