@@ -469,6 +469,7 @@ trait DeviceHelper extends AccommodationHelper with PipeHelper{
                 })
               }
               val query = s"update element_lang set long_descr = replace(long_descr, '${removeId}', '') where lang = -1 and long_descr is not null and long_descr like '%$newLabel%'"
+              rs.close()
               s.execute(query)
               s.close()
               oracle.close()
