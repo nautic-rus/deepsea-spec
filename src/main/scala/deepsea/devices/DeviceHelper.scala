@@ -138,6 +138,10 @@ trait DeviceHelper extends AccommodationHelper with PipeHelper{
                     deviceBase.compAbbrev,
                     split(2) match {
                       case "166" => split(3).toDoubleOption.getOrElse(0)
+                      case "006" => materials.find(_.code == split(1)) match {
+                        case Some(value) => split(3).toDoubleOption.getOrElse(0.toDouble) * value.singleWeight
+                        case _ => split(3).toDoubleOption.getOrElse(0)
+                      }
                       case _ => materials.find(_.code == split(1)) match {
                         case Some(value) => value.singleWeight
                         case _ => 0
