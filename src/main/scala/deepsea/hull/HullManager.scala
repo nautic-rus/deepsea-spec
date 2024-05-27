@@ -92,9 +92,12 @@ object HullManager {
     def toHullPart(materials: List[Material], lang: String = "ru"): PrdPart = {
       materials.find(_.code == stock) match {
         case Some(material) =>
+          if (material.code == "NR00000000021603"){
+            val q = 0
+          }
           val mWeight = units match {
             case "796" => material.singleWeight
-            case "055" => material.singleWeight * count
+            case "055" => material.singleWeight
             case _ => weight
           }
           PrdPart(id, count.toInt, pos, "", 0, "", material.name(lang), 0, material.description(lang), "MANUAL", "", 0, 0, 0, mWeight, mWeight * count, addText, 0, 0, 0, 0, 0, 0, 0, "", stock)
