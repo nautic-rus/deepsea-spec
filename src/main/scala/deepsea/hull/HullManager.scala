@@ -100,9 +100,9 @@ object HullManager {
             case "055" => material.singleWeight
             case _ => weight
           }
-          PrdPart(id, count.toInt, pos, "", 0, "", material.name(lang), 0, material.description(lang), "MANUAL", "", 0, 0, 0, mWeight, mWeight * count, addText, 0, 0, 0, 0, 0, 0, 0, "", stock)
+          PrdPart(id, count, pos, "", 0, "", material.name(lang), 0, material.description(lang), "MANUAL", "", 0, 0, 0, mWeight, mWeight * count, addText, 0, 0, 0, 0, 0, 0, 0, "", stock)
         case _ =>
-          PrdPart(id, count.toInt, pos, "", 0, "", "MATERIAL NOT FOUND", 0, "MATERIAL NOT FOUND", "MANUAL", "", 0, 0, 0, weight, weight * count, "", 0, 0, 0, 0, 0, 0, 0, "", stock)
+          PrdPart(id, count, pos, "", 0, "", "MATERIAL NOT FOUND", 0, "MATERIAL NOT FOUND", "MANUAL", "", 0, 0, 0, weight, weight * count, "", 0, 0, 0, 0, 0, 0, 0, "", stock)
       }
     }
   }
