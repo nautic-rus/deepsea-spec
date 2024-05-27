@@ -14,7 +14,7 @@ object PartManager extends PartHelper with Codecs {
 
   case class PrdPart(
                       PART_OID: Int = 0,
-                      QTY: Int = 0,
+                      QTY: Double = 0,
                       PART_CODE: String = "",
                       SYMMETRY: String = "",
                       PART_TYPE: Int = 0,

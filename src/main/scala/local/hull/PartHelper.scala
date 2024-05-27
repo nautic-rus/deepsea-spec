@@ -50,7 +50,7 @@ trait PartHelper {
           while (rs.next()) {
             ret += PrdPart(
               Option(rs.getInt("PART_OID")).getOrElse(0),
-              Option(rs.getInt("EXPL_OID")).getOrElse(0),
+              Option(rs.getDouble("EXPL_OID")).getOrElse(0),
               Option(rs.getString("PART_CODE")).getOrElse(""),
               Option(rs.getString("SYMMETRY")).getOrElse(""),
               Option(rs.getInt("PART_TYPE")).getOrElse(0),
@@ -104,7 +104,7 @@ trait PartHelper {
           while (rs.next()) {
             ret += PrdPart(
               Option(rs.getInt("PART_OID")).getOrElse(0),
-              Option(rs.getInt("QTY")).getOrElse(0),
+              Option(rs.getDouble("QTY")).getOrElse(0),
               Option(rs.getString("PART_CODE")).getOrElse(""),
               Option(rs.getString("SYMMETRY")).getOrElse(""),
               Option(rs.getInt("PART_TYPE")).getOrElse(0),
