@@ -94,6 +94,7 @@ object HullManager {
         case Some(material) =>
           val mWeight = units match {
             case "796" => material.singleWeight
+            case "055" => material.singleWeight * count
             case _ => weight
           }
           PrdPart(id, count.toInt, pos, "", 0, "", material.name(lang), 0, material.description(lang), "MANUAL", "", 0, 0, 0, mWeight, mWeight * count, addText, 0, 0, 0, 0, 0, 0, 0, "", stock)
