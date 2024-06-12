@@ -119,7 +119,17 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
   implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
 
   override def preStart(): Unit = {
-//    val qwe = generateGlobalEsp(List("N002"))
+    val foranProject = "N002"
+    val projects = getIssueProjects
+    val rkdProject = projects.find(_.foran == foranProject) match {
+      case Some(value) => value.rkd
+      case _ => ""
+    }
+    val materials = getMaterials.filter(_.project == rkdProject)
+    val m = materials.filter(_.code.contains("21630"))
+    val m1 = m
+
+    //    val qwe = generateGlobalEsp(List("N002"))
 //    val q = qwe
 //    generatePipeGlobalEsp(List("N002"))
 //    self ! InitIssues()

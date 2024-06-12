@@ -21,6 +21,7 @@ import io.circe.syntax.EncoderOps
 import local.common.Codecs
 import org.mongodb.scala.model.Filters
 import io.circe.parser.decode
+import local.pdf.ru.ele.EleTrayCableBoxReportRu.getIssueProjects
 
 import java.io.{File, FileInputStream, FileOutputStream}
 import java.net.{URL, URLEncoder}
@@ -94,10 +95,11 @@ trait PipeHelper extends Codecs with MaterialsHelper {
               case Some(value) => value.rkd
               case _ => ""
             }
-            val materials = Await.result(materialsCollection.find(equal("project", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
-              case values: Seq[Material] => values.toList
-              case _ => List.empty[Material]
-            }
+//            val materials = Await.result(materialsCollection.find(equal("project", rkdProject)).toFuture(), Duration(30, SECONDS)) match {
+//              case values: Seq[Material] => values.toList
+//              case _ => List.empty[Material]
+//            }
+            val materials = getMaterials.filter(_.project == rkdProject)
             val systemDefs = getSystemDefs(project)
             val res = ListBuffer.empty[PipeSeg]
             Await.result(vPipeCompActualCollection.find().toFuture(), Duration(30, SECONDS)) match {
