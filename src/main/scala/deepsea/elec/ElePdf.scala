@@ -58,7 +58,7 @@ trait ElePdf extends UtilsPDF {
       }
     }
 
-    val dn: DocNameEN = DocNameEN(num = espObject.docNumber, name = docName)
+    val dn: DocNameEN = DocNameEN(num = espObject.docNumber, name = docName, lastRev = espObject.rev)
     val elems = espObject.elements
     val count = ListBuffer.empty[String]
     val pdfElem = PdfElems(
