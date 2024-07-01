@@ -86,6 +86,7 @@ trait ElePdf extends UtilsPDF {
         }
         val wgt = m.units match {
           case "006" => qty * m.singleWeight
+          case "796" => qty * m.singleWeight
           case _ => gr._2.map(_.weight).sum
         }
         PdfElemSummary(
