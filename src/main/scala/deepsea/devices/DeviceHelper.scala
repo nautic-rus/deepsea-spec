@@ -175,6 +175,10 @@ trait DeviceHelper extends AccommodationHelper with PipeHelper{
             }
             val split = l.split('|')
             if (split.length >= 4){
+              val material = materials.find(_.code == split(1)) match {
+                case Some(value) => value
+                case _ => Material()
+              }
               val zone = if (split.length > 5) split(5) else ""
               devices += Device(
                 rkdProject,
@@ -190,7 +194,10 @@ trait DeviceHelper extends AccommodationHelper with PipeHelper{
                 "",
                 split(2) match {
                   case "166" => split(3).toDoubleOption.getOrElse(0)
-                  case "006" => split(3).toDoubleOption.getOrElse(0)
+                  case "006" =>
+                    val wgt: Double = split(3).toDoubleOption.getOrElse(0)
+                    val sWgt: Double = material.singleWeight
+                    wgt * sWgt
                   case _ => materials.find(_.code == split(1)) match {
                     case Some(value) => value.singleWeight
                     case _ => 0
@@ -202,10 +209,7 @@ trait DeviceHelper extends AccommodationHelper with PipeHelper{
                 "",
                 "",
 //                "",
-                materials.find(_.code == split(1)) match {
-                  case Some(value) => value
-                  case _ => Material()
-                },
+                material,
                 split(0),
                 "",
                 split(2),
