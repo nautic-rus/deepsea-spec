@@ -120,7 +120,7 @@ trait DeviceHelper extends AccommodationHelper with PipeHelper{
         }
         devicesAux.filter(_.descr.contains("|")).foreach(d => {
           d.descr.split('\n').toList.foreach(l => {
-            if (l.contains("COMPLAXXXXXX0001")){
+            if (l.contains("ROMLINPLYPLY0001")){
               val qwe  = 0
             }
             val split = l.split('|')
@@ -170,7 +170,7 @@ trait DeviceHelper extends AccommodationHelper with PipeHelper{
         })
         devicesAuxFromSystem.filter(_.descr.contains("|")).foreach(d => {
           d.descr.split('\n').toList.foreach(l => {
-            if (l.contains("COMPLAXXXXXX0001")) {
+            if (l.contains("ROMLINPLYPLY0001")) {
               val qwe = 0
             }
             val split = l.split('|')
