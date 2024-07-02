@@ -623,6 +623,13 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
 
           case "166" => weight
 
+          case "055" => if (row.fromAux == 1){
+            String.format("%.2f", (row.count))
+          }
+          else{
+            String.format("%.2f", (row.weight / row.count))
+          }
+
           case _ => String.format("%.2f", row.count)
         }
 
@@ -659,11 +666,6 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
 
     rawData.groupBy(p => (p.units, p.material.code)).foreach(gr => {
 
-
-      if (gr._1._2 == "NR00000000021604"){
-        val q = 0
-      }
-
       val row = gr._2.head
       //val unit = formatUnits(row.material)
       val sumWeight = gr._2.map(_.weight).sum
@@ -695,6 +697,12 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
       }
       val weight: String = qtySubs.unit match {
         case "006" => formatWGTDouble(sumWeight)
+        case "055" => if (row.fromAux == 1){
+          formatWGTDouble(qtyA * row.material.singleWeight)
+        }
+        else{
+          formatWGTDouble(sumWeight)
+        }
         case _ => formatWGTDouble(w)
       }
 
@@ -703,6 +711,12 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
           case "pcs."=> qtySubs.newQty.toInt.toString
           case "796"=> qtySubs.newQty.toInt.toString
           case "166"=> weight
+          case "055"=> if (row.fromAux == 1){
+            String.format("%.2f", qtyA)
+          }
+          else{
+            String.format("%.2f", sumWeight / qtyA)
+          }
 //          case "006" => formatWGTDouble(sumWeight)
           case "006" => formatWGTDouble(qtyA)
           case _=> String.format("%.2f", qtySubs.newQty)

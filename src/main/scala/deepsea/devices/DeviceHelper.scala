@@ -120,7 +120,7 @@ trait DeviceHelper extends AccommodationHelper with PipeHelper{
         }
         devicesAux.filter(_.descr.contains("|")).foreach(d => {
           d.descr.split('\n').toList.foreach(l => {
-            if (l.contains("ROMINSAUXXXX0001")){
+            if (l.contains("COMPLAXXXXXX0001")){
               val qwe  = 0
             }
             val split = l.split('|')
@@ -170,7 +170,7 @@ trait DeviceHelper extends AccommodationHelper with PipeHelper{
         })
         devicesAuxFromSystem.filter(_.descr.contains("|")).foreach(d => {
           d.descr.split('\n').toList.foreach(l => {
-            if (l.contains("ROMINSAUXXXX0001")) {
+            if (l.contains("COMPLAXXXXXX0001")) {
               val qwe = 0
             }
             val split = l.split('|')
@@ -195,6 +195,10 @@ trait DeviceHelper extends AccommodationHelper with PipeHelper{
                 split(2) match {
                   case "166" => split(3).toDoubleOption.getOrElse(0)
                   case "006" =>
+                    val wgt: Double = split(3).toDoubleOption.getOrElse(0)
+                    val sWgt: Double = material.singleWeight
+                    wgt * sWgt
+                  case "055" =>
                     val wgt: Double = split(3).toDoubleOption.getOrElse(0)
                     val sWgt: Double = material.singleWeight
                     wgt * sWgt
