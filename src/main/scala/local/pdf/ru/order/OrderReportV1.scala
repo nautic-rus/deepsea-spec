@@ -16,7 +16,7 @@ import local.common.DBRequests.MaterialNode
 import local.pdf.UtilsPDF
 import local.pdf.en.common.ReportCommonEN.{DocNameEN, Item11ColumnsEN, border5mm, defaultFontSize, fillStamp, fillStampLandscape, fontHELVETICA, getNnauticLigoEN, stampEN, stampENLandscape}
 import local.pdf.en.prd.PrdPartsReportEN.{mmToPt, pageSize, pointColumnWidths}
-import local.pdf.ru.ele.EleTrayCableBoxReportRu.{generateDeviceGlobalEsp, generateHullGlobalEsp, generatePipeGlobalEsp}
+import local.pdf.ru.ele.EleTrayCableBoxReportRu.{generateDeviceGlobalEsp, generateEleGlobalEsp, generateHullGlobalEsp, generatePipeGlobalEsp}
 import org.bson.codecs.configuration.CodecRegistries.{fromProviders, fromRegistries}
 import org.bson.codecs.configuration.CodecRegistry
 import org.mongodb.scala.MongoClient.DEFAULT_CODEC_REGISTRY
@@ -90,8 +90,9 @@ object OrderReportV1 extends UtilsPDF with MaterialsHelper {
                 val hull = generateHullGlobalEsp(List(dbProject))
                 val pipe = generatePipeGlobalEsp(List(dbProject))
                 val device = generateDeviceGlobalEsp(List(dbProject))
+                val ele = generateEleGlobalEsp(List(dbProject))
 
-                val prebuff = hull ++ pipe ++ device
+                val prebuff = hull ++ pipe ++ device ++ ele
                 val buff=ListBuffer.empty[GlobalEsp]
                 prebuff.groupBy(s => s.code).foreach(gr => {
                   val qty = gr._2.map(_.qty).sum

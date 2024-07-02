@@ -135,8 +135,6 @@ trait Codecs {
 
 
 
-
-
   //KOKOVIN
 
   implicit val EleComplectDecoder: Decoder[EleComplect] = deriveDecoder[EleComplect]
@@ -277,6 +275,7 @@ trait Codecs {
     classOf[DocumentWithMaterial],
     classOf[ElecAngle],
     classOf[MaterialNode],
+    classOf[Cog],
 
     //KOKOVIN
     classOf[EleComplect],

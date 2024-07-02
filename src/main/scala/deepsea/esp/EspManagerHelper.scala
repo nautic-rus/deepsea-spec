@@ -338,6 +338,42 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
     }
     res.toList
   }
+  def getEleAllLatestEsp(projects: List[String] = List("N002", "N004")): List[DeviceEspObject] = {
+    val res = ListBuffer.empty[DeviceEspObject]
+    DBManager.GetMongoConnection() match {
+      case Some(mongo) =>
+        projects.foreach(project => {
+          val espCollectionName = List(espObjectsCollectionName, project, "ele").mkString("-").toLowerCase
+          val espCollection: MongoCollection[DeviceEspObject] = mongo.getCollection(espCollectionName)
+          try {
+            Await.result(espCollection.aggregate(
+              Seq(
+                sort(ascending("date")),
+                group(
+                  Document("_id" -> "$docNumber"),
+                  model.BsonField("id", Document("$last" -> "$id")),
+                  model.BsonField("foranProject", Document("$last" -> "$foranProject")),
+                  model.BsonField("docNumber", Document("$last" -> "$docNumber")),
+                  model.BsonField("rev", Document("$last" -> "$rev")),
+                  model.BsonField("date", Document("$last" -> "$date")),
+                  model.BsonField("user", Document("$last" -> "$user")),
+                  model.BsonField("kind", Document("$last" -> "$kind")),
+                  model.BsonField("taskId", Document("$last" -> "$taskId")),
+                  model.BsonField("elements", Document("$last" -> "$elements")),
+                )
+              )).allowDiskUse(true).toFuture(), Duration(60, SECONDS)) match {
+              case espObjects: Seq[DeviceEspObject] => res ++= espObjects.toList
+              case _ => None
+            }
+          }
+          catch {
+            case e: Exception => println(e.toString)
+          }
+        })
+      case _ => None
+    }
+    res.toList
+  }
 
   def generateGlobalEsp(projects: List[String]): String = {
     (generateHullGlobalEsp(projects) ++ generatePipeGlobalEsp(projects) ++ generateDeviceGlobalEsp(projects)).asJson.noSpaces
@@ -567,6 +603,79 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
     val units: List[Units] = getUnits
     projects.foreach(p => {
       val esps = getDeviceAllLatestEsp(List(p))
+      val elems = esps.flatMap(_.elements).filter(_.material.code != "")
+      elems.groupBy(_.material.code).map(group => {
+        val material = materials.find(_.code == group._1) match {
+          case Some(value) => value
+          case _ => Material()
+        }
+        val qty = material.units match {
+          case "796" => group._2.map(_.count).sum
+          case "006" => group._2.map(_.count).sum
+          case "166" => group._2.map(_.weight).sum
+          case "055" => group._2.map(_.weight).sum / material.singleWeight
+          case _ => group._2.length
+        }
+        val weight = material.units match {
+          case _ => material.singleWeight
+        }
+        val weightTotal = material.units match {
+          case "796" => qty * material.singleWeight
+          case "006" => qty * material.singleWeight
+          case _ => group._2.map(_.weight).sum
+        }
+
+        val docMaterial = ListBuffer.empty[DocumentWithMaterial]
+        esps.foreach(esp => {
+          esp.elements.filter(_.material.code == group._1).foreach(pos => {
+            docMaterial += DocumentWithMaterial(
+              esp.docNumber,
+              esp.rev,
+              esp.user,
+              esp.date,
+              units.find(_.code == material.units) match {
+                case Some(value) => value.thumb
+                case _ => material.units
+              },
+              pos.material.units,
+              material.units match {
+                case "796" => if (pos.count != 0) pos.count else 1
+                case "006" => pos.weight
+                case "166" => pos.weight
+                case _ => group._2.length
+              },
+              material.singleWeight,
+              pos.weight,
+              pos.userId,
+            )
+          })
+        })
+
+        res += GlobalEsp(
+          material.code,
+          material.name("ru"),
+          material.name,
+          units.find(_.code == material.units) match {
+            case Some(value) => value.thumb
+            case _ => material.units
+          },
+          material.units,
+          qty.formatted("%.2f").toDouble,
+          weight.formatted("%.3f").toDouble,
+          weightTotal.formatted("%.3f").toDouble,
+          docMaterial.toList,
+          material
+        )
+      })
+    })
+    res.toList.filter(_.code != "")
+  }
+  def generateEleGlobalEsp(projects: List[String]): List[GlobalEsp] = {
+    val res = ListBuffer.empty[GlobalEsp]
+    val materials = getMaterials
+    val units: List[Units] = getUnits
+    projects.foreach(p => {
+      val esps = getEleAllLatestEsp(List(p))
       val elems = esps.flatMap(_.elements).filter(_.material.code != "")
       elems.groupBy(_.material.code).map(group => {
         val material = materials.find(_.code == group._1) match {
