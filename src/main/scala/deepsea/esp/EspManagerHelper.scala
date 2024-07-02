@@ -338,13 +338,13 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
     }
     res.toList
   }
-  def getEleAllLatestEsp(projects: List[String] = List("N002", "N004")): List[DeviceEspObject] = {
-    val res = ListBuffer.empty[DeviceEspObject]
+  def getEleAllLatestEsp(projects: List[String] = List("N002", "N004")): List[EleEspObject] = {
+    val res = ListBuffer.empty[EleEspObject]
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
         projects.foreach(project => {
           val espCollectionName = List(espObjectsCollectionName, project, "ele").mkString("-").toLowerCase
-          val espCollection: MongoCollection[DeviceEspObject] = mongo.getCollection(espCollectionName)
+          val espCollection: MongoCollection[EleEspObject] = mongo.getCollection(espCollectionName)
           try {
             Await.result(espCollection.aggregate(
               Seq(
@@ -362,7 +362,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
                   model.BsonField("elements", Document("$last" -> "$elements")),
                 )
               )).allowDiskUse(true).toFuture(), Duration(60, SECONDS)) match {
-              case espObjects: Seq[DeviceEspObject] => res ++= espObjects.toList
+              case espObjects: Seq[EleEspObject] => res ++= espObjects.toList
               case _ => None
             }
           }
@@ -383,7 +383,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
       case Some(value) => List(value.foran)
       case _ => List.empty[String]
     }
-    (generateHullGlobalEsp(projects) ++ generatePipeGlobalEsp(projects) ++ generateDeviceGlobalEsp(projects))
+    (generateHullGlobalEsp(projects) ++ generatePipeGlobalEsp(projects) ++ generateDeviceGlobalEsp(projects) ++ generateEleGlobalEsp(projects))
   }
 
   def generateHullGlobalEsp(projects: List[String]): List[GlobalEsp] ={
@@ -681,6 +681,9 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
         val material = materials.find(_.code == group._1) match {
           case Some(value) => value
           case _ => Material()
+        }
+        if (material.code == "ESNCARCTSXXX0011"){
+          val q = 0
         }
         val qty = material.units match {
           case "796" => group._2.map(_.count).sum
