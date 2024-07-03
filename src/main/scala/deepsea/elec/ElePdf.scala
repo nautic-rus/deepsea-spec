@@ -64,9 +64,17 @@ trait ElePdf extends UtilsPDF {
     val pdfElem = PdfElems(
       elems.groupBy(_.userId).map(gr => {
         val h = gr._2.head
+        if (h.material.code == "COMPROANGCST0002"){
+          val q = 0
+        }
         val units = h.material.units
         val qty = units match {
-          case "006" => gr._2.map(_.weight).sum
+          case "006" => if (h.typeName == "MANUAL"){
+            gr._2.map(_.count).sum
+          }
+          else{
+            gr._2.map(_.weight).sum
+          }
           case _ => gr._2.length
         }
         val wgt = units match {
