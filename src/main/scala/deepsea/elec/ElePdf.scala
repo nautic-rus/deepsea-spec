@@ -89,7 +89,12 @@ trait ElePdf extends UtilsPDF {
         val label = (("0" * 10) + count.length.toString).takeRight(4)
         val m = gr._2.head.material
         val qty = m.units match {
-          case "006" => gr._2.map(_.weight).sum
+          case "006" => if (gr._2.head.typeName == "MANUAL"){
+            gr._2.map(_.count).sum
+          }
+          else{
+            gr._2.map(_.weight).sum
+          }
           case _ => gr._2.length
         }
         val wgt = m.units match {
