@@ -56,6 +56,10 @@ trait DeviceHelper extends AccommodationHelper with PipeHelper{
                 case Some(value) => value
                 case _ => Material()
               }
+              if (m.code == "ROMINSPOLXXX0003"){
+                val q = 0
+              }
+              val w: Double = Option(rs.getDouble("WEIGHT")).getOrElse(0)
               devices += Device(
                 foranProject,
                 Option(rs.getInt("OID")).getOrElse(-1),
@@ -76,7 +80,8 @@ trait DeviceHelper extends AccommodationHelper with PipeHelper{
                 m,
                 Option(rs.getString("USERID")).getOrElse(""),
                 "", m.units, m.units match {
-                  case "055" => Option(rs.getDouble("WEIGHT")).getOrElse(0)
+                  case "055" => w / m.singleWeight
+                  case "113" => w / m.singleWeight
                   case "796" => 1
                   case _ => 0
                 })
@@ -120,7 +125,7 @@ trait DeviceHelper extends AccommodationHelper with PipeHelper{
         }
         devicesAux.filter(_.descr.contains("|")).foreach(d => {
           d.descr.split('\n').toList.foreach(l => {
-            if (l.contains("ROMLINPLYPLY0001")){
+            if (l.contains("ROMINSHULXXX0018")){
               val qwe  = 0
             }
             val split = l.split('|')
@@ -170,7 +175,7 @@ trait DeviceHelper extends AccommodationHelper with PipeHelper{
         })
         devicesAuxFromSystem.filter(_.descr.contains("|")).foreach(d => {
           d.descr.split('\n').toList.foreach(l => {
-            if (l.contains("ROMLINPLYPLY0001")) {
+            if (l.contains("ROMINSPOLXXX0003")) {
               val qwe = 0
             }
             val split = l.split('|')
@@ -225,6 +230,9 @@ trait DeviceHelper extends AccommodationHelper with PipeHelper{
         })
         devices.foreach(d => {
           if (d.longDesc.contains("|")){
+            if (d.longDesc.contains("ROMINSHULXXX0018")){
+              val q = 0
+            }
             d.longDesc.split('\n').toList.foreach(l => {
               val split = l.replace("\r", "").split('|')
               if (split.length >= 4){

@@ -252,10 +252,7 @@ trait AccommodationHelper extends PipeHelper{
     }
 
     val res = accommodations.map(_.asDevice).filter(m => m.material.code != "" && !groups.map(_.code).contains(m.material.code + m.zone) && !groups.map(_.code).contains(m.material.code)).tapEach(x => {
-      if (x.material.code == "ROMLINPLYPLY0001") {
-        val q = 0
-      }
-      if (x.material.code == "ROMLINPLYPLY0002") {
+      if (x.material.code == "ROMINSHULXXX0018") {
         val q = 0
       }
       x.units = x.material.units
@@ -267,15 +264,16 @@ trait AccommodationHelper extends PipeHelper{
       }
     }).toList ++
     accommodations.map(_.asDevice).filter(m => m.material.code != "" && groups.map(x => x.code).contains(m.material.code + m.zone)).groupBy(x => x.material.code + x.material.name + x.zone).map(acc => {
-      if (acc._2.head.material.code == "ROMLINPLYPLY0001"){
+      if (acc._2.head.material.code == "ROMINSPOLXXX0003"){
         val q = 0
       }
-      if (acc._2.head.material.code == "ROMLINPLYPLY0002"){
-        val q = 0
-      }
+      val wgt =  acc._2.map(_.weight).sum
+      val count = acc._2.head.count
+      val weightTotal = acc._2.map(_.weight).sum / acc._2.head.count
       acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.head.units match {
-        case "006" => acc._2.head.count
-        case "055" => acc._2.head.material.singleWeight
+        case "006" => wgt / acc._2.head.material.singleWeight
+        case "055" => wgt / count
+        case "113" => wgt / acc._2.head.material.singleWeight
         case _ => acc._2.map(_.count).sum
       }, userId = groups.find(x => x.code == acc._2.head.material.code + acc._2.head.zone) match {
         case Some(group) => group.userId
@@ -289,18 +287,16 @@ trait AccommodationHelper extends PipeHelper{
       })
     }).toList ++
     accommodations.map(_.asDevice).filter(m => m.material.code != "" && groups.map(_.code).contains(m.material.code) && !groups.map(_.code).contains(m.material.code + m.zone)).groupBy(x => x.material.code + x.material.name).map(acc => {
-      if (acc._2.head.material.code == "ROMLINPLYPLY0001") {
-        val q = 0
-      }
-      if (acc._2.head.material.code == "ROMLINPLYPLY0002") {
+      if (acc._2.head.material.code == "ROMINSPOLXXX0003") {
         val q = 0
       }
       val wgt =  acc._2.map(_.weight).sum
       val count = acc._2.head.count
       val weightTotal = acc._2.map(_.weight).sum / acc._2.head.count
       acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.head.units match {
-        case "006" => acc._2.head.count
-        case "055" => acc._2.head.material.singleWeight
+        case "006" => wgt / acc._2.head.material.singleWeight
+        case "055" => wgt / count
+        case "113" => wgt / acc._2.head.material.singleWeight
         case _ => acc._2.map(_.count).sum
       }, userId = groups.find(x => acc._1.startsWith(x.code)) match {
         case Some(group) => group.userId

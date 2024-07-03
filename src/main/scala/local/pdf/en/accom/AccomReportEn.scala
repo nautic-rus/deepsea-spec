@@ -615,6 +615,10 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
 
       val weight: String = formatWGT(row)
 
+      if (row.material.code == "ROMLINPLYPLY0001"){
+        val q = 0
+      }
+
       val qty = {
         row.units match {
           case "pcs." => row.count.toInt.toString
@@ -623,12 +627,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
 
           case "166" => weight
 
-          case "055" => if (row.fromAux == 1){
-            String.format("%.2f", (row.count))
-          }
-          else{
-            String.format("%.2f", (row.weight / row.count))
-          }
+          case "055" => String.format("%.2f", (row.count))
 
           case _ => String.format("%.2f", row.count)
         }
