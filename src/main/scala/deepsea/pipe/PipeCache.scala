@@ -142,7 +142,7 @@ class PipeCache extends Actor{
                           val subQuery = s"select stock_code from component where oid in (select comp from component_outf where qmat = '$fcon1' and fcon2 = '$fcon2' and fcon3 = '$fcon3') and rownum = 1"
                           val subRs = subStmt.executeQuery(subQuery)
                           val stock = if (subRs.next()) {
-                            subRs.getString("stock_code")
+                            Option(subRs.getString("stock_code")).getOrElse("")
                           }
                           else {
                             ""
@@ -192,7 +192,7 @@ class PipeCache extends Actor{
         val vPipeComp: MongoCollection[PipeSeg] = mongo.getCollection(vPipeCompCollection)
         val vPipeCompActual: MongoCollection[PipeSegActual] = mongo.getCollection(vPipeCompCollectionActual)
 
-        Await.result(vPipeComp.insertMany(pipeSegs.toList).toFuture(), Duration(300, SECONDS))
+        Await.result(vPipeComp.insertMany(pipeSegs.filter(_.stock != null).toList).toFuture(), Duration(300, SECONDS))
         Await.result(vPipeCompActual.insertOne(PipeSegActual(vPipeCompCollection, date)).toFuture(), Duration(30, SECONDS))
 
         Await.result(mongo.listCollectionNames().toFuture(), Duration(30, SECONDS)) match {
