@@ -179,7 +179,24 @@ object PrdPartsReportEN extends UtilsPDF {
         pages += new PartListBodyPage(docNameEN)
         currPage = currPage + 1
       }
-      pages.last.insertRow(row)
+      val rowLimit = 11
+      if (row.A9.length > rowLimit){
+        val split = row.A9.split(' ')
+        var firstRow = ""
+        var secondRow = ""
+        for (x <- 1.to(split.length)){
+          val splitRow = split.take(x).mkString(" ")
+          if (splitRow.length < rowLimit){
+            firstRow = splitRow
+            secondRow = row.A9.replace(firstRow, "")
+          }
+        }
+        pages.last.insertRow(row.copy(A9 = firstRow))
+        pages.last.insertRow(Item11ColumnsEN(false, "", A9 = secondRow))
+      }
+      else{
+        pages.last.insertRow(row)
+      }
     })
     pages.last.setLastPage()
 
