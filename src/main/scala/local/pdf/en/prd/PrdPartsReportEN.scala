@@ -179,7 +179,7 @@ object PrdPartsReportEN extends UtilsPDF {
         pages += new PartListBodyPage(docNameEN)
         currPage = currPage + 1
       }
-      val rowLimit = 11
+      val rowLimit = 12
       if (row.A9.length > rowLimit){
         val split = row.A9.split(' ')
         var firstRow = ""
