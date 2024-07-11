@@ -691,7 +691,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
           case "PLATE" => String.format("%.2f", ps.weight)
           case _ =>
             ps.compType match {
-              case "A" => String.format("%.2f", ps.material.singleWeight)
+              case "A" => String.format("%.2f", ps.material.singleWeight * ps.length)
               case "B" => String.format("%.2f", ps.material.singleWeight)
               case _ => String.format("%.2f", ps.weight)
             }
