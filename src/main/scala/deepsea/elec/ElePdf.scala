@@ -64,7 +64,7 @@ trait ElePdf extends UtilsPDF {
     val pdfElem = PdfElems(
       elems.groupBy(_.userId).map(gr => {
         val h = gr._2.head
-        if (h.material.code == "NR00000000021918"){
+        if (h.material.code == "HULPPLCSTXXX0029"){
           val q = 0
         }
         val units = h.material.units
@@ -76,6 +76,12 @@ trait ElePdf extends UtilsPDF {
               gr._2.map(_.weight).sum
             }
           case "796" => if (h.typeName == "MANUAL"){
+              gr._2.map(_.count).sum
+            }
+            else{
+              gr._2.length
+            }
+          case "166" => if (h.typeName == "MANUAL"){
               gr._2.map(_.count).sum
             }
             else{
@@ -102,6 +108,12 @@ trait ElePdf extends UtilsPDF {
               gr._2.map(_.weight).sum
             }
           case "796" => if (gr._2.head.typeName == "MANUAL"){
+              gr._2.map(_.count).sum
+            }
+            else{
+              gr._2.length
+            }
+          case "166" => if (gr._2.head.typeName == "MANUAL"){
               gr._2.map(_.count).sum
             }
             else{

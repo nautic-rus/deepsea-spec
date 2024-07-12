@@ -872,12 +872,13 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
     val equips = getEleEquips(foranProject, zones, materials).map(x => EleElement(x.userId, "EQUIP", "796", x.weight, x.stock, x.material, x.cog, x.zone, 1))
     val manual = getEleIssueMaterials(issueId).map(x => {
       val material = materials.find(_.code == x.stock).getOrElse(Material())
-      if (material.code == "NR00000000021918"){
+      if (material.code == "HULPPLCSTXXX0029"){
         val q = 0
       }
       val weight = x.units match {
         case "006" => x.count * material.singleWeight
         case "796" => x.count * material.singleWeight
+        case "166" => x.count
         case _ => x.weight
       }
       EleElement(x.pos, "MANUAL", x.units, weight, x.stock, material, Cog(0, 0, 0), x.zone, x.count)
