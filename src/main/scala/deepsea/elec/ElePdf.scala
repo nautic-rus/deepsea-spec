@@ -64,17 +64,23 @@ trait ElePdf extends UtilsPDF {
     val pdfElem = PdfElems(
       elems.groupBy(_.userId).map(gr => {
         val h = gr._2.head
-        if (h.material.code == "COMPROANGCST0002"){
+        if (h.material.code == "NR00000000021918"){
           val q = 0
         }
         val units = h.material.units
         val qty = units match {
           case "006" => if (h.typeName == "MANUAL"){
-            gr._2.map(_.count).sum
-          }
-          else{
-            gr._2.map(_.weight).sum
-          }
+              gr._2.map(_.count).sum
+            }
+            else{
+              gr._2.map(_.weight).sum
+            }
+          case "796" => if (h.typeName == "MANUAL"){
+              gr._2.map(_.count).sum
+            }
+            else{
+              gr._2.length
+            }
           case _ => gr._2.length
         }
         val wgt = units match {
@@ -90,11 +96,17 @@ trait ElePdf extends UtilsPDF {
         val m = gr._2.head.material
         val qty = m.units match {
           case "006" => if (gr._2.head.typeName == "MANUAL"){
-            gr._2.map(_.count).sum
-          }
-          else{
-            gr._2.map(_.weight).sum
-          }
+              gr._2.map(_.count).sum
+            }
+            else{
+              gr._2.map(_.weight).sum
+            }
+          case "796" => if (gr._2.head.typeName == "MANUAL"){
+              gr._2.map(_.count).sum
+            }
+            else{
+              gr._2.length
+            }
           case _ => gr._2.length
         }
         val wgt = m.units match {
@@ -720,9 +732,9 @@ trait ElePdf extends UtilsPDF {
       bodyGrid.addCell(generateCell(item.title))
       bodyGrid.addCell(generateCell(item.descr))
       bodyGrid.addCell(generateCell(item.units))
-      bodyGrid.addCell(generateCell((Math.round(item.qty * 100) / 100d).toString))
-      bodyGrid.addCell(generateCell((Math.round(item.wgt * 100) / 100d).toString))
-      bodyGrid.addCell(generateCell((Math.round(item.tWgt * 100) / 100d).toString))
+      bodyGrid.addCell(generateCell((Math.round(item.qty * 1000) / 1000d).toString))
+      bodyGrid.addCell(generateCell((Math.round(item.wgt * 1000) / 1000d).toString))
+      bodyGrid.addCell(generateCell((Math.round(item.tWgt * 1000) / 1000d).toString))
       bodyGrid.addCell(generateCell(item.room))
       bodyGrid.addCell(generateCell(item.place))
       bodyGrid.addCell(generateCell(item.matCode))
@@ -733,8 +745,8 @@ trait ElePdf extends UtilsPDF {
       bodyGrid.addCell(generateCell(item.title))
       bodyGrid.addCell(generateCell(item.descr))
       bodyGrid.addCell(generateCell(item.units))
-      bodyGrid.addCell(generateCell((Math.round(item.qty * 100) / 100d).toString))
-      bodyGrid.addCell(generateCell((Math.round(item.tWgt * 100) / 100d).toString))
+      bodyGrid.addCell(generateCell((Math.round(item.qty * 1000) / 1000d).toString))
+      bodyGrid.addCell(generateCell((Math.round(item.tWgt * 1000) / 1000d).toString))
       bodyGrid.addCell(generateCell(item.stmt))
       bodyGrid.addCell(generateCell(item.matCode))
       currentRow = currentRow + 1
