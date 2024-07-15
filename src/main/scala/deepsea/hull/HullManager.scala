@@ -86,7 +86,7 @@ object HullManager {
   case class ProfilePart(name: String, description: String, kse: Int, section: String, material: String, w_h: Double, w_t: Double, f_h: Double, f_t: Double, block: String, length: Double, area: Double, stock: String, density: Double, weight: Double, struct: String)
   case class HullSystem(code: String, name: String)
   case class AddIssueMaterial(pos: String, units: String, weight: String, count: String, stock: String, userId: String, docNumber: String, issueId: String, addText: String, department: String, zone: String)
-  case class DeleteIssueMaterial(pos: String, docNumber: String,department: String)
+  case class DeleteIssueMaterial(pos: String, docNumber: String, id: String, department: String)
 
   case class IssueMaterial(id: Int, pos: String, units: String, weight: Double, count: Double, stock: String, userId: Int, dateIns: Long, docNumber: String, issueId: Int, addText: String, dep: String, zone: String){
     def toHullPart(materials: List[Material], lang: String = "ru"): PrdPart = {
@@ -336,8 +336,8 @@ class HullManager extends Actor with Codecs with HullHelper with MaterialsHelper
     case AddIssueMaterial(pos, units, weight, count, stock, userId, docNumber, issueId, addText, department, zone) =>
       addMaterial(pos, units, weight.toDoubleOption.getOrElse(0), count.toDoubleOption.getOrElse(0), stock, userId.toIntOption.getOrElse(0), docNumber, issueId.toIntOption.getOrElse(0), addText, department, zone)
       sender() ! "success".asJson.noSpaces
-    case DeleteIssueMaterial(pos, docNumber, department) =>
-      sender() ! deleteMaterial(pos, docNumber, department).asJson.noSpaces
+    case DeleteIssueMaterial(pos, docNumber, id, department) =>
+      sender() ! deleteMaterial(pos, docNumber, id.toIntOption.getOrElse(0), department).asJson.noSpaces
   }
 
 

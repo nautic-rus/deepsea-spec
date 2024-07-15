@@ -34,11 +34,11 @@ trait HullHelper {
     "success"
   }
 
-  def deleteMaterial(pos: String, docNumber: String, department: String): String = {
+  def deleteMaterial(pos: String, docNumber: String, id: Int, department: String): String = {
     DBManager.GetPGConnection() match {
       case Some(c) =>
         val s = c.createStatement()
-        s.execute(s"delete from issue_materials where pos = '$pos' and doc_number = '$docNumber' and department = '$department'")
+        s.execute(s"delete from issue_materials where pos = '$pos' and (doc_number = '$docNumber' or issue_id = $id) and department = '$department'")
         s.close()
         c.close()
       case _ => None

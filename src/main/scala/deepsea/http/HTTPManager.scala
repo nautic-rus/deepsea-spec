@@ -294,8 +294,8 @@ class HTTPManager extends Actor {
       (get & path("addIssueMaterial") & parameter("pos", "units", "weight", "count", "stock", "userId", "docNumber", "issueId", "addText", "department", "zone")) { (pos, units, weight, count, stock, userId, docNumber, issueId, addText, department, zone) =>
         askFor(ActorManager.hullManager, AddIssueMaterial(pos, units, weight, count, stock, userId, docNumber, issueId, addText, department, zone))
       },
-      (get & path("deleteIssueMaterial") & parameter("pos", "docNumber", "department")) { (pos, docNumber, department) =>
-        askFor(ActorManager.hullManager, DeleteIssueMaterial(pos, docNumber, department))
+      (get & path("deleteIssueMaterial") & parameter("pos", "docNumber", "id", "department")) { (pos, docNumber, id, department) =>
+        askFor(ActorManager.hullManager, DeleteIssueMaterial(pos, docNumber, id, department))
       },
 
       //NEW ELEC
