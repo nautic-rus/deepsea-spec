@@ -780,7 +780,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
             }
 
             val length = cType match {
-              case "A" => material.singleWeight
+              //case "A" => material.singleWeight
               case "B" =>
                 if (params.length == 4) {
                   val angle = params(3).value * 180 / Math.PI
@@ -813,7 +813,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
                 rs.getDouble("Z_COG"),
               ),
               Option(rs.getString("zone_name")).getOrElse(""),
-              material.units,
+              "006",
               material
             )
           }
