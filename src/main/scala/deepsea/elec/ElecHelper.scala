@@ -781,7 +781,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
 
             val length = {
               material.units match {
-                case "796" => material.singleWeight
+                case "796" => 1
                 case _ =>
                   cType match {
                     //case "A" => material.singleWeight
