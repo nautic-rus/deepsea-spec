@@ -774,9 +774,13 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
             if (stock == "ESNCARCTSXXX0001"){
               val q = 0
             }
+            val material = materials.find(_.code == stock) match {
+              case Some(value) => value
+              case _ => Material().copy(name = "No stock code, userId " + userId, units = "006")
+            }
 
             val length = cType match {
-              case "A" => 1
+              case "A" => material.singleWeight
               case "B" =>
                 if (params.length == 4) {
                   val angle = params(3).value * 180 / Math.PI
@@ -809,14 +813,8 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
                 rs.getDouble("Z_COG"),
               ),
               Option(rs.getString("zone_name")).getOrElse(""),
-              materials.find(_.code == stock) match {
-                case Some(value) => value.units
-                case _ => "006"
-              },
-              materials.find(_.code == stock) match {
-                case Some(value) => value
-                case _ => Material().copy(name = "No stock code, userId " + userId)
-              }
+              material.units,
+              material
             )
           }
           rs.close()
