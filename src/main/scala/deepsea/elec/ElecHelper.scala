@@ -779,19 +779,25 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
               case _ => Material().copy(name = "No stock code, userId " + userId, units = "006")
             }
 
-            val length = cType match {
-              //case "A" => material.singleWeight
-              case "B" =>
-                if (params.length == 4) {
-                  val angle = params(3).value * 180 / Math.PI
-                  Math.PI * params(2).value * angle / 180 / 1000d
-                }
-                else{
-                  0
-                }
-              case "P" =>
-                if (params.nonEmpty) params.last.value / 1000d else 0
-              case _ => 0
+            val length = {
+              material.units match {
+                case "796" => material.singleWeight
+                case _ =>
+                  cType match {
+                    //case "A" => material.singleWeight
+                    case "B" =>
+                      if (params.length == 4) {
+                        val angle = params(3).value * 180 / Math.PI
+                        Math.PI * params(2).value * angle / 180 / 1000d
+                      }
+                      else{
+                        0
+                      }
+                    case "P" =>
+                      if (params.nonEmpty) params.last.value / 1000d else 0
+                    case _ => 0
+                  }
+              }
             }
 
             if (length < 0.015){
@@ -813,7 +819,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
                 rs.getDouble("Z_COG"),
               ),
               Option(rs.getString("zone_name")).getOrElse(""),
-              "006",
+              material.units,
               material
             )
           }
