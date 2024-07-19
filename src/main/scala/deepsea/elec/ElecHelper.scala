@@ -771,7 +771,12 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
 
             val params = plsParams.filter(_.pls.equals(pls))
 
+            if (stock == "ESNCARCTSXXX0001"){
+              val q = 0
+            }
+
             val length = cType match {
+              case "A" => 1
               case "B" =>
                 if (params.length == 4) {
                   val angle = params(3).value * 180 / Math.PI
@@ -804,6 +809,10 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
                 rs.getDouble("Z_COG"),
               ),
               Option(rs.getString("zone_name")).getOrElse(""),
+              materials.find(_.code == stock) match {
+                case Some(value) => value.units
+                case _ => "006"
+              },
               materials.find(_.code == stock) match {
                 case Some(value) => value
                 case _ => Material().copy(name = "No stock code, userId " + userId)
@@ -868,11 +877,11 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
     res.toList
   }
   def getEleEsp(foranProject: String, systems: List[String], zones: List[String], materials: List[Material], issueId: Int): List[EleElement] = {
-    val trays = getEleTrays(foranProject, systems, materials).map(x => EleElement(x.userId, x.kind, "006", x.weight, x.stock, x.material, x.cog, x.zone, 1))
+    val trays = getEleTrays(foranProject, systems, materials).map(x => EleElement(x.userId, x.kind, x.units, x.weight, x.stock, x.material, x.cog, x.zone, 1))
     val equips = getEleEquips(foranProject, zones, materials).map(x => EleElement(x.userId, "EQUIP", "796", x.weight, x.stock, x.material, x.cog, x.zone, 1))
     val manual = getEleIssueMaterials(issueId).map(x => {
       val material = materials.find(_.code == x.stock).getOrElse(Material())
-      if (material.code == "HULPPLCSTXXX0029"){
+      if (material.code == "ESNCARCTSXXX0001"){
         val q = 0
       }
       val weight = x.units match {

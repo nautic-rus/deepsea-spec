@@ -266,7 +266,7 @@ object ElecManager {
   implicit val SystemEncoder: Encoder[System] = deriveEncoder[System]
 
 
-  case class EleTray(userId: String, stock: String, weight: Double, cType: String, idsq: Int, node1: Int, node2: Int, kind: String, cog: Cog, zone: String, material: Material)
+  case class EleTray(userId: String, stock: String, weight: Double, cType: String, idsq: Int, node1: Int, node2: Int, kind: String, cog: Cog, zone: String, units: String, material: Material)
   case class EleEquip(userId: String, abbrev: String, stock: String, weight: Double, cog: Cog, zone: String, material: Material)
   case class EleElement(userId: String, typeName: String, units: String, weight: Double, code: String, material: Material, cog: Cog, zone: String, count: Double)
   case class Cog(x: Double, y: Double, z: Double)

@@ -34,6 +34,9 @@ object AccommodationManager{
 
   case class Accommodation(project: String, modelOid: Int, asOid: Int, weight: Double, surface: Double, userId: String, materialCode: String, materialDescription: String, objType: Int, pars: List[Double], bsWeight: Double, zone: String, profileStock: String, plateStock: String, var material: Material = Material(), profileLength: Double, profileSection: Int){
     def asDevice: Device ={
+      if (profileStock == "COMFSNSTUXXX0030"){
+        val q = 0
+      }
       Device(
         project,
         modelOid,
