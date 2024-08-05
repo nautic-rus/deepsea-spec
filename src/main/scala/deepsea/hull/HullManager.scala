@@ -97,6 +97,7 @@ object HullManager {
           }
           val mWeight = units match {
             case "796" => material.singleWeight
+            case "006" => material.singleWeight
             case "055" => material.singleWeight
             case _ => weight
           }
