@@ -665,7 +665,7 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
 
     rawData.groupBy(p => (p.units, p.material.code)).foreach(gr => {
 
-      if (gr._1._2 == "ROMLINPLYPLY0002"){
+      if (gr._1._2 == "ROMINSPOLXXX0003"){
         val q = 0
       }
       val row = gr._2.head
@@ -678,6 +678,8 @@ object AccomReportEn extends UtilsPDF with DeviceHelper with MaterialsHelper {
         }else if(row.units.equals("166")){
           gr._2.map(_.weight).sum
         }else if(row.units.equals("006")){
+          gr._2.map(_.weight).sum
+        }else if(row.units.equals("113")){
           gr._2.map(_.weight).sum
         }else{
           row.weight
