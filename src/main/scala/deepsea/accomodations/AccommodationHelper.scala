@@ -173,10 +173,10 @@ trait AccommodationHelper extends PipeHelper{
               val profileStock: String = Option(rs.getString("PROFILE_STOCK")).getOrElse("")
               val plateStock: String = Option(rs.getString("PLATE_STOCK")).getOrElse("")
               val plateStockCont: String = Option(rs.getString("PLATE_STOCK_CONT")).getOrElse("")
-              if (plateStock == "MCHNDSXXXXXX0003"){
+              if (plateStock == "ROMINSPOLXXX0003"){
                 val qw = 0
               }
-              if (profileStock == "MCHNDSXXXXXX0003"){
+              if (profileStock == "ROMINSPOLXXX0003"){
                 val q = 0
               }
               val profileLength: Double = Option(rs.getDouble("PROFILE_LENGTH")).getOrElse(0)
@@ -227,7 +227,7 @@ trait AccommodationHelper extends PipeHelper{
                   if (materialDescription != ""){
                     if (materialDescription.contains("#")){
                       val code = materialDescription.split("#").last
-                      if (code == "MCHNDSXXXXXX0003"){
+                      if (code == "ROMINSPOLXXX0003"){
                         val a = 0
                       }
                       materials.find(_.code == code) match {
@@ -258,7 +258,7 @@ trait AccommodationHelper extends PipeHelper{
     }
 
     val res = accommodations.map(_.asDevice).filter(m => m.material.code != "" && !groups.map(_.code).contains(m.material.code + m.zone) && !groups.map(_.code).contains(m.material.code)).tapEach(x => {
-      if (x.material.code == "MCHNDSXXXXXX0003") {
+      if (x.material.code == "ROMINSPOLXXX0003") {
         val q = 0
       }
       x.units = x.material.units
@@ -270,7 +270,7 @@ trait AccommodationHelper extends PipeHelper{
       }
     }).toList ++
     accommodations.map(_.asDevice).filter(m => m.material.code != "" && groups.map(x => x.code).contains(m.material.code + m.zone)).groupBy(x => x.material.code + x.material.name + x.zone).map(acc => {
-      if (acc._2.head.material.code == "MCHNDSXXXXXX0003"){
+      if (acc._2.head.material.code == "ROMINSPOLXXX0003"){
         val q = 0
       }
       val wgt = acc._2.map(_.weight).sum
@@ -298,7 +298,7 @@ trait AccommodationHelper extends PipeHelper{
       })
     }).toList ++
     accommodations.map(_.asDevice).filter(m => m.material.code != "" && groups.map(_.code).contains(m.material.code) && !groups.map(_.code).contains(m.material.code + m.zone)).groupBy(x => x.material.code + x.material.name).map(acc => {
-      if (acc._2.head.material.code == "MCHNDSXXXXXX0003") {
+      if (acc._2.head.material.code == "ROMINSPOLXXX0003") {
         val q = 0
       }
       val wgt =  acc._2.map(_.weight).sum
