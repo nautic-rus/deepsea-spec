@@ -693,7 +693,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
           val quality = (bdatri + "    ").substring(0, 4).trim
           val insulation = (bdatri + "    ").substring(4, 4).trim
 
-          if (plsElem.spool == "026"){
+          if (plsElem.spool == "550"){
             val qwe = 0
           }
           val isComp = plsElem.cmp_oid != 0

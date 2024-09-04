@@ -173,7 +173,7 @@ class PipeManager extends Actor with Codecs with PipeHelper {
   override def preStart(): Unit ={
     //self ! GetPipeSegs("N002", "805-001", 11906304)
     //self ! GetPipeESP("200101-743-001", "1", "", "ru")
-    //self ! GetPipeSegsByDocNumber("200101-800-001")
+    //self ! GetPipeSegsByDocNumber("200101-574-024")
     //self ! GetSpoolModel("210101-545-0001", "032", "0")
   }
 
@@ -191,7 +191,8 @@ class PipeManager extends Actor with Codecs with PipeHelper {
         case res: String => sender() ! res
         case _ => sender() ! "error".asJson.noSpaces
       }
-      //val pipeSegs = getPipeSegs(projectSystem._1, projectSystem._2)
+      val pipeSegs = getPipeSegs(projectSystem._1, projectSystem._2)
+      val a = 0
       //sender() ! (if (json) pipeSegs.asJson.noSpaces else pipeSegs)
     case SetSpoolLock(jsValue) =>
       setSpoolLock(jsValue)

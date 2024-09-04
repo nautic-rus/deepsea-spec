@@ -60,6 +60,9 @@ trait DeviceHelper extends AccommodationHelper with PipeHelper{
                 val q = 0
               }
               val w: Double = Option(rs.getDouble("WEIGHT")).getOrElse(0)
+              if (Option(rs.getString("STOCK_CODE")).getOrElse("") == "MCHNDSXXXXXX0003"){
+                val a = 0
+              }
               devices += Device(
                 foranProject,
                 Option(rs.getInt("OID")).getOrElse(-1),
