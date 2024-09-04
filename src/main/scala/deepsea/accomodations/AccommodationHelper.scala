@@ -276,8 +276,11 @@ trait AccommodationHelper extends PipeHelper{
       val wgt = acc._2.map(_.weight).sum
       val count = acc._2.head.count
       val weightTotal = acc._2.map(_.weight).sum / acc._2.head.count
-      acc._2.head.copy(weight = acc._2.map(_.weight).sum, count = acc._2.head.units match {
-        case "796" => wgt
+      acc._2.head.copy(weight = acc._2.head.units match {
+        case "796" => acc._2.head.weight
+        case _ => acc._2.map(_.weight).sum
+      }, count = acc._2.head.units match {
+        case "796" => acc._2.length
         case "006" => wgt / acc._2.head.material.singleWeight
         case "055" => wgt / count
         case "166" => wgt
