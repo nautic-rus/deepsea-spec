@@ -1,6 +1,6 @@
 package deepsea.pipe
 
-import deepsea.pipe.PipeManager.{ElecEquip, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSystems, GetZones, Material, MaterialQuality, PipeLineSegment, PipeSeg, PipeSegActual, PipeSegBilling, PipeSup, Pls, PlsElem, PlsParam, ProjectName, SetSpoolLock, SpoolLock, SystemDef, Units, UpdatePipeComp, UpdatePipeJoints}
+import deepsea.pipe.PipeManager.{ElecEquip, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSystems, GetZones, Material, MaterialQuality, PipeLineSegment, PipeSeg, PipeSegActual, PipeSegBilling, PipeSegExtended, PipeSup, Pls, PlsElem, PlsParam, ProjectName, SetSpoolLock, SpoolLock, SystemDef, Units, UpdatePipeComp, UpdatePipeJoints}
 import org.mongodb.scala.{Document, MongoClient, MongoCollection, MongoDatabase, bson}
 import org.mongodb.scala.model.Filters.{and, equal, notEqual}
 import akka.http.scaladsl.{Http, HttpExt}
@@ -268,13 +268,11 @@ trait PipeHelper extends Codecs with MaterialsHelper {
     }
     pipeSegs
   }
-  def getPipeSegsBySystem(project: String, system: String): List[PipeSeg] ={
+  def getPipeSegsBySystem(project: String, system: String): List[PipeSegExtended] ={
     val pipeSegs = DBManager.GetMongoCacheConnection() match {
       case Some(mongo) =>
-        val vPipeCompCollectionActualName = "vPipeCompActual"
+        val vPipeCompCollectionActualName = "vPipeCompActualExt"
         val vPipeCompActualCollection: MongoCollection[PipeSegActual] = mongo.getCollection(vPipeCompCollectionActualName)
-        val vPipeJointsCollectionActualName = "vPipeJointsActual"
-        val vPipeJointsActualCollection: MongoCollection[PipeSegActual] = mongo.getCollection(vPipeJointsCollectionActualName)
         DBManager.GetMongoConnection() match {
           case Some(mongoData) =>
             val materialsNCollectionName = "materials-n"
@@ -289,11 +287,11 @@ trait PipeHelper extends Codecs with MaterialsHelper {
             }
             val materials = getMaterials.filter(_.project == rkdProject)
             val systemDefs = getSystemDefs(project)
-            val res = ListBuffer.empty[PipeSeg]
+            val res = ListBuffer.empty[PipeSegExtended]
             Await.result(vPipeCompActualCollection.find().toFuture(), Duration(30, SECONDS)) match {
               case values: Seq[PipeSegActual] =>
-                Await.result(mongo.getCollection[PipeSeg](values.last.name).find(and(equal("project", project), equal("system", system))).toFuture(), Duration(300, SECONDS)) match {
-                  case pipeSegs: Seq[PipeSeg] =>
+                Await.result(mongo.getCollection[PipeSegExtended](values.last.name).find(and(equal("project", project), equal("system", system))).toFuture(), Duration(300, SECONDS)) match {
+                  case pipeSegs: Seq[PipeSegExtended] =>
                     pipeSegs.foreach(x => x.material = materials.find(_.code == x.stock) match {
                       case Some(value) => value
                       case _ => Material()
@@ -307,145 +305,8 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                 }
               case _ =>
             }
-
-            val valves = ListBuffer.empty[PipeSeg]
-            res.foreach(pipeSeg => {
-              """\w{12}\d{4}""".r.findFirstIn(pipeSeg.classDescription) match {
-                case Some(value) =>
-                  materials.find(_.code == value) match {
-                    case Some(addMaterial) =>
-                      valves += pipeSeg.copy(material = addMaterial, stock = addMaterial.code, weight = addMaterial.singleWeight, compUserId = addMaterial.name, spPieceId = res.filter(_.spool == pipeSeg.spool).maxBy(_.spPieceId).spPieceId + 1)
-                    case _ => None
-                  }
-                case _ => None
-              }
-            })
-
-            res ++= valves
-
-
-
-            res ++= getHvacSegs(project, system)
-
-
-            Await.result(vPipeJointsActualCollection.find().toFuture(), Duration(30, SECONDS)) match {
-              case values: Seq[PipeSegActual] =>
-                Await.result(mongo.getCollection[PipeSeg](values.last.name).find(and(equal("project", project), equal("system", system))).toFuture(), Duration(300, SECONDS)) match {
-                  case pipeSegs: Seq[PipeSeg] =>
-                    pipeSegs.foreach(x => x.material = materials.find(_.code == x.stock) match {
-                      case Some(value) => value
-                      case _ => Material()
-                    })
-                    pipeSegs.foreach(p => p.systemDescr = systemDefs.find(_.name == p.system) match {
-                      case Some(systemDef) => systemDef.descr
-                      case _ => ""
-                    })
-                    res ++= pipeSegs.filter(_.stock != "")
-                  case _ =>
-                }
-              case _ =>
-            }
-
-            res.groupBy(_.spool).foreach(group => {
-              if (group._2.exists(_.fcon3 == "FWT0")){
-                group._2.filter(_.compType == "BOLT").foreach(x => x.length = x.length / 2d)
-                group._2.filter(_.compType == "NUT").foreach(x => x.length = x.length / 2d)
-              }
-            })
-
-
-            val sups = ListBuffer.empty[PipeSup]
-            DBManager.GetOracleConnection(project) match {
-              case Some(conn) =>
-                val stmt = conn.createStatement()
-                val query = s"SELECT \n    (SELECT STOCK_CODE FROM AS_SUBAS WHERE AS_OID = VSUPP.OID) AS STOCK_CODE,\n    USERID\nFROM \n    (SELECT OID, USERID FROM V_SUPP_LIST WHERE SYSTEM = '$system') VSUPP"
-                val rs = stmt.executeQuery(query)
-                while (rs.next()){
-                  sups += PipeSup(
-                    Option(rs.getString("STOCK_CODE")).getOrElse(""),
-                    Option(rs.getString("USERID")).getOrElse("")
-                  )
-                }
-                rs.close()
-                stmt.close()
-                conn.close()
-              case _ => None
-            }
-
-            var spool = 700
-            sups.groupBy(x => x.code).foreach(gr => {
-              materials.find(_.code == gr._1) match {
-                case Some(material) =>
-                  res += PipeSeg(project, "", system, "", 0, 0, "SUP", "Support", "", "SUP", gr._2.map(_.userId).mkString(","), "", 0, 0, 0, "", "SUP", gr._2.length, 0, 0, material.singleWeight, gr._1, "", "", "", material, system)
-                  spool += 1
-                case _ => None
-              }
-            })
-
-            var counter = 0
-            res.filter(_.typeCode == "SUP").foreach(s => {
-              counter += 1
-              s.spPieceId = counter
-            })
-
-            val devicesAuxFromSystem = ListBuffer.empty[DeviceAux]
-            DBManager.GetOracleConnection(project) match {
-              case Some(oracle) =>
-                val s = oracle.createStatement()
-                val query = s"select system, long_descr from systems_lang where system in (select oid from systems where name = '$system')"
-                val rs = s.executeQuery(query)
-                while (rs.next()) {
-                  devicesAuxFromSystem += DeviceAux(
-                    Option(rs.getInt("SYSTEM")).getOrElse(-1),
-                    Option(rs.getString("LONG_DESCR")).getOrElse(""),
-                  )
-                }
-                rs.close()
-                s.close()
-                oracle.close()
-              case _ => List.empty[Device]
-            }
-            devicesAuxFromSystem.filter(_.descr.contains("|")).foreach(d => {
-              d.descr.split('\n').toList.foreach(l => {
-                val split = l.split('|')
-                val pos = split.head
-                if (split.length >= 4){
-                  res += PipeSeg(
-                    project, "", system, "", 0, 0, "AUX", "", "",
-                    "AUX", "Inserted Manually", "", 0, 0, 0, pos, pos, split(3).toDoubleOption.getOrElse(0),
-                    0, 0, materials.find(_.code == split(1)) match {
-                      case Some(value) => value.singleWeight
-                      case _ => 0
-                    }, split(1), "", "", "", materials.find(_.code == split(1)) match {
-                      case Some(value) =>
-                        if (split.length > 4){
-                          value.copy(name = value.name + ", " + split(4), translations = value.translations.map(x => x.copy(name = x.name + ", " + split(4))))
-                        }
-                        else{
-                          value
-                        }
-                      case _ => Material()
-                    }
-                  )
-                }
-              })
-            })
-            var spoolValue = ""
-            var spCounter = 0
-            res.filter(_.compType == "AUX").filter(_.spPieceId == 0).sortBy(_.spool).foreach(sp => {
-              if (sp.spool != spoolValue){
-                spCounter = 0
-                val alreadyIn = res.filter(_.compType != "AUX").filter(_.spool == sp.spool)
-                if (alreadyIn.nonEmpty){
-                  spCounter = alreadyIn.maxBy(_.spPieceId).spPieceId
-                }
-                spoolValue = sp.spool
-              }
-              spCounter = spCounter + 1
-              sp.spPieceId = spCounter
-            })
             res.toList
-          case _ => List.empty[PipeSeg]
+          case _ => List.empty[PipeSegExtended]
         }
     }
     pipeSegs
