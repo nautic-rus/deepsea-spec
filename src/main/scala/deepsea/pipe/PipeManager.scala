@@ -35,8 +35,10 @@ object PipeManager{
                      sqInSystem: Int, isPieceId: Int, var spPieceId: Int, isom: String, spool: String, var length: Double, radius: Double, angle: Double,
                      weight: Double, stock: String, fcon3: String, insul: String, classDescription: String,
                      or_vec_u: Double, or_vec_v: Double, or_vec_w: Double, or_angle: Double, x: Double, y: Double, z: Double,
+                     zone_id: Int, system_id: Int, nomD: Double, outD: Double, params: List[UsrPar],
                      var material: Material = Material(), var systemDescr: String = "") extends EspElement {
   }
+  case class UsrPar(zone: Int, System: Int, line: String, pls: Int, elem: Int, value: String, des: String)
   case class PipeSegBilling(zone: String, system: String, typeCode: String, typeDesc: String, classAlpha: String, compType: String, compUserId: String, smat: String, length: Double, weight: Double, stock: String, insul: String, material: Material = Material(), systemDescr: String = "", count: Int = 1)
   case class PipeSegActual(name: String, date: Long)
   case class Material(

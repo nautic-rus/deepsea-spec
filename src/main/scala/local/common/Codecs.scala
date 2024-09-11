@@ -5,7 +5,7 @@ import deepsea.devices.DeviceManager.{Device, DeviceAux}
 import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, Cog, EleElement, ElecAngle, ElecCable, EquipmentConnection, TrayBySystem}
 import deepsea.esp.EspManager.{DeviceEspObject, DocumentWithMaterial, EleEspObject, EspElement, EspObject, GlobalEsp, GlobalEspSpec, HullEspObject, MaterialPurchase, PipeEspObject}
 import deepsea.hull.HullManager._
-import deepsea.pipe.PipeManager.{Material, MaterialTranslation, PipeSeg, PipeSegActual, PipeSegBilling, PipeSegExtended, ProjectName, SpecMaterial, SpoolLock, SystemDef, UnitTranslation, Units}
+import deepsea.pipe.PipeManager.{Material, MaterialTranslation, PipeSeg, PipeSegActual, PipeSegBilling, PipeSegExtended, ProjectName, SpecMaterial, SpoolLock, SystemDef, UnitTranslation, Units, UsrPar}
 import io.circe.{Decoder, Encoder}
 import io.circe.parser._
 import io.circe.{Decoder, Encoder}
@@ -60,6 +60,9 @@ trait Codecs {
 
   implicit val PipeSegExtendedDecoder: Decoder[PipeSegExtended] = deriveDecoder[PipeSegExtended]
   implicit val PipeSegExtendedEncoder: Encoder[PipeSegExtended] = deriveEncoder[PipeSegExtended]
+
+  implicit val UsrParDecoder: Decoder[UsrPar] = deriveDecoder[UsrPar]
+  implicit val UsrParEncoder: Encoder[UsrPar] = deriveEncoder[UsrPar]
 
   implicit val PipeSegActualDecoder: Decoder[PipeSegActual] = deriveDecoder[PipeSegActual]
   implicit val PipeSegActualEncoder: Encoder[PipeSegActual] = deriveEncoder[PipeSegActual]
@@ -256,6 +259,7 @@ trait Codecs {
     classOf[HullSystem],
     classOf[PipeSeg],
     classOf[PipeSegExtended],
+    classOf[UsrPar],
     classOf[PipeSegActual],
     classOf[Material],
     classOf[ProjectName],
