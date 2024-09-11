@@ -21,7 +21,7 @@ import ch.megard.akka.http.cors.scaladsl.CorsDirectives.cors
 import deepsea.accomodations.AccommodationManager.{AddAccommodationGroup, GetAccomUserIdReplace, GetAccommodations, GetAccommodationsESP, SetAccommodationLabel, UpdateAccommodationUserId}
 import deepsea.devices.DeviceManager.{AddDeviceToSystem, GetDevices, GetDevicesESP, RemoveDeviceFromSystem}
 import deepsea.esp.EspManager.{AddMaterialPurchase, CreateEsp, GetEsp, GetGlobalEsp, GetGlobalEspPdf, GetGlobalEspPdfSpec, GetGlobalEspSpec, GetMaterialPurchases}
-import deepsea.pipe.PipeManager.{GetPipeESP, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetPipeSegsBySystemZone, GetSpoolLocks, GetSpoolModel, GetSystems, GetZones, SetSpoolLock}
+import deepsea.pipe.PipeManager.{GetPipeESP, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetPipeSegsBySystem, GetSpoolLocks, GetSpoolModel, GetSystems, GetZones, SetSpoolLock}
 import io.circe.syntax.EncoderOps
 
 import java.io.File
@@ -200,8 +200,8 @@ class HTTPManager extends Actor {
       (get & path("pipeSegs") & parameter("docNumber")) { (docNumber) =>
         askFor(ActorManager.pipe, GetPipeSegsByDocNumber(docNumber))
       },
-      (get & path("pipeSegs") & parameter("system") & parameter("zone")) { (system, zone) =>
-        askFor(ActorManager.pipe, GetPipeSegsBySystemZone(system, zone))
+      (get & path("pipeSegs") & parameter("system")) { (system) =>
+        askFor(ActorManager.pipe, GetPipeSegsBySystem(system))
       },
       (get & path("pipeSegs") & parameter("project")) { (project) =>
         askFor(ActorManager.pipe, GetPipeSegsBilling(project))

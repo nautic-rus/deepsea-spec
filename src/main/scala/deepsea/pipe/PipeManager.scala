@@ -88,7 +88,7 @@ object PipeManager{
   case class GetPipeSegsBilling(project: String)
   case class GetPipeSegsSpools(project: String)
   case class GetPipeSegsByDocNumber(docNumber: String, json: Boolean = true)
-  case class GetPipeSegsBySystemZone(system: String, zone: String)
+  case class GetPipeSegsBySystem(system: String)
   case class GetSystems(project: String)
   case class GetZones(project: String)
   case class GetSpoolLocks(docNumber: String)
@@ -194,8 +194,8 @@ class PipeManager extends Actor with Codecs with PipeHelper {
       }
       val pipeSegs = getPipeSegs(projectSystem._1, projectSystem._2)
       val a = 0
-    case GetPipeSegsBySystemZone(system, zone) =>
-      sender() ! getPipeSegsBySystemZone("N002", system, zone).asJson.noSpaces
+    case GetPipeSegsBySystem(system) =>
+      sender() ! getPipeSegsBySystem("N002", system).asJson.noSpaces
     case SetSpoolLock(jsValue) =>
       setSpoolLock(jsValue)
       sender() ! "success".asJson.noSpaces
