@@ -35,10 +35,12 @@ object PipeManager{
                      sqInSystem: Int, isPieceId: Int, var spPieceId: Int, isom: String, spool: String, var length: Double, radius: Double, angle: Double,
                      weight: Double, stock: String, fcon3: String, insul: String, classDescription: String,
                      or_vec_u: Double, or_vec_v: Double, or_vec_w: Double, or_angle: Double, x: Double, y: Double, z: Double,
-                     zone_id: Int, system_id: Int, nomD: Double, outD: Double, params: List[UsrPar],
+                     zone_id: Int, system_id: Int, nomD: Double, outD: Double, params: List[UsrPar], parObj: List[ParObj],
                      var material: Material = Material(), var systemDescr: String = "") extends EspElement {
   }
-  case class UsrPar(zone: Int, System: Int, line: String, pls: Int, elem: Int, value: String, des: String)
+  case class UsrPar(zone: Int, system: Int, line: String, pls: Int, elem: Int, value: String, des: String)
+  case class ParObj(zone: Int, system: Int, line: String, pls: Int, elem: Int, bdnom: String, a11: Double, a12: Double, a13: Double,
+                    a21: Double, a22: Double, a23: Double, a31: Double, a32: Double, a33: Double, a41: Double, a42: Double, a43: Double, x_max: Double, x_min: Double, y_max: Double, y_min: Double, z_man: Double, z_min: Double)
   case class PipeSegBilling(zone: String, system: String, typeCode: String, typeDesc: String, classAlpha: String, compType: String, compUserId: String, smat: String, length: Double, weight: Double, stock: String, insul: String, material: Material = Material(), systemDescr: String = "", count: Int = 1)
   case class PipeSegActual(name: String, date: Long)
   case class Material(

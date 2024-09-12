@@ -1,6 +1,6 @@
 package deepsea.pipe
 
-import deepsea.pipe.PipeManager.{ElecEquip, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSystems, GetZones, Material, MaterialQuality, PipeLineSegment, PipeSeg, PipeSegActual, PipeSegBilling, PipeSegExtended, PipeSup, Pls, PlsElem, PlsParam, ProjectName, SetSpoolLock, SpoolLock, SystemDef, Units, UpdatePipeComp, UpdatePipeJoints, UsrPar}
+import deepsea.pipe.PipeManager.{ElecEquip, GetPipeSegs, GetPipeSegsBilling, GetPipeSegsByDocNumber, GetSpoolLocks, GetSystems, GetZones, Material, MaterialQuality, ParObj, PipeLineSegment, PipeSeg, PipeSegActual, PipeSegBilling, PipeSegExtended, PipeSup, Pls, PlsElem, PlsParam, ProjectName, SetSpoolLock, SpoolLock, SystemDef, Units, UpdatePipeComp, UpdatePipeJoints, UsrPar}
 import org.mongodb.scala.{Document, MongoClient, MongoCollection, MongoDatabase, bson}
 import org.mongodb.scala.model.Filters.{and, equal, notEqual}
 import akka.http.scaladsl.{Http, HttpExt}
@@ -277,21 +277,52 @@ trait PipeHelper extends Codecs with MaterialsHelper {
           case Some(mongoData) =>
             val res = ListBuffer.empty[PipeSegExtended]
             val usrPar = ListBuffer.empty[UsrPar]
+            val parObjects = ListBuffer.empty[ParObj]
 
             DBManager.GetOracleConnection(project) match {
               case Some(connection) =>
                 val stmt = connection.createStatement()
-                val q = s"select * from PLSE_PAROBJ_USRPAR where system in (select seqid from systems where name = '$system')"
-                val rs = stmt.executeQuery(q)
-                while (rs.next()){
+                val q1 = s"select * from PLSE_PAROBJ_USRPAR where system in (select seqid from systems where name = '$system')"
+                val rs1 = stmt.executeQuery(q1)
+                while (rs1.next()){
                   usrPar += UsrPar(
-                    rs.getInt("ZONE"),
-                    rs.getInt("SYSTEM"),
-                    rs.getString("LINE"),
-                    rs.getInt("PLS"),
-                    rs.getInt("ELEM"),
-                    rs.getString("CVAL"),
-                    rs.getString("CDES"),
+                    rs1.getInt("ZONE"),
+                    rs1.getInt("SYSTEM"),
+                    rs1.getString("LINE"),
+                    rs1.getInt("PLS"),
+                    rs1.getInt("ELEM"),
+                    rs1.getString("CVAL"),
+                    rs1.getString("CDES"),
+                  )
+                }
+                val q2 = s"select * from PLSELEM_PAROBJ where system in (select seqid from systems where name = '$system')"
+                val rs2 = stmt.executeQuery(q2)
+                while (rs2.next()){
+                  parObjects += ParObj(
+                    rs2.getInt("ZONE"),
+                    rs2.getInt("SYSTEM"),
+                    rs2.getString("LINE"),
+                    rs2.getInt("PLS"),
+                    rs2.getInt("ELEM"),
+                    rs2.getString("BDNOM"),
+                    rs2.getDouble("A11"),
+                    rs2.getDouble("A12"),
+                    rs2.getDouble("A13"),
+                    rs2.getDouble("A21"),
+                    rs2.getDouble("A22"),
+                    rs2.getDouble("A23"),
+                    rs2.getDouble("A31"),
+                    rs2.getDouble("A32"),
+                    rs2.getDouble("A33"),
+                    rs2.getDouble("A41"),
+                    rs2.getDouble("A42"),
+                    rs2.getDouble("A43"),
+                    rs2.getDouble("X_MAX"),
+                    rs2.getDouble("X_MIN"),
+                    rs2.getDouble("Y_MAX"),
+                    rs2.getDouble("Y_MIN"),
+                    rs2.getDouble("Z_MAX"),
+                    rs2.getDouble("Z_MIN"),
                   )
                 }
 
@@ -324,14 +355,18 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                     }
                   case _ =>
                 }
-
+                rs1.close()
+                rs2.close()
                 stmt.close()
                 connection.close()
               case _ =>
             }
 
 
-            res.toList.map(x => x.copy(params = usrPar.filter(y => y.zone == x.zone_id && y.line == x.line && y.pls == x.pls && y.elem == x.elem).toList))
+            res.toList.map(x => x.copy(
+              params = usrPar.filter(y => y.zone == x.zone_id && y.line == x.line && y.pls == x.pls && y.elem == x.elem).toList,
+              parObj = parObjects.filter(y => y.zone == x.zone_id && y.line == x.line && y.pls == x.pls && y.elem == x.elem).toList
+            ))
           case _ => List.empty[PipeSegExtended]
         }
     }

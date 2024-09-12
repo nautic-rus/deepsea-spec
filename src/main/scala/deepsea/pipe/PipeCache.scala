@@ -4,7 +4,7 @@ import akka.actor.{Actor, ActorSystem}
 import akka.util.Timeout
 import deepsea.database.DBManager
 import deepsea.database.DBManager.GetMongoCacheConnection
-import deepsea.pipe.PipeManager.{PipeSeg, PipeSegActual, PipeSegExtended, UpdatePipeComp, UpdatePipeJoints, UsrPar}
+import deepsea.pipe.PipeManager.{ParObj, PipeSeg, PipeSegActual, PipeSegExtended, UpdatePipeComp, UpdatePipeJoints, UsrPar}
 import org.mongodb.scala.MongoCollection
 import org.mongodb.scala.model.Filters.notEqual
 
@@ -207,7 +207,8 @@ class PipeCache extends Actor{
                 case value: Double => value
                 case _ => 0
               },
-              List.empty[UsrPar]
+              List.empty[UsrPar],
+              List.empty[ParObj]
             )
 
           }
