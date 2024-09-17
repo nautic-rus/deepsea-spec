@@ -94,7 +94,7 @@ from
             (select STORAGE_CODE from STD_PLATE where MATERIAL_OID=PA.MATERIAL_OID and THICKNESS=PA.THICKNESS and STORAGE_CODE is not null  fetch first 1 row only  ) as STOCK
         FROM PRD_EXPL_PART PE,  PRD_PART P, V_RPT_SHDK_PLATE_ATT PA, BLOCK B
         WHERE
-                PA.PRD_PART_OID = P.OID AND PE.PRD_PART_OID =PA.PRD_PART_OID
+            PA.PRD_PART_OID = P.OID AND PE.PRD_PART_OID =PA.PRD_PART_OID
           AND P.PART_TYPE IN (9, 10)
           AND P.BLOCK_OID=B.OID
           and B.DESCRIPTION like '%&drawingNumber %'
@@ -158,7 +158,7 @@ from
                (select STORAGE_CODE from STD_PLATE where MATERIAL_OID=PA.MATERIAL_OID and THICKNESS=PA.THICKNESS*1000 and STORAGE_CODE is not null fetch first 1 row only    ) as STOCK
         FROM PRD_EXPL_PART PE, PRD_PART P, INP_PLATE_ATT_DB PA,BLOCK B
         WHERE
-                PA.INP_PART_OID = P.OID AND PE.PRD_PART_OID=P.OID
+            PA.INP_PART_OID = P.OID AND PE.PRD_PART_OID=P.OID
           AND P.PART_TYPE IN (14,
                               15,
                               18,
@@ -211,13 +211,54 @@ from
                     GET_PRD_EXPL_NESTING_OID(PE.OID) as NOID
                 from PRD_PART P, PRD_EXPL_PART PE, INP_LC_ATT_DB PRF
                 where
-                        P.PART_TYPE in (17)
+                    P.PART_TYPE in (17)  AND SUBSTR (GET_SECT_TP (PRF.STD_SECTION_OID), 1, 2) like 'FS'
                   AND P.BLOCK_OID=(select OID from BLOCK where DESCRIPTION like '%&drawingNumber %')
                   AND PE.PRD_PART_OID=  P.OID
                   AND PRF.INP_PART_OID = P.OID
 
 
             ) PART
+
+        union all
+
+        select
+            P.OID as PART_OID,
+            PE.OID as PEOID,
+            P.CODE  as PART_CODE,
+            DECODE (PE.SYMMETRY,  0,'P', 1,'S', 2,'C', 3,'') as SYMMETRY,
+            P.PART_TYPE,
+            B.CODE as BLOCK_CODE,
+            RPT_COPY_COUNT (P.OID) as NUM_EQ_PART,
+            SUBSTR (GET_PART_DESC (P.OID, 1), 1, 200) as PART_DESC ,
+            SUBSTR (GET_SECT_TP (prf.STD_SECTION_OID), 1, 2) as ELEM_TYPE,
+            SUBSTR (GET_MATERIAL_CODE (PRF.STD_SECTION_OID, 2), 1, 12) as MATERIAL,
+            RPT_GET_PART_LENGTH (P.OID) * 1000 as LENGTH,
+            STD.WEB_HEIGHT as WIDTH,
+            STD.WEB_THICKNESS as THICKNESS,
+            RPT_GET_PART_WEIGHT (P.OID) as WEIGHT_UNIT,
+            RPT_GET_PART_WEIGHT (P.OID) * RPT_COPY_COUNT (P.OID) as TOTAL_WEIGHT,
+            SUBSTR (GET_NEST_ID (GET_PRD_EXPL_NESTING_OID(PE.OID), P.BLOCK_OID), 1, 15)  as NEST_ID,
+            GET_NUM_EQ_NEST (GET_PRD_EXPL_NESTING_OID(PE.OID)) as NUM_PART_NEST,
+            GET_NEST_HEIGHT (GET_PRD_EXPL_NESTING_OID(PE.OID)) as NEST_LENGTH,
+            GET_NEST_WIDTH (GET_PRD_EXPL_NESTING_OID(PE.OID)) as NEST_WIDTH,
+            GET_NUM_EQ_NEST (GET_PRD_EXPL_NESTING_OID(PE.OID)) as NUM_EQ_NEST,
+            STD.WEB_HEIGHT as WH,
+            STD.WEB_THICKNESS as WT,
+            STD.FLANGE_HEIGHT as FH,
+            STD.FLANGE_THICKNESS as FT,
+            STD.STOCK_CODE0 as STOCK
+        FROM
+            PRD_EXPL_PART PE,
+            PRD_PART P,
+            INP_LC_ATT_DB PRF,
+            BLOCK B,
+            STD_PROFILE STD
+        WHERE
+            (PRF.INP_PART_OID = P.OID AND PRF.STD_SECTION_OID=STD.OID)
+          AND PE.PRD_PART_OID= P.OID
+          AND P.PART_TYPE IN (17) AND SUBSTR (GET_SECT_TP (PRF.STD_SECTION_OID), 1, 2) not like 'FS'
+          AND P.BLOCK_OID=B.OID
+          AND P.BLOCK_OID in (SELECT OID FROM BLOCk WHERE DESCRIPTION like '%&drawingNumber %')
 
         union all
         select P.OID as PART_OID,   PE.OID as PEOID, P.CODE  as PART_CODE,
@@ -249,7 +290,7 @@ from
              PRD_EXPL_PART          PE ,  BLOCK B, MATERIAL M
 
         WHERE
-                PA.OID = P.OID
+            PA.OID = P.OID
           AND PE.PRD_PART_OID = P.OID
           AND P.PART_TYPE = 12 AND P.BLOCK_OID=B.OID
           AND PA.MATQ=M.CODE
@@ -308,7 +349,7 @@ from
           AND STD.KSE = PRF.KSE
           AND P.PART_TYPE = 7 AND P.BLOCK_OID=B.OID
           and B.DESCRIPTION like '%&drawingNumber %'
-    union all
+        union all
         SELECT
             P.OID as PART_OID,
             PE.OID as PEOID,
@@ -343,7 +384,7 @@ from
             BLOCK B,
             MATERIAL M
         WHERE
-                PA.OID = P.OID
+            PA.OID = P.OID
           AND NP.PART_OID = P.OID
           AND PE.PRD_PART_OID = P.OID
           AND P.BLOCK_OID = B.OID

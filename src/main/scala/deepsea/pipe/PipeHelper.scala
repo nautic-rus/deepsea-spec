@@ -276,7 +276,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
         DBManager.GetMongoConnection() match {
           case Some(mongoData) =>
             val res = ListBuffer.empty[PipeSegExtended]
-            val usrPar = ListBuffer.empty[UsrPar]
+            val usrParams = ListBuffer.empty[UsrPar]
             val parObjects = ListBuffer.empty[ParObj]
 
             DBManager.GetOracleConnection(project) match {
@@ -285,7 +285,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                 val q1 = s"select * from PLSE_PAROBJ_USRPAR where system in (select seqid from systems where name = '$system')"
                 val rs1 = stmt.executeQuery(q1)
                 while (rs1.next()){
-                  usrPar += UsrPar(
+                  usrParams += UsrPar(
                     rs1.getInt("ZONE"),
                     rs1.getInt("SYSTEM"),
                     rs1.getString("LINE"),
@@ -364,7 +364,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
 
 
             res.toList.map(x => x.copy(
-              params = usrPar.filter(y => y.zone == x.zone_id && y.line == x.line && y.pls == x.pls && y.elem == x.elem).toList,
+              usrPar = usrParams.filter(y => y.zone == x.zone_id && y.line == x.line && y.pls == x.pls && y.elem == x.elem).toList,
               parObj = parObjects.filter(y => y.zone == x.zone_id && y.line == x.line && y.pls == x.pls && y.elem == x.elem).toList
             ))
           case _ => List.empty[PipeSegExtended]
