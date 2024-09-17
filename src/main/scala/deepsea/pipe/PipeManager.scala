@@ -188,7 +188,7 @@ class PipeManager extends Actor with Codecs with PipeHelper {
     //self ! GetPipeESP("200101-743-001", "1", "", "ru")
     //self ! GetPipeSegsByDocNumber("200101-574-024")
     //self ! GetSpoolModel("210101-545-0001", "032", "0")
-    self ! GetPipeSegsBySystem("701-005")
+    //self ! GetPipeSegsBySystem("701-005")
   }
 
   override def receive: Receive = {
