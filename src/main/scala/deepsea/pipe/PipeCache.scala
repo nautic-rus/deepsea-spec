@@ -29,9 +29,10 @@ class PipeCache extends Actor{
 
   override def receive: Receive = {
     case UpdatePipeComp() =>
-      updatePipeComp()
+      //updatePipeComp()
       //updatePipeCompExtened()
-    case UpdatePipeJoints() => updatePipeJoints()
+    case UpdatePipeJoints() =>
+      //updatePipeJoints()
 
   }
   def updatePipeCompExtened(): Unit = {
