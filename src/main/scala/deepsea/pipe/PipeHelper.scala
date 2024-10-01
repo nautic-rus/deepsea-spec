@@ -798,7 +798,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
           val quality = (bdatri + "    ").substring(0, 4).trim
           val insulation = (bdatri + "    ").substring(4, 4).trim
 
-          if (plsElem.spool == "550"){
+          if (plsElem.spool == "015"){
             val qwe = 0
           }
           val isComp = plsElem.cmp_oid != 0
@@ -884,6 +884,15 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                               val d2 = Math.round(params(1).value * 2)
                               val l = Math.round(params(2).value)
                               s"ПЕРЕХОД ДУ$d2/ДУ$d1, L=$l (${material.name})"
+                            }
+                            else if (params.length == 5){
+                              val d1 = Math.round(params(0).value * 2)
+                              val d2 = Math.round(params(1).value * 2)
+                              val d3 = Math.round(params(2).value * 2)
+                              val d4 = Math.round(params(3).value * 2)
+                              val l = Math.round(params(2).value)
+                              val cross = 'x'
+                              s"ПЕРЕХОД $d1$cross$d2/$d3$cross$d4 L=$l (${material.name})"
                             }
                             else if (params.length == 7) {
                               val d1 = Math.round(params(0).value)
