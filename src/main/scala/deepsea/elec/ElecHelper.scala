@@ -1049,29 +1049,29 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
         while (rs.next()){
           try{
             res += EleNode(
-              rs.getInt("NODE_OID"),
-              rs.getString("NODE"),
-              rs.getDouble("X"),
-              rs.getDouble("Y"),
-              rs.getDouble("Z"),
-              rs.getInt("TYPE"),
-              rs.getInt("AREA_ID"),
-              rs.getString("ROUT_AREA"),
-              rs.getString("AREA_DESCR"),
-              rs.getString("CODE"),
-              rs.getString("DESCR"),
-              rs.getDouble("FRAMES"),
-              rs.getDouble("IWIDTH"),
-              rs.getDouble("IHEIGHT"),
-              rs.getDouble("LENGTH"),
-              rs.getDouble("THICKNESS"),
-              rs.getDouble("HEIGHT2"),
-              rs.getDouble("WEIGHT"),
-              rs.getString("STOCK"),
-              rs.getDouble("NROWS"),
-              rs.getDouble("NCOLUMNS"),
-              rs.getString("SEAL"),
-              rs.getString("TRANSIT_SIZE"),
+              Option(rs.getInt("NODE_OID")).getOrElse(0),
+              Option(rs.getString("NODE")).getOrElse(""),
+              Option(rs.getDouble("X")).getOrElse(0d),
+              Option(rs.getDouble("Y")).getOrElse(0d),
+              Option(rs.getDouble("Z")).getOrElse(0d),
+              Option(rs.getInt("TYPE")).getOrElse(0),
+              Option(rs.getInt("AREA_ID")).getOrElse(0),
+              Option(rs.getString("ROUT_AREA")).getOrElse(""),
+              Option(rs.getString("AREA_DESCR")).getOrElse(""),
+              Option(rs.getString("CODE")).getOrElse(""),
+              Option(rs.getString("DESCR")).getOrElse(""),
+              Option(rs.getDouble("FRAMES")).getOrElse(0d),
+              Option(rs.getDouble("IWIDTH")).getOrElse(0d),
+              Option(rs.getDouble("IHEIGHT")).getOrElse(0d),
+              Option(rs.getDouble("LENGTH")).getOrElse(0d),
+              Option(rs.getDouble("THICKNESS")).getOrElse(0d),
+              Option(rs.getDouble("HEIGHT2")).getOrElse(0d),
+              Option(rs.getDouble("WEIGHT")).getOrElse(0d),
+              Option(rs.getString("STOCK_CODE")).getOrElse(""),
+              Option(rs.getDouble("NROWS")).getOrElse(0d),
+              Option(rs.getDouble("NCOLUMNS")).getOrElse(0d),
+              Option(rs.getString("SEAL_TYPE")).getOrElse(""),
+              Option(rs.getString("TRANSIT_SIZE")).getOrElse(""),
             )
           }
          catch {
@@ -1096,11 +1096,11 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
         while (rs.next()){
           try{
             res += EleCable(
-              rs.getString("CABLE_ID"),
-              rs.getString("NOM_SECTION"),
-              rs.getString("CABLE_SPEC"),
-              rs.getString("MAT_NUMBER"),
-              rs.getDouble("O_DIAMETER"),
+              Option(rs.getString("CABLE_ID")).getOrElse(""),
+              Option(rs.getString("NOM_SECTION")).getOrElse(""),
+              Option(rs.getString("CABLE_SPEC")).getOrElse(""),
+              Option(rs.getString("MAT_NUMBER")).getOrElse(""),
+              Option(rs.getDouble("O_DIAMETER")).getOrElse(0d),
             )
           }
           catch {
