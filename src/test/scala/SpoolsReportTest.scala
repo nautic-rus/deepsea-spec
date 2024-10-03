@@ -1,5 +1,6 @@
 
 import deepsea.esp.EspManagerHelper
+import deepsea.pipe.PipeManager.Material
 import deepsea.pipe.{PipeHelper, PipeManager}
 import local.pdf.en.common.ReportCommonEN.{Item11ColumnsEN, rowwrap}
 import local.pdf.en.pipe.SpoolsReportEN.{genSpoolsListEnPDF, genSpoolsListEnPDFAll}
@@ -13,7 +14,7 @@ class SpoolsReportTest extends AnyFunSuite with PipeHelper  with EspManagerHelpe
 
 
   //val pipeSegs: List[PipeManager.PipeSeg] = getPipeSegsFromMongo("N002", "200101-574-008")
-  val docNumber = "200101-574-008"
+  val docNumber = "200101-743-001"
   val projectSystem = getSystemAndProjectFromDocNumber(docNumber)
   //from real db
   val pipeSegs: List[PipeManager.PipeSeg] = getPipeSegs(projectSystem._1, projectSystem._2)
@@ -26,8 +27,8 @@ class SpoolsReportTest extends AnyFunSuite with PipeHelper  with EspManagerHelpe
 
   //val ret: String = genSpoolsListEnPDF("210101-800-0001", "FUEL SYSTEM", "0", jk, "ru")
 
-  val retAll: String = genSpoolsListEnPDFAll("200101-574-008",
-    "СИСТЕМА ВЕНТИЛЯЦИИ ПОМ. ПРИЕМА ПИТАНИЯ С БЕРЕГА И ПОМ. СПАСАТЕЛЬНОГО ИМУЩЕСТВАЖЖЖЖЖЖЖЖЖЖЖЖ", "0", pipeSegs2.toList, "ru")
+  val retAll: String = genSpoolsListEnPDFAll(docNumber,
+    "SOME SYSTEM DESCRIPTION", "0", pipeSegs2.toList, "ru", List.empty[Material])
 
   // println(ret)
   println(retAll)

@@ -16,7 +16,7 @@ class SummTest extends AnyFunSuite with MaterialPdf with EspManagerHelper with E
   val file: String = Files.createTempDirectory("hullPdf").toAbsolutePath.toString + "/" + docNumber + "_rev" + rev + ".pdf"
   val projects = List(foranProject)
   val projectId = 1
-  val globalEsp = generateHullGlobalEsp(projects)
+  val globalEsp = generateDeviceGlobalEsp(projects).filter(_.code == "ROMINSAUXXXX0003")
   val res = ListBuffer.empty[GlobalEsp]
 
   val statemId = 1

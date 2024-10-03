@@ -29,7 +29,7 @@ class MatTypes extends AnyFunSuite with PipeHelper with EspManagerHelper{
                       ProfileSection(17, "TL"))
   case class ProfileSection(code: Int, section: String)
   case class HullSpec(descr: String, partType: String, thickness: Double, kse: Double, hullKse: HullKse)
-  case class PipeSpec(t: String, tDesc: String, nd: Double, outD: Double, thick: Double)
+  case class PipeSpec(t: String, tDesc: String, nd: Double, outD: Double, thick: Double, systemName: String, compuserid: String, length: Double, angle: Double)
   case class HvacSpec(name: String, cType: String, oid: Double, params: List[HvacParam])
   case class HvacPlates(name: String, oid: Int)
   case class HvacParam(oid: Double, name: String, pType: String, value: String)
@@ -39,6 +39,11 @@ class MatTypes extends AnyFunSuite with PipeHelper with EspManagerHelper{
   case class TraySpec(descr: String, w: Double, h: Double, diam: Double, fillRule: String, nomSize: String, cabWidth: Double, cabHeight: Double, trayComp: String)
   case class PipeJoin(nomDiam: Double, joinSpec: String, joinPressure: String, joinThick: Double, nuts: Double, nutsPressure: String, boltLength: Double, boltPressure: String, bolts: Double)
 
+  val systems1 = List("821-001", "821-002", "804-001", "803-001", "803-003", "722-001", "721-004", "721-001", "734-001", "581-001", "779-001", "262-001", "574-007", "701-009", "701-004", "701-001", "581-001")
+  val systems = List("872-002", "872-003", "872-005", "880-001")
+
+  printPipeCount(getPipe("N002").filter(x => systems.contains(x.systemName)))
+
   //printHullWithCount(getHull(project))
   //printHull(getHullByBlock(project, "U0107"))
   //printPipe(getPipe(project))
@@ -46,7 +51,7 @@ class MatTypes extends AnyFunSuite with PipeHelper with EspManagerHelper{
   //printCables(getCables(project))
   //printCableTrays(getCableTrays(project))
   //printPipeJoins(getPipeJoins(project))
-  printHvacPlates(getHvacPlates(project))
+  //printHvacPlates(getHvacPlates(project))
   //printPipeWithCount(getPipeBySystem(project, "813-1001"))
 
   //val materials = getMaterialsAux.filter(_.project == "200101")
@@ -182,6 +187,10 @@ class MatTypes extends AnyFunSuite with PipeHelper with EspManagerHelper{
             rs.getDouble("ND1MM"),
             rs.getDouble("OUTDIAMETER"),
             rs.getDouble("THICKNESS"),
+            rs.getString("SYSTEMNAME"),
+            Option(rs.getString("COMPUSERID")).getOrElse("NO NAME"),
+            Option(rs.getDouble("LENGTH")).getOrElse(0),
+            Option(rs.getDouble("ANGLE")).getOrElse(0),
           )
         }
         stmt.close()
@@ -193,6 +202,16 @@ class MatTypes extends AnyFunSuite with PipeHelper with EspManagerHelper{
   def printPipe(pipe: List[PipeSpec]): Unit = {
     pipe.groupBy(x => (x.t, x.tDesc, x.nd, x.outD, x.thick)).toList.sortBy(x => x._1._2 + "-" + x._1._3 + "-" + x._1._4 + "-" + x._1._5).foreach(g => {
       println(List(g._1._2, g._1._3, g._1._4, g._1._5).mkString(","))
+    })
+  }
+  def printPipeCount(pipe: List[PipeSpec]): Unit = {
+    pipe.sortBy(_.compuserid).groupBy(x => (x.t, x.compuserid, x.nd, x.outD, x.thick, x.systemName, x.angle)).foreach(gr => {
+      val length = gr._1._1 match {
+        case "PIPE" => Math.round(gr._2.map(_.length).sum / 1000d * 100d) / 100d
+        case _ => gr._2.length
+      }
+      val angle = Math.round(gr._1._7 * 180 / Math.PI)
+      println(List(gr._1._2.replace(",", " "), gr._1._1, gr._1._3, gr._1._4, gr._1._5, length, gr._1._6, angle).mkString(","))
     })
   }
   def getPipeBySystem(project: String, system: String): List[PipeSpec] = {
@@ -208,6 +227,10 @@ class MatTypes extends AnyFunSuite with PipeHelper with EspManagerHelper{
             rs.getDouble("ND1MM"),
             rs.getDouble("OUTDIAMETER"),
             rs.getDouble("THICKNESS"),
+            rs.getString("SYSTEMNAME"),
+            Option(rs.getString("COMPUSERID")).getOrElse("NO NAME"),
+            Option(rs.getDouble("LENGTH")).getOrElse(0),
+            Option(rs.getDouble("ANGLE")).getOrElse(0),
           )
         }
         stmt.close()

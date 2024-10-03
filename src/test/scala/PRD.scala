@@ -1,17 +1,41 @@
+import deepsea.hull.HullHelper
+import deepsea.materials.MaterialsHelper
 import local.hull.PartManager._
 import local.pdf.en.common.ReportCommonEN.{DocNameEN, Item11ColumnsEN}
 import local.pdf.en.prd.PrdPartsReportEN.genHullPartListEnPDF
 import org.scalatest.funsuite.AnyFunSuite
 
+import java.awt.Desktop
+import java.io.File
+import java.nio.file.Files
 import scala.collection.mutable.ListBuffer
 
-class PRD extends AnyFunSuite {
+class PRD extends AnyFunSuite with MaterialsHelper with HullHelper {
 
   //val s=ForanPartLabelByDrawingNumAndPartName("N004","210101-102-0203","0657")
   //val sы=genForanPartLabelByDrawingNumAndPartNameJSON("N004","NR004-101-0103","0001")
-  val parts = genForanPartsByDrawingNum("N002","200101-222-BS12")
+  val project = "N002"
+  val docNumber = "200101-222-BS01"
+  val materials = getMaterials
+  val parts = genForanPartsByDrawingNum(project, docNumber) ++ getHullIssueMaterials(docNumber, materials)
+  parts.map(_.STOCK_CODE).distinct.foreach(println)
+  val parts1 = parts.filter(_.STOCK_CODE == "NR00000000022398")
+  val parts2 = parts.filter(_.PART_CODE == "1135")
+  val qww = getHullIssueMaterials(docNumber, materials)
+  val qwww = qww
 
-  val h=0
+  val notFound1 = parts.filter(_.PART_CODE == "0001")
+  val notFound2 = parts.filter(_.PART_CODE == "0002")
+  val notFound3 = parts.filter(_.PART_CODE == "0003")
+  val notFound4 = parts.filter(_.PART_CODE == "0004")
+  val rev = "_"
+  val docName = "УСТАНОВКА НАСТИЛА В МОРОЗИЛЬНОМ ТРЮМЕ"
+  val file: String = Files.createTempDirectory("hullPdf").toAbsolutePath.toString + "/" + docNumber + "_rev" + rev + ".pdf"
+
+  genHullPartListEnPDF(project, docNumber, docName, rev, file, getHullIssueMaterials(docNumber, materials))
+  Desktop.getDesktop.open(new File(file))
+
+  val h = 0
 
 /*  val parts: List[PrdPart] = genForanPartsByDrawingNum("N004", "210101-102-0103")
   val rows:List[Item11ColumnsEN]={
