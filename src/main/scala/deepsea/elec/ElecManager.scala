@@ -282,6 +282,13 @@ object ElecManager {
 
   case class MaterialLabel(code: String, label: String)
 
+  case class EleNode(node_id: Int, node: String, x: Double, y: Double, z: Double,
+                     node_type: Int, area: Int, rout_area: String, area_desc: String,
+                     code: String, descr: String, frames: Double, iwidth: Double, iheight: Double, length: Double, thickness: Double,
+                     height2: Double, weight: Double, stock: String, nrows: Double, ncolumns: Double, seal: String,
+                     transit_size: String)
+  case class EleCable(cable_id: String, nom_section: String, spec: String, code: String, diam: Double)
+
   case class GetEleNodes(project: String)
   case class GetEleNodeCables(project: String, node: Int)
 

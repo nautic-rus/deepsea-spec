@@ -2,7 +2,7 @@ package local.common
 
 import deepsea.accomodations.AccommodationManager.{Accommodation, BBox}
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
-import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, Cog, EleElement, ElecAngle, ElecCable, EquipmentConnection, TrayBySystem}
+import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, Cog, EleCable, EleElement, EleNode, ElecAngle, ElecCable, EquipmentConnection, TrayBySystem}
 import deepsea.esp.EspManager.{DeviceEspObject, DocumentWithMaterial, EleEspObject, EspElement, EspObject, GlobalEsp, GlobalEspSpec, HullEspObject, MaterialPurchase, PipeEspObject}
 import deepsea.hull.HullManager._
 import deepsea.pipe.PipeManager.{Material, MaterialTranslation, ParObj, PipeSeg, PipeSegActual, PipeSegBilling, PipeSegExtended, ProjectName, SpecMaterial, SpoolLock, SystemDef, UnitTranslation, Units, UsrPar}
@@ -142,6 +142,11 @@ trait Codecs {
   implicit val ElecAngleDecoder: Decoder[ElecAngle] = deriveDecoder[ElecAngle]
   implicit val ElecAngleEncoder: Encoder[ElecAngle] = deriveEncoder[ElecAngle]
 
+  implicit val EleNodeDecoder: Decoder[EleNode] = deriveDecoder[EleNode]
+  implicit val EleNodeEncoder: Encoder[EleNode] = deriveEncoder[EleNode]
+
+  implicit val EleCableDecoder: Decoder[EleCable] = deriveDecoder[EleCable]
+  implicit val EleCableEncoder: Encoder[EleCable] = deriveEncoder[EleCable]
 
 
   //KOKOVIN

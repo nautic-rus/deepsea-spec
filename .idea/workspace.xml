@@ -5,24 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="89ab2c51-df73-4691-9162-e6a933796311" name="Changes" comment="some changes">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Default_Changelist.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Default_Changelist/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/scala/deepsea/App.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/App.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/scala/deepsea/database/DBManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/database/DBManager.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/scala/AccomReportTest.scala" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/scala/AccommodationsTest.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/AccommodationsTest.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/scala/CableListTest.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/CableListTest.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/scala/EleTest.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/EleTest.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/scala/MatTypes.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/MatTypes.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/scala/PRD.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/PRD.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/scala/SpoolsReportTest.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/SpoolsReportTest.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/scala/SummTest.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/SummTest.scala" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/test/scala/TestCreateSP.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/test/scala/TestCreateSP.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/deepsea/elec/ElecHelper.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/elec/ElecHelper.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/deepsea/elec/ElecManager.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/deepsea/elec/ElecManager.scala" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/scala/local/common/Codecs.scala" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/scala/local/common/Codecs.scala" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -219,15 +205,7 @@
       <workItem from="1727159236321" duration="605000" />
       <workItem from="1727175940615" duration="14000" />
       <workItem from="1727786895663" duration="1744000" />
-      <workItem from="1727936391509" duration="4618000" />
-    </task>
-    <task id="LOCAL-00048" summary="some changes">
-      <option name="closed" value="true" />
-      <created>1719820999418</created>
-      <option name="number" value="00048" />
-      <option name="presentableId" value="LOCAL-00048" />
-      <option name="project" value="LOCAL" />
-      <updated>1719820999418</updated>
+      <workItem from="1727936391509" duration="5022000" />
     </task>
     <task id="LOCAL-00049" summary="some changes">
       <option name="closed" value="true" />
@@ -613,7 +591,15 @@
       <option name="project" value="LOCAL" />
       <updated>1727955170768</updated>
     </task>
-    <option name="localTasksCounter" value="97" />
+    <task id="LOCAL-00097" summary="some changes">
+      <option name="closed" value="true" />
+      <created>1727955292795</created>
+      <option name="number" value="00097" />
+      <option name="presentableId" value="LOCAL-00097" />
+      <option name="project" value="LOCAL" />
+      <updated>1727955292795</updated>
+    </task>
+    <option name="localTasksCounter" value="98" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
