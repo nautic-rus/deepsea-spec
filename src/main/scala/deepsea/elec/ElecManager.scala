@@ -282,6 +282,9 @@ object ElecManager {
 
   case class MaterialLabel(code: String, label: String)
 
+  case class GetEleNodes(project: String)
+  case class GetEleNodeCables(project: String, node: Int)
+
   class ElecManager extends Actor with ElecHelper with Codecs with ElePdf {
     implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
 
@@ -376,6 +379,10 @@ object ElecManager {
         sender() ! generateEleEsp(foranProject, docNumber, rev, user, taskId).asJson.noSpaces
       case GetElePos(project, index, kind, taskId) =>
         sender() ! getElePos(project, kind, index.toIntOption.getOrElse(0), taskId.toIntOption.getOrElse(0)).asJson.noSpaces
+      case GetEleNodes(project) =>
+        sender() ! getEleNodes(project).asJson.noSpaces
+      case GetEleNodeCables(project, node) =>
+        sender() ! getEleNodeCables(project, node).asJson.noSpaces
       case _ => None
     }
   }

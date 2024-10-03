@@ -338,6 +338,12 @@ class HTTPManager extends Actor {
       (get & path("elePos") & parameter("project", "index", "kind", "taskId")) { (project, index, kind, taskId) =>
         askFor(ActorManager.elec, GetElePos(project, index, kind, taskId))
       },
+      (get & path("eleNodes") & parameter("project")) { (project) =>
+        askFor(ActorManager.elec, GetEleNodes(project))
+      },
+      (get & path("eleNodeCables") & parameter("project") & parameter("node")) { (project, node) =>
+        askFor(ActorManager.elec, GetEleNodeCables(project, node.toIntOption.getOrElse(0)))
+      },
 
       (get & path("time")) {
         complete(HttpEntity(new Date().getTime.asJson.noSpaces))

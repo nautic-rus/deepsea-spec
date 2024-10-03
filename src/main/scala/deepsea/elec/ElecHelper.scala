@@ -1038,4 +1038,87 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
     }
   }
 
+  @JsonCodec case class EleNode(node_id: Int, node: String, x: Double, y: Double, z: Double,
+                                node_type: Int, area: Int, rout_area: String, area_desc: String,
+                                code: String, descr: String, frames: Double, iwidth: Double, iheight: Double, length: Double, thickness: Double,
+                                height2: Double, weight: Double, stock: String, nrows: Double, ncolumns: Double, seal: String,
+                                transit_size: String)
+  def getEleNodes(project: String): List[EleNode] = {
+    val res = ListBuffer.empty[EleNode]
+    DBManager.GetOracleConnection(project) match {
+      case Some(connection) =>
+        val stmt = connection.createStatement()
+        val query = "select * from v_node_penetration np, v_node n where np.NODE = n.NODE"
+        val rs = stmt.executeQuery(query)
+        while (rs.next()){
+          try{
+            res += EleNode(
+              rs.getInt("NODE_OID"),
+              rs.getString("NODE"),
+              rs.getDouble("X"),
+              rs.getDouble("Y"),
+              rs.getDouble("Z"),
+              rs.getInt("TYPE"),
+              rs.getInt("AREA_ID"),
+              rs.getString("ROUT_AREA"),
+              rs.getString("AREA_DESCR"),
+              rs.getString("CODE"),
+              rs.getString("DESCR"),
+              rs.getDouble("FRAMES"),
+              rs.getDouble("IWIDTH"),
+              rs.getDouble("IHEIGHT"),
+              rs.getDouble("LENGTH"),
+              rs.getDouble("THICKNESS"),
+              rs.getDouble("HEIGHT2"),
+              rs.getDouble("WEIGHT"),
+              rs.getString("STOCK"),
+              rs.getDouble("NROWS"),
+              rs.getDouble("NCOLUMNS"),
+              rs.getString("SEAL"),
+              rs.getString("TRANSIT_SIZE"),
+            )
+          }
+         catch {
+           case e: Throwable => println(e.toString)
+         }
+        }
+        rs.close()
+        stmt.close()
+        connection.close()
+        res.toList
+      case _ => List.empty[EleNode]
+    }
+  }
+
+  @JsonCodec case class EleCable(cable_id: String, nom_section: String, spec: String, code: String, diam: Double)
+  def getEleNodeCables(project: String, node: Int): List[EleCable] = {
+    val res = ListBuffer.empty[EleCable]
+    DBManager.GetOracleConnection(project) match {
+      case Some(connection) =>
+        val stmt = connection.createStatement()
+        val query = s"select * from v_cable where seqid in (select cable_sid from v_node_cables where node_sid = $node)"
+        val rs = stmt.executeQuery(query)
+        while (rs.next()){
+          try{
+            res += EleCable(
+              rs.getString("CABLE_ID"),
+              rs.getString("NOM_SECTION"),
+              rs.getString("CABLE_SPEC"),
+              rs.getString("MAT_NUMBER"),
+              rs.getDouble("O_DIAMETER"),
+            )
+          }
+          catch {
+            case e: Throwable => println(e.toString)
+          }
+        }
+        rs.close()
+        stmt.close()
+        connection.close()
+        res.toList
+      case _ => List.empty[EleCable]
+    }
+  }
+
+
 }
