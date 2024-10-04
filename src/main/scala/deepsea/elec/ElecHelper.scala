@@ -1044,7 +1044,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
     DBManager.GetOracleConnection(project) match {
       case Some(connection) =>
         val stmt = connection.createStatement()
-        val query = "select * from v_node_penetration np, v_node n where np.NODE = n.NODE"
+        val query = "select * from v_node_penetration np, v_node n where np.NODE = n.NODE and np.type = 2"
         val rs = stmt.executeQuery(query)
         while (rs.next()){
           try{
