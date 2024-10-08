@@ -1261,7 +1261,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
 
         pic.write[Png](file.toString)
 
-        EleNodePNG(node, cables, if (error != "") error else file.toString)
+        EleNodePNG(node, cables, if (error != "") error else fileUrl)
 
       case _ =>
         EleNodePNG(
