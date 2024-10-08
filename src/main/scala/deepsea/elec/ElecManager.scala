@@ -4,6 +4,7 @@ import akka.actor.Actor
 import akka.pattern.ask
 import akka.util.Timeout
 import deepsea.actors.ActorManager
+import deepsea.elec.ElecManager.EleNodeModule
 import deepsea.esp.EspManager.CreateEsp
 import deepsea.files.FileManager.GenerateUrl
 import deepsea.pipe.PipeManager.Material
@@ -287,10 +288,22 @@ object ElecManager {
                      code: String, descr: String, frames: Double, iwidth: Double, iheight: Double, length: Double, thickness: Double,
                      height2: Double, weight: Double, stock: String, nrows: Double, ncolumns: Double, seal: String,
                      transit_size: String)
-  case class EleCable(cable_id: String, nom_section: String, spec: String, code: String, diam: Double)
+  case class EleCable(cable_id: String, nom_section: String, spec: String, code: String, diam: Double){
+    def diamModule(modules: List[EleNodeModule]): Double = {
+      modules.find(x => x.minDiam >= diam && diam <= x.maxDiam) match {
+        case Some(value) => value.diam
+        case _ => 0d
+      }
+    }
+  }
+  case class EleNodeModule(code: String, block_type: String, diam: Double, minDiam: Double, maxDiam: Double)
 
   case class GetEleNodes(project: String)
   case class GetEleNodeCables(project: String, node: Int)
+
+  case class EleNodePNG(node: EleNode, cables: List[EleCable], png_url: String)
+
+  case class GetEleNodePNG(project: String, node: Int)
 
   class ElecManager extends Actor with ElecHelper with Codecs with ElePdf {
     implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
@@ -390,6 +403,8 @@ object ElecManager {
         sender() ! getEleNodes(project).asJson.noSpaces
       case GetEleNodeCables(project, node) =>
         sender() ! getEleNodeCables(project, node).asJson.noSpaces
+      case GetEleNodePNG(project, node) =>
+        sender() ! createNodeModulesPNG(project, node).asJson.noSpaces
       case _ => None
     }
   }

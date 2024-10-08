@@ -1,34 +1,38 @@
 package deepsea.elec
 
 import breeze.linalg.DenseMatrix
+import cats.effect.unsafe.implicits.global
+import cats.implicits._
 import deepsea.database.DBManager
-import deepsea.database.DBManager.{RsIterator, foranProjects}
+import deepsea.database.DBManager.foranProjects
 import deepsea.elec.ElecManager._
-import deepsea.esp.EspManager.{DeviceEspObject, EleEspObject, espObjectsCollectionName}
+import deepsea.esp.EspManager.EleEspObject
 import deepsea.esp.EspManagerHelper
 import deepsea.hull.HullManager.IssueMaterial
 import deepsea.materials.MaterialsHelper
-import deepsea.pipe.PipeManager.{Material, Pls, PlsParam, SpecMaterial, SpoolLock}
+import deepsea.pipe.PipeManager.{Material, Pls, PlsParam}
+import doodle.core._
+import doodle.core.format._
+import doodle.image._
+import doodle.image.syntax.all._
+import doodle.java2d._
+import io.circe.parser._
 import local.common.Codecs
 import local.common.DBRequests.{MountItem, findWorkshopMaterialContains, retrieveAllMaterialsByProject}
 import local.domain.WorkShopMaterial
 import local.ele.CommonEle.EleComplect
 import org.mongodb.scala.MongoCollection
-import org.mongodb.scala.model.Filters.{and, equal}
-import io.circe.parser._
-import io.circe.{Decoder, Encoder}
-import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
-import io.circe.syntax.EncoderOps
-import io.circe._
-import io.circe.generic.JsonCodec
-import io.circe.parser._
-import io.circe.generic.auto._
-import io.circe.syntax._
-import io.circe.generic.semiauto._
+import org.mongodb.scala.model.Filters.equal
+import cats.implicits._
+import cats.effect.unsafe.implicits.global
+import deepsea.App
 
+import java.io.{File, FileOutputStream}
+import java.nio.file.Files
+import java.util.zip.{ZipEntry, ZipOutputStream}
 import java.util.{Date, UUID}
 import scala.collection.mutable.ListBuffer
-import scala.concurrent.{Await, Future}
+import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, SECONDS}
 import scala.io.Source
 
@@ -1039,12 +1043,12 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
   }
 
 
-  def getEleNodes(project: String): List[EleNode] = {
+  def getEleNodes(project: String, node_oid: Int = 0): List[EleNode] = {
     val res = ListBuffer.empty[EleNode]
     DBManager.GetOracleConnection(project) match {
       case Some(connection) =>
         val stmt = connection.createStatement()
-        val query = "select * from v_node_penetration np, v_node n where np.NODE = n.NODE and np.type = 2"
+        val query = "select * from v_node_penetration np, v_node n where np.NODE = n.NODE and np.type = 2" + (if (node_oid != 0) s" and NODE_OID = $node_oid" else "")
         val rs = stmt.executeQuery(query)
         while (rs.next()){
           try{
@@ -1085,7 +1089,6 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
       case _ => List.empty[EleNode]
     }
   }
-
   def getEleNodeCables(project: String, node: Int): List[EleCable] = {
     val res = ListBuffer.empty[EleCable]
     DBManager.GetOracleConnection(project) match {
@@ -1114,6 +1117,159 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
       case _ => List.empty[EleCable]
     }
   }
+  def getEleNodeModules(project: String): List[EleNodeModule] = {
+    val res = ListBuffer.empty[EleNodeModule]
+    DBManager.GetOracleConnection(project) match {
+      case Some(connection) =>
+        val stmt = connection.createStatement()
+        val query = "select * from cab_block"
+        val rs = stmt.executeQuery(query)
+        while (rs.next()){
+          try{
+            res += EleNodeModule(
+              Option(rs.getString("CODE")).getOrElse(""),
+              Option(rs.getString("BLOCK_TYPE")).getOrElse(""),
+              Option(rs.getDouble("O_WIDTH")).getOrElse(0d),
+              Option(rs.getDouble("I_DIAM")).getOrElse(0d),
+              Option(rs.getDouble("MX_DIAM")).getOrElse(0d),
+            )
+          }
+          catch {
+            case e: Throwable => println(e.toString)
+          }
+        }
+        rs.close()
+        stmt.close()
+        connection.close()
+        res.toList
+      case _ => List.empty[EleNodeModule]
+    }
+  }
 
+  def createNodeModulesPNG(project: String, node: Int, scale: Int = 4): EleNodePNG = {
+
+
+    val nodes = getEleNodes(project, node)
+    val cables = getEleNodeCables(project, node)
+    //val cables = cables1 ++ cables1 ++ cables1 ++ cables1 ++ cables1 ++ cables1 ++ cables1 ++ cables1 ++ cables1 ++ cables1 ++ cables1 ++ cables1 ++ cables1
+    val nodeModules = getEleNodeModules(project)
+    var error = ""
+
+
+    nodes.find(_.node_id == node) match {
+      case Some(node) =>
+
+        //val node = node1.copy(nrows = 3, ncolumns = 4)
+
+//        println("cables: " + cables.length)
+//        println("node cols: " + node.ncolumns)
+//        println("node rows: " + node.nrows)
+
+        var pic = Image.rectangle(node.iwidth * node.ncolumns, node.iheight * node.nrows)
+
+        val xStart = -1 * node.iwidth * node.ncolumns / 2d
+        val yStart = node.iheight * node.nrows / 2d
+
+        (0.until(node.nrows.toInt)).foreach(row => {
+          (0.until(node.ncolumns.toInt)).foreach(col => {
+            pic = Image.rectangle(node.iwidth, node.iheight).fillColor(Color.lightGray).at(xStart + col * node.iwidth + node.iwidth / 2d, yStart - row * node.iheight - node.iheight / 2d).on(pic)
+          })
+        })
+
+
+        var x = xStart
+        var y = yStart
+        var col = 0
+        var row = 0
+
+        val colDiams = ListBuffer.empty[Double]
+        val rowDiams = ListBuffer.empty[Double]
+
+        val cablesSort = cables.sortBy(x => (x.diamModule(nodeModules), x.cable_id)).reverse
+        cablesSort.foreach(cab => {
+          val diam = cab.diamModule(nodeModules)
+
+          if (colDiams.nonEmpty && colDiams.lastOption.getOrElse(0) != diam){
+            if (colDiams.sum + colDiams.last <= node.iwidth){
+              val fillDiam = colDiams.last
+              val fillCount = node.iwidth / fillDiam - colDiams.length
+              (0.until(fillCount.toInt)).foreach(filler => {
+                x = xStart + col * node.iwidth + colDiams.length * fillDiam + filler * fillDiam
+                val r = Image.rectangle(fillDiam, fillDiam).strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + fillDiam / 2, y - fillDiam / 2)
+                val t = Image.text(fillDiam.toString).scale(fillDiam * 1.5 / node.iwidth, fillDiam * 1.5 / node.iwidth).at(x + fillDiam / 2, y - fillDiam / 2)
+                pic = r.on(pic)
+                pic = t.on(pic)
+              })
+            }
+
+            y += -1 * colDiams.last
+            rowDiams += colDiams.last
+            colDiams.clear()
+          }
+          else if (colDiams.nonEmpty && (colDiams.sum + diam) > node.iwidth){
+            y += -1 * colDiams.last
+            rowDiams += colDiams.last
+            colDiams.clear()
+          }
+
+          if (rowDiams.sum + diam > node.iheight){
+            if (col < node.ncolumns - 1){
+              col += 1
+            }
+            else if (row < node.nrows - 1){
+              row += 1
+              col = 0
+            }
+            else{
+              println("error: not enough")
+              error = "not enough space for cables"
+            }
+            y = yStart - row * node.iheight
+            rowDiams.clear()
+            colDiams.clear()
+          }
+
+          if (colDiams.isEmpty){
+            x = xStart + col * node.iwidth
+          }
+          else{
+            x = xStart + col * node.iwidth + colDiams.length * diam
+          }
+
+          val r = Image.rectangle(diam, diam).strokeColor(Color.blue).strokeWidth(0.5).fillColor(Color.white).at(x + diam / 2, y - diam / 2)
+          val t = Image.text(cab.cable_id).scale(diam * 1.5 / node.iwidth, diam * 1.5 / node.iwidth).at(x + diam / 2, y - diam / 2)
+          pic = r.on(pic)
+          pic = t.on(pic)
+
+          colDiams += diam
+        })
+
+
+        pic = pic.scale(scale, scale)
+
+        val fileName = "node-" + new Date().getTime + ".png"
+        var pathId = UUID.randomUUID().toString.substring(0, 12)
+        var file = new File(App.Cloud.Directory + File.separator + pathId)
+        while (file.exists()) {
+          pathId = UUID.randomUUID().toString.substring(0, 8)
+          file = new File(App.Cloud.Directory + File.separator + pathId)
+        }
+        file.mkdir()
+        file = new File(App.Cloud.Directory + File.separator + pathId + File.separator + fileName)
+
+        val fileUrl = App.Cloud.Url + "/" + pathId + "/" + fileName
+
+        pic.write[Png](file.toString)
+
+        EleNodePNG(node, cables, if (error != "") error else file.toString)
+
+      case _ =>
+        EleNodePNG(
+          EleNode(0, "", 0, 0, 0, 0, 0, "", "", "", "", 0, 0, 0, 0, 0, 0, 0, "", 0, 0, "", ""),
+          List.empty[EleCable],
+          ""
+        )
+    }
+  }
 
 }

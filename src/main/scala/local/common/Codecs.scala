@@ -2,7 +2,7 @@ package local.common
 
 import deepsea.accomodations.AccommodationManager.{Accommodation, BBox}
 import deepsea.devices.DeviceManager.{Device, DeviceAux}
-import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, Cog, EleCable, EleElement, EleNode, ElecAngle, ElecCable, EquipmentConnection, TrayBySystem}
+import deepsea.elec.ElecManager.{CableBoxesBySystem, CableRoute, Cog, EleCable, EleElement, EleNode, EleNodeModule, EleNodePNG, ElecAngle, ElecCable, EquipmentConnection, TrayBySystem}
 import deepsea.esp.EspManager.{DeviceEspObject, DocumentWithMaterial, EleEspObject, EspElement, EspObject, GlobalEsp, GlobalEspSpec, HullEspObject, MaterialPurchase, PipeEspObject}
 import deepsea.hull.HullManager._
 import deepsea.pipe.PipeManager.{Material, MaterialTranslation, ParObj, PipeSeg, PipeSegActual, PipeSegBilling, PipeSegExtended, ProjectName, SpecMaterial, SpoolLock, SystemDef, UnitTranslation, Units, UsrPar}
@@ -148,6 +148,11 @@ trait Codecs {
   implicit val EleCableDecoder: Decoder[EleCable] = deriveDecoder[EleCable]
   implicit val EleCableEncoder: Encoder[EleCable] = deriveEncoder[EleCable]
 
+  implicit val EleNodeModuleDecoder: Decoder[EleNodeModule] = deriveDecoder[EleNodeModule]
+  implicit val EleNodeModuleEncoder: Encoder[EleNodeModule] = deriveEncoder[EleNodeModule]
+
+  implicit val EleNodePNGDecoder: Decoder[EleNodePNG] = deriveDecoder[EleNodePNG]
+  implicit val EleNodePNGEncoder: Encoder[EleNodePNG] = deriveEncoder[EleNodePNG]
 
   //KOKOVIN
 
