@@ -29,7 +29,6 @@ import deepsea.App
 
 import java.io.{File, FileOutputStream}
 import java.nio.file.Files
-import java.text.DecimalFormat
 import java.util.zip.{ZipEntry, ZipOutputStream}
 import java.util.{Date, UUID}
 import scala.collection.mutable.ListBuffer
@@ -1197,7 +1196,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
               (0.until(fillCount.toInt)).foreach(filler => {
                 x = xStart + col * node.iwidth + colDiams.length * fillDiam + filler * fillDiam
                 val r = Image.rectangle(fillDiam, fillDiam).strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + fillDiam / 2, y - fillDiam / 2)
-                val t = Image.text(new DecimalFormat("0.#").format(fillDiam.toString)).scale(fillDiam * 1.5 / node.iwidth, fillDiam * 1.5 / node.iwidth).at(x + fillDiam / 2, y - fillDiam / 2)
+                val t = Image.text(fillDiam.toString).scale(fillDiam * 1.5 / node.iwidth, fillDiam * 1.5 / node.iwidth).at(x + fillDiam / 2, y - fillDiam / 2)
                 pic = r.on(pic)
                 pic = t.on(pic)
               })
