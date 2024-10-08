@@ -29,6 +29,7 @@ import deepsea.App
 
 import java.io.{File, FileOutputStream}
 import java.nio.file.Files
+import java.text.DecimalFormat
 import java.util.zip.{ZipEntry, ZipOutputStream}
 import java.util.{Date, UUID}
 import scala.collection.mutable.ListBuffer
@@ -1172,7 +1173,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
 
         (0.until(node.nrows.toInt)).foreach(row => {
           (0.until(node.ncolumns.toInt)).foreach(col => {
-            pic = Image.rectangle(node.iwidth, node.iheight).fillColor(Color.lightGray).at(xStart + col * node.iwidth + node.iwidth / 2d, yStart - row * node.iheight - node.iheight / 2d).on(pic)
+            pic = Image.rectangle(node.iwidth, node.iheight).fillColor(Color.lightGray).strokeWidth(0.5).at(xStart + col * node.iwidth + node.iwidth / 2d, yStart - row * node.iheight - node.iheight / 2d).on(pic)
           })
         })
 
@@ -1196,7 +1197,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
               (0.until(fillCount.toInt)).foreach(filler => {
                 x = xStart + col * node.iwidth + colDiams.length * fillDiam + filler * fillDiam
                 val r = Image.rectangle(fillDiam, fillDiam).strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + fillDiam / 2, y - fillDiam / 2)
-                val t = Image.text(fillDiam.toString).scale(fillDiam * 1.5 / node.iwidth, fillDiam * 1.5 / node.iwidth).at(x + fillDiam / 2, y - fillDiam / 2)
+                val t = Image.text(new DecimalFormat("0.#").format(fillDiam.toString)).scale(fillDiam * 1.5 / node.iwidth, fillDiam * 1.5 / node.iwidth).at(x + fillDiam / 2, y - fillDiam / 2)
                 pic = r.on(pic)
                 pic = t.on(pic)
               })
@@ -1256,8 +1257,10 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
         }
         file.mkdir()
         file = new File(App.Cloud.Directory + File.separator + pathId + File.separator + fileName)
-
         val fileUrl = App.Cloud.Url + "/" + pathId + "/" + fileName
+
+//        val file = Files.createTempFile("image", ".png")
+//        val fileUrl = file.toString
 
         pic.write[Png](file.toString)
 
