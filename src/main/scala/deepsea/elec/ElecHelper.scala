@@ -1159,20 +1159,21 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
     nodes.find(_.node_id == node) match {
       case Some(node) =>
 
+        val nodeWidth = if (node.iwidth > 120) 120 else node.iwidth
         //val node = node1.copy(nrows = 3, ncolumns = 4)
 
 //        println("cables: " + cables.length)
 //        println("node cols: " + node.ncolumns)
 //        println("node rows: " + node.nrows)
 
-        var pic = Image.rectangle(node.iwidth * node.ncolumns, node.iheight * node.nrows)
+        var pic = Image.rectangle(nodeWidth * node.ncolumns, node.iheight * node.nrows)
 
-        val xStart = -1 * node.iwidth * node.ncolumns / 2d
+        val xStart = -1 * nodeWidth * node.ncolumns / 2d
         val yStart = node.iheight * node.nrows / 2d
 
         (0.until(node.nrows.toInt)).foreach(row => {
           (0.until(node.ncolumns.toInt)).foreach(col => {
-            pic = Image.rectangle(node.iwidth, node.iheight).fillColor(Color.lightGray).strokeWidth(0.5).at(xStart + col * node.iwidth + node.iwidth / 2d, yStart - row * node.iheight - node.iheight / 2d).on(pic)
+            pic = Image.rectangle(nodeWidth, node.iheight).fillColor(Color.lightGray).strokeWidth(0.5).at(xStart + col * nodeWidth + nodeWidth / 2d, yStart - row * node.iheight - node.iheight / 2d).on(pic)
           })
         })
 
@@ -1190,13 +1191,13 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
           val diam = cab.diamModule(nodeModules)
 
           if (colDiams.nonEmpty && colDiams.lastOption.getOrElse(0) != diam){
-            if (colDiams.sum + colDiams.last <= node.iwidth){
+            if (colDiams.sum + colDiams.last <= nodeWidth){
               val fillDiam = colDiams.last
-              val fillCount = node.iwidth / fillDiam - colDiams.length
+              val fillCount = nodeWidth / fillDiam - colDiams.length
               (0.until(fillCount.toInt)).foreach(filler => {
-                x = xStart + col * node.iwidth + colDiams.length * fillDiam + filler * fillDiam
+                x = xStart + col * nodeWidth + colDiams.length * fillDiam + filler * fillDiam
                 val r = Image.rectangle(fillDiam, fillDiam).strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + fillDiam / 2, y - fillDiam / 2)
-                val t = Image.text(fillDiam.toString).scale(fillDiam * 1.5 / node.iwidth, fillDiam * 1.5 / node.iwidth).at(x + fillDiam / 2, y - fillDiam / 2)
+                val t = Image.text(fillDiam.toString).scale(fillDiam * 1.5 / nodeWidth, fillDiam * 1.5 / nodeWidth).at(x + fillDiam / 2, y - fillDiam / 2)
                 pic = r.on(pic)
                 pic = t.on(pic)
               })
@@ -1206,7 +1207,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
             rowDiams += colDiams.last
             colDiams.clear()
           }
-          else if (colDiams.nonEmpty && (colDiams.sum + diam) > node.iwidth){
+          else if (colDiams.nonEmpty && (colDiams.sum + diam) > nodeWidth){
             y += -1 * colDiams.last
             rowDiams += colDiams.last
             colDiams.clear()
@@ -1230,25 +1231,25 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
           }
 
           if (colDiams.isEmpty){
-            x = xStart + col * node.iwidth
+            x = xStart + col * nodeWidth
           }
           else{
-            x = xStart + col * node.iwidth + colDiams.length * diam
+            x = xStart + col * nodeWidth + colDiams.length * diam
           }
 
           val r = Image.rectangle(diam, diam).strokeColor(Color.blue).strokeWidth(0.5).fillColor(Color.white).at(x + diam / 2, y - diam / 2)
-          val t = Image.text(cab.cable_id).scale(diam * 1.5 / node.iwidth, diam * 1.5 / node.iwidth).at(x + diam / 2, y - diam / 2)
+          val t = Image.text(cab.cable_id).scale(diam * 1.5 / nodeWidth, diam * 1.5 / nodeWidth).at(x + diam / 2, y - diam / 2)
           pic = r.on(pic)
           pic = t.on(pic)
 
           colDiams += diam
 
-          if (cablesSort.indexOf(cab) == cablesSort.length - 1 && colDiams.nonEmpty && colDiams.sum + diam <= node.iwidth){
-            val fillCount = node.iwidth / diam - colDiams.length
+          if (cablesSort.indexOf(cab) == cablesSort.length - 1 && colDiams.nonEmpty && colDiams.sum + diam <= nodeWidth){
+            val fillCount = nodeWidth / diam - colDiams.length
             (0.until(fillCount.toInt)).foreach(filler => {
-              x = xStart + col * node.iwidth + colDiams.length * diam + filler * diam
+              x = xStart + col * nodeWidth + colDiams.length * diam + filler * diam
               val r = Image.rectangle(diam, diam).strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + diam / 2, y - diam / 2)
-              val t = Image.text(diam.toString).scale(diam * 1.5 / node.iwidth, diam * 1.5 / node.iwidth).at(x + diam / 2, y - diam / 2)
+              val t = Image.text(diam.toString).scale(diam * 1.5 / nodeWidth, diam * 1.5 / nodeWidth).at(x + diam / 2, y - diam / 2)
               pic = r.on(pic)
               pic = t.on(pic)
             })
