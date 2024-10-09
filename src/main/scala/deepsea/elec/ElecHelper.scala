@@ -1222,7 +1222,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
             }
             else{
               println("error: not enough")
-              error = "not enough space for cables"
+              error = "not enough space for cables, placed " + (cablesSort.indexOf(cab) + 1).toString + " of " + cablesSort.length.toString
             }
             y = yStart - row * node.iheight
             rowDiams.clear()
@@ -1242,6 +1242,18 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
           pic = t.on(pic)
 
           colDiams += diam
+
+          if (cablesSort.indexOf(cab) == cablesSort.length - 1 && colDiams.nonEmpty && colDiams.sum + diam <= node.iwidth){
+            val fillCount = node.iwidth / diam - colDiams.length
+            (0.until(fillCount.toInt)).foreach(filler => {
+              x = xStart + col * node.iwidth + colDiams.length * diam + filler * diam
+              val r = Image.rectangle(diam, diam).strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + diam / 2, y - diam / 2)
+              val t = Image.text(diam.toString).scale(diam * 1.5 / node.iwidth, diam * 1.5 / node.iwidth).at(x + diam / 2, y - diam / 2)
+              pic = r.on(pic)
+              pic = t.on(pic)
+            })
+          }
+
         })
 
 
