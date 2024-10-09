@@ -1222,7 +1222,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
             }
             else{
               println("error: not enough")
-              error = "not enough space for cables, placed " + (cablesSort.indexOf(cab) + 1).toString + " of " + cablesSort.length.toString
+              error = "not enough space for cables, placed " + cablesSort.indexOf(cab).toString + " of " + cablesSort.length.toString
             }
             y = yStart - row * node.iheight
             rowDiams.clear()
