@@ -1189,71 +1189,78 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
         val cablesSort = cables.sortBy(x => (x.diamModule(nodeModules), x.cable_id)).reverse
         cablesSort.foreach(cab => {
           val diam = cab.diamModule(nodeModules)
+          if (diam > 0){
+            if (colDiams.nonEmpty && colDiams.lastOption.getOrElse(0) != diam){
+              if (colDiams.sum + colDiams.last <= nodeWidth){
+                val fillDiam = colDiams.last
+                val fillCount = nodeWidth / fillDiam - colDiams.length
+                (0.until(fillCount.toInt)).foreach(filler => {
+                  x = xStart + col * nodeWidth + colDiams.length * fillDiam + filler * fillDiam
+                  val r = Image.rectangle(fillDiam, fillDiam).strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + fillDiam / 2, y - fillDiam / 2)
+                  val t = Image.text(fillDiam.toString).scale(fillDiam * 1.5 / nodeWidth, fillDiam * 1.5 / nodeWidth).at(x + fillDiam / 2, y - fillDiam / 2)
+                  pic = r.on(pic)
+                  pic = t.on(pic)
+                })
+              }
 
-          if (colDiams.nonEmpty && colDiams.lastOption.getOrElse(0) != diam){
-            if (colDiams.sum + colDiams.last <= nodeWidth){
-              val fillDiam = colDiams.last
-              val fillCount = nodeWidth / fillDiam - colDiams.length
+              y += -1 * colDiams.last
+              rowDiams += colDiams.last
+              colDiams.clear()
+            }
+            else if (colDiams.nonEmpty && (colDiams.sum + diam) > nodeWidth){
+              y += -1 * colDiams.last
+              rowDiams += colDiams.last
+              colDiams.clear()
+            }
+
+            if (rowDiams.sum + diam > node.iheight){
+              if (col < node.ncolumns - 1){
+                col += 1
+              }
+              else if (row < node.nrows - 1){
+                row += 1
+                col = 0
+              }
+              else{
+                println("error: not enough")
+                error = "error: not enough space for cables, placed " + cablesSort.indexOf(cab).toString + " of " + cablesSort.length.toString
+              }
+              y = yStart - row * node.iheight
+              rowDiams.clear()
+              colDiams.clear()
+            }
+
+            if (colDiams.isEmpty){
+              x = xStart + col * nodeWidth
+            }
+            else{
+              x = xStart + col * nodeWidth + colDiams.length * diam
+            }
+
+            val r = Image.rectangle(diam, diam).strokeColor(Color.blue).strokeWidth(0.5).fillColor(Color.white).at(x + diam / 2, y - diam / 2)
+            val t = Image.text(cab.cable_id).scale(diam * 1.5 / nodeWidth, diam * 1.5 / nodeWidth).at(x + diam / 2, y - diam / 2)
+            pic = r.on(pic)
+            pic = t.on(pic)
+
+            colDiams += diam
+
+            if (cablesSort.indexOf(cab) == cablesSort.length - 1 && colDiams.nonEmpty && colDiams.sum + diam <= nodeWidth){
+              val fillCount = nodeWidth / diam - colDiams.length
               (0.until(fillCount.toInt)).foreach(filler => {
-                x = xStart + col * nodeWidth + colDiams.length * fillDiam + filler * fillDiam
-                val r = Image.rectangle(fillDiam, fillDiam).strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + fillDiam / 2, y - fillDiam / 2)
-                val t = Image.text(fillDiam.toString).scale(fillDiam * 1.5 / nodeWidth, fillDiam * 1.5 / nodeWidth).at(x + fillDiam / 2, y - fillDiam / 2)
+                x = xStart + col * nodeWidth + colDiams.length * diam + filler * diam
+                val r = Image.rectangle(diam, diam).strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + diam / 2, y - diam / 2)
+                val t = Image.text(diam.toString).scale(diam * 1.5 / nodeWidth, diam * 1.5 / nodeWidth).at(x + diam / 2, y - diam / 2)
                 pic = r.on(pic)
                 pic = t.on(pic)
               })
             }
-
-            y += -1 * colDiams.last
-            rowDiams += colDiams.last
-            colDiams.clear()
-          }
-          else if (colDiams.nonEmpty && (colDiams.sum + diam) > nodeWidth){
-            y += -1 * colDiams.last
-            rowDiams += colDiams.last
-            colDiams.clear()
-          }
-
-          if (rowDiams.sum + diam > node.iheight){
-            if (col < node.ncolumns - 1){
-              col += 1
-            }
-            else if (row < node.nrows - 1){
-              row += 1
-              col = 0
-            }
-            else{
-              println("error: not enough")
-              error = "not enough space for cables, placed " + cablesSort.indexOf(cab).toString + " of " + cablesSort.length.toString
-            }
-            y = yStart - row * node.iheight
-            rowDiams.clear()
-            colDiams.clear()
-          }
-
-          if (colDiams.isEmpty){
-            x = xStart + col * nodeWidth
           }
           else{
-            x = xStart + col * nodeWidth + colDiams.length * diam
+            error = "error: null diameter for cable " + cab.cable_id
           }
 
-          val r = Image.rectangle(diam, diam).strokeColor(Color.blue).strokeWidth(0.5).fillColor(Color.white).at(x + diam / 2, y - diam / 2)
-          val t = Image.text(cab.cable_id).scale(diam * 1.5 / nodeWidth, diam * 1.5 / nodeWidth).at(x + diam / 2, y - diam / 2)
-          pic = r.on(pic)
-          pic = t.on(pic)
 
-          colDiams += diam
 
-          if (cablesSort.indexOf(cab) == cablesSort.length - 1 && colDiams.nonEmpty && colDiams.sum + diam <= nodeWidth){
-            val fillCount = nodeWidth / diam - colDiams.length
-            (0.until(fillCount.toInt)).foreach(filler => {
-              x = xStart + col * nodeWidth + colDiams.length * diam + filler * diam
-              val r = Image.rectangle(diam, diam).strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + diam / 2, y - diam / 2)
-              val t = Image.text(diam.toString).scale(diam * 1.5 / nodeWidth, diam * 1.5 / nodeWidth).at(x + diam / 2, y - diam / 2)
-              pic = r.on(pic)
-              pic = t.on(pic)
-            })
-          }
 
         })
 
