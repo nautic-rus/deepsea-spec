@@ -1147,150 +1147,224 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
   }
 
   def createNodeModulesPNG(project: String, node: Int, scale: Int = 4): EleNodePNG = {
+    try{
+
+      val materials = getMaterials
+      val specText = ListBuffer.empty[String]
+      val spec = ListBuffer.empty[EleNodeSpec]
+
+      val nodes = getEleNodes(project, node)
+      val cables = getEleNodeCables(project, node)
+      val nodeModules = getEleNodeModules(project)
+      var error = ""
+      var totalRows = 0
+      var modules = ListBuffer.empty[Double]
+      var fillerModules = ListBuffer.empty[Double]
 
 
-    val nodes = getEleNodes(project, node)
-    val cables = getEleNodeCables(project, node)
-    //val cables = cables1 ++ cables1 ++ cables1 ++ cables1 ++ cables1 ++ cables1 ++ cables1 ++ cables1 ++ cables1 ++ cables1 ++ cables1 ++ cables1 ++ cables1
-    val nodeModules = getEleNodeModules(project)
-    var error = ""
+      nodes.find(_.node_id == node) match {
+        case Some(node) =>
 
+          val nodeWidth = if (node.iwidth >= 120) 120 else 60
+          var pic = Image.rectangle(nodeWidth * node.ncolumns, node.iheight * node.nrows)
 
-    nodes.find(_.node_id == node) match {
-      case Some(node) =>
+          val xStart = -1 * nodeWidth * node.ncolumns / 2d
+          val yStart = node.iheight * node.nrows / 2d
 
-        val nodeWidth = if (node.iwidth > 120) 120 else node.iwidth
-        //val node = node1.copy(nrows = 3, ncolumns = 4)
-
-//        println("cables: " + cables.length)
-//        println("node cols: " + node.ncolumns)
-//        println("node rows: " + node.nrows)
-
-        var pic = Image.rectangle(nodeWidth * node.ncolumns, node.iheight * node.nrows)
-
-        val xStart = -1 * nodeWidth * node.ncolumns / 2d
-        val yStart = node.iheight * node.nrows / 2d
-
-        (0.until(node.nrows.toInt)).foreach(row => {
-          (0.until(node.ncolumns.toInt)).foreach(col => {
-            pic = Image.rectangle(nodeWidth, node.iheight).fillColor(Color.lightGray).strokeWidth(0.5).at(xStart + col * nodeWidth + nodeWidth / 2d, yStart - row * node.iheight - node.iheight / 2d).on(pic)
+          (0.until(node.nrows.toInt)).foreach(row => {
+            (0.until(node.ncolumns.toInt)).foreach(col => {
+              pic = Image.rectangle(nodeWidth, node.iheight).fillColor(Color.lightGray).strokeWidth(0.5).at(xStart + col * nodeWidth + nodeWidth / 2d, yStart - row * node.iheight - node.iheight / 2d).on(pic)
+            })
           })
-        })
 
 
-        var x = xStart
-        var y = yStart
-        var col = 0
-        var row = 0
+          var x = xStart
+          var y = yStart
+          var col = 0
+          var row = 0
 
-        val colDiams = ListBuffer.empty[Double]
-        val rowDiams = ListBuffer.empty[Double]
+          val colDiams = ListBuffer.empty[Double]
+          val rowDiams = ListBuffer.empty[Double]
 
-        val cablesSort = cables.sortBy(x => (x.diamModule(nodeModules), x.cable_id)).reverse
-        cablesSort.foreach(cab => {
-          val diam = cab.diamModule(nodeModules)
-          if (diam > 0){
-            if (colDiams.nonEmpty && colDiams.lastOption.getOrElse(0) != diam){
-              if (colDiams.sum + colDiams.last <= nodeWidth){
-                val fillDiam = colDiams.last
-                val fillCount = nodeWidth / fillDiam - colDiams.length
-                (0.until(fillCount.toInt)).foreach(filler => {
-                  x = xStart + col * nodeWidth + colDiams.length * fillDiam + filler * fillDiam
-                  val r = Image.rectangle(fillDiam, fillDiam).strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + fillDiam / 2, y - fillDiam / 2)
-                  val t = Image.text(fillDiam.toString).scale(fillDiam * 1.5 / nodeWidth, fillDiam * 1.5 / nodeWidth).at(x + fillDiam / 2, y - fillDiam / 2)
-                  pic = r.on(pic)
-                  pic = t.on(pic)
-                })
+          val cablesSort = cables.sortBy(x => (x.diamModule(nodeModules), x.cable_id)).reverse
+          cablesSort.foreach(cab => {
+            val diam = cab.diamModule(nodeModules)
+            modules += diam
+            if (diam > 0){
+              if (colDiams.nonEmpty && colDiams.lastOption.getOrElse(0) != diam){
+                if (colDiams.sum + colDiams.last <= nodeWidth){
+                  val fillDiam = colDiams.last
+                  val fillCount = nodeWidth / fillDiam - colDiams.length
+                  (0.until(fillCount.toInt)).foreach(filler => {
+                    x = xStart + col * nodeWidth + colDiams.length * fillDiam + filler * fillDiam
+                    val r = Image.rectangle(fillDiam, fillDiam).strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + fillDiam / 2, y - fillDiam / 2)
+                    val t = Image.text(fillDiam.toString).scale(fillDiam * 1.5 / nodeWidth, fillDiam * 1.5 / nodeWidth).at(x + fillDiam / 2, y - fillDiam / 2)
+                    pic = r.on(pic)
+                    pic = t.on(pic)
+                    fillerModules += fillDiam
+                  })
+                }
+                y += -1 * colDiams.last
+                rowDiams += colDiams.last
+                colDiams.clear()
+                totalRows += 1
+              }
+              else if (colDiams.nonEmpty && (colDiams.sum + diam) > nodeWidth){
+                y += -1 * colDiams.last
+                rowDiams += colDiams.last
+                colDiams.clear()
+                totalRows += 1
               }
 
-              y += -1 * colDiams.last
-              rowDiams += colDiams.last
-              colDiams.clear()
-            }
-            else if (colDiams.nonEmpty && (colDiams.sum + diam) > nodeWidth){
-              y += -1 * colDiams.last
-              rowDiams += colDiams.last
-              colDiams.clear()
-            }
-
-            if (rowDiams.sum + diam > node.iheight){
-              if (col < node.ncolumns - 1){
-                col += 1
+              if (rowDiams.sum + diam > node.iheight){
+                if (col < node.ncolumns - 1){
+                  col += 1
+                }
+                else if (row < node.nrows - 1){
+                  row += 1
+                  col = 0
+                }
+                else{
+                  println("error: not enough")
+                  error = "error: not enough space for cables, placed " + cablesSort.indexOf(cab).toString + " of " + cablesSort.length.toString
+                }
+                y = yStart - row * node.iheight
+                rowDiams.clear()
+                colDiams.clear()
               }
-              else if (row < node.nrows - 1){
-                row += 1
-                col = 0
+
+              if (colDiams.isEmpty){
+                x = xStart + col * nodeWidth
               }
               else{
-                println("error: not enough")
-                error = "error: not enough space for cables, placed " + cablesSort.indexOf(cab).toString + " of " + cablesSort.length.toString
+                x = xStart + col * nodeWidth + colDiams.length * diam
               }
-              y = yStart - row * node.iheight
-              rowDiams.clear()
-              colDiams.clear()
-            }
 
-            if (colDiams.isEmpty){
-              x = xStart + col * nodeWidth
+              val r = Image.rectangle(diam, diam).strokeColor(Color.blue).strokeWidth(0.5).fillColor(Color.white).at(x + diam / 2, y - diam / 2)
+              val t = Image.text(cab.cable_id).scale(diam * 1.5 / nodeWidth, diam * 1.5 / nodeWidth).at(x + diam / 2, y - diam / 2)
+              pic = r.on(pic)
+              pic = t.on(pic)
+
+              colDiams += diam
+
+              if (cablesSort.indexOf(cab) == cablesSort.length - 1 && colDiams.nonEmpty && colDiams.sum + diam <= nodeWidth){
+                val fillCount = nodeWidth / diam - colDiams.length
+                (0.until(fillCount.toInt)).foreach(filler => {
+                  x = xStart + col * nodeWidth + colDiams.length * diam + filler * diam
+                  val r = Image.rectangle(diam, diam).strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + diam / 2, y - diam / 2)
+                  val t = Image.text(diam.toString).scale(diam * 1.5 / nodeWidth, diam * 1.5 / nodeWidth).at(x + diam / 2, y - diam / 2)
+                  pic = r.on(pic)
+                  pic = t.on(pic)
+                  fillerModules += diam
+                })
+              }
+              if (cablesSort.indexOf(cab) == cablesSort.length - 1 && colDiams.nonEmpty){
+                totalRows += 1
+              }
             }
             else{
-              x = xStart + col * nodeWidth + colDiams.length * diam
+              error = "error: null diameter for cable " + cab.cable_id
             }
 
-            val r = Image.rectangle(diam, diam).strokeColor(Color.blue).strokeWidth(0.5).fillColor(Color.white).at(x + diam / 2, y - diam / 2)
-            val t = Image.text(cab.cable_id).scale(diam * 1.5 / nodeWidth, diam * 1.5 / nodeWidth).at(x + diam / 2, y - diam / 2)
-            pic = r.on(pic)
-            pic = t.on(pic)
 
-            colDiams += diam
 
-            if (cablesSort.indexOf(cab) == cablesSort.length - 1 && colDiams.nonEmpty && colDiams.sum + diam <= nodeWidth){
-              val fillCount = nodeWidth / diam - colDiams.length
-              (0.until(fillCount.toInt)).foreach(filler => {
-                x = xStart + col * nodeWidth + colDiams.length * diam + filler * diam
-                val r = Image.rectangle(diam, diam).strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + diam / 2, y - diam / 2)
-                val t = Image.text(diam.toString).scale(diam * 1.5 / nodeWidth, diam * 1.5 / nodeWidth).at(x + diam / 2, y - diam / 2)
-                pic = r.on(pic)
-                pic = t.on(pic)
-              })
+
+          })
+
+
+          pic = pic.scale(scale, scale)
+
+          //        val fileName = "node-" + new Date().getTime + ".png"
+          //        var pathId = UUID.randomUUID().toString.substring(0, 12)
+          //        var file = new File(App.Cloud.Directory + File.separator + pathId)
+          //        while (file.exists()) {
+          //          pathId = UUID.randomUUID().toString.substring(0, 8)
+          //          file = new File(App.Cloud.Directory + File.separator + pathId)
+          //        }
+          //        file.mkdir()
+          //        file = new File(App.Cloud.Directory + File.separator + pathId + File.separator + fileName)
+          //        val fileUrl = App.Cloud.Url + "/" + pathId + "/" + fileName
+
+          val file = Files.createTempFile("image", ".png")
+          val fileUrl = file.toString
+
+          pic.write[Png](file.toString)
+
+
+
+
+
+          val sections = (node.nrows * node.ncolumns).toInt
+
+          val rama = (materials.find(_.code == node.stock) match {
+            case Some(value) =>
+              spec += EleNodeSpec(value.name + ", секций " + (sections).toString + ", " + node.iheight.toString + "x" + node.iwidth.toString, 1, value.singleWeight)
+              value.name + ", секций " + (sections).toString + ", " +
+              node.iheight.toString + "x" + node.iwidth.toString +
+              " мм, к-во 1 шт, вес " +  value.singleWeight.toString + " кг"
+            case _ => "Не найдено по коду " + node.stock
+          })
+          specText += rama
+
+          val plastina = (materials.find(_.name == ("Пластина анкерная " + nodeWidth.toInt.toString)) match {
+            case Some(value) =>
+              spec += EleNodeSpec(value.name, totalRows + 1, (totalRows + 1) * value.singleWeight)
+              value.name + " мм, к-во " + (totalRows + 1).toString + " шт, вес " + ((totalRows + 1) * value.singleWeight).toString + " кг"
+            case _ => "Не найдено по коду " + node.stock
+          })
+          specText += plastina
+
+          modules.groupBy(x => x).toList.sortBy(x => x._1).foreach(gr => {
+            val module = materials.find(_.name.contains("Уплотнительный модуль МКС " + gr._1.toInt.toString)) match {
+              case Some(value) =>
+                spec += EleNodeSpec(value.name, gr._2.length, gr._2.length * value.singleWeight)
+                value.name + ", к-во  " + (gr._2.length).toString + " шт, вес " + ((gr._2.length) * value.singleWeight).toString + " кг"
+              case _ => "Не найден уплотнительный модуль МКС " + gr._1.toInt.toString
             }
-          }
-          else{
-            error = "error: null diameter for cable " + cab.cable_id
-          }
+            specText += module
+          })
+
+          fillerModules.groupBy(x => x).toList.sortBy(x => x._1).foreach(gr => {
+            val module = materials.find(_.name.contains("Глухой модуль МКС " + gr._1.toInt.toString)) match {
+              case Some(value) =>
+                spec += EleNodeSpec(value.name, gr._2.length, gr._2.length * value.singleWeight)
+                value.name + ", к-во  " + (gr._2.length).toString + " шт, вес " + ((gr._2.length) * value.singleWeight).toString + " кг"
+              case _ => "Не найден глухой модуль МКС " + gr._1.toInt.toString
+            }
+            specText += module
+          })
 
 
+          val compression = (materials.find(_.name == ("Компрессионный блок МКС КБ " + nodeWidth.toInt.toString)) match {
+            case Some(value) =>
+              spec += EleNodeSpec(value.name, sections, sections * value.singleWeight)
+              value.name + " мм, к-во " + (sections).toString + " шт, вес " + (sections * value.singleWeight).toString + " кг"
+            case _ => "Не найдено по коду " + node.code
+          })
+          specText += compression
 
+          specText += "Смазка 1 шт"
+          spec += EleNodeSpec("Смазка", 1, 0)
 
-        })
+          EleNodePNG(node, cables, if (error != "") error else fileUrl, spec.toList, specText.toList)
 
-
-        pic = pic.scale(scale, scale)
-
-        val fileName = "node-" + new Date().getTime + ".png"
-        var pathId = UUID.randomUUID().toString.substring(0, 12)
-        var file = new File(App.Cloud.Directory + File.separator + pathId)
-        while (file.exists()) {
-          pathId = UUID.randomUUID().toString.substring(0, 8)
-          file = new File(App.Cloud.Directory + File.separator + pathId)
-        }
-        file.mkdir()
-        file = new File(App.Cloud.Directory + File.separator + pathId + File.separator + fileName)
-        val fileUrl = App.Cloud.Url + "/" + pathId + "/" + fileName
-
-//        val file = Files.createTempFile("image", ".png")
-//        val fileUrl = file.toString
-
-        pic.write[Png](file.toString)
-
-        EleNodePNG(node, cables, if (error != "") error else fileUrl)
-
-      case _ =>
-        EleNodePNG(
-          EleNode(0, "", 0, 0, 0, 0, 0, "", "", "", "", 0, 0, 0, 0, 0, 0, 0, "", 0, 0, "", ""),
-          List.empty[EleCable],
-          ""
-        )
+        case _ =>
+          EleNodePNG(
+            EleNode(0, "", 0, 0, 0, 0, 0, "", "", "", "", 0, 0, 0, 0, 0, 0, 0, "", 0, 0, "", ""),
+            List.empty[EleCable],
+            "",
+            spec.toList,
+            specText.toList
+          )
+      }
+    }
+    catch {
+      case e: Throwable => EleNodePNG(
+        EleNode(0, "", 0, 0, 0, 0, 0, "", "", "", "", 0, 0, 0, 0, 0, 0, 0, "", 0, 0, "", ""),
+        List.empty[EleCable],
+        "error: " + e.toString,
+        List.empty[EleNodeSpec], List.empty[String]
+      )
     }
   }
 

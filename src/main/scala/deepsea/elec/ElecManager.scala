@@ -301,7 +301,8 @@ object ElecManager {
   case class GetEleNodes(project: String)
   case class GetEleNodeCables(project: String, node: Int)
 
-  case class EleNodePNG(node: EleNode, cables: List[EleCable], png_url: String)
+  case class EleNodePNG(node: EleNode, cables: List[EleCable], png_url: String, spec: List[EleNodeSpec], specText: List[String])
+  case class EleNodeSpec(name: String, count: Int, weight: Double)
 
   case class GetEleNodePNG(project: String, node: Int)
 
