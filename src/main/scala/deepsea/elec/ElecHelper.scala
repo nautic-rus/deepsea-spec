@@ -1158,8 +1158,8 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
       val nodeModules = getEleNodeModules(project)
       var error = ""
       var totalRows = 0
-      var modules = ListBuffer.empty[Double]
-      var fillerModules = ListBuffer.empty[Double]
+      val modules = ListBuffer.empty[Double]
+      val fillerModules = ListBuffer.empty[Double]
 
 
       nodes.find(_.node_id == node) match {
@@ -1298,7 +1298,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
 
           val rama = (materials.find(_.code == node.stock) match {
             case Some(value) =>
-              spec += EleNodeSpec(value.name + ", секций " + (sections).toString + ", " + node.iheight.toString + "x" + node.iwidth.toString, 1, value.singleWeight)
+              spec += EleNodeSpec(value.name + ", секций " + (sections).toString + ", " + node.iheight.toString + "x" + nodeWidth.toString, 1, value.singleWeight)
               value.name + ", секций " + (sections).toString + ", " +
               node.iheight.toString + "x" + node.iwidth.toString +
               " мм, к-во 1 шт, вес " +  value.singleWeight.toString + " кг"
@@ -1306,7 +1306,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
           })
           specText += rama
 
-          val plastina = (materials.find(_.name == ("Пластина анкерная " + nodeWidth.toInt.toString)) match {
+          val plastina = (materials.find(_.name == ("Пластина анкерная " + nodeWidth.toString)) match {
             case Some(value) =>
               spec += EleNodeSpec(value.name, totalRows + 1, (totalRows + 1) * value.singleWeight)
               value.name + " мм, к-во " + (totalRows + 1).toString + " шт, вес " + ((totalRows + 1) * value.singleWeight).toString + " кг"
@@ -1314,7 +1314,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
           })
           specText += plastina
 
-          modules.groupBy(x => x).toList.sortBy(x => x._1).foreach(gr => {
+          modules.groupBy(x => x).toList.sortBy(x => x._1).reverse.foreach(gr => {
             val module = materials.find(_.name.contains("Уплотнительный модуль МКС " + gr._1.toInt.toString)) match {
               case Some(value) =>
                 spec += EleNodeSpec(value.name, gr._2.length, gr._2.length * value.singleWeight)
@@ -1324,7 +1324,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
             specText += module
           })
 
-          fillerModules.groupBy(x => x).toList.sortBy(x => x._1).foreach(gr => {
+          fillerModules.groupBy(x => x).toList.sortBy(x => x._1).reverse.foreach(gr => {
             val module = materials.find(_.name.contains("Глухой модуль МКС " + gr._1.toInt.toString)) match {
               case Some(value) =>
                 spec += EleNodeSpec(value.name, gr._2.length, gr._2.length * value.singleWeight)
