@@ -287,7 +287,8 @@ object ElecManager {
                      node_type: Int, area: Int, rout_area: String, area_desc: String,
                      code: String, descr: String, frames: Double, iwidth: Double, iheight: Double, length: Double, thickness: Double,
                      height2: Double, weight: Double, stock: String, nrows: Double, ncolumns: Double, seal: String,
-                     transit_size: String)
+                     transit_size: String, error: String)
+
   case class EleCable(cable_id: String, nom_section: String, spec: String, code: String, diam: Double){
     def diamModule(modules: List[EleNodeModule]): Double = {
       modules.find(x => x.minDiam <= diam && diam <= x.maxDiam) match {
@@ -299,6 +300,7 @@ object ElecManager {
   case class EleNodeModule(code: String, block_type: String, diam: Double, minDiam: Double, maxDiam: Double)
 
   case class GetEleNodes(project: String)
+  case class GetEleNodesError(project: String)
   case class GetEleNodeCables(project: String, node: Int)
 
   case class EleNodePNG(node: EleNode, cables: List[EleCable], png_url: String, spec: List[EleNodeSpec], specText: List[String])
@@ -402,6 +404,8 @@ object ElecManager {
         sender() ! getElePos(project, kind, index.toIntOption.getOrElse(0), taskId.toIntOption.getOrElse(0)).asJson.noSpaces
       case GetEleNodes(project) =>
         sender() ! getEleNodes(project).asJson.noSpaces
+      case GetEleNodesError(project) =>
+        sender() ! getEleNodesError(project).asJson.noSpaces
       case GetEleNodeCables(project, node) =>
         sender() ! getEleNodeCables(project, node).asJson.noSpaces
       case GetEleNodePNG(project, node) =>

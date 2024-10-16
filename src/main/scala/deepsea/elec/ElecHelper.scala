@@ -1076,6 +1076,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
               Option(rs.getDouble("NCOLUMNS")).getOrElse(0d),
               Option(rs.getString("SEAL_TYPE")).getOrElse(""),
               Option(rs.getString("TRANSIT_SIZE")).getOrElse(""),
+              "NO"
             )
           }
          catch {
@@ -1088,6 +1089,11 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
         res.toList
       case _ => List.empty[EleNode]
     }
+  }
+  def getEleNodesError(project: String): List[EleNode] = {
+    val nodes = getEleNodes(project)
+    val nodeModules = getEleNodeModules(project)
+    nodes.map(node => node.copy(error = checkNodeModulesPNG(project, node, nodeModules)))
   }
   def getEleNodeCables(project: String, node: Int): List[EleCable] = {
     val res = ListBuffer.empty[EleCable]
@@ -1145,7 +1151,6 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
       case _ => List.empty[EleNodeModule]
     }
   }
-
   def createNodeModulesPNG(project: String, node: Int, scale: Int = 4): EleNodePNG = {
     try{
 
@@ -1350,7 +1355,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
 
         case _ =>
           EleNodePNG(
-            EleNode(0, "", 0, 0, 0, 0, 0, "", "", "", "", 0, 0, 0, 0, 0, 0, 0, "", 0, 0, "", ""),
+            EleNode(0, "", 0, 0, 0, 0, 0, "", "", "", "", 0, 0, 0, 0, 0, 0, 0, "", 0, 0, "", "", ""),
             List.empty[EleCable],
             "",
             spec.toList,
@@ -1360,12 +1365,104 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
     }
     catch {
       case e: Throwable => EleNodePNG(
-        EleNode(0, "", 0, 0, 0, 0, 0, "", "", "", "", 0, 0, 0, 0, 0, 0, 0, "", 0, 0, "", ""),
+        EleNode(0, "", 0, 0, 0, 0, 0, "", "", "", "", 0, 0, 0, 0, 0, 0, 0, "", 0, 0, "", "", ""),
         List.empty[EleCable],
         "error: " + e.toString,
         List.empty[EleNodeSpec], List.empty[String]
       )
     }
   }
+  def checkNodeModulesPNG(project: String, node: EleNode, nodeModules: List[EleNodeModule]): String = {
+    try{
+      val cables = getEleNodeCables(project, node.node_id)
+      var error = "ok"
+      var totalRows = 0
+      val modules = ListBuffer.empty[Double]
+      val fillerModules = ListBuffer.empty[Double]
+
+      val nodeWidth = if (node.iwidth >= 120) 120 else 60
+      val xStart = -1 * nodeWidth * node.ncolumns / 2d
+      val yStart = node.iheight * node.nrows / 2d
+
+      var x = xStart
+      var y = yStart
+      var col = 0
+      var row = 0
+
+      val colDiams = ListBuffer.empty[Double]
+      val rowDiams = ListBuffer.empty[Double]
+
+      val cablesSort = cables.sortBy(x => (x.diamModule(nodeModules), x.cable_id)).reverse
+      cablesSort.foreach(cab => {
+        val diam = cab.diamModule(nodeModules)
+        modules += diam
+        if (diam > 0){
+          if (colDiams.nonEmpty && colDiams.lastOption.getOrElse(0) != diam){
+            if (colDiams.sum + colDiams.last <= nodeWidth){
+              val fillDiam = colDiams.last
+              val fillCount = nodeWidth / fillDiam - colDiams.length
+              (0.until(fillCount.toInt)).foreach(filler => {
+                x = xStart + col * nodeWidth + colDiams.length * fillDiam + filler * fillDiam
+                fillerModules += fillDiam
+              })
+            }
+            y += -1 * colDiams.last
+            rowDiams += colDiams.last
+            colDiams.clear()
+            totalRows += 1
+          }
+          else if (colDiams.nonEmpty && (colDiams.sum + diam) > nodeWidth){
+            y += -1 * colDiams.last
+            rowDiams += colDiams.last
+            colDiams.clear()
+            totalRows += 1
+          }
+
+          if (rowDiams.sum + diam > node.iheight){
+            if (col < node.ncolumns - 1){
+              col += 1
+            }
+            else if (row < node.nrows - 1){
+              row += 1
+              col = 0
+            }
+            else{
+              error = "error: not enough space for cables, placed " + cablesSort.indexOf(cab).toString + " of " + cablesSort.length.toString
+            }
+            y = yStart - row * node.iheight
+            rowDiams.clear()
+            colDiams.clear()
+          }
+
+          if (colDiams.isEmpty){
+            x = xStart + col * nodeWidth
+          }
+          else{
+            x = xStart + col * nodeWidth + colDiams.length * diam
+          }
+          colDiams += diam
+          if (cablesSort.indexOf(cab) == cablesSort.length - 1 && colDiams.nonEmpty && colDiams.sum + diam <= nodeWidth){
+            val fillCount = nodeWidth / diam - colDiams.length
+            (0.until(fillCount.toInt)).foreach(filler => {
+              x = xStart + col * nodeWidth + colDiams.length * diam + filler * diam
+              fillerModules += diam
+            })
+          }
+          if (cablesSort.indexOf(cab) == cablesSort.length - 1 && colDiams.nonEmpty){
+            totalRows += 1
+          }
+        }
+        else{
+          error = "error: null diameter for cable " + cab.cable_id
+        }
+      })
+
+      error
+    }
+    catch {
+      case e: Throwable => "error: " + e.toString
+    }
+  }
+
 
 }
