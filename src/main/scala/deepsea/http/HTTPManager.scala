@@ -341,8 +341,8 @@ class HTTPManager extends Actor {
       (get & path("eleNodes") & parameter("project")) { (project) =>
         askFor(ActorManager.elec, GetEleNodes(project))
       },
-      (get & path("eleNodesError") & parameter("project")) { (project) =>
-        askFor(ActorManager.elec, GetEleNodesError(project))
+      (get & path("eleNodesError") & parameter("project", "node")) { (project, node) =>
+        askFor(ActorManager.elec, GetEleNodesError(project, node.toIntOption.getOrElse(0)))
       },
       (get & path("eleNodeCables") & parameter("project") & parameter("node")) { (project, node) =>
         askFor(ActorManager.elec, GetEleNodeCables(project, node.toIntOption.getOrElse(0)))

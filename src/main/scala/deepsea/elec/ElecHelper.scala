@@ -1090,8 +1090,8 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
       case _ => List.empty[EleNode]
     }
   }
-  def getEleNodesError(project: String): List[EleNode] = {
-    val nodes = getEleNodes(project)
+  def getEleNodesError(project: String, node: Int = 0): List[EleNode] = {
+    val nodes = getEleNodes(project, node)
     val nodeModules = getEleNodeModules(project)
     nodes.map(node => node.copy(error = checkNodeModulesPNG(project, node, nodeModules)))
   }

@@ -300,7 +300,7 @@ object ElecManager {
   case class EleNodeModule(code: String, block_type: String, diam: Double, minDiam: Double, maxDiam: Double)
 
   case class GetEleNodes(project: String)
-  case class GetEleNodesError(project: String)
+  case class GetEleNodesError(project: String, node: Int)
   case class GetEleNodeCables(project: String, node: Int)
 
   case class EleNodePNG(node: EleNode, cables: List[EleCable], png_url: String, spec: List[EleNodeSpec], specText: List[String])
@@ -404,8 +404,8 @@ object ElecManager {
         sender() ! getElePos(project, kind, index.toIntOption.getOrElse(0), taskId.toIntOption.getOrElse(0)).asJson.noSpaces
       case GetEleNodes(project) =>
         sender() ! getEleNodes(project).asJson.noSpaces
-      case GetEleNodesError(project) =>
-        sender() ! getEleNodesError(project).asJson.noSpaces
+      case GetEleNodesError(project, node) =>
+        sender() ! getEleNodesError(project, node).asJson.noSpaces
       case GetEleNodeCables(project, node) =>
         sender() ! getEleNodeCables(project, node).asJson.noSpaces
       case GetEleNodePNG(project, node) =>
