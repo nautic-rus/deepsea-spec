@@ -303,10 +303,12 @@ object ElecManager {
   case class GetEleNodesError(project: String, node: Int)
   case class GetEleNodeCables(project: String, node: Int)
 
-  case class EleNodePNG(node: EleNode, cables: List[EleCable], png_url: String, spec: List[EleNodeSpec], specText: List[String])
+  case class EleNodePNG(node: EleNode, cables: List[EleCable], png_url: String, png_path: String, spec: List[EleNodeSpec], specText: List[String], specCables: List[EleCableSpec])
   case class EleNodeSpec(name: String, count: Int, weight: Double)
+  case class EleCableSpec(pos: String, cable: String, module: String)
 
   case class GetEleNodePNG(project: String, node: Int)
+  case class GetEleNodePDF(project: String, node: Int)
 
   class ElecManager extends Actor with ElecHelper with Codecs with ElePdf {
     implicit val timeout: Timeout = Timeout(60, TimeUnit.SECONDS)
@@ -410,6 +412,8 @@ object ElecManager {
         sender() ! getEleNodeCables(project, node).asJson.noSpaces
       case GetEleNodePNG(project, node) =>
         sender() ! createNodeModulesPNG(project, node).asJson.noSpaces
+      case GetEleNodePDF(project, node) =>
+        sender() ! createNodeModulesPDF(project, node).asJson.noSpaces
       case _ => None
     }
   }

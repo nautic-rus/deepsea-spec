@@ -13,7 +13,6 @@ import deepsea.materials.MaterialsHelper
 import deepsea.pipe.PipeManager.{Material, Pls, PlsParam}
 import doodle.core._
 import doodle.core.format._
-import doodle.image._
 import doodle.image.syntax.all._
 import doodle.java2d._
 import io.circe.parser._
@@ -25,12 +24,24 @@ import org.mongodb.scala.MongoCollection
 import org.mongodb.scala.model.Filters.equal
 import cats.implicits._
 import cats.effect.unsafe.implicits.global
+import com.itextpdf.io.font.{FontProgramFactory, PdfEncodings}
+import com.itextpdf.io.image.ImageDataFactory
+import com.itextpdf.kernel.font.PdfFontFactory.EmbeddingStrategy
+import com.itextpdf.kernel.font.{PdfFont, PdfFontFactory}
+import com.itextpdf.kernel.pdf.{PdfDocument, PdfWriter}
+import com.itextpdf.layout.Document
+import com.itextpdf.layout.borders.Border
+import com.itextpdf.layout.element.{AreaBreak, Cell, Paragraph, Table}
+import com.itextpdf.layout.properties.{HorizontalAlignment, TextAlignment}
 import deepsea.App
+import doodle.image.Image
 
+import java.awt.geom.Area
 import java.io.{File, FileOutputStream}
 import java.nio.file.Files
 import java.util.zip.{ZipEntry, ZipOutputStream}
 import java.util.{Date, UUID}
+import javax.swing.text.StyleConstants.FontConstants
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.Await
 import scala.concurrent.duration.{Duration, SECONDS}
@@ -1151,12 +1162,13 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
       case _ => List.empty[EleNodeModule]
     }
   }
-  def createNodeModulesPNG(project: String, node: Int, scale: Int = 4): EleNodePNG = {
+  def createNodeModulesPNG(project: String, node: Int, scale: Int = 4, numeric: Boolean = false): EleNodePNG = {
     try{
 
       val materials = getMaterials
       val specText = ListBuffer.empty[String]
       val spec = ListBuffer.empty[EleNodeSpec]
+      val specCables = ListBuffer.empty[EleCableSpec]
 
       val nodes = getEleNodes(project, node)
       val cables = getEleNodeCables(project, node)
@@ -1178,7 +1190,8 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
 
           (0.until(node.nrows.toInt)).foreach(row => {
             (0.until(node.ncolumns.toInt)).foreach(col => {
-              pic = Image.rectangle(nodeWidth, node.iheight).fillColor(Color.lightGray).strokeWidth(0.5).at(xStart + col * nodeWidth + nodeWidth / 2d, yStart - row * node.iheight - node.iheight / 2d).on(pic)
+              pic = Image.rectangle(nodeWidth, node.iheight).strokeWidth(0.5).at(xStart + col * nodeWidth + nodeWidth / 2d, yStart - row * node.iheight - node.iheight / 2d).on(pic)
+              //pic = Image.rectangle(nodeWidth, node.iheight).fillColor(Color.lightGray).strokeWidth(0.5).at(xStart + col * nodeWidth + nodeWidth / 2d, yStart - row * node.iheight - node.iheight / 2d).on(pic)
             })
           })
 
@@ -1195,6 +1208,11 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
           cablesSort.foreach(cab => {
             val diam = cab.diamModule(nodeModules)
             modules += diam
+            val moduleName = materials.find(_.name.contains("Уплотнительный модуль МКС " + diam.toInt.toString)) match {
+              case Some(value) => value.name.replace("Уплотнительный модуль ", "")
+              case _ => "Не найден"
+            }
+
             if (diam > 0){
               if (colDiams.nonEmpty && colDiams.lastOption.getOrElse(0) != diam){
                 if (colDiams.sum + colDiams.last <= nodeWidth){
@@ -1203,10 +1221,20 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
                   (0.until(fillCount.toInt)).foreach(filler => {
                     x = xStart + col * nodeWidth + colDiams.length * fillDiam + filler * fillDiam
                     val r = Image.rectangle(fillDiam, fillDiam).strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + fillDiam / 2, y - fillDiam / 2)
-                    val t = Image.text(fillDiam.toString).scale(fillDiam * 1.5 / nodeWidth, fillDiam * 1.5 / nodeWidth).at(x + fillDiam / 2, y - fillDiam / 2)
+                    val t = Image.text(
+                      if (numeric) (specCables.length + 1).toString else fillDiam.toString
+                    ).scale(fillDiam * 1.5 / nodeWidth, fillDiam * 1.5 / nodeWidth).at(x + fillDiam / 2, y - fillDiam / 2)
                     pic = r.on(pic)
                     pic = t.on(pic)
                     fillerModules += fillDiam
+
+                    val moduleName = materials.find(_.name.contains("Глухой модуль МКС " + fillDiam.toInt.toString)) match {
+                      case Some(value) => value.name.replace("Глухой модуль ", "")
+                      case _ => "Не найден"
+                    }
+
+                    specCables += EleCableSpec((specCables.length + 1).toString, cab.cable_id, moduleName)
+
                   })
                 }
                 y += -1 * colDiams.last
@@ -1246,21 +1274,29 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
               }
 
               val r = Image.rectangle(diam, diam).strokeColor(Color.blue).strokeWidth(0.5).fillColor(Color.white).at(x + diam / 2, y - diam / 2)
-              val t = Image.text(cab.cable_id).scale(diam * 1.5 / nodeWidth, diam * 1.5 / nodeWidth).at(x + diam / 2, y - diam / 2)
+              val t = Image.text(if (numeric) (specCables.length + 1).toString else cab.cable_id).scale(diam * 1.5 / nodeWidth, diam * 1.5 / nodeWidth).at(x + diam / 2, y - diam / 2)
               pic = r.on(pic)
               pic = t.on(pic)
 
               colDiams += diam
+              specCables += EleCableSpec((specCables.length + 1).toString, cab.cable_id, moduleName)
+
 
               if (cablesSort.indexOf(cab) == cablesSort.length - 1 && colDiams.nonEmpty && colDiams.sum + diam <= nodeWidth){
                 val fillCount = nodeWidth / diam - colDiams.length
                 (0.until(fillCount.toInt)).foreach(filler => {
                   x = xStart + col * nodeWidth + colDiams.length * diam + filler * diam
                   val r = Image.rectangle(diam, diam).strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + diam / 2, y - diam / 2)
-                  val t = Image.text(diam.toString).scale(diam * 1.5 / nodeWidth, diam * 1.5 / nodeWidth).at(x + diam / 2, y - diam / 2)
+                  val t = Image.text(if (numeric) (specCables.length + 1).toString else diam.toString).scale(diam * 1.5 / nodeWidth, diam * 1.5 / nodeWidth).at(x + diam / 2, y - diam / 2)
                   pic = r.on(pic)
                   pic = t.on(pic)
                   fillerModules += diam
+
+                  val moduleName = materials.find(_.name.contains("Глухой модуль МКС " + diam.toInt.toString)) match {
+                    case Some(value) => value.name.replace("Глухой модуль ", "")
+                    case _ => "Не найден"
+                  }
+                  specCables += EleCableSpec((specCables.length + 1).toString, cab.cable_id, moduleName)
                 })
               }
               if (cablesSort.indexOf(cab) == cablesSort.length - 1 && colDiams.nonEmpty){
@@ -1351,15 +1387,17 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
           specText += "Смазка 1 шт"
           spec += EleNodeSpec("Смазка", 1, 0)
 
-          EleNodePNG(node, cables, if (error != "") error else fileUrl, spec.toList, specText.toList)
+          EleNodePNG(node, cables, if (error != "") error else fileUrl, file.toString, spec.toList, specText.toList, specCables.toList)
 
         case _ =>
           EleNodePNG(
             EleNode(0, "", 0, 0, 0, 0, 0, "", "", "", "", 0, 0, 0, 0, 0, 0, 0, "", 0, 0, "", "", ""),
             List.empty[EleCable],
             "",
+            "",
             spec.toList,
-            specText.toList
+            specText.toList,
+            List.empty[EleCableSpec]
           )
       }
     }
@@ -1368,7 +1406,9 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
         EleNode(0, "", 0, 0, 0, 0, 0, "", "", "", "", 0, 0, 0, 0, 0, 0, 0, "", 0, 0, "", "", ""),
         List.empty[EleCable],
         "error: " + e.toString,
-        List.empty[EleNodeSpec], List.empty[String]
+        "",
+        List.empty[EleNodeSpec], List.empty[String],
+        List.empty[EleCableSpec]
       )
     }
   }
@@ -1463,6 +1503,84 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
       case e: Throwable => "error: " + e.toString
     }
   }
+  def createNodeModulesPDF(project: String, node_id: Int): String ={
 
+    val fileName = "node-" + new Date().getTime + ".pdf"
+    var pathId = UUID.randomUUID().toString.substring(0, 12)
+    var file = new File(App.Cloud.Directory + File.separator + pathId)
+    while (file.exists()) {
+      pathId = UUID.randomUUID().toString.substring(0, 8)
+      file = new File(App.Cloud.Directory + File.separator + pathId)
+    }
+    file.mkdir()
+    file = new File(App.Cloud.Directory + File.separator + pathId + File.separator + fileName)
+    val fileUrl = App.Cloud.Url + "/" + pathId + "/" + fileName
+
+    val node = createNodeModulesPNG(project, node_id, numeric = true)
+    val writer = new PdfWriter(file.toString)
+    val pdfDoc = new PdfDocument(writer)
+    val doc = new Document(pdfDoc)
+    val gostFont = PdfFontFactory.createFont(FontProgramFactory.createFont("fonts/GOSTtypeA.ttf"), PdfEncodings.IDENTITY_H, EmbeddingStrategy.PREFER_NOT_EMBEDDED)
+    doc.setFont(gostFont)
+    doc.setFontSize(10F)
+
+
+    val header = new Paragraph("Узел: " + node.node.node + ", " + node.node.descr)
+    header.setFontSize(12F)
+    header.setBold()
+    header.setTextAlignment(TextAlignment.CENTER)
+    doc.add(header)
+
+    val tableOfTables = new Table(3)
+    tableOfTables.setHorizontalAlignment(HorizontalAlignment.CENTER)
+    val tableColumnWidths = Array(15F, 50F, 80F)
+    node.specCables.grouped(Math.round(node.specCables.length / 3)).foreach(cableGroup => {
+      val table = new Table(tableColumnWidths)
+      cableGroup.foreach(cable => {
+
+        val cellPos = new Cell()
+        val cellCable = new Cell()
+        val cellModule = new Cell()
+
+        cellPos.add(new Paragraph(cable.pos))
+        cellCable.add(new Paragraph(cable.cable))
+        cellModule.add(new Paragraph(cable.module))
+
+        table.addCell(cellPos)
+        table.addCell(cellCable)
+        table.addCell(cellModule)
+      })
+      val tableCell = new Cell()
+      tableCell.add(table)
+      tableCell.setBorder(Border.NO_BORDER)
+      tableOfTables.addCell(tableCell)
+    })
+    doc.add(tableOfTables)
+
+    val headerCommon = new Paragraph("Сводные данные")
+    headerCommon.setFontSize(12F)
+    headerCommon.setMarginTop(20F)
+    headerCommon.setItalic()
+    doc.add(headerCommon)
+    node.specText.foreach(text => {
+      val specText = new Paragraph(text)
+      specText.setMarginTop(0F)
+      specText.setMarginBottom(0F)
+      specText.setItalic()
+      doc.add(specText)
+    })
+
+    doc.add(new AreaBreak())
+
+    val imageData = ImageDataFactory.create(node.png_path)
+    val image = new com.itextpdf.layout.element.Image(imageData)
+    image.setHorizontalAlignment(HorizontalAlignment.CENTER)
+    if (node.node.ncolumns > 2){
+      image.setRotationAngle(-90 * Math.PI / 180)
+    }
+    doc.add(image.setAutoScale(true))
+    doc.close()
+    fileUrl
+  }
 
 }

@@ -350,6 +350,9 @@ class HTTPManager extends Actor {
       (get & path("eleNodePng") & parameter("project") & parameter("node")) { (project, node) =>
         askFor(ActorManager.elec, GetEleNodePNG(project, node.toIntOption.getOrElse(0)))
       },
+      (get & path("eleNodePdf") & parameter("project") & parameter("node")) { (project, node) =>
+        askFor(ActorManager.elec, GetEleNodePDF(project, node.toIntOption.getOrElse(0)))
+      },
 
       (get & path("time")) {
         complete(HttpEntity(new Date().getTime.asJson.noSpaces))
