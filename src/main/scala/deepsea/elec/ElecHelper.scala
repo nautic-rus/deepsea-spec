@@ -21,7 +21,7 @@ import local.common.DBRequests.{MountItem, findWorkshopMaterialContains, retriev
 import local.domain.WorkShopMaterial
 import local.ele.CommonEle.EleComplect
 import org.mongodb.scala.MongoCollection
-import org.mongodb.scala.model.Filters.equal
+import org.mongodb.scala.model.Filters.{empty, equal}
 import cats.implicits._
 import cats.effect.unsafe.implicits.global
 import com.itextpdf.io.font.{FontProgramFactory, PdfEncodings}
@@ -1182,15 +1182,24 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
       nodes.find(_.node_id == node) match {
         case Some(node) =>
 
-          val nodeWidth = if (node.iwidth >= 120) 120 else 60
-          var pic = Image.rectangle(nodeWidth * node.ncolumns, node.iheight * node.nrows)
+          val split = node.descr.split("\n").lastOption.getOrElse("").replace("х", "x")
+          val wh = split.split("x")
+          val nodeWidth = wh(0).toIntOption.getOrElse(0)
+          val nodeHeight = wh(1).toIntOption.getOrElse(0)
+
+          if (nodeHeight == 0 || nodeWidth == 0) {
+            error = "error: node height or width is zero"
+          }
+
+
+          var pic = Image.rectangle(nodeWidth * node.ncolumns, nodeHeight * node.nrows)
 
           val xStart = -1 * nodeWidth * node.ncolumns / 2d
-          val yStart = node.iheight * node.nrows / 2d
+          val yStart = nodeHeight * node.nrows / 2d
 
           (0.until(node.nrows.toInt)).foreach(row => {
             (0.until(node.ncolumns.toInt)).foreach(col => {
-              pic = Image.rectangle(nodeWidth, node.iheight).strokeWidth(0.5).at(xStart + col * nodeWidth + nodeWidth / 2d, yStart - row * node.iheight - node.iheight / 2d).on(pic)
+              pic = Image.rectangle(nodeWidth, nodeHeight).strokeWidth(0.5).at(xStart + col * nodeWidth + nodeWidth / 2d, yStart - row * nodeHeight - nodeHeight / 2d).on(pic)
               //pic = Image.rectangle(nodeWidth, node.iheight).fillColor(Color.lightGray).strokeWidth(0.5).at(xStart + col * nodeWidth + nodeWidth / 2d, yStart - row * node.iheight - node.iheight / 2d).on(pic)
             })
           })
@@ -1249,7 +1258,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
                 totalRows += 1
               }
 
-              if (rowDiams.sum + diam > node.iheight){
+              if (rowDiams.sum + diam > nodeHeight){
                 if (col < node.ncolumns - 1){
                   col += 1
                 }
@@ -1261,7 +1270,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
                   println("error: not enough")
                   error = "error: not enough space for cables, placed " + cablesSort.indexOf(cab).toString + " of " + cablesSort.length.toString
                 }
-                y = yStart - row * node.iheight
+                y = yStart - row * nodeHeight
                 rowDiams.clear()
                 colDiams.clear()
               }
@@ -1339,9 +1348,9 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
 
           val rama = (materials.find(_.code == node.stock) match {
             case Some(value) =>
-              spec += EleNodeSpec(value.name + ", секций " + (sections).toString + ", " + node.iheight.toString + "x" + nodeWidth.toString, 1, value.singleWeight)
+              spec += EleNodeSpec(value.name + ", секций " + (sections).toString + ", " + nodeHeight.toString + "x" + nodeWidth.toString, 1, value.singleWeight)
               value.name + ", секций " + (sections).toString + ", " +
-              node.iheight.toString + "x" + node.iwidth.toString +
+              nodeHeight.toString + "x" + nodeWidth.toString +
               " мм, к-во 1 шт, вес " +  value.singleWeight.toString + " кг"
             case _ => "Не найдено по коду " + node.stock
           })
@@ -1420,9 +1429,17 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
       val modules = ListBuffer.empty[Double]
       val fillerModules = ListBuffer.empty[Double]
 
-      val nodeWidth = if (node.iwidth >= 120) 120 else 60
+      val split = node.descr.split("\n").lastOption.getOrElse("").replace("х", "x")
+      val wh = split.split("x")
+      val nodeWidth = wh(0).toIntOption.getOrElse(0)
+      val nodeHeight = wh(1).toIntOption.getOrElse(0)
+
+      if (nodeHeight == 0 || nodeWidth == 0) {
+        error = "error: node height or width is zero"
+      }
+
       val xStart = -1 * nodeWidth * node.ncolumns / 2d
-      val yStart = node.iheight * node.nrows / 2d
+      val yStart = nodeHeight * node.nrows / 2d
 
       var x = xStart
       var y = yStart
@@ -1458,7 +1475,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
             totalRows += 1
           }
 
-          if (rowDiams.sum + diam > node.iheight){
+          if (rowDiams.sum + diam > nodeHeight){
             if (col < node.ncolumns - 1){
               col += 1
             }
@@ -1469,7 +1486,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
             else{
               error = "error: not enough space for cables, placed " + cablesSort.indexOf(cab).toString + " of " + cablesSort.length.toString
             }
-            y = yStart - row * node.iheight
+            y = yStart - row * nodeHeight
             rowDiams.clear()
             colDiams.clear()
           }
