@@ -39,13 +39,13 @@ object PrdPartsReportEN extends UtilsPDF {
     mmToPt(10),
     mmToPt(10),
     mmToPt(10),
-    mmToPt(81),
+    mmToPt(71),
     mmToPt(20),
 
     mmToPt(10),
     mmToPt(15),
     mmToPt(15),
-    mmToPt(21),
+    mmToPt(31),
 
 
     mmToPt(15) + 2 //
@@ -179,20 +179,69 @@ object PrdPartsReportEN extends UtilsPDF {
         pages += new PartListBodyPage(docNameEN)
         currPage = currPage + 1
       }
-      val rowLimit = 12
-      if (row.A9.length > rowLimit){
-        val split = row.A9.split(' ')
-        var firstRow = ""
-        var secondRow = ""
-        for (x <- 1.to(split.length)){
-          val splitRow = split.take(x).mkString(" ")
-          if (splitRow.length < rowLimit){
-            firstRow = splitRow
-            secondRow = row.A9.replace(firstRow, "")
+      val rowA4Limit = 45
+      val rowA9Limit = 16
+      if (row.A4.length > rowA4Limit || row.A9.length > rowA9Limit){
+        val splitA4 = ListBuffer.empty[String]
+        val splitA9 = ListBuffer.empty[String]
+
+        val splitA4BySpace = row.A4.split(" ")
+        val splitA9BySpace = row.A9.split(" ")
+
+
+        val splits = ListBuffer.empty[String]
+        var rowSplit = ""
+        var error = false
+        splitA4BySpace.foreach(s => {
+          if ((s + rowSplit).length > rowA4Limit && rowSplit != ""){
+            splits += rowSplit
+            rowSplit = s
           }
+          else if ((s + rowSplit).length > rowA4Limit && rowSplit == ""){
+            error = true
+          }
+          else{
+            rowSplit = (rowSplit + " " + s).trim
+          }
+        })
+        splits += rowSplit
+        if (!error){
+          splitA4 ++= splits
         }
-        pages.last.insertRow(row.copy(A9 = firstRow))
-        pages.last.insertRow(Item11ColumnsEN(false, "", A9 = secondRow))
+
+        splits.clear()
+        rowSplit = ""
+        error = false
+        splitA9BySpace.foreach(s => {
+          if ((s + rowSplit).length > rowA9Limit && rowSplit != ""){
+            splits += rowSplit
+            rowSplit = s
+          }
+          else if ((s + rowSplit).length > rowA9Limit && rowSplit == ""){
+            error = true
+          }
+          else{
+            rowSplit = (rowSplit + " " + s).trim
+          }
+        })
+        splits += rowSplit
+        if (!error){
+          splitA9 ++= splits
+        }
+
+        if (splitA4.isEmpty){
+          splitA4 ++= row.A4.grouped(rowA4Limit).toList
+        }
+        if (splitA9.isEmpty){
+          splitA9 ++= row.A9.grouped(rowA9Limit).toList
+        }
+
+        val groupLength = List(splitA4.length, splitA9.length).max
+
+        pages.last.insertRow(row.copy(A4 = splitA4.head, A9 = splitA9.head))
+        for (x <- 1.until(groupLength)){
+          pages.last.insertRow(Item11ColumnsEN(false, "", A4 = if (x > splitA4.length - 1) "" else splitA4(x), A9 = if (x > splitA9.length - 1) "" else splitA9(x)))
+        }
       }
       else{
         pages.last.insertRow(row)
