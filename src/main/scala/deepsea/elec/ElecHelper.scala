@@ -1187,6 +1187,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
       var totalRows = 0
       val modules = ListBuffer.empty[Double]
       val fillerModules = ListBuffer.empty[Double]
+      val fillerNoModules = ListBuffer.empty[Double]
 
 
       nodes.find(_.node_id == node) match {
@@ -1227,11 +1228,10 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
           cablesSort.foreach(cab => {
             val diam = cab.diamModule(nodeModules)
             modules += diam
-            val moduleName = materials.find(_.name.contains("Уплотнительный модуль МКС " + diam.toInt.toString)) match {
+            val moduleName = materials.find(_.name.contains("Уплотнительный модуль МКС " + diam.toString)) match {
               case Some(value) => value.name.replace("Уплотнительный модуль ", "")
               case _ => "Не найден"
             }
-
             if (diam > 0){
               if (colDiams.nonEmpty && colDiams.lastOption.getOrElse(0) != diam){
                 if (colDiams.sum + colDiams.last <= nodeWidth){
@@ -1241,14 +1241,14 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
                     x = xStart + col * nodeWidth + colDiams.length * fillDiam + filler * fillDiam
                     val r = Image.rectangle(fillDiam, fillDiam).strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + fillDiam / 2, y - fillDiam / 2)
                     val t = Image.text(
-                      if (numeric) (specCables.length + 1).toString else fillDiam.toString
+                      if (numeric) (specCables.length + 1).toString else fillDiam.toInt.toString
                     ).scale(fillDiam * 1.5 / nodeWidth, fillDiam * 1.5 / nodeWidth).at(x + fillDiam / 2, y - fillDiam / 2)
                     pic = r.on(pic)
                     pic = t.on(pic)
                     fillerModules += fillDiam
 
-                    val moduleName = materials.find(_.name.contains("Глухой модуль МКС " + fillDiam.toInt.toString)) match {
-                      case Some(value) => value.name.replace("Глухой модуль ", "")
+                    val moduleName = materials.find(_.name.contains("Уплотнительный модуль МКС " + fillDiam.toInt.toString)) match {
+                      case Some(value) => value.name.replace("Уплотнительный модуль ", "")
                       case _ => "Не найден"
                     }
 
@@ -1303,7 +1303,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
 
               if (cablesSort.indexOf(cab) == cablesSort.length - 1 && colDiams.nonEmpty && colDiams.sum + diam <= nodeWidth){
                 val fillCount = nodeWidth / diam - colDiams.length
-                (0.until(fillCount.toInt)).foreach(filler => {
+                (0.until(fillCount)).foreach(filler => {
                   x = xStart + col * nodeWidth + colDiams.length * diam + filler * diam
                   val r = Image.rectangle(diam, diam).strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + diam / 2, y - diam / 2)
                   val t = Image.text(if (numeric) (specCables.length + 1).toString else diam.toString).scale(diam * 1.5 / nodeWidth, diam * 1.5 / nodeWidth).at(x + diam / 2, y - diam / 2)
@@ -1311,25 +1311,85 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
                   pic = t.on(pic)
                   fillerModules += diam
 
-                  val moduleName = materials.find(_.name.contains("Глухой модуль МКС " + diam.toInt.toString)) match {
-                    case Some(value) => value.name.replace("Глухой модуль ", "")
+                  val moduleName = materials.find(_.name.contains("Уплотнительный модуль МКС " + diam.toString)) match {
+                    case Some(value) => value.name.replace("Уплотнительный модуль ", "")
                     case _ => "Не найден"
                   }
-                  specCables += EleCableSpec((specCables.length + 1).toString, cab.cable_id, moduleName)
+                  specCables += EleCableSpec((specCables.length + 1).toString, "Модуль", moduleName)
                 })
               }
               if (cablesSort.indexOf(cab) == cablesSort.length - 1 && colDiams.nonEmpty){
                 totalRows += 1
+                rowDiams += colDiams.last
               }
             }
             else{
               error = "error: null diameter for cable " + cab.cable_id
             }
-
-
-
-
           })
+
+
+          while (error == "" && row <= node.nrows - 1){
+            while (col <= node.ncolumns - 1){
+              if (rowDiams.sum < nodeHeight){
+                val diam = 30
+                while (rowDiams.sum + diam <= nodeHeight){
+                  y += -1 * rowDiams.last
+                  rowDiams += diam
+                  totalRows += 1
+                  val fillCount = nodeWidth / diam
+                  (0.until(fillCount)).foreach(filler => {
+                    x = xStart + col * nodeWidth + filler * diam
+                    val r = Image.rectangle(diam, diam).strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + diam / 2, y - diam / 2)
+                    val t = Image.text(if (numeric) (specCables.length + 1).toString else diam.toString).scale(diam * 1.5 / nodeWidth, diam * 1.5 / nodeWidth).at(x + diam / 2, y - diam / 2)
+                    pic = r.on(pic)
+                    pic = t.on(pic)
+                    fillerModules += diam
+
+                    val moduleName = materials.find(_.name.contains("Уплотнительный модуль МКС " + diam.toString)) match {
+                      case Some(value) => value.name.replace("Уплотнительный модуль ", "")
+                      case _ => "Не найден"
+                    }
+
+                    specCables += EleCableSpec((specCables.length + 1).toString, "Модуль", moduleName)
+                  })
+                }
+              }
+
+              while (error == "" && rowDiams.sum + 5 <= nodeHeight){
+                y += -1 * rowDiams.last
+                val diam = if (rowDiams.sum + 10 <= nodeHeight){
+                  10
+                }
+                else{
+                  5
+                }
+                x = xStart + col * nodeWidth
+                val r = Image.rectangle(nodeWidth, diam).strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + nodeWidth / 2, y - diam / 2)
+                val t = Image.text(if (numeric) (specCables.length + 1).toString else diam.toString).scale(diam * 4.5 / nodeWidth, diam * 4.5 / nodeWidth).at(x + nodeWidth / 2, y - diam / 2)
+                pic = r.on(pic)
+                pic = t.on(pic)
+                fillerNoModules += diam
+
+                val moduleName = materials.find(x => x.name.contains("Глухой модуль МКС " + diam.toString) && x.name.contains(nodeWidth.toString)) match {
+                  case Some(value) => value.name.replace("Глухой модуль ", "")
+                  case _ => "Не найден"
+                }
+                specCables += EleCableSpec((specCables.length + 1).toString, "Модуль", moduleName)
+                totalRows += 1
+                rowDiams += diam
+              }
+
+              col += 1
+              y = yStart - row * nodeHeight
+              rowDiams.clear()
+              colDiams.clear()
+            }
+            row += 1
+            col = 0
+            y = yStart - row * nodeHeight
+          }
+
 
 
           pic = pic.scale(scale, scale)
@@ -1374,7 +1434,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
           })
           specText += plastina
 
-          modules.groupBy(x => x).toList.sortBy(x => x._1).reverse.foreach(gr => {
+          (modules ++ fillerModules).groupBy(x => x).toList.sortBy(x => x._1).reverse.foreach(gr => {
             val module = materials.find(_.name.contains("Уплотнительный модуль МКС " + gr._1.toInt.toString)) match {
               case Some(value) =>
                 spec += EleNodeSpec(value.name, gr._2.length, gr._2.length * value.singleWeight)
@@ -1384,8 +1444,18 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
             specText += module
           })
 
-          fillerModules.groupBy(x => x).toList.sortBy(x => x._1).reverse.foreach(gr => {
-            val module = materials.find(_.name.contains("Глухой модуль МКС " + gr._1.toInt.toString)) match {
+//          fillerModules.groupBy(x => x).toList.sortBy(x => x._1).reverse.foreach(gr => {
+//            val module = materials.find(_.name.contains("Уплотнительный модуль МКС " + gr._1.toInt.toString)) match {
+//              case Some(value) =>
+//                spec += EleNodeSpec(value.name, gr._2.length, gr._2.length * value.singleWeight)
+//                value.name + ", к-во  " + (gr._2.length).toString + " шт, вес " + ((gr._2.length) * value.singleWeight).toString + " кг"
+//              case _ => "Не найден уплотнительный модуль МКС " + gr._1.toInt.toString
+//            }
+//            specText += module
+//          })
+
+          fillerNoModules.groupBy(x => x).toList.sortBy(x => x._1).reverse.foreach(gr => {
+            val module = materials.find(x => x.name.contains("Глухой модуль МКС " + gr._1.toInt.toString) && x.name.contains(nodeWidth)) match {
               case Some(value) =>
                 spec += EleNodeSpec(value.name, gr._2.length, gr._2.length * value.singleWeight)
                 value.name + ", к-во  " + (gr._2.length).toString + " шт, вес " + ((gr._2.length) * value.singleWeight).toString + " кг"
@@ -1395,7 +1465,8 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
           })
 
 
-          val compression = (materials.find(_.name == ("Компрессионный блок МКС КБ " + nodeWidth.toInt.toString)) match {
+
+          val compression = (materials.find(_.name == ("Компрессионный блок МКС КБ " + nodeWidth.toString)) match {
             case Some(value) =>
               spec += EleNodeSpec(value.name, sections, sections * value.singleWeight)
               value.name + " мм, к-во " + (sections).toString + " шт, вес " + (sections * value.singleWeight).toString + " кг"
