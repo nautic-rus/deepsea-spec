@@ -1561,7 +1561,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
       val tableOfTables = new Table(3)
       tableOfTables.setHorizontalAlignment(HorizontalAlignment.CENTER)
       val tableColumnWidths = Array(15F, 50F, 80F)
-      node.specCables.grouped(Math.ceil(node.specCables.length / 3).toInt).foreach(cableGroup => {
+      node.specCables.grouped((Math.ceil(node.specCables.length / 3d)).toInt).foreach(cableGroup => {
         val table = new Table(tableColumnWidths)
         cableGroup.foreach(cable => {
 
