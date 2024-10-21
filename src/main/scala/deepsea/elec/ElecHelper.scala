@@ -1277,6 +1277,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
                   col = 0
                 }
                 else{
+                  col += 1
                   println("error: not enough")
                   error = "error: not enough space for cables, placed " + cablesSort.indexOf(cab).toString + " of " + cablesSort.length.toString
                 }
@@ -1477,12 +1478,13 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
           specText += "Смазка 1 шт"
           spec += EleNodeSpec("Смазка", 1, 0)
 
-          EleNodePNG(node, cables, if (error != "") error else fileUrl, file.toString, spec.toList, specText.toList, specCables.toList)
+          EleNodePNG(node, cables, if (error != "") error else fileUrl, fileUrl, file.toString, spec.toList, specText.toList, specCables.toList)
 
         case _ =>
           EleNodePNG(
             EleNode(0, "", 0, 0, 0, 0, 0, "", "", "", "", 0, 0, 0, 0, 0, 0, 0, "", 0, 0, "", "", ""),
             List.empty[EleCable],
+            "",
             "",
             "",
             spec.toList,
@@ -1495,7 +1497,8 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
       case e: Throwable => EleNodePNG(
         EleNode(0, "", 0, 0, 0, 0, 0, "", "", "", "", 0, 0, 0, 0, 0, 0, 0, "", 0, 0, "", "", ""),
         List.empty[EleCable],
-        "error: " + e.toString,
+        "alert: " + e.toString,
+        "",
         "",
         List.empty[EleNodeSpec], List.empty[String],
         List.empty[EleCableSpec]

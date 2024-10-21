@@ -303,7 +303,7 @@ object ElecManager {
   case class GetEleNodesError(project: String, node: Int)
   case class GetEleNodeCables(project: String, node: Int)
 
-  case class EleNodePNG(node: EleNode, cables: List[EleCable], png_url: String, png_path: String, spec: List[EleNodeSpec], specText: List[String], specCables: List[EleCableSpec])
+  case class EleNodePNG(node: EleNode, cables: List[EleCable], png_url: String, error_png_url: String, png_path: String, spec: List[EleNodeSpec], specText: List[String], specCables: List[EleCableSpec])
   case class EleNodeSpec(name: String, count: Int, weight: Double)
   case class EleCableSpec(pos: String, cable: String, module: String)
 
