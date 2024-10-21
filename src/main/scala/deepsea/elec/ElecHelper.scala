@@ -1102,36 +1102,46 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
     }
   }
   def getEleNodesError(project: String, node: Int = 0): List[EleNode] = {
-    val nodes = getEleNodes(project, node)
-    val nodeModules = getEleNodeModules(project)
-    nodes.map(node => node.copy(error = checkNodeModulesPNG(project, node, nodeModules)))
+    try{
+      val nodes = getEleNodes(project, node)
+      val nodeModules = getEleNodeModules(project)
+      nodes.map(node => node.copy(error = checkNodeModulesPNG(project, node, nodeModules)))
+    }
+    catch {
+      case e: Throwable => List.empty[EleNode]
+    }
   }
   def getEleNodeCables(project: String, node: Int): List[EleCable] = {
-    val res = ListBuffer.empty[EleCable]
-    DBManager.GetOracleConnection(project) match {
-      case Some(connection) =>
-        val stmt = connection.createStatement()
-        val query = s"select * from v_cable where seqid in (select cable_sid from v_node_cables where node_sid = $node)"
-        val rs = stmt.executeQuery(query)
-        while (rs.next()){
-          try{
-            res += EleCable(
-              Option(rs.getString("CABLE_ID")).getOrElse(""),
-              Option(rs.getString("NOM_SECTION")).getOrElse(""),
-              Option(rs.getString("CABLE_SPEC")).getOrElse(""),
-              Option(rs.getString("MAT_NUMBER")).getOrElse(""),
-              Option(rs.getDouble("O_DIAMETER")).getOrElse(0d),
-            )
+    try{
+      val res = ListBuffer.empty[EleCable]
+      DBManager.GetOracleConnection(project) match {
+        case Some(connection) =>
+          val stmt = connection.createStatement()
+          val query = s"select * from v_cable where seqid in (select cable_sid from v_node_cables where node_sid = $node)"
+          val rs = stmt.executeQuery(query)
+          while (rs.next()){
+            try{
+              res += EleCable(
+                Option(rs.getString("CABLE_ID")).getOrElse(""),
+                Option(rs.getString("NOM_SECTION")).getOrElse(""),
+                Option(rs.getString("CABLE_SPEC")).getOrElse(""),
+                Option(rs.getString("MAT_NUMBER")).getOrElse(""),
+                Option(rs.getDouble("O_DIAMETER")).getOrElse(0d),
+              )
+            }
+            catch {
+              case e: Throwable => println(e.toString)
+            }
           }
-          catch {
-            case e: Throwable => println(e.toString)
-          }
-        }
-        rs.close()
-        stmt.close()
-        connection.close()
-        res.toList
-      case _ => List.empty[EleCable]
+          rs.close()
+          stmt.close()
+          connection.close()
+          res.toList
+        case _ => List.empty[EleCable]
+      }
+    }
+    catch {
+      case e: Throwable => List.empty[EleCable]
     }
   }
   def getEleNodeModules(project: String): List[EleNodeModule] = {
@@ -1521,83 +1531,88 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
     }
   }
   def createNodeModulesPDF(project: String, node_id: Int): String ={
+    try{
+      val fileName = "node-" + new Date().getTime + ".pdf"
+      var pathId = UUID.randomUUID().toString.substring(0, 12)
+      var file = new File(App.Cloud.Directory + File.separator + pathId)
+      while (file.exists()) {
+        pathId = UUID.randomUUID().toString.substring(0, 8)
+        file = new File(App.Cloud.Directory + File.separator + pathId)
+      }
+      file.mkdir()
+      file = new File(App.Cloud.Directory + File.separator + pathId + File.separator + fileName)
+      val fileUrl = App.Cloud.Url + "/" + pathId + "/" + fileName
 
-    val fileName = "node-" + new Date().getTime + ".pdf"
-    var pathId = UUID.randomUUID().toString.substring(0, 12)
-    var file = new File(App.Cloud.Directory + File.separator + pathId)
-    while (file.exists()) {
-      pathId = UUID.randomUUID().toString.substring(0, 8)
-      file = new File(App.Cloud.Directory + File.separator + pathId)
-    }
-    file.mkdir()
-    file = new File(App.Cloud.Directory + File.separator + pathId + File.separator + fileName)
-    val fileUrl = App.Cloud.Url + "/" + pathId + "/" + fileName
-
-    val node = createNodeModulesPNG(project, node_id, numeric = true)
-    val writer = new PdfWriter(file.toString)
-    val pdfDoc = new PdfDocument(writer)
-    val doc = new Document(pdfDoc)
-    val gostFont = PdfFontFactory.createFont(FontProgramFactory.createFont("fonts/GOSTtypeA.ttf"), PdfEncodings.IDENTITY_H, EmbeddingStrategy.PREFER_NOT_EMBEDDED)
-    doc.setFont(gostFont)
-    doc.setFontSize(10F)
+      val node = createNodeModulesPNG(project, node_id, numeric = true)
+      val writer = new PdfWriter(file.toString)
+      val pdfDoc = new PdfDocument(writer)
+      val doc = new Document(pdfDoc)
+      val gostFont = PdfFontFactory.createFont(FontProgramFactory.createFont("fonts/GOSTtypeA.ttf"), PdfEncodings.IDENTITY_H, EmbeddingStrategy.PREFER_NOT_EMBEDDED)
+      doc.setFont(gostFont)
+      doc.setFontSize(10F)
 
 
-    val header = new Paragraph("Узел: " + node.node.node + ", " + node.node.descr)
-    header.setFontSize(12F)
-    header.setBold()
-    header.setTextAlignment(TextAlignment.CENTER)
-    doc.add(header)
+      val header = new Paragraph("Узел: " + node.node.node + ", " + node.node.descr)
+      header.setFontSize(12F)
+      header.setBold()
+      header.setTextAlignment(TextAlignment.CENTER)
+      doc.add(header)
 
-    val tableOfTables = new Table(3)
-    tableOfTables.setHorizontalAlignment(HorizontalAlignment.CENTER)
-    val tableColumnWidths = Array(15F, 50F, 80F)
-    node.specCables.grouped(Math.ceil(node.specCables.length / 3).toInt).foreach(cableGroup => {
-      val table = new Table(tableColumnWidths)
-      cableGroup.foreach(cable => {
+      val tableOfTables = new Table(3)
+      tableOfTables.setHorizontalAlignment(HorizontalAlignment.CENTER)
+      val tableColumnWidths = Array(15F, 50F, 80F)
+      node.specCables.grouped(Math.ceil(node.specCables.length / 3).toInt).foreach(cableGroup => {
+        val table = new Table(tableColumnWidths)
+        cableGroup.foreach(cable => {
 
-        val cellPos = new Cell()
-        val cellCable = new Cell()
-        val cellModule = new Cell()
+          val cellPos = new Cell()
+          val cellCable = new Cell()
+          val cellModule = new Cell()
 
-        cellPos.add(new Paragraph(cable.pos))
-        cellCable.add(new Paragraph(cable.cable))
-        cellModule.add(new Paragraph(cable.module))
+          cellPos.add(new Paragraph(cable.pos))
+          cellCable.add(new Paragraph(cable.cable))
+          cellModule.add(new Paragraph(cable.module))
 
-        table.addCell(cellPos)
-        table.addCell(cellCable)
-        table.addCell(cellModule)
+          table.addCell(cellPos)
+          table.addCell(cellCable)
+          table.addCell(cellModule)
+        })
+        val tableCell = new Cell()
+        tableCell.add(table)
+        tableCell.setBorder(Border.NO_BORDER)
+        tableOfTables.addCell(tableCell)
       })
-      val tableCell = new Cell()
-      tableCell.add(table)
-      tableCell.setBorder(Border.NO_BORDER)
-      tableOfTables.addCell(tableCell)
-    })
-    doc.add(tableOfTables)
+      doc.add(tableOfTables)
 
-    val headerCommon = new Paragraph("Сводные данные")
-    headerCommon.setFontSize(12F)
-    headerCommon.setMarginTop(20F)
-    headerCommon.setItalic()
-    doc.add(headerCommon)
-    node.specText.foreach(text => {
-      val specText = new Paragraph(text)
-      specText.setMarginTop(0F)
-      specText.setMarginBottom(0F)
-      specText.setItalic()
-      doc.add(specText)
-    })
+      val headerCommon = new Paragraph("Сводные данные")
+      headerCommon.setFontSize(12F)
+      headerCommon.setMarginTop(20F)
+      headerCommon.setItalic()
+      doc.add(headerCommon)
+      node.specText.foreach(text => {
+        val specText = new Paragraph(text)
+        specText.setMarginTop(0F)
+        specText.setMarginBottom(0F)
+        specText.setItalic()
+        doc.add(specText)
+      })
 
-    doc.add(new AreaBreak())
+      doc.add(new AreaBreak())
 
-    val imageData = ImageDataFactory.create(node.png_path)
-    val image = new com.itextpdf.layout.element.Image(imageData)
-    image.setHorizontalAlignment(HorizontalAlignment.CENTER)
-    if (node.node.ncolumns > 2){
-      image.setRotationAngle(-90 * Math.PI / 180)
+      val imageData = ImageDataFactory.create(node.png_path)
+      val image = new com.itextpdf.layout.element.Image(imageData)
+      image.setHorizontalAlignment(HorizontalAlignment.CENTER)
+      if (node.node.ncolumns > 2){
+        image.setRotationAngle(-90 * Math.PI / 180)
+      }
+      doc.add(image.setAutoScale(true))
+      doc.close()
+      fileUrl
     }
-    doc.add(image.setAutoScale(true))
-    doc.close()
-    fileUrl
+    catch{
+      case e: Throwable => "error: " + e.toString
+    }
+
   }
 
 }
