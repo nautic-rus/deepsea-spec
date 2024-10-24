@@ -1101,11 +1101,15 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
       case _ => List.empty[EleNode]
     }
   }
-  def getEleNodesError(project: String, node: Int = 0): List[EleNode] = {
+  def getEleNodesError(project: String, node_id: Int = 0): List[EleNode] = {
     try{
-      val nodes = getEleNodes(project, node)
+      val nodes = getEleNodes(project, node_id)
       val nodeModules = getEleNodeModules(project)
-      nodes.map(node => node.copy(error = checkNodeModulesPNG(project, node, nodeModules)))
+      val materials = getMaterials
+      nodes.map(node => node.copy(error = {
+        val png = createNodeModulesPNG(project, node.node_id, materials, nodeModules, deleteFile = true)
+        if (png.png_url.contains("error")) png.png_url else "ok"
+      }))
     }
     catch {
       case e: Throwable => List.empty[EleNode]
@@ -1172,26 +1176,30 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
       case _ => List.empty[EleNodeModule]
     }
   }
-  def createNodeModulesPNG(project: String, node: Int, scale: Int = 4, numeric: Boolean = false): EleNodePNG = {
+  def createNodeModulesPNG(project: String, node_id: Int, materialsSrc: List[Material] = List.empty[Material], nodeModulesSrc: List[EleNodeModule] = List.empty[EleNodeModule], scale: Int = 4, numeric: Boolean = false, step: Int = 1, deleteFile: Boolean = false): EleNodePNG = {
     try{
 
-      val materials = getMaterials
+      val materials = if (materialsSrc.isEmpty) getMaterials else materialsSrc
+      val nodeModules = if (nodeModulesSrc.isEmpty) getEleNodeModules(project) else nodeModulesSrc
+
       val specText = ListBuffer.empty[String]
       val spec = ListBuffer.empty[EleNodeSpec]
       val specCables = ListBuffer.empty[EleCableSpec]
 
-      val nodes = getEleNodes(project, node)
-      val cables = getEleNodeCables(project, node)
-      val nodeModules = getEleNodeModules(project)
+      val nodes = getEleNodes(project, node_id)
+      val cables = getEleNodeCables(project, node_id)
       var error = ""
       var totalRows = 0
-      val modules = ListBuffer.empty[Double]
-      val fillerModules = ListBuffer.empty[Double]
-      val fillerNoModules = ListBuffer.empty[Double]
+      val modules = ListBuffer.empty[Int]
+      val fillerModules = ListBuffer.empty[Int]
+      val fillerNoModules = ListBuffer.empty[Int]
 
 
-      nodes.find(_.node_id == node) match {
+      nodes.find(_.node_id == node_id) match {
         case Some(node) =>
+
+          val p = 1
+          val colP = 5
 
           val split = node.descr.split("\n").lastOption.getOrElse("").replace("х", "x")
           val wh = split.split("x")
@@ -1203,14 +1211,17 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
           }
 
 
-          var pic = Image.rectangle(nodeWidth * node.ncolumns, nodeHeight * node.nrows)
+          var pic = Image.rectangle(nodeWidth * node.ncolumns + p, nodeHeight * node.nrows + p).strokeWidth(0)
 
-          val xStart = -1 * nodeWidth * node.ncolumns / 2d
-          val yStart = nodeHeight * node.nrows / 2d
+          val xStart = -1 * nodeWidth * node.ncolumns / 2d - p
+          val yStart = nodeHeight * node.nrows / 2d + p
+
 
           (0.until(node.nrows.toInt)).foreach(row => {
             (0.until(node.ncolumns.toInt)).foreach(col => {
-              pic = Image.rectangle(nodeWidth, nodeHeight).strokeWidth(0.5).at(xStart + col * nodeWidth + nodeWidth / 2d, yStart - row * nodeHeight - nodeHeight / 2d).on(pic)
+              pic = Image.rectangle(nodeWidth + p, nodeHeight + p)
+                .strokeWidth(0.5)
+                .at(xStart + col * nodeWidth + nodeWidth / 2d + p + colP * col, yStart - row * nodeHeight - nodeHeight / 2d - p).on(pic)
               //pic = Image.rectangle(nodeWidth, node.iheight).fillColor(Color.lightGray).strokeWidth(0.5).at(xStart + col * nodeWidth + nodeWidth / 2d, yStart - row * node.iheight - node.iheight / 2d).on(pic)
             })
           })
@@ -1224,108 +1235,208 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
           val colDiams = ListBuffer.empty[Double]
           val rowDiams = ListBuffer.empty[Double]
 
-          val cablesSort = cables.sortBy(x => (x.diamModule(nodeModules), x.cable_id)).reverse
+          val usedInsert = ListBuffer.empty[String]
+
+
+          val cablesSort = cables.sortBy(x => (x.diam, x.diamModule(nodeModules, step, modules.toList), x.cable_id)).reverse
           cablesSort.foreach(cab => {
-            val diam = cab.diamModule(nodeModules)
-            modules += diam
-            val moduleName = materials.find(_.name.contains("Уплотнительный модуль МКС " + diam.toString)) match {
-              case Some(value) => value.name.replace("Уплотнительный модуль ", "")
-              case _ => "Не найден"
-            }
-            if (diam > 0){
-              if (colDiams.nonEmpty && colDiams.lastOption.getOrElse(0) != diam){
-                if (colDiams.sum + colDiams.last <= nodeWidth){
-                  val fillDiam = colDiams.last
-                  val fillCount = nodeWidth / fillDiam - colDiams.length
-                  (0.until(fillCount.toInt)).foreach(filler => {
-                    x = xStart + col * nodeWidth + colDiams.length * fillDiam + filler * fillDiam
-                    val r = Image.rectangle(fillDiam, fillDiam).strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + fillDiam / 2, y - fillDiam / 2)
-                    val t = Image.text(
-                      if (numeric) (specCables.length + 1).toString else fillDiam.toInt.toString
-                    ).scale(fillDiam * 1.5 / nodeWidth, fillDiam * 1.5 / nodeWidth).at(x + fillDiam / 2, y - fillDiam / 2)
+            if (!usedInsert.contains(cab.cable_id)){
+              val diam = cab.diamModule(nodeModules, step, modules.toList)
+              modules += diam
+              val moduleName = materials.find(_.name.contains("Уплотнительный модуль МКС " + diam.toString)) match {
+                case Some(value) => value.name.replace("Уплотнительный модуль ", "")
+                case _ => "Не найден"
+              }
+              if (diam > 0){
+                if (colDiams.nonEmpty && colDiams.lastOption.getOrElse(0d) != diam){
+                  if (colDiams.sum + colDiams.lastOption.getOrElse(0d) <= nodeWidth){
+                    val fillDiam = colDiams.lastOption.getOrElse(0d)
+                    val fillCount = nodeWidth / fillDiam - colDiams.length
+                    (0.until(fillCount.toInt)).foreach(filler => {
+                      x = xStart + col * nodeWidth + colDiams.length * fillDiam + filler * fillDiam
+                      val r = Image.rectangle(fillDiam - p, fillDiam - p).strokeColor(Color.red)
+                        .strokeWidth(0.5).fillColor(Color.white).at(x +  Math.ceil(fillDiam / 2d) + p, y - fillDiam / 2 - p)
+                      val t = Image.text(
+                        if (numeric) (specCables.length + 1).toString else fillDiam.toInt.toString
+                      ).scale(fillDiam * 1.5 / nodeWidth, fillDiam * 1.5 / nodeWidth).at(x +  Math.ceil(fillDiam / 2d) + p, y - fillDiam / 2 - p)
+                      pic = r.on(pic)
+                      pic = t.on(pic)
+                      fillerModules += fillDiam.toInt
+
+                      val moduleName = materials.find(_.name.contains("Уплотнительный модуль МКС " + fillDiam.toInt.toString)) match {
+                        case Some(value) => value.name.replace("Уплотнительный модуль ", "")
+                        case _ => "Не найден"
+                      }
+
+                      specCables += EleCableSpec((specCables.length + 1).toString, "Модуль", moduleName)
+
+                    })
+                  }
+                  y += -1 * colDiams.lastOption.getOrElse(0d)
+                  rowDiams += colDiams.lastOption.getOrElse(0d)
+                  colDiams.clear()
+                  totalRows += 1
+                }
+                else if (colDiams.nonEmpty && (colDiams.sum + diam) > nodeWidth){
+                  if (step != 1){
+                    val insertDiam = nodeWidth - colDiams.sum
+                    val filterInsert = cablesSort.filter(x => x.diamModule(nodeModules, step, modules.toList) == insertDiam)
+                    if (filterInsert.nonEmpty){
+                      0.until(diam / insertDiam.toInt).foreach(insertCableIndex => {
+                        val insertCables = filterInsert.find(x => !usedInsert.contains(x.cable_id)).take(1)
+                        if (insertCables.nonEmpty){
+                          val insertCable = insertCables.head
+                          usedInsert += insertCable.cable_id
+                          x = xStart + col * nodeWidth + col * colP + diam
+                          val r = Image.rectangle(insertDiam - p, insertDiam - p)
+                            .strokeColor(Color.blue).strokeWidth(0.5).fillColor(Color.white)
+                            .at(x + Math.ceil(insertDiam / 2d) + p, y - insertDiam / 2 - p - insertCableIndex * insertDiam)
+                          val t = Image.text(if (numeric) (specCables.length + 1).toString else insertCable.cable_id)
+                            .scale(insertDiam * 1.5 / nodeWidth, insertDiam * 1.5 / nodeWidth)
+                            .at(x +  Math.ceil(insertDiam / 2d) + p, y - insertDiam / 2 - p - insertCableIndex * insertDiam)
+                          pic = r.on(pic)
+                          pic = t.on(pic)
+
+                          specCables += EleCableSpec((specCables.length + 1).toString, insertCable.cable_id, moduleName)
+                        }
+                        else{
+                          x = xStart + col * nodeWidth + col * colP + diam
+                          val r = Image.rectangle(insertDiam - p, insertDiam - p)
+                            .strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white)
+                            .at(x + Math.ceil(insertDiam / 2d) + p, y - insertDiam / 2 - p - insertCableIndex * insertDiam)
+                          val t = Image.text(if (numeric) (specCables.length + 1).toString else insertDiam.toInt.toString)
+                            .scale(insertDiam * 1.5 / nodeWidth, insertDiam * 1.5 / nodeWidth)
+                            .at(x +  Math.ceil(insertDiam / 2d) + p, y - insertDiam / 2 - p - insertCableIndex * insertDiam)
+                          pic = r.on(pic)
+                          pic = t.on(pic)
+                          fillerModules += diam
+
+                          val moduleName = materials.find(_.name.contains("Уплотнительный модуль МКС " + diam.toString)) match {
+                            case Some(value) => value.name.replace("Уплотнительный модуль ", "")
+                            case _ => "Не найден"
+                          }
+                          specCables += EleCableSpec((specCables.length + 1).toString, "Модуль", moduleName)
+                        }
+                      })
+                    }
+                    y += -1 * diam
+                    rowDiams += diam
+                    colDiams.clear()
+                    totalRows += 1
+                  }
+                  else{
+                    y += -1 * colDiams.lastOption.getOrElse(0d)
+                    rowDiams += colDiams.lastOption.getOrElse(0d)
+                    colDiams.clear()
+                    totalRows += 1
+                  }
+                }
+                if (rowDiams.sum + diam > nodeHeight){
+                  if (col < node.ncolumns - 1){
+                    col += 1
+                  }
+                  else if (row < node.nrows - 1){
+                    row += 1
+                    col = 0
+                  }
+                  else{
+                    col += 1
+                    println("error: not enough")
+                    error = "error: not enough space for cables, placed " + cablesSort.indexOf(cab).toString + " of " + cablesSort.length.toString
+                  }
+                  y = yStart - row * nodeHeight
+                  rowDiams.clear()
+                  colDiams.clear()
+                }
+
+                if (colDiams.isEmpty){
+                  x = xStart + col * nodeWidth + col * colP
+                }
+                else{
+                  x = xStart + col * nodeWidth + col * colP + colDiams.length * diam
+                }
+
+                val r = Image.rectangle(diam - p, diam - p)
+                  .strokeColor(Color.blue).strokeWidth(0.5).fillColor(Color.white).at(x + Math.ceil(diam / 2d) + p, y - diam / 2 - p)
+                val t = Image.text(if (numeric) (specCables.length + 1).toString else cab.cable_id)
+                  .scale(diam * 1.5 / nodeWidth, diam * 1.5 / nodeWidth).at(x +  Math.ceil(diam / 2d) + p, y - diam / 2 - p)
+                pic = r.on(pic)
+                pic = t.on(pic)
+
+                colDiams += diam
+                specCables += EleCableSpec((specCables.length + 1).toString, cab.cable_id, moduleName)
+
+
+                if (cablesSort.indexOf(cab) == cablesSort.length - 1 && colDiams.nonEmpty && colDiams.sum + diam <= nodeWidth){
+                  val fillCount = nodeWidth / diam - colDiams.length
+                  (0.until(fillCount)).foreach(filler => {
+                    x = xStart + col * nodeWidth + col * colP + colDiams.length * diam + filler * diam
+                    val r = Image.rectangle(diam - p, diam - p)
+                      .strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + Math.ceil(diam / 2d) + p, y - diam / 2 - p)
+                    val t = Image.text(if (numeric) (specCables.length + 1).toString else diam.toString)
+                      .scale(diam * 1.5 / nodeWidth, diam * 1.5 / nodeWidth).at(x +  Math.ceil(diam / 2d) + p, y - diam / 2 - p)
                     pic = r.on(pic)
                     pic = t.on(pic)
-                    fillerModules += fillDiam
+                    fillerModules += diam
 
-                    val moduleName = materials.find(_.name.contains("Уплотнительный модуль МКС " + fillDiam.toInt.toString)) match {
+                    val moduleName = materials.find(_.name.contains("Уплотнительный модуль МКС " + diam.toString)) match {
                       case Some(value) => value.name.replace("Уплотнительный модуль ", "")
                       case _ => "Не найден"
                     }
-
-                    specCables += EleCableSpec((specCables.length + 1).toString, cab.cable_id, moduleName)
-
+                    specCables += EleCableSpec((specCables.length + 1).toString, "Модуль", moduleName)
                   })
                 }
-                y += -1 * colDiams.last
-                rowDiams += colDiams.last
-                colDiams.clear()
-                totalRows += 1
-              }
-              else if (colDiams.nonEmpty && (colDiams.sum + diam) > nodeWidth){
-                y += -1 * colDiams.last
-                rowDiams += colDiams.last
-                colDiams.clear()
-                totalRows += 1
-              }
+                else if (!cablesSort.filter(x => cablesSort.indexOf(x) > cablesSort.indexOf(cab)).exists(x => !usedInsert.contains(x.cable_id)) && colDiams.nonEmpty && step != 1){
+                  val insertDiam = nodeWidth - colDiams.sum
+                  val filterInsert = cablesSort.filter(x => x.diamModule(nodeModules, step, modules.toList) == insertDiam)
+                  if (filterInsert.nonEmpty){
+                    0.until(diam / insertDiam.toInt).foreach(insertCableIndex => {
+                      val insertCables = filterInsert.find(x => !usedInsert.contains(x.cable_id)).take(1)
+                      if (insertCables.nonEmpty){
+                        val insertCable = insertCables.head
+                        usedInsert += insertCable.cable_id
+                        x = xStart + col * nodeWidth + col * colP + diam
+                        val r = Image.rectangle(insertDiam - p, insertDiam - p)
+                          .strokeColor(Color.blue).strokeWidth(0.5).fillColor(Color.white)
+                          .at(x + Math.ceil(insertDiam / 2d) + p, y - insertDiam / 2 - p - insertCableIndex * insertDiam)
+                        val t = Image.text(if (numeric) (specCables.length + 1).toString else insertCable.cable_id)
+                          .scale(insertDiam * 1.5 / nodeWidth, insertDiam * 1.5 / nodeWidth)
+                          .at(x +  Math.ceil(insertDiam / 2d) + p, y - insertDiam / 2 - p - insertCableIndex * insertDiam)
+                        pic = r.on(pic)
+                        pic = t.on(pic)
 
-              if (rowDiams.sum + diam > nodeHeight){
-                if (col < node.ncolumns - 1){
-                  col += 1
-                }
-                else if (row < node.nrows - 1){
-                  row += 1
-                  col = 0
-                }
-                else{
-                  col += 1
-                  println("error: not enough")
-                  error = "error: not enough space for cables, placed " + cablesSort.indexOf(cab).toString + " of " + cablesSort.length.toString
-                }
-                y = yStart - row * nodeHeight
-                rowDiams.clear()
-                colDiams.clear()
-              }
+                        specCables += EleCableSpec((specCables.length + 1).toString, insertCable.cable_id, moduleName)
+                      }
+                      else{
+                        x = xStart + col * nodeWidth + col * colP + diam
+                        val r = Image.rectangle(insertDiam - p, insertDiam - p)
+                          .strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white)
+                          .at(x + Math.ceil(insertDiam / 2d) + p, y - insertDiam / 2 - p - insertCableIndex * insertDiam)
+                        val t = Image.text(if (numeric) (specCables.length + 1).toString else insertDiam.toInt.toString)
+                          .scale(insertDiam * 1.5 / nodeWidth, insertDiam * 1.5 / nodeWidth)
+                          .at(x +  Math.ceil(insertDiam / 2d) + p, y - insertDiam / 2 - p - insertCableIndex * insertDiam)
+                        pic = r.on(pic)
+                        pic = t.on(pic)
+                        fillerModules += diam
 
-              if (colDiams.isEmpty){
-                x = xStart + col * nodeWidth
+                        val moduleName = materials.find(_.name.contains("Уплотнительный модуль МКС " + diam.toString)) match {
+                          case Some(value) => value.name.replace("Уплотнительный модуль ", "")
+                          case _ => "Не найден"
+                        }
+                        specCables += EleCableSpec((specCables.length + 1).toString, "Модуль", moduleName)
+                      }
+                    })
+                  }
+                }
+                if (cablesSort.indexOf(cab) == cablesSort.length - 1 && colDiams.nonEmpty ||
+                  !cablesSort.filter(x => cablesSort.indexOf(x) > cablesSort.indexOf(cab)).exists(x => !usedInsert.contains(x.cable_id)) && colDiams.nonEmpty && step != 1){
+                  totalRows += 1
+                  rowDiams += colDiams.lastOption.getOrElse(0)
+                }
               }
               else{
-                x = xStart + col * nodeWidth + colDiams.length * diam
+                error = "error: null diameter for cable " + cab.cable_id
               }
-
-              val r = Image.rectangle(diam, diam).strokeColor(Color.blue).strokeWidth(0.5).fillColor(Color.white).at(x + diam / 2, y - diam / 2)
-              val t = Image.text(if (numeric) (specCables.length + 1).toString else cab.cable_id).scale(diam * 1.5 / nodeWidth, diam * 1.5 / nodeWidth).at(x + diam / 2, y - diam / 2)
-              pic = r.on(pic)
-              pic = t.on(pic)
-
-              colDiams += diam
-              specCables += EleCableSpec((specCables.length + 1).toString, cab.cable_id, moduleName)
-
-
-              if (cablesSort.indexOf(cab) == cablesSort.length - 1 && colDiams.nonEmpty && colDiams.sum + diam <= nodeWidth){
-                val fillCount = nodeWidth / diam - colDiams.length
-                (0.until(fillCount)).foreach(filler => {
-                  x = xStart + col * nodeWidth + colDiams.length * diam + filler * diam
-                  val r = Image.rectangle(diam, diam).strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + diam / 2, y - diam / 2)
-                  val t = Image.text(if (numeric) (specCables.length + 1).toString else diam.toString).scale(diam * 1.5 / nodeWidth, diam * 1.5 / nodeWidth).at(x + diam / 2, y - diam / 2)
-                  pic = r.on(pic)
-                  pic = t.on(pic)
-                  fillerModules += diam
-
-                  val moduleName = materials.find(_.name.contains("Уплотнительный модуль МКС " + diam.toString)) match {
-                    case Some(value) => value.name.replace("Уплотнительный модуль ", "")
-                    case _ => "Не найден"
-                  }
-                  specCables += EleCableSpec((specCables.length + 1).toString, "Модуль", moduleName)
-                })
-              }
-              if (cablesSort.indexOf(cab) == cablesSort.length - 1 && colDiams.nonEmpty){
-                totalRows += 1
-                rowDiams += colDiams.last
-              }
-            }
-            else{
-              error = "error: null diameter for cable " + cab.cable_id
             }
           })
 
@@ -1335,14 +1446,16 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
               if (rowDiams.sum < nodeHeight){
                 val diam = 30
                 while (rowDiams.sum + diam <= nodeHeight){
-                  y += -1 * rowDiams.last
+                  y += -1 * rowDiams.lastOption.getOrElse(0d)
                   rowDiams += diam
                   totalRows += 1
                   val fillCount = nodeWidth / diam
                   (0.until(fillCount)).foreach(filler => {
-                    x = xStart + col * nodeWidth + filler * diam
-                    val r = Image.rectangle(diam, diam).strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + diam / 2, y - diam / 2)
-                    val t = Image.text(if (numeric) (specCables.length + 1).toString else diam.toString).scale(diam * 1.5 / nodeWidth, diam * 1.5 / nodeWidth).at(x + diam / 2, y - diam / 2)
+                    x = xStart + col * nodeWidth + col * colP + filler * diam
+                    val r = Image.rectangle(diam - p, diam - p)
+                      .strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + Math.ceil(diam / 2d) + p, y - diam / 2 - p)
+                    val t = Image.text(if (numeric) (specCables.length + 1).toString else diam.toString)
+                      .scale(diam * 1.5 / nodeWidth, diam * 1.5 / nodeWidth).at(x +  Math.ceil(diam / 2d) + p, y - diam / 2 - p)
                     pic = r.on(pic)
                     pic = t.on(pic)
                     fillerModules += diam
@@ -1358,16 +1471,17 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
               }
 
               while (error == "" && rowDiams.sum + 5 <= nodeHeight){
-                y += -1 * rowDiams.last
+                y += -1 * rowDiams.lastOption.getOrElse(0d)
                 val diam = if (rowDiams.sum + 10 <= nodeHeight){
                   10
                 }
                 else{
                   5
                 }
-                x = xStart + col * nodeWidth
-                val r = Image.rectangle(nodeWidth, diam).strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + nodeWidth / 2, y - diam / 2)
-                val t = Image.text(if (numeric) (specCables.length + 1).toString else diam.toString).scale(diam * 4.5 / nodeWidth, diam * 4.5 / nodeWidth).at(x + nodeWidth / 2, y - diam / 2)
+                x = xStart + col * nodeWidth + col * colP
+                val r = Image.rectangle(nodeWidth - p, diam - p)
+                  .strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + nodeWidth / 2 + p, y - diam / 2 - p)
+                val t = Image.text(if (numeric) (specCables.length + 1).toString else diam.toString).scale(diam * 4.5 / nodeWidth, diam * 4.5 / nodeWidth).at(x + nodeWidth / 2 + p, y - diam / 2 - p)
                 pic = r.on(pic)
                 pic = t.on(pic)
                 fillerNoModules += diam
@@ -1445,16 +1559,6 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
             specText += module
           })
 
-//          fillerModules.groupBy(x => x).toList.sortBy(x => x._1).reverse.foreach(gr => {
-//            val module = materials.find(_.name.contains("Уплотнительный модуль МКС " + gr._1.toInt.toString)) match {
-//              case Some(value) =>
-//                spec += EleNodeSpec(value.name, gr._2.length, gr._2.length * value.singleWeight)
-//                value.name + ", к-во  " + (gr._2.length).toString + " шт, вес " + ((gr._2.length) * value.singleWeight).toString + " кг"
-//              case _ => "Не найден уплотнительный модуль МКС " + gr._1.toInt.toString
-//            }
-//            specText += module
-//          })
-
           fillerNoModules.groupBy(x => x).toList.sortBy(x => x._1).reverse.foreach(gr => {
             val module = materials.find(x => x.name.contains("Глухой модуль МКС " + gr._1.toInt.toString) && x.name.contains(nodeWidth)) match {
               case Some(value) =>
@@ -1478,7 +1582,20 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
           specText += "Смазка 1 шт"
           spec += EleNodeSpec("Смазка", 1, 0)
 
-          EleNodePNG(node, cables, if (error != "") error else fileUrl, fileUrl, file.toString, spec.toList, specText.toList, specCables.toList)
+          val filePath = file.toString
+          if (deleteFile){
+            file.delete()
+          }
+
+          if (error == "") {
+            EleNodePNG(node, cables, fileUrl, fileUrl, filePath, spec.toList, specText.toList, specCables.toList)
+          }
+          else if (step != 2){
+            createNodeModulesPNG(project, node_id, materials, nodeModules, scale, numeric, step + 1)
+          }
+          else{
+            EleNodePNG(node, cables, error, fileUrl, filePath, spec.toList, specText.toList, specCables.toList)
+          }
 
         case _ =>
           EleNodePNG(
@@ -1506,104 +1623,108 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
     }
   }
   def checkNodeModulesPNG(project: String, node: EleNode, nodeModules: List[EleNodeModule]): String = {
-    try{
-      val cables = getEleNodeCables(project, node.node_id)
-      var error = "ok"
-      var totalRows = 0
-      val modules = ListBuffer.empty[Double]
-      val fillerModules = ListBuffer.empty[Double]
-
-      val split = node.descr.split("\n").lastOption.getOrElse("").replace("х", "x")
-      val wh = split.split("x")
-      val nodeWidth = wh(0).toIntOption.getOrElse(0)
-      val nodeHeight = wh(1).toIntOption.getOrElse(0)
-
-      if (nodeHeight == 0 || nodeWidth == 0) {
-        error = "error: node height or width is zero"
-      }
-
-      val xStart = -1 * nodeWidth * node.ncolumns / 2d
-      val yStart = nodeHeight * node.nrows / 2d
-
-      var x = xStart
-      var y = yStart
-      var col = 0
-      var row = 0
-
-      val colDiams = ListBuffer.empty[Double]
-      val rowDiams = ListBuffer.empty[Double]
-
-      val cablesSort = cables.sortBy(x => (x.diamModule(nodeModules), x.cable_id)).reverse
-      cablesSort.foreach(cab => {
-        val diam = cab.diamModule(nodeModules)
-        modules += diam
-        if (diam > 0){
-          if (colDiams.nonEmpty && colDiams.lastOption.getOrElse(0) != diam){
-            if (colDiams.sum + colDiams.last <= nodeWidth){
-              val fillDiam = colDiams.last
-              val fillCount = nodeWidth / fillDiam - colDiams.length
-              (0.until(fillCount.toInt)).foreach(filler => {
-                x = xStart + col * nodeWidth + colDiams.length * fillDiam + filler * fillDiam
-                fillerModules += fillDiam
-              })
-            }
-            y += -1 * colDiams.last
-            rowDiams += colDiams.last
-            colDiams.clear()
-            totalRows += 1
-          }
-          else if (colDiams.nonEmpty && (colDiams.sum + diam) > nodeWidth){
-            y += -1 * colDiams.last
-            rowDiams += colDiams.last
-            colDiams.clear()
-            totalRows += 1
-          }
-
-          if (rowDiams.sum + diam > nodeHeight){
-            if (col < node.ncolumns - 1){
-              col += 1
-            }
-            else if (row < node.nrows - 1){
-              row += 1
-              col = 0
-            }
-            else{
-              error = "error: not enough space for cables, placed " + cablesSort.indexOf(cab).toString + " of " + cablesSort.length.toString
-            }
-            y = yStart - row * nodeHeight
-            rowDiams.clear()
-            colDiams.clear()
-          }
-
-          if (colDiams.isEmpty){
-            x = xStart + col * nodeWidth
-          }
-          else{
-            x = xStart + col * nodeWidth + colDiams.length * diam
-          }
-          colDiams += diam
-          if (cablesSort.indexOf(cab) == cablesSort.length - 1 && colDiams.nonEmpty && colDiams.sum + diam <= nodeWidth){
-            val fillCount = nodeWidth / diam - colDiams.length
-            (0.until(fillCount.toInt)).foreach(filler => {
-              x = xStart + col * nodeWidth + colDiams.length * diam + filler * diam
-              fillerModules += diam
-            })
-          }
-          if (cablesSort.indexOf(cab) == cablesSort.length - 1 && colDiams.nonEmpty){
-            totalRows += 1
-          }
-        }
-        else{
-          error = "error: null diameter for cable " + cab.cable_id
-        }
-      })
-
-      error
-    }
-    catch {
-      case e: Throwable => "error: " + e.toString
-    }
+    "ok"
   }
+
+  //  def checkNodeModulesPNG(project: String, node: EleNode, nodeModules: List[EleNodeModule]): String = {
+//    try{
+//      val cables = getEleNodeCables(project, node.node_id)
+//      var error = "ok"
+//      var totalRows = 0
+//      val modules = ListBuffer.empty[Double]
+//      val fillerModules = ListBuffer.empty[Double]
+//
+//      val split = node.descr.split("\n").lastOption.getOrElse("").replace("х", "x")
+//      val wh = split.split("x")
+//      val nodeWidth = wh(0).toIntOption.getOrElse(0)
+//      val nodeHeight = wh(1).toIntOption.getOrElse(0)
+//
+//      if (nodeHeight == 0 || nodeWidth == 0) {
+//        error = "error: node height or width is zero"
+//      }
+//
+//      val xStart = -1 * nodeWidth * node.ncolumns / 2d
+//      val yStart = nodeHeight * node.nrows / 2d
+//
+//      var x = xStart
+//      var y = yStart
+//      var col = 0
+//      var row = 0
+//
+//      val colDiams = ListBuffer.empty[Double]
+//      val rowDiams = ListBuffer.empty[Double]
+//
+//      val cablesSort = cables.sortBy(x => (x.diamModule(nodeModules), x.cable_id)).reverse
+//      cablesSort.foreach(cab => {
+//        val diam = cab.diamModule(nodeModules)
+//        modules += diam
+//        if (diam > 0){
+//          if (colDiams.nonEmpty && colDiams.lastOption.getOrElse(0) != diam){
+//            if (colDiams.sum + colDiams.last <= nodeWidth){
+//              val fillDiam = colDiams.last
+//              val fillCount = nodeWidth / fillDiam - colDiams.length
+//              (0.until(fillCount.toInt)).foreach(filler => {
+//                x = xStart + col * nodeWidth + colDiams.length * fillDiam + filler * fillDiam
+//                fillerModules += fillDiam
+//              })
+//            }
+//            y += -1 * colDiams.last
+//            rowDiams += colDiams.last
+//            colDiams.clear()
+//            totalRows += 1
+//          }
+//          else if (colDiams.nonEmpty && (colDiams.sum + diam) > nodeWidth){
+//            y += -1 * colDiams.last
+//            rowDiams += colDiams.last
+//            colDiams.clear()
+//            totalRows += 1
+//          }
+//
+//          if (rowDiams.sum + diam > nodeHeight){
+//            if (col < node.ncolumns - 1){
+//              col += 1
+//            }
+//            else if (row < node.nrows - 1){
+//              row += 1
+//              col = 0
+//            }
+//            else{
+//              error = "error: not enough space for cables, placed " + cablesSort.indexOf(cab).toString + " of " + cablesSort.length.toString
+//            }
+//            y = yStart - row * nodeHeight
+//            rowDiams.clear()
+//            colDiams.clear()
+//          }
+//
+//          if (colDiams.isEmpty){
+//            x = xStart + col * nodeWidth
+//          }
+//          else{
+//            x = xStart + col * nodeWidth + colDiams.length * diam
+//          }
+//          colDiams += diam
+//          if (cablesSort.indexOf(cab) == cablesSort.length - 1 && colDiams.nonEmpty && colDiams.sum + diam <= nodeWidth){
+//            val fillCount = nodeWidth / diam - colDiams.length
+//            (0.until(fillCount.toInt)).foreach(filler => {
+//              x = xStart + col * nodeWidth + colDiams.length * diam + filler * diam
+//              fillerModules += diam
+//            })
+//          }
+//          if (cablesSort.indexOf(cab) == cablesSort.length - 1 && colDiams.nonEmpty){
+//            totalRows += 1
+//          }
+//        }
+//        else{
+//          error = "error: null diameter for cable " + cab.cable_id
+//        }
+//      })
+//
+//      error
+//    }
+//    catch {
+//      case e: Throwable => "error: " + e.toString
+//    }
+//  }
   def createNodeModulesPDF(project: String, node_id: Int): String ={
     try{
       val fileName = "node-" + new Date().getTime + ".pdf"
@@ -1635,7 +1756,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
       val tableOfTables = new Table(3)
       tableOfTables.setHorizontalAlignment(HorizontalAlignment.CENTER)
       val tableColumnWidths = Array(15F, 50F, 80F)
-      node.specCables.grouped((Math.ceil(node.specCables.length / 3d)).toInt).foreach(cableGroup => {
+      node.specCables.grouped((Math.ceil(node.specCables.length / 3d) + 1).toInt).foreach(cableGroup => {
         val table = new Table(tableColumnWidths)
         cableGroup.foreach(cable => {
 

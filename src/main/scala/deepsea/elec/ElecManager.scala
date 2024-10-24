@@ -290,10 +290,16 @@ object ElecManager {
                      transit_size: String, error: String)
 
   case class EleCable(cable_id: String, nom_section: String, spec: String, code: String, diam: Double){
-    def diamModule(modules: List[EleNodeModule]): Int = {
-      modules.find(x => x.minDiam <= diam && diam <= x.maxDiam) match {
-        case Some(value) => value.diam.toInt
-        case _ => 0
+    def diamModule(modules: List[EleNodeModule], step: Int = 1, modulesUsed: List[Int]): Int = {
+      val modulesFilter = modules.filter(x => x.minDiam <= diam && diam <= x.maxDiam).sortBy(_.diam)
+      if (step == 1) {
+        modulesFilter.headOption.map(_.diam.toInt).getOrElse(0)
+      }
+      else{
+        modulesFilter.find(x => modulesUsed.contains(x.diam.toInt)) match {
+          case Some(x) => x.diam.toInt
+          case _ => modulesFilter.headOption.map(_.diam.toInt).getOrElse(0)
+        }
       }
     }
   }
