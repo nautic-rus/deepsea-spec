@@ -1573,7 +1573,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
           })
 
           fillerNoModules.groupBy(x => x).toList.sortBy(x => x._1).reverse.foreach(gr => {
-            val module = materials.find(x => x.name.contains("Глухой модуль МКС " + gr._1.toString) && x.name.contains(nodeWidth.toString)) match {
+            val module = materials.find(x => x.name.contains("Глухой модуль МКС " + gr._1.toString) && x.name.contains(nodeWidth)) match {
               case Some(value) =>
                 spec += EleNodeSpec(value.name, gr._2.length, Math.round(gr._2.length * value.singleWeight * 100) / 100d)
                 value.name + ", к-во  " + (gr._2.length).toString + " шт, вес " + (Math.round((gr._2.length) * value.singleWeight * 100) / 100d).toString + " кг"
