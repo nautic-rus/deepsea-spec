@@ -184,8 +184,8 @@ class PipeManager extends Actor with Codecs with PipeHelper {
   implicit val timeout: Timeout = Timeout(10, TimeUnit.SECONDS)
 
   override def preStart(): Unit ={
-    //self ! GetPipeSegs("N002", "574-019")
-    //self ! GetPipeESP("200101-743-001", "1", "", "ru")
+    //self ! GetPipeSegs("N002", "804-001")
+    //self ! GetPipeESP("200101-804-001", "1", "", "ru")
     //self ! GetPipeSegsByDocNumber("200101-574-019")
     //self ! GetSpoolModel("210101-545-0001", "032", "0")
     //self ! GetPipeSegsBySystem("701-005")
@@ -195,8 +195,8 @@ class PipeManager extends Actor with Codecs with PipeHelper {
     case GetSystems(project) => sender() ! getSystems(project).asJson.noSpaces
     case GetZones(project) => sender() ! getZones(project).asJson.noSpaces
     case GetPipeSegs(project, system, sqInSystem) =>
-//      val jk = getPipeSegs(project, system, sqInSystem.toIntOption.getOrElse(-1))
-//      genSpoolsListEnPDFAll("200101-574-014", "FUEL SYSTEM", "0", jk,"en")
+      //val jk = getPipeSegs(project, system, sqInSystem.toIntOption.getOrElse(-1))
+      //genSpoolsListEnPDFAll("200101-804-001", "FUEL SYSTEM", "0", jk,"en")
       sender() ! getPipeSegs(project, system, sqInSystem.toIntOption.getOrElse(-1)).asJson.noSpaces
     case GetPipeSegsBilling(project) => sender() ! getPipeSegsBilling(project).asJson.noSpaces
     case GetPipeSegsByDocNumber(docNumber, json) =>

@@ -730,7 +730,7 @@ object SpoolsReportEN extends UtilsPDF with PipeHelper {
         if (w < 0.01) " 0.01" else String.format("%.2f", w)
       }
       val materialName = materials.find(_.code == ent.A12) match {
-        case Some(value) => value.name(lang)
+        case Some(value) => value.name(lang) + (if (value.description(lang) != "") (" (" + value.description(lang) + ")") else "")
         case _ => ent.A2
       }
       buff += Item11ColumnsEN(A1 = "", A2 = materialName, A3 = ent.A3, A4 = qty, A5 = wgt)
