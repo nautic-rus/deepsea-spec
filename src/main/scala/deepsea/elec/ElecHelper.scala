@@ -1592,7 +1592,8 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
           })
           specText += compression
 
-          specText += "Смазка 1 шт"
+//          specText += "Смазка 1 шт"
+          specText += "Смазка " + sections.toString + "шт"
           spec += EleNodeSpec("Смазка", 1, 0)
 
           val filePath = file.toString
