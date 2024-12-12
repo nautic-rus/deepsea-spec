@@ -720,6 +720,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
       case _ => project
     }
     val materials = getMaterials.filter(_.project == rkdProject)
+//    val m = materials.find(_.code = 'NR00000000022259')
     DBManager.GetOracleConnection(project) match {
       case Some(connection) =>
         val stmt = connection.createStatement()
@@ -850,6 +851,12 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                   case Some(code) =>
                     materials.find(_.code == code) match {
                       case Some(material) =>
+                        if (code == "NR00000000022259") {
+                          println("stopppp")
+                        }
+                        if (material.code == "NR00000000022259") {
+                          println("stopppp")
+                        }
                         val l = if (params.nonEmpty){
                           params.last.value / 1000d
                         }
@@ -918,12 +925,19 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                               val d4 = Math.round(params(5).value)
                               s"ОТВОД $angle° R=$r С ПЕРЕХОДОМ ${d1}x$d2/${d3}x$d4 (${material.name})"
                             }
-                            else if (params.length > 10) {
+                            else if (params.length == 10) {
                               val d1 = Math.round(params(0).value)
                               val d2 = Math.round(params(1).value)
                               val diam = Math.round(params(2).value * 2)
                               val l = Math.round(params(3).value)
                               s"ПЕРЕХОД ${d2}x$d1/ДУ$diam, L=$l (${material.name})"
+                            }
+                            else if (params.length == 31) {
+                              val d1 = Math.round(params(0).value)
+                              val d2 = Math.round(params(1).value)
+                              val diam = Math.round(params(2).value * 2)
+                              val l = Math.round(params(3).value)
+                              s"ТРОЙНИК ${d2}x$d1/${d2}x$d1, L=$l (${material.name})"
                             }
                             else{
                               "undefined"
