@@ -1334,6 +1334,64 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
                 }
                 if (rowDiams.sum + diam > nodeHeight){
                   if (col < node.ncolumns - 1){
+                    while (error == "" && rowDiams.sum + 5 <= nodeHeight){  //заполнение красных в нехватающую высоту после синих
+                      val diam = if (rowDiams.sum + 20 <= nodeHeight){
+                        20
+                      }
+                      else if (rowDiams.sum + 15 <= nodeHeight){
+                        15
+                      }
+                      else if (rowDiams.sum + 10 <= nodeHeight){
+                        10
+                      }
+                      else{
+                        5
+                      }
+                      x = xStart + col * nodeWidth + col * colP
+
+                      if (diam <= 10){
+//                        val r = Image.rectangle(nodeWidth - p, diam - p)
+//                          .strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + nodeWidth / 2 + p, rowDiams.sum + diam)  //выровнить эту штуку
+                          val r = Image.rectangle(nodeWidth - p, diam - p)
+                            .strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + nodeWidth / 2 + p,  -1 * rowDiams.sum/2)
+                        val t = Image.text(if (numeric) (specCables.length + 1).toString else diam.toString).scale(diam * 4.5 / nodeWidth, diam * 4.5 / nodeWidth).at(x + nodeWidth / 2 + p, y - diam / 2 - p)
+                        pic = r.on(pic)
+                        pic = t.on(pic)
+                        fillerNoModules += diam
+
+                        val moduleName = materials.find(x => x.name.contains("Глухой модуль МКС " + diam.toString) && x.name.contains(nodeWidth.toString)) match {
+                          case Some(value) => value.name.replace("Глухой модуль ", "")
+                          case _ => "Не найден"
+                        }
+                        specCables += EleCableSpec((specCables.length + 1).toString, "Модуль", moduleName)
+                      }
+                      else{
+                        val fillCount = nodeWidth / diam
+                        (0.until(fillCount)).foreach(filler => {
+                          x = xStart + col * nodeWidth + col * colP + filler * diam
+                          val r = Image.rectangle(diam - p, diam - p)
+                            .strokeColor(Color.red).strokeWidth(0.5).fillColor(Color.white).at(x + Math.ceil(diam / 2d) + p, y - diam / 2 - p)
+                          val t = Image.text(if (numeric) (specCables.length + 1).toString else diam.toString)
+                            .scale(diam * 1.5 / nodeWidth, diam * 1.5 / nodeWidth).at(x +  Math.ceil(diam / 2d) + p, y - diam / 2 - p)
+                          pic = r.on(pic)
+                          pic = t.on(pic)
+
+                          val moduleName = materials.find(_.name.contains("Уплотнительный модуль МКС " + diam.toString + "/")) match {
+                            case Some(value) => value.name.replace("Уплотнительный модуль ", "")
+                            case _ => "Не найден"
+                          }
+                          fillerModules += diam
+
+                          specCables += EleCableSpec((specCables.length + 1).toString, "Модуль", moduleName)
+                        })
+
+                      }
+                      totalRows += 1
+                      rowDiams += diam
+                    }
+//
+//
+//
                     col += 1
                   }
                   else if (row < node.nrows - 1){
@@ -1453,7 +1511,7 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
                 }
               }
 
-              while (error == "" && rowDiams.sum + 5 <= nodeHeight){
+              while (error == "" && rowDiams.sum + 5 <= nodeHeight){  //заполнение красных в нехватающую высоту после красных
                 y += -1 * rowDiams.lastOption.getOrElse(0d)
                 val diam = if (rowDiams.sum + 20 <= nodeHeight){
                   20
