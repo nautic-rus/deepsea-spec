@@ -258,144 +258,151 @@ class PipeCache extends Actor{
         case Some(c) =>
           val s = c.createStatement()
           val query = Source.fromResource("queries/pipeComps.sql").mkString
-          val rs = s.executeQuery(query)
-          while (rs.next()) {
-            val fcon1 = Option(rs.getString("FCON1")).getOrElse("") match {
-              case "HTF " => "PP-R"
-              case value: String => value
-            }
-            val fcon2 = Option(rs.getString("FCON2")).getOrElse("") match {
-              case "H3.0" => "5.5P"
-              case value: String => value
-            }
-            val fcon3 = Option(rs.getString("FCON3")).getOrElse("")
-            pipeSegs += PipeSeg(project = proj, zone = rs.getString("ZONENAME") match {
-              case value: String => value
-              case _ => ""
-            }, system = rs.getString("SYSTEMNAME") match {
-              case value: String => value
-              case _ => ""
-            },
-              line = Option(rs.getString("LINE")).getOrElse(""),
-              pls = Option(rs.getInt("PLS")).getOrElse(0),
-              elem = Option(rs.getInt("ELEM")).getOrElse(0),
-              typeCode = rs.getString("TYPECODE") match {
+          try{
+            val rs = s.executeQuery(query)
+            while (rs.next()) {
+              val fcon1 = Option(rs.getString("FCON1")).getOrElse("") match {
+                case "HTF " => "PP-R"
+                case value: String => value
+              }
+              val fcon2 = Option(rs.getString("FCON2")).getOrElse("") match {
+                case "H3.0" => "5.5P"
+                case value: String => value
+              }
+              val fcon3 = Option(rs.getString("FCON3")).getOrElse("")
+              pipeSegs += PipeSeg(project = proj, zone = rs.getString("ZONENAME") match {
                 case value: String => value
                 case _ => ""
-              }, typeDesc = rs.getString("TYPEDESC") match {
+              }, system = rs.getString("SYSTEMNAME") match {
                 case value: String => value
                 case _ => ""
-              }, classAlpha = rs.getString("CLASSALPHA") match {
-                case value: String => value
-                case _ => ""
-              }, compType = rs.getString("COMPTYPE") match {
-                case value: String => value
-                case _ => ""
-              }, compUserId = rs.getString("COMPUSERID") match {
-                case value: String => value
-                case _ => ""
-              }, smat = rs.getString("SMAT") match {
-                case value: String => value
-                case _ => ""
-              }, sqInSystem = rs.getInt("SQINSYSTEM") match {
-                case value: Int => value
-                case _ => 0
-              }, isPieceId = rs.getInt("ISPIECEID") match {
-                case value: Int => value
-                case _ => 0
-              }, spPieceId = rs.getInt("SPPIECEID") match {
-                case value: Int => value
-                case _ => 0
-              }, isom = rs.getString("ISOMUSERID") match {
-                case value: String => value
-                case _ => ""
-              }, spool = rs.getString("SPOOLUSERID") match {
-                case value: String => value
-                case _ => ""
-              }, length = rs.getDouble("LENGTH") match {
-                case value: Double => value
-                case _ => 0
-              }, radius = rs.getDouble("RADIUS") match {
-                case value: Double => value
-                case _ => 0
-              }, angle = rs.getDouble("ANGLE") match {
-                case value: Double => value
-                case _ => 0
-              }, weight = rs.getDouble("WEIGHT") match {
-                case value: Double =>
-                  if (value == 0){
-                    if ((fcon1 + fcon2).trim.nonEmpty) {
-                      DBManager.GetOracleConnection(proj) match {
-                        case Some(subConn) =>
-                          val subStmt = subConn.createStatement()
-                          val subQuery = s"select weight from component where oid in (select comp from component_outf where qmat = '$fcon1' and fcon2 = '$fcon2' and fcon3 = '$fcon3') and rownum = 1"
-                          val subRs = subStmt.executeQuery(subQuery)
-                          val weight = if (subRs.next()) {
-                            subRs.getDouble("weight")
-                          }
-                          else {
-                            0
-                          }
-                          subRs.close()
-                          subStmt.close()
-                          subConn.close()
-                          weight
-                        case _ => 0
+              },
+                line = Option(rs.getString("LINE")).getOrElse(""),
+                pls = Option(rs.getInt("PLS")).getOrElse(0),
+                elem = Option(rs.getInt("ELEM")).getOrElse(0),
+                typeCode = rs.getString("TYPECODE") match {
+                  case value: String => value
+                  case _ => ""
+                }, typeDesc = rs.getString("TYPEDESC") match {
+                  case value: String => value
+                  case _ => ""
+                }, classAlpha = rs.getString("CLASSALPHA") match {
+                  case value: String => value
+                  case _ => ""
+                }, compType = rs.getString("COMPTYPE") match {
+                  case value: String => value
+                  case _ => ""
+                }, compUserId = rs.getString("COMPUSERID") match {
+                  case value: String => value
+                  case _ => ""
+                }, smat = rs.getString("SMAT") match {
+                  case value: String => value
+                  case _ => ""
+                }, sqInSystem = rs.getInt("SQINSYSTEM") match {
+                  case value: Int => value
+                  case _ => 0
+                }, isPieceId = rs.getInt("ISPIECEID") match {
+                  case value: Int => value
+                  case _ => 0
+                }, spPieceId = rs.getInt("SPPIECEID") match {
+                  case value: Int => value
+                  case _ => 0
+                }, isom = rs.getString("ISOMUSERID") match {
+                  case value: String => value
+                  case _ => ""
+                }, spool = rs.getString("SPOOLUSERID") match {
+                  case value: String => value
+                  case _ => ""
+                }, length = rs.getDouble("LENGTH") match {
+                  case value: Double => value
+                  case _ => 0
+                }, radius = rs.getDouble("RADIUS") match {
+                  case value: Double => value
+                  case _ => 0
+                }, angle = rs.getDouble("ANGLE") match {
+                  case value: Double => value
+                  case _ => 0
+                }, weight = rs.getDouble("WEIGHT") match {
+                  case value: Double =>
+                    if (value == 0){
+                      if ((fcon1 + fcon2).trim.nonEmpty) {
+                        DBManager.GetOracleConnection(proj) match {
+                          case Some(subConn) =>
+                            val subStmt = subConn.createStatement()
+                            val subQuery = s"select weight from component where oid in (select comp from component_outf where qmat = '$fcon1' and fcon2 = '$fcon2' and fcon3 = '$fcon3') and rownum = 1"
+                            val subRs = subStmt.executeQuery(subQuery)
+                            val weight = if (subRs.next()) {
+                              subRs.getDouble("weight")
+                            }
+                            else {
+                              0
+                            }
+                            subRs.close()
+                            subStmt.close()
+                            subConn.close()
+                            weight
+                          case _ => 0
+                        }
                       }
-                    }
-                    else {
-                      0
-                    }
-                  }
-                  else{
-                    value
-                  }
-                case _ => 0
-              }, stock = rs.getString("STOCKCODE") match {
-                case value: String =>
-                  if (value.trim == ""){
-                    if ((fcon1 + fcon2).trim.nonEmpty){
-                      DBManager.GetOracleConnection(proj) match {
-                        case Some(subConn) =>
-                          val subStmt = subConn.createStatement()
-                          val subQuery = s"select stock_code from component where oid in (select comp from component_outf where qmat = '$fcon1' and fcon2 = '$fcon2' and fcon3 = '$fcon3') and rownum = 1"
-                          val subRs = subStmt.executeQuery(subQuery)
-                          val stock = if (subRs.next()) {
-                            Option(subRs.getString("stock_code")).getOrElse("")
-                          }
-                          else {
-                            ""
-                          }
-                          subRs.close()
-                          subStmt.close()
-                          subConn.close()
-                          stock
-                        case _ => ""
+                      else {
+                        0
                       }
                     }
                     else{
-                      ""
+                      value
                     }
-                  }
-                  else{
-                    value
-                  }
-                case _ => ""
-              }, fcon3 = rs.getString("FCON3") match {
-                case value: String => value
-                case _ => ""
-              }, insul = rs.getString("INSULUSERID") match {
-                case value: String => value
-                case _ => ""
-              }, classDescription = rs.getString("CLASSDESCR") match {
-                case value: String => value
-                case _ => ""
-              })
+                  case _ => 0
+                }, stock = rs.getString("STOCKCODE") match {
+                  case value: String =>
+                    if (value.trim == ""){
+                      if ((fcon1 + fcon2).trim.nonEmpty){
+                        DBManager.GetOracleConnection(proj) match {
+                          case Some(subConn) =>
+                            val subStmt = subConn.createStatement()
+                            val subQuery = s"select stock_code from component where oid in (select comp from component_outf where qmat = '$fcon1' and fcon2 = '$fcon2' and fcon3 = '$fcon3') and rownum = 1"
+                            val subRs = subStmt.executeQuery(subQuery)
+                            val stock = if (subRs.next()) {
+                              Option(subRs.getString("stock_code")).getOrElse("")
+                            }
+                            else {
+                              ""
+                            }
+                            subRs.close()
+                            subStmt.close()
+                            subConn.close()
+                            stock
+                          case _ => ""
+                        }
+                      }
+                      else{
+                        ""
+                      }
+                    }
+                    else{
+                      value
+                    }
+                  case _ => ""
+                }, fcon3 = rs.getString("FCON3") match {
+                  case value: String => value
+                  case _ => ""
+                }, insul = rs.getString("INSULUSERID") match {
+                  case value: String => value
+                  case _ => ""
+                }, classDescription = rs.getString("CLASSDESCR") match {
+                  case value: String => value
+                  case _ => ""
+                })
 
+            }
+            rs.close()
+            s.close()
+            c.close()
           }
-          rs.close()
-          s.close()
-          c.close()
+          catch {
+            case e: Exception =>
+              s.close()
+              c.close()
+          }
         case _ =>
       }
     })
