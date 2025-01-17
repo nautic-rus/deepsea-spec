@@ -902,9 +902,10 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                               val d1 = Math.round(params(0).value)
                               val d2 = Math.round(params(1).value)
                               val d3 = Math.round(params(2).value)
-                              val d4 = Math.round(params(3).value)
-                              val l = Math.round(params.last.value)
-                              s"ТРОЙНИК ${d2}x$d3/${d2}x$d4, L=$l (${material.name})"
+                              val d4 = Math.round(params(0).value)
+                              val l = Math.round(params(0).value)
+                              println(params)
+                              s"ТРОЙНИК ${d2}x$d3/${d2}x$d3, L=$l (${material.name})"
                             }
                             else if (params.length == 7) {
                               val d1 = Math.round(params(0).value)
