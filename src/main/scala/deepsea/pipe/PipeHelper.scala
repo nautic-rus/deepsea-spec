@@ -851,12 +851,6 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                   case Some(code) =>
                     materials.find(_.code == code) match {
                       case Some(material) =>
-                        if (code == "NR00000000022259") {
-                          println("stopppp")
-                        }
-                        if (material.code == "NR00000000022259") {
-                          println("stopppp")
-                        }
                         val l = if (params.nonEmpty){
                           params.last.value / 1000d
                         }
@@ -900,6 +894,17 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                               val l = Math.round(params(2).value)
                               val cross = 'x'
                               s"ПЕРЕХОД $d1$cross$d2/$d3$cross$d4 L=$l (${material.name})"
+                            }
+                            else if (params.length == 6) {
+                              if (code == "NR00000000022259") {
+                                println("TEST")
+                              }
+                              val d1 = Math.round(params(0).value)
+                              val d2 = Math.round(params(1).value)
+                              val d3 = Math.round(params(2).value)
+                              val d4 = Math.round(params(3).value)
+                              val l = Math.round(params.last.value)
+                              s"TEST"
                             }
                             else if (params.length == 7) {
                               val d1 = Math.round(params(0).value)
