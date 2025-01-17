@@ -1600,19 +1600,19 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
 
           pic = pic.scale(scale, scale)
 
-//          val fileName = "node-" + new Date().getTime + ".png"
-//          var pathId = UUID.randomUUID().toString.substring(0, 12)
-//          var file = new File(App.Cloud.Directory + File.separator + pathId)
-//          while (file.exists()) {
-//            pathId = UUID.randomUUID().toString.substring(0, 8)
-//            file = new File(App.Cloud.Directory + File.separator + pathId)
-//          }
-//          file.mkdir()
-//          file = new File(App.Cloud.Directory + File.separator + pathId + File.separator + fileName)
-//          val fileUrl = App.Cloud.Url + "/" + pathId + "/" + fileName
+          val fileName = "node-" + new Date().getTime + ".png"
+          var pathId = UUID.randomUUID().toString.substring(0, 12)
+          var file = new File(App.Cloud.Directory + File.separator + pathId)
+          while (file.exists()) {
+            pathId = UUID.randomUUID().toString.substring(0, 8)
+            file = new File(App.Cloud.Directory + File.separator + pathId)
+          }
+          file.mkdir()
+          file = new File(App.Cloud.Directory + File.separator + pathId + File.separator + fileName)
+          val fileUrl = App.Cloud.Url + "/" + pathId + "/" + fileName
 
-          val file = Files.createTempFile("image", ".png")
-          val fileUrl = file.toString
+//          val file = Files.createTempFile("image", ".png")
+//          val fileUrl = file.toString
 
           pic.write[Png](file.toString)
 
@@ -1675,9 +1675,9 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
           spec += EleNodeSpec("Смазка", 1, 0)
 
           val filePath = file.toString
-//          if (deleteFile){
-//            file.delete()
-//          }
+          if (deleteFile){
+            file.delete()
+          }
 
           if (error == "") {
             EleNodePNG(node, cables, fileUrl, fileUrl, filePath, spec.toList, specText.toList, specCables.toList)
