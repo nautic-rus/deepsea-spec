@@ -1254,13 +1254,33 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
                     val fillCount = nodeWidth / fillDiam - colDiams.length
                     (0.until(fillCount.toInt)).foreach(filler => {
                       x = xStart + col * nodeWidth + colDiams.length * fillDiam + filler * fillDiam
-                      val r = Image.rectangle(fillDiam - p, fillDiam - p).strokeColor(Color.red)
-                        .strokeWidth(0.5).fillColor(Color.white).at(x +  Math.ceil(fillDiam / 2d) + p, y - fillDiam / 2 - p)
-                      val t = Image.text(
-                        if (numeric) (specCables.length + 1).toString else fillDiam.toInt.toString
-                      ).scale(fillDiam * 1.5 / nodeWidth, fillDiam * 1.5 / nodeWidth).at(x +  Math.ceil(fillDiam / 2d) + p, y - fillDiam / 2 - p)
-                      pic = r.on(pic)
-                      pic = t.on(pic)
+
+                      if (col != 0) {
+                        val r = Image.rectangle(fillDiam - p, fillDiam - p).strokeColor(Color.red)
+                          .strokeWidth(0.5).fillColor(Color.white).at(x + Math.ceil(fillDiam / 1.5d) + 2 * p, y - fillDiam / 2 - p)  //на первой и второй страницах
+                        pic = r.on(pic)
+                        val t = Image.text(
+                          if (numeric) (specCables.length + 1).toString else fillDiam.toInt.toString
+                        ).scale(fillDiam * 1.5 / nodeWidth, fillDiam * 1.5 / nodeWidth).at(x +  Math.ceil(fillDiam / 1.5d) + 2*p, y - fillDiam / 2 - p)
+                        pic = t.on(pic)
+                      }
+                      else {
+                        val r = Image.rectangle(fillDiam - p, fillDiam - p).strokeColor(Color.red)
+                          .strokeWidth(0.5).fillColor(Color.white).at(x +  Math.ceil(fillDiam / 2d) + p, y - fillDiam / 2 - p)  //на первой и второй страницах
+                        pic = r.on(pic)
+                        val t = Image.text(
+                          if (numeric) (specCables.length + 1).toString else fillDiam.toInt.toString
+                        ).scale(fillDiam * 1.5 / nodeWidth, fillDiam * 1.5 / nodeWidth).at(x +  Math.ceil(fillDiam / 2d) + p, y - fillDiam / 2 - p)
+                        pic = t.on(pic)
+                      }
+//                      val r = Image.rectangle(fillDiam - p, fillDiam - p).strokeColor(Color.red)
+//                        .strokeWidth(0.5).fillColor(Color.white).at(x +  Math.ceil(fillDiam / 2d) + p, y - fillDiam / 2 - p)  //на первой и второй страницах
+//                      pic = r.on(pic)
+//                      val t = Image.text(
+//                        if (numeric) (specCables.length + 1).toString else fillDiam.toInt.toString
+//                      ).scale(fillDiam * 1.5 / nodeWidth, fillDiam * 1.5 / nodeWidth).at(x +  Math.ceil(fillDiam / 2d) + p, y - fillDiam / 2 - p)
+//                      pic = r.on(pic)
+//                      pic = t.on(pic)
                       fillerModules += fillDiam.toInt
 
                       val moduleName = materials.find(_.name.contains("Уплотнительный модуль МКС " + fillDiam.toInt.toString)) match {
@@ -1580,19 +1600,19 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
 
           pic = pic.scale(scale, scale)
 
-          val fileName = "node-" + new Date().getTime + ".png"
-          var pathId = UUID.randomUUID().toString.substring(0, 12)
-          var file = new File(App.Cloud.Directory + File.separator + pathId)
-          while (file.exists()) {
-            pathId = UUID.randomUUID().toString.substring(0, 8)
-            file = new File(App.Cloud.Directory + File.separator + pathId)
-          }
-          file.mkdir()
-          file = new File(App.Cloud.Directory + File.separator + pathId + File.separator + fileName)
-          val fileUrl = App.Cloud.Url + "/" + pathId + "/" + fileName
+//          val fileName = "node-" + new Date().getTime + ".png"
+//          var pathId = UUID.randomUUID().toString.substring(0, 12)
+//          var file = new File(App.Cloud.Directory + File.separator + pathId)
+//          while (file.exists()) {
+//            pathId = UUID.randomUUID().toString.substring(0, 8)
+//            file = new File(App.Cloud.Directory + File.separator + pathId)
+//          }
+//          file.mkdir()
+//          file = new File(App.Cloud.Directory + File.separator + pathId + File.separator + fileName)
+//          val fileUrl = App.Cloud.Url + "/" + pathId + "/" + fileName
 
-//          val file = Files.createTempFile("image", ".png")
-//          val fileUrl = file.toString
+          val file = Files.createTempFile("image", ".png")
+          val fileUrl = file.toString
 
           pic.write[Png](file.toString)
 
@@ -1655,9 +1675,9 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
           spec += EleNodeSpec("Смазка", 1, 0)
 
           val filePath = file.toString
-          if (deleteFile){
-            file.delete()
-          }
+//          if (deleteFile){
+//            file.delete()
+//          }
 
           if (error == "") {
             EleNodePNG(node, cables, fileUrl, fileUrl, filePath, spec.toList, specText.toList, specCables.toList)
