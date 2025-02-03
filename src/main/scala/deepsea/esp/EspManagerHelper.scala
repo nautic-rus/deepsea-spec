@@ -230,7 +230,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
     res.toList
   }
 
-  def getHullAllLatestEsp(projects: List[String] = List("N002", "N004")): List[HullEspObject] ={
+  def getHullAllLatestEsp(projects: List[String] = List("N002", "N004", "N008")): List[HullEspObject] ={
     val res = ListBuffer.empty[HullEspObject]
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
@@ -266,7 +266,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
     }
     res.toList
   }
-  def getPipeAllLatestEsp(projects: List[String] = List("N002", "N004")): List[PipeEspObject] ={
+  def getPipeAllLatestEsp(projects: List[String] = List("N002", "N004", "N008")): List[PipeEspObject] ={
     val res = ListBuffer.empty[PipeEspObject]
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
@@ -302,7 +302,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
     }
     res.toList
   }
-  def getDeviceAllLatestEsp(projects: List[String] = List("N002", "N004")): List[DeviceEspObject] = {
+  def getDeviceAllLatestEsp(projects: List[String] = List("N002", "N004", "N008")): List[DeviceEspObject] = {
     val res = ListBuffer.empty[DeviceEspObject]
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
@@ -338,7 +338,7 @@ trait EspManagerHelper extends Codecs with MaterialsHelper{
     }
     res.toList
   }
-  def getEleAllLatestEsp(projects: List[String] = List("N002", "N004")): List[EleEspObject] = {
+  def getEleAllLatestEsp(projects: List[String] = List("N002", "N004", "N008")): List[EleEspObject] = {
     val res = ListBuffer.empty[EleEspObject]
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>
