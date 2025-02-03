@@ -260,7 +260,7 @@ class PipeCache extends Actor{
 
   def updatePipeComp(): Unit = {
     val pipeSegs = ListBuffer.empty[PipeSeg]
-    List("N002", "N004").foreach(proj => {
+    List("N002", "N004", "N008").foreach(proj => {
       DBManager.GetOracleConnection(proj) match {
         case Some(c) =>
           val s = c.createStatement()
@@ -446,7 +446,7 @@ class PipeCache extends Actor{
   }
   def updatePipeJoints(): Unit = {
     val pipeSegs = ListBuffer.empty[PipeSeg]
-    List("N002", "N004", "TEST").foreach(proj => {
+    List("N002", "N004", "TEST", "N008").foreach(proj => {
       DBManager.GetOracleConnection(proj) match {
         case Some(c) =>
           val s = c.createStatement()
