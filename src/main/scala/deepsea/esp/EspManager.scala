@@ -157,7 +157,14 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
       val materials = getMaterials.filter(_.project == rkdProject)
       kind match {
         case "hull" =>
-          addHullEsp(HullEspObject(id, foranProject, docNumber, rev, date, user, kind, taskId.toIntOption.getOrElse(0), elements = ForanPartsByDrawingNum(foranProject, docNumber) ++ getHullIssueMaterials(docNumber, materials)))
+          val elements = ForanPartsByDrawingNum(foranProject, docNumber) ++ getHullIssueMaterials(docNumber, materials)
+          val filteredElements = if (foranProject == "N008") {
+            elements.filter(element => element.PART_CODE.toIntOption.exists(_ > 2000))
+          } else {
+            elements
+          }
+          addHullEsp(HullEspObject(id, foranProject, docNumber, rev, date, user, kind, taskId.toIntOption.getOrElse(0),
+            elements = filteredElements))
         case "pipe" =>
           val projectSystem = getSystemAndProjectFromDocNumber(docNumber)
           addPipeEsp(PipeEspObject(id, foranProject, docNumber, rev, date, user, kind, taskId.toIntOption.getOrElse(0), elements = getPipeSegs(projectSystem._1, projectSystem._2)))
