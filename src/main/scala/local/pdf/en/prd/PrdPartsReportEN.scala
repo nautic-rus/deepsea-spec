@@ -52,7 +52,13 @@ object PrdPartsReportEN extends UtilsPDF {
   )
 
   def genHullPartListEnPDF(project: String, docNumber: String, docName: String, revision: String, path: String, additional: List[PrdPart]): Unit = {
-    val parts: List[PrdPart] = genForanPartsByDrawingNum(project, docNumber)
+    val partsInit: List[PrdPart] = genForanPartsByDrawingNum(project, docNumber)
+    val parts: List[PrdPart] =
+      if (project == "N008") {
+        partsInit.filter(element => element.PART_CODE.toIntOption.exists(_ > 2000))
+      } else {
+        partsInit
+      }
     val chess: CommonTypes.DrawingChess = {
       val l = findChess(docNumber, revision)
       if (l.nonEmpty) {
