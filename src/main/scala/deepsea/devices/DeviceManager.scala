@@ -37,8 +37,19 @@ class DeviceManager extends Actor with DeviceHelper with AccommodationHelper wit
 
   override def receive: Receive = {
     case GetDevices(docNumber) =>
+//      val projectSystem = getProjectFromDocNumber(docNumber)
+//      Await.result(ActorManager.esp ? GetEsp(projectSystem._1.replace("NT02", "N002"), "device", docNumber), timeout.duration) match {
+//        case res: String => sender() ! res
+//        case _ => sender() ! "error".asJson.noSpaces
+//      }
+
       val projectSystem = getProjectFromDocNumber(docNumber)
-      Await.result(ActorManager.esp ? GetEsp(projectSystem._1.replace("NT02", "N002"), "device", docNumber), timeout.duration) match {
+      val espProjectSystemCode = projectSystem._1 match {
+        case "N002" | "N008" => projectSystem._1
+        case code => code.replace("NT02", "N002")
+      }
+
+      Await.result(ActorManager.esp ? GetEsp(espProjectSystemCode, "device", docNumber), timeout.duration) match {
         case res: String => sender() ! res
         case _ => sender() ! "error".asJson.noSpaces
       }
