@@ -99,7 +99,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
 //              case values: Seq[Material] => values.toList
 //              case _ => List.empty[Material]
 //            }
-            val materials = getMaterials.filter(_.project == rkdProject)
+            val materials = getMaterials
             val systemDefs = getSystemDefs(project)
             val res = ListBuffer.empty[PipeSeg]
             Await.result(vPipeCompActualCollection.find().toFuture(), Duration(30, SECONDS)) match {
@@ -336,7 +336,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
                   case Some(value) => value.rkd
                   case _ => ""
                 }
-                val materials = getMaterials.filter(_.project == rkdProject)
+                val materials = getMaterials
                 val systemDefs = getSystemDefs(project)
                 Await.result(vPipeCompActualCollection.find().toFuture(), Duration(30, SECONDS)) match {
                   case values: Seq[PipeSegActual] =>
@@ -719,7 +719,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
       case Some(value) => value.rkd
       case _ => project
     }
-    val materials = getMaterials.filter(_.project == rkdProject)
+    val materials = getMaterials
 //    val m = materials.find(_.code = 'NR00000000022259')
     DBManager.GetOracleConnection(project) match {
       case Some(connection) =>
@@ -1032,7 +1032,7 @@ trait PipeHelper extends Codecs with MaterialsHelper {
       case Some(value) => value.rkd
       case _ => project
     }
-    val materials = getMaterials.filter(_.project == rkdProject)
+    val materials = getMaterials
     DBManager.GetOracleConnection(project) match {
       case Some(connection) =>
         val stmt = connection.createStatement()
