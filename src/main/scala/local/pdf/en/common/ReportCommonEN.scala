@@ -418,7 +418,7 @@ object ReportCommonEN extends UtilsPDF {
     doc.add(genTextFixPos(docNameEN.name, fontCOURIER_BOLD, 4f, offset + 6.0f, 18.0f, 150f))
   }
 
-  def fillStamp(doc: Document, docNameEN: DocNameEN, date: String = dateNow, lang: String = "ru", department: String = ""): Unit = {
+  def fillStamp(doc: Document, docNameEN: DocNameEN, date: String = dateNow, lang: String = "ru", department: String = "hull"): Unit = {
     var numToDisplay = docNameEN.num // Копируем значение, чтобы не изменять исходный docNameEN
 
     if (department == "hull" && docNameEN.num.contains("240402-210")) {

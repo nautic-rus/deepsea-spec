@@ -118,7 +118,7 @@ object PrdPartsReportEN extends UtilsPDF {
     processPDF(dn, path, rows, department = "hull")
   }
 
-  private def processPDF(docNameEN: DocNameEN, path: String, items: List[Item11ColumnsEN], department: String = ""): Unit = {
+  private def processPDF(docNameEN: DocNameEN, path: String, items: List[Item11ColumnsEN], department: String): Unit = {
 
     val pdfWriter: PdfWriter = new PdfWriter(path, new WriterProperties().setFullCompressionMode(true)) {
       setSmartMode(true)
