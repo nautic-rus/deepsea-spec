@@ -418,14 +418,23 @@ object ReportCommonEN extends UtilsPDF {
     doc.add(genTextFixPos(docNameEN.name, fontCOURIER_BOLD, 4f, offset + 6.0f, 18.0f, 150f))
   }
 
-  def fillStamp(doc: Document, docNameEN: DocNameEN, date: String = dateNow, lang: String = "ru"): Unit = {
+  def fillStamp(doc: Document, docNameEN: DocNameEN, date: String = dateNow, lang: String = "ru", department: String = ""): Unit = {
+    var numToDisplay = docNameEN.num // Копируем значение, чтобы не изменять исходный docNameEN
+
+    if (department == "hull" && docNameEN.num.contains("240402-210")) {
+      val parts = docNameEN.num.split("-")
+      if (parts.length >= 2) {
+        val lastPart = parts.last
+        numToDisplay = s"ОР.240402.21.${lastPart}"
+      }
+    }
     doc.add(genTextFixPos(if (lang == "ru") "НОМЕР ЧЕРТЕЖА" else "SFI-DRAWING NO.", fontHELVETICA, 3.0f, 35f, 14f, 50f))
     doc.add(genTextFixPos(if (lang == "ru") "РЕВ." else "REV.", fontHELVETICA, 3.0f, 187.5f, 13f, 10f))
     doc.add(genTextFixPos(if (lang == "ru") "ЛИСТ" else "SHEET", fontHELVETICA, 3.0f, 197f, 13f, 10f))
     doc.add(genTextFixPos(if (lang == "ru") "ДАТА" else "DATE", fontHELVETICA, 2.5f, 185.5f, 21.0f, 10f))
     doc.add(genTextFixPos(date, fontHELVETICA, 4.0f, 188.0f, 17.0f, 20f))
     doc.add(genTextFixPos(docNameEN.lastRev, fontHELVETICA, 5.0f, 188.5f, 7f, 10f))
-    doc.add(genTextFixPos(docNameEN.num, fontCOURIER_BOLD, 12.0f, 32.5f, 0.5f, 180f))
+    doc.add(genTextFixPos(numToDisplay, fontCOURIER_BOLD, 12.0f, 32.5f, 0.5f, 180f))
     doc.add(genTextFixPos(docNameEN.name, fontCOURIER_BOLD, 4f, 6.5f, 18.0f, 180f))
   }
 

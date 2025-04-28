@@ -115,10 +115,10 @@ object PrdPartsReportEN extends UtilsPDF {
     }
 
 
-    processPDF(dn, path, rows)
+    processPDF(dn, path, rows, department = "hull")
   }
 
-  private def processPDF(docNameEN: DocNameEN, path: String, items: List[Item11ColumnsEN]): Unit = {
+  private def processPDF(docNameEN: DocNameEN, path: String, items: List[Item11ColumnsEN], department: String = ""): Unit = {
 
     val pdfWriter: PdfWriter = new PdfWriter(path, new WriterProperties().setFullCompressionMode(true)) {
       setSmartMode(true)
@@ -128,7 +128,7 @@ object PrdPartsReportEN extends UtilsPDF {
     }
     val doc: Document = new Document(pdfDoc, pageSize)
 
-    val titul: PdfDocument = genTitulA4(docNameEN)
+    val titul: PdfDocument = genTitulA4(docNameEN, department)
 
     titul.copyPagesTo(1, 1, pdfDoc)
 
@@ -155,7 +155,7 @@ object PrdPartsReportEN extends UtilsPDF {
     doc.close()
   }
 
-  private def genTitulA4(docNameEN: DocNameEN, date: String = dateNow): PdfDocument = {
+  private def genTitulA4(docNameEN: DocNameEN, date: String = dateNow, department: String = ""): PdfDocument = {
     val os: OutputStream = new ByteArrayOutputStream()
     val pdfWriter = new PdfWriter(os)
     val pdfDoc = new PdfDocument(pdfWriter)
@@ -168,7 +168,7 @@ object PrdPartsReportEN extends UtilsPDF {
     doc.add(logo)
     border5mm(pdfDoc.getPage(1))
     val stamp: Table = stampEN()
-    fillStamp(doc, docNameEN)
+    fillStamp(doc, docNameEN, department)
     doc.add(stamp)
     doc.close()
     os.flush()
