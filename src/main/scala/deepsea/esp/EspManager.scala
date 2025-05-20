@@ -158,7 +158,7 @@ class EspManager extends Actor with EspManagerHelper with Codecs with PipeHelper
       kind match {
         case "hull" =>
           val elements = ForanPartsByDrawingNum(foranProject, docNumber) ++ getHullIssueMaterials(docNumber, materials)
-          val filteredElements = if (foranProject == "N008") {
+          val filteredElements = if (foranProject == "N008" || foranProject == "N004") {
             elements.filter(element => element.PART_CODE.toIntOption.exists(_ > 2000))
           } else {
             elements
