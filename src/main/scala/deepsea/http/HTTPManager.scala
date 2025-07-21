@@ -323,6 +323,9 @@ class HTTPManager extends Actor {
       (post & path("updateEleComplect") & entity(as[String])) { (complect) =>
         askFor(ActorManager.elec, UpdateEleComplect(complect))
       },
+      (post & path("updatePosEleEsp") & parameter("code", "count", "docNumber", "prevPos", "newPos")) { (code, count, docNumber, prevPos, newPos) =>
+        askFor(ActorManager.elec, UpdatePosEleEsp(code, count.toDouble, docNumber, prevPos, newPos))
+      },
       (get & path("deleteEleComplect") & parameter("drawing")) { (drawing) =>
         askFor(ActorManager.elec, DeleteEleComplect(drawing))
       },

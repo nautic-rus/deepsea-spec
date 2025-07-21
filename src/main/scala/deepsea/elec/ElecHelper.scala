@@ -696,6 +696,81 @@ trait ElecHelper extends Codecs with EspManagerHelper with MaterialsHelper {
       case Left(value) =>
     }
   }
+
+  def updatePosEleEsp(
+                       code: String,
+                       count: Double,
+                       docNumber: String,
+                       prevPos: String,
+                       newPos: String
+                     ): String = {
+    DBManager.GetPGConnection() match {
+      case Some(c) =>
+        val selectQuery = "SELECT 1 FROM issue_materials WHERE material_stock_code = ? AND count = ? AND doc_number = ? AND pos = ?"
+        val updateQuery = "UPDATE issue_materials SET pos = ? WHERE material_stock_code = ? AND count = ? AND doc_number = ? AND pos = ?"
+
+        val selectStmt = c.prepareStatement(selectQuery)
+        selectStmt.setString(1, code)
+        selectStmt.setDouble(2, count)
+        selectStmt.setString(3, docNumber)
+        selectStmt.setString(4, prevPos)
+        val rs = selectStmt.executeQuery()
+
+        if (rs.next()) {
+          val updateStmt = c.prepareStatement(updateQuery)
+          updateStmt.setString(1, newPos)
+          updateStmt.setString(2, code)
+          updateStmt.setDouble(3, count)
+          updateStmt.setString(4, docNumber)
+          updateStmt.setString(5, prevPos)
+          updateStmt.executeUpdate()
+          updateStmt.close()
+        }
+        rs.close()
+        selectStmt.close()
+        c.close()
+      case _ => None
+    }
+    "success"
+  }
+
+
+//  def updatePosEleEsp(
+//                 code: String,       // material_stock_code в БД
+//                 count: Int,
+//                 docNumber: String,
+//                 prevPos: String,       // предыдущее значение pos
+//                 newPos: String        // новое значение pos
+//               ): String = {
+//    DBManager.GetPGConnection() match {
+//      case Some(c) =>
+//        val s = c.createStatement()
+//        // Проверим, есть ли такая строка по четырём полям
+//        val rs = s.executeQuery(
+//          s"select * from issue_materials where material_stock_code = '$code' and count = $count and doc_number = '$docNumber' and pos = '$prevPos'"
+//        )
+//        println(rs)
+//
+//        val entries = ListBuffer.empty[Int]
+//        while (rs.next()) {
+//          entries += rs.getInt("pos")
+//        }
+//
+//        if (entries.nonEmpty) {
+//          // Обновляем pos только в найденной строке
+//          println("updateElePos")
+//          s.execute(
+//            s"update issue_materials set pos = '$newPos' where material_stock_code = '$code' and count = $count and doc_number = '$docNumber' and pos = '$prevPos'"
+//          )
+//        }
+//        rs.close()
+//        s.close()
+//        c.close()
+//      case _ => None
+//    }
+//    "success"
+//  }
+
   def deleteEleComplect(drawing: String): Unit = {
     DBManager.GetMongoConnection() match {
       case Some(mongo) =>

@@ -4,7 +4,6 @@ import akka.actor.Actor
 import akka.pattern.ask
 import akka.util.Timeout
 import deepsea.actors.ActorManager
-import deepsea.elec.ElecManager.EleNodeModule
 import deepsea.esp.EspManager.CreateEsp
 import deepsea.files.FileManager.GenerateUrl
 import deepsea.pipe.PipeManager.Material
@@ -253,6 +252,9 @@ object ElecManager {
   case class AddEleComplect(complect: String)
   case class DeleteEleComplect(drawing: String)
   case class UpdateEleComplect(drawing: String)
+
+  case class UpdatePosEleEsp(code: String, count: Double, docNumber: String, prevPos: String, newPos: String)
+
   case class Block(code: String, name: String)
   case class Zone(code: String, name: String)
   case class System(code: String, name: String)
@@ -398,6 +400,8 @@ object ElecManager {
       case UpdateEleComplect(drawing) =>
         updateEleComplect(drawing)
         sender() ! "success".asJson.noSpaces
+      case UpdatePosEleEsp(code: String, count: Double, docNumber: String, prevPos: String, newPos: String) =>
+        sender() ! updatePosEleEsp(code: String, count: Double, docNumber: String, prevPos: String, newPos: String).asJson.noSpaces
       case GetEleEspFiles(foranProject, docNumber, rev, user, taskId) =>
         val taskName = getIssueName(taskId.toIntOption.getOrElse(0))
         val eleEsp = generateEleEsp(foranProject, docNumber, rev, user, taskId)
