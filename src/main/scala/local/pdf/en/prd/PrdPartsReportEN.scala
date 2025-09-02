@@ -54,7 +54,7 @@ object PrdPartsReportEN extends UtilsPDF {
   def genHullPartListEnPDF(project: String, docNumber: String, docName: String, revision: String, path: String, additional: List[PrdPart]): Unit = {
     val partsInit: List[PrdPart] = genForanPartsByDrawingNum(project, docNumber)
     val parts: List[PrdPart] =
-      if ((project == "N008" || project == "N004") && docNumber.contains("240402-210")) {
+      if ((project == "N008" || project == "N004") && docNumber.contains("240402-210") ) {
         partsInit.filter(element => element.PART_CODE.toIntOption.exists(_ > 2000))
       } else {
         partsInit
